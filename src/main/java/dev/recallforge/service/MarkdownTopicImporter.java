@@ -17,47 +17,47 @@ public class MarkdownTopicImporter {
     private final TopicRepository topicRepository;
     private final Path notesPath;
 
-    public MarkdownTopicImporter(TopicRepository topicRepository, @Value("${recallforge.notes.path}") String notesPath) {
+    public MarkdownTopicImporter(
+            TopicRepository topicRepository, 
+            @Value("${recallforge.notes.path}") String notesPath
+    ) {
         this.topicRepository = topicRepository;
         this.notesPath = Path.of(notesPath);
     }
 
+    private record ParsedTopic(String title, String content) {
+    }
+
     /**
-     * Imports topics from the configured markdown file.
-     *
-     * Existing topics are matched by title and updated.
-     * New topics are created when no existing title is found.
+     * Imports topics from the configured markdown file:
+     * - existing topics are matched by title and updated
+     * - new topics are created when no existing title is found
      */
     public List<Topic> importFromLocalMarkdownFile() {
         String markdown = readMarkdownFile();
 
         List<ParsedTopic> parsedTopics = parseMarkdown(markdown);
-
         List<Topic> savedTopics = new ArrayList<>();
 
         for (ParsedTopic parsedTopic : parsedTopics) {
             Topic topic = topicRepository
                     .findByTitle(parsedTopic.title())
                     .map(existingTopic -> {
-                        // Keep the same database row, but refresh its markdown content.
                         existingTopic.updateContent(parsedTopic.content());
                         return existingTopic;
                     })
                     .orElseGet(() -> 
-                        // No existing topic with this title, so create a new entity.
                         new Topic(parsedTopic.title(), parsedTopic.content())
                     );
-            
-            // save() handles both insert and update.
-            savedTopics.add(topicRepository.save(topic));
+
+            savedTopics.add(
+                topicRepository.save(topic)  // handles both insert and update
+            );
         }
 
         return savedTopics;
     }
 
-    /**
-     * Reads the markdown file configured by recallforge.notes.path.
-     */
     private String readMarkdownFile() {
         try {
             return Files.readString(notesPath);
@@ -69,12 +69,8 @@ public class MarkdownTopicImporter {
     /**
      * Parse markdown into topics.
      * Every markdown heading starts a new topic:
-     *
-     * # Agent Loop
-     * body...
-     *
-     * Supports headings from # to ######.
-     * Everything until the next heading becomes content.
+     * - supports headings from # to ######
+     * - everything until the next heading becomes content
      */
     private List<ParsedTopic> parseMarkdown(String markdown) {
 
@@ -90,7 +86,7 @@ public class MarkdownTopicImporter {
 
             if (isHeading) {
 
-                // Save previous topic before starting a new one.
+                // Save previous topic before starting a new one
                 if (currentTitle != null) {
 
                     String content = currentContent.toString().trim();
@@ -133,8 +129,5 @@ public class MarkdownTopicImporter {
         }
 
         return topics;
-    }
-
-    private record ParsedTopic(String title, String content) {
     }
 }

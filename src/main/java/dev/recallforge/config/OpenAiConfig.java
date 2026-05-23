@@ -10,10 +10,11 @@ public class OpenAiConfig {
     
     @Bean
     RestClient openAiRestClient(@Value("${openai.api-key}") String apiKey) {
+        
         return RestClient.builder()
-                .baseUrl("https://api.openai.com/v1")
-                .defaultHeader("Authorization", "Bearer " + apiKey)
-                .defaultHeader("Content-Type", "application/json")
-                .build();
+            .baseUrl("https://api.openai.com/v1")
+            .defaultHeader("Authorization", "Bearer " + apiKey)
+            .defaultHeader("Content-Type", "application/json")
+            .build();
     }
 }

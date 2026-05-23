@@ -1,21 +1,21 @@
 package dev.recallforge.domain;
 
 import java.time.LocalDateTime;
-
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "reviews")
+@Getter
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)  // JPA requieres no-args constructor
 public class Review {
 
-    @Id
+    @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Many reviews can belong to one topic.
-     */
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false)  // Many reviews can belong to one topic
     private Topic topic;
 
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -32,9 +32,6 @@ public class Review {
 
     @Column(nullable = false)
     private LocalDateTime reviewedAt;
-
-    protected Review() {
-    }
     
     public Review(Topic topic, String question, String userAnswer, double score, String feedback) {
         this.topic = topic;
@@ -43,33 +40,5 @@ public class Review {
         this.score = score;
         this.feedback = feedback;
         this.reviewedAt = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Topic getTopic() {
-        return topic;
-    }
-
-    public String getQuestion() {
-        return question;
-    }
-
-    public String getUserAnswer() {
-        return userAnswer;
-    }
-
-    public double getScore() {
-        return score;
-    }
-
-    public String getFeedback() {
-        return feedback;
-    }
-
-    public LocalDateTime getReviewedAt() {
-        return reviewedAt;
     }
 }

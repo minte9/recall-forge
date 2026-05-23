@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Recall Forge</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    #app {
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    .panel {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      overflow: auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .markdown {
+      white-space: pre-wrap;
+      line-height: 1.6;
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      margin-top: 12px;
+      padding: 12px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 15px;
+    }
+
+    .feedback {
+      margin-top: 16px;
+      padding: 12px;
+      background: #ecfdf5;
+      border-left: 4px solid #10b981;
+      border-radius: 6px;
+    }
+
+    .error {
+      margin-top: 16px;
+      color: #b91c1c;
+    }
+  </style>
+</head>
+
+<body>
+<div id="app">
+  <!-- Left side -->
+  <section class="panel">
+    <h2>Current Markdown</h2>
+
+    <input
+        type="file"
+        accept=".md,.markdown,text/markdown,text/plain"
+        @change="uploadMarkdown"
+    />
+
+    <p v-if="markdownFileName">
+        Loaded: <strong>{{ markdownFileName }}</strong>
+    </p>
+
+    <div class="markdown" v-html="renderMarkdown(markdown)"></div>
+  </section>
+
+  <!-- Right side -->
+  <section class="panel">
+    <h2>Review</h2>
+
+    <button @click="startReview" :disabled="loading">
+      {{ loading ? "Loading..." : "Next Review" }}
+    </button>
+
+    <div v-if="review">
+      <h3>{{ review.topicTitle }}</h3>
+      <p><strong>Question:</strong> {{ review.question }}</p>
+
+      <textarea
+        v-model="userAnswer"
+        placeholder="Write your answer here..."
+      ></textarea>
+
+      <br><br>
+
+      <button @click="submitAnswer" :disabled="loading || !userAnswer.trim()">
+        Submit Answer
+      </button>
+    </div>
+
+    <div v-if="result" class="feedback">
+      <p><strong>Score:</strong> {{ result.score }}</p>
+      <p><strong>Feedback:</strong> {{ result.feedback }}</p>
+      <p><strong>Updated memory score:</strong> {{ result.updateMemoryScore }}</p>
+      <p><strong>Next review:</strong> {{ result.nextReviewAt }}</p>
+    </div>
+
+    <div v-if="error" class="error">
+      {{ error }}
+    </div>
+  </section>
+</div>
+
+<script>
+const { createApp } = Vue;
+
+createApp({
+  data() {
+    return {
+      loading: false,
+      error: null,
+      markdownFileName: null,
+
+      markdown: `# RecallForge
+
+RecallForge is a spaced-repetition knowledgebase agent.  
+It imports learning notes from markdown, asks questions, evaluates answers, and tracks weak topics.
+
+## Pipeline Model
+
+A pipeline model processes data in steps.  
+Each step receives input, transforms it, and passes the result to the next step.  
+Pipelines are useful because they make complex workflows easier to understand and debug.
+
+## Agent Loop
+
+An agent loop usually follows this pattern:  
+
+Think → Act → Observe → Repeat.
+
+The agent decides what to do, uses a tool or action, observes the result, and continues.  
+
+## Tool Calling
+
+Tool calling allows an LLM to use external functions.  
+Instead of only generating text, the model can ask the application to run specific actions such as searching files, reading data, or calling APIs.
+
+## Spaced Repetition
+
+Spaced repetition is a learning technique where topics are reviewed at increasing intervals.  
+Topics that are poorly remembered are repeated sooner.  
+Topics that are well remembered are repeated later.`,
+
+      review: null,
+      userAnswer: "",
+      result: null
+    };
+  },
+
+  mounted() {
+    this.startReview();
+  },
+
+  methods: {
+    renderMarkdown(md) {
+        return md
+            .replace(/^# (.*)$/gm, "<strong>$1</strong>")
+            .replace(/^## (.*)$/gm, "<strong>$1</strong>")
+            .replace(/\n/g, "<br>");
+    },
+
+    uploadMarkdown(event) {
+        const file = event.target.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        this.markdownFileName = file.name;
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            this.markdown = reader.result;
+        };
+
+        reader.readAsText(file);
+    },
+
+    async startReview() {
+      this.loading = true;
+      this.error = null;
+      this.result = null;
+      this.userAnswer = "";
+
+      try {
+        const response = await fetch("/api/reviews/start", {
+          method: "POST"
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not start review.");
+        }
+
+        this.review = await response.json();
+      } catch (err) {
+        this.error = err.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async submitAnswer() {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await fetch("/api/reviews/answer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            topicId: this.review.topicId,
+            question: this.review.question,
+            userAnswer: this.userAnswer
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not submit answer.");
+        }
+
+        this.result = await response.json();
+      } catch (err) {
+        this.error = err.message;
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+}).mount("#app");
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: recallforge
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/recallforge
+    username: recallforge
+    password: recallforge
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  docker:
+    compose:
+      enabled: true
+      file: compose.yml
+
+server:
+  port: 9090
+
+recallforge:
+  notes:
+    path: local_topics/README.md
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+  model: gpt-4.1-mini

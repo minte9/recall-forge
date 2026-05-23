@@ -39,9 +39,7 @@ public class ReviewController {
      * receives a score, stores the review, and updates spaced repetition.
      */
     @PostMapping("/answer")
-    public AnswerResponse answerQuestion(
-        @Valid @RequestBody AnswerRequest request
-    ) {
+    public AnswerResponse answerQuestion(@Valid @RequestBody AnswerRequest request) {
         return reviewService.answerQuestion(
             request.topicId(),
             request.question(),

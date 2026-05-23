@@ -26,16 +26,20 @@ public class TopicService {
 
     public List<Topic> getAllTopics() {
         return repository.findAll()
-                .stream()
-                .sorted(Comparator.comparing(Topic::getMemoryScore))
-                .toList();
+            .stream()
+            .sorted(Comparator.comparing(Topic::getMemoryScore))
+            .toList();
+    }
+
+    public List<Topic> getDueTopics() {
+        return repository.findDueTopics(LocalDateTime.now());
     }
 
     public Topic getTopic(Long topicId) {
         return repository.findById(topicId)
-                .orElseThrow(() ->
-                    new IllegalArgumentException("Topic not found: " + topicId)
-                );
+            .orElseThrow(() ->
+                new IllegalArgumentException("Topic not found: " + topicId)
+            );
     }
 
     public Topic selectNextTopic() {

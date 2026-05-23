@@ -9,49 +9,36 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "topics")
+@Getter
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)  // JPA requieres no-args constructor
 public class Topic {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * The title from markdown section 
-     * Example: "Agent Loop"
-     */
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true)  // title from markdown section
     private String title;
 
-    /**
-     * The body text under the markdown heading.
-     */
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")  // body text under the title
     private String content;
 
-    /**
-     * Average score from previous reviews.
-     * 0.0 means unknown / weak.
-     * 1.0 means wel known.
-     */
-    @Column(nullable = false)
+    @Column(nullable = false)  // Average score from previous reviews(0.0 - 1.0)
     private double memoryScore = 0.5;
 
-    /**
-     * When this topic should appear again.
-     */
-    private LocalDateTime nextReviewAt;
+    private LocalDateTime nextReviewAt;  // when this topic should appear again
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    protected Topic() {  // JPA requires an entity no-arg constructor
-    }
 
     public Topic(String title, String content) {
         this.title = title;
         this.content = content;
+        
         this.memoryScore = 0.5;
         this.nextReviewAt = LocalDateTime.now();
         this.createdAt = LocalDateTime.now();
@@ -61,26 +48,6 @@ public class Topic {
     @PreUpdate
     void onUpdate() {
         this.updatedAt = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public double getMemoryScore() {
-        return memoryScore;
-    }
-
-    public LocalDateTime getNextReviewAt() {
-        return nextReviewAt;
     }
 
     public void updateContent(String content) {
