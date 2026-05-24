@@ -140,7 +140,7 @@ curl http://localhost:9090/api/topics/2/reviews | jq
   }
 ]
 ~~~
-<details>
+</details>
 
 
 ### 2.2 Due Topics Endpoint
