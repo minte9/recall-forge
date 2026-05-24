@@ -4,9 +4,12 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -22,7 +25,7 @@ public class Topic {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)  // title from markdown section
+    @Column(nullable = false)  // title from markdown section
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")  // body text under the title
@@ -35,9 +38,14 @@ public class Topic {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Topic(String title, String content) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "markdown_file_id")
+    private MarkdownFile markdownFile;
+
+    public Topic(String title, String content, MarkdownFile markdownFile) {
         this.title = title;
         this.content = content;
+        this.markdownFile = markdownFile;
         
         this.memoryScore = 0.5;
         this.nextReviewAt = LocalDateTime.now();

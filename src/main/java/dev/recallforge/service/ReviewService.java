@@ -39,10 +39,15 @@ public class ReviewService {
             topic.getContent()
         );
 
+        String markdownContent = topic.getMarkdownFile() != null
+            ? topic.getMarkdownFile().getContent()
+            : "# " + topic.getTitle() + "\n\n" + topic.getContent();
+
         return new ReviewQuestionResponse(
             topic.getId(), 
             topic.getTitle(), 
-            question
+            question,
+            markdownContent
         );
     }
 

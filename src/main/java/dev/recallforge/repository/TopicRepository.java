@@ -18,6 +18,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         select t
         from Topic t
         where t.nextReviewAt <= :now
+        and t.markdownFile is not null
         order by t.memoryScore ASC
     """)
     List<Topic> findDueTopics(@Param("now") LocalDateTime now);

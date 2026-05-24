@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>Recall Forge</title>
+
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <style>
     body {
@@ -30,27 +32,75 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
-    .markdown {
-      white-space: pre-wrap;
-      line-height: 1.6;
-      background: white;
-      padding: 16px;
-      border-radius: 8px;
+    .actions-row button,
+    .actions-row .upload-btn {
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        width:140px;
+        height:48px;
+        padding:0;
+        box-sizing:border-box;
+        border:none;
+        border-radius:14px;
+        color:white;
+        cursor:pointer;
+        font-size:14px;
+        font-weight:600;
+        font-family:inherit;
+        text-decoration:none;
+        white-space:nowrap;
+        transition:.18s;
+        box-shadow: 0 8px 18px rgba(0,0,0,.08);
     }
 
-    button {
-      padding: 10px 14px;
-      border: none;
-      border-radius: 8px;
-      background: #2563eb;
-      color: white;
-      cursor: pointer;
-      margin-right: 8px;
+    .actions-row button:hover,
+    .actions-row .upload-btn:hover {
+
+        transform:
+            translateY(-1px);
+
+        box-shadow:
+            0 12px 20px rgba(0,0,0,.10);
     }
 
-    button:disabled {
-      background: #9ca3af;
-      cursor: not-allowed;
+    .review-btn {
+
+        background:
+            linear-gradient(
+                135deg,
+                #FFC542,
+                #FFB020
+            );
+    }
+
+    .upload-btn {
+
+        background:
+            linear-gradient(
+                135deg,
+                #F7A57B,
+                #F48B63
+            );
+    }
+
+    .submit-btn {
+
+        background:
+            linear-gradient(
+                135deg,
+                #F96D00,
+                #E85800
+            );
+    }
+
+    .actions-row {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     textarea {
@@ -74,52 +124,196 @@
 
     .error {
       margin-top: 16px;
-      color: #b91c1c;
+      padding: 12px;
+      background: #fef2f2;
+      color: #991b1b;
+      border-left: 4px solid #ef4444;
+      border-radius: 6px;
+    }
+
+    .empty-state {
+      color: #6b7280;
+      margin-top: 20px;
+    }
+
+    .markdown {
+      background: white;
+      color: #111827;
+      line-height: 1.45;
+      padding: 16px;
+      border-radius: 8px;
+    }
+
+    .markdown > :first-child {
+      margin-top: 0;
+    }
+
+    .markdown > :last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown p {
+      margin: 6px 0;
+    }
+
+    .markdown h1,
+    .markdown h2,
+    .markdown h3,
+    .markdown h4 {
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .markdown h1 {
+      font-size: 32px;
+      margin: 0 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .markdown h2 {
+      font-size: 24px;
+      margin: 22px 0 10px;
+    }
+
+    .markdown h3 {
+      font-size: 20px;
+      margin: 18px 0 8px;
+    }
+
+    .markdown h4 {
+      font-size: 17px;
+      margin: 14px 0 6px;
+    }
+
+    .markdown ul,
+    .markdown ol {
+      margin: 8px 0;
+      padding-left: 24px;
+    }
+
+    .markdown li {
+      margin: 4px 0;
+    }
+
+    .markdown pre {
+      margin: 14px 0;
+      background: #111827;
+      color: #e5e7eb;
+      padding: 14px;
+      border-radius: 8px;
+      overflow-x: auto;
+      line-height: 1.45;
+    }
+
+    .markdown code {
+      font-family: Consolas, monospace;
+      font-size: 14px;
+    }
+
+    .markdown p code,
+    .markdown li code {
+      background: #f3f4f6;
+      color: #dc2626;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    .markdown blockquote {
+      margin: 10px 0;
+      border-left: 4px solid #d1d5db;
+      padding-left: 12px;
+      color: #4b5563;
+    }
+
+    .markdown table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 12px 0;
+    }
+
+    .markdown th,
+    .markdown td {
+      border: 1px solid #d1d5db;
+      padding: 8px;
     }
   </style>
 </head>
 
 <body>
 <div id="app">
-  <!-- Left side -->
+
   <section class="panel">
-    <h2>Current Markdown</h2>
+    <!--h2>Current Markdown</h2-->
 
-    <input
-        type="file"
-        accept=".md,.markdown,text/markdown,text/plain"
-        @change="uploadMarkdown"
-    />
-
-    <p v-if="markdownFileName">
-        Loaded: <strong>{{ markdownFileName }}</strong>
-    </p>
-
-    <div class="markdown" v-html="renderMarkdown(markdown)"></div>
+    <div
+      class="markdown"
+      v-html="renderMarkdown(markdown)">
+    </div>
   </section>
 
-  <!-- Right side -->
   <section class="panel">
-    <h2>Review</h2>
-
-    <button @click="startReview" :disabled="loading">
-      {{ loading ? "Loading..." : "Next Review" }}
-    </button>
+    <!--h2>Review</h2-->
 
     <div v-if="review">
       <h3>{{ review.topicTitle }}</h3>
-      <p><strong>Question:</strong> {{ review.question }}</p>
+
+      <p>
+        <!--strong>Question:</strong-->
+        {{ review.question }}
+      </p>
 
       <textarea
         v-model="userAnswer"
-        placeholder="Write your answer here..."
-      ></textarea>
+        placeholder="Write your answer here...">
+      </textarea>
 
-      <br><br>
+      <div class="actions-row">
+        <button
+          class="review-btn"
+          @click="startReview">
+          <span>→</span> Next Review
+        </button>
 
-      <button @click="submitAnswer" :disabled="loading || !userAnswer.trim()">
-        Submit Answer
+        <label class="upload-btn">
+          <span>📁</span> Choose File
+          <input
+          hidden
+          type="file"
+          accept=".md,.markdown,text/plain"
+          @change="uploadMarkdown"/>
+        </label>
+
+        <button
+          class="submit-btn"
+          @click="submitAnswer">
+          <span>✈</span> Submit Answer
+        </button>
+      </div>
+    </div>
+
+    <div v-else class="empty-state">
+      Upload a markdown file, then click <strong>Next Review</strong>.
+    </div>
+
+    <div v-if="!review" class="actions-row">
+      <button
+        class="review-btn"
+        @click="startReview"
+        :disabled="loading">
+        {{ loading ? "Loading..." : "Next Review" }}
       </button>
+
+      <label class="upload-btn">
+        Choose File
+
+        <input
+          hidden
+          type="file"
+          accept=".md,.markdown,text/plain"
+          @change="uploadMarkdown"
+        />
+      </label>
     </div>
 
     <div v-if="result" class="feedback">
@@ -133,6 +327,7 @@
       {{ error }}
     </div>
   </section>
+
 </div>
 
 <script>
@@ -143,37 +338,13 @@ createApp({
     return {
       loading: false,
       error: null,
-      markdownFileName: null,
 
-      markdown: `# RecallForge
+      markdown: `
+Upload a markdown file to start.
 
-RecallForge is a spaced-repetition knowledgebase agent.  
-It imports learning notes from markdown, asks questions, evaluates answers, and tracks weak topics.
+The uploaded markdown will be saved in the database.
 
-## Pipeline Model
-
-A pipeline model processes data in steps.  
-Each step receives input, transforms it, and passes the result to the next step.  
-Pipelines are useful because they make complex workflows easier to understand and debug.
-
-## Agent Loop
-
-An agent loop usually follows this pattern:  
-
-Think → Act → Observe → Repeat.
-
-The agent decides what to do, uses a tool or action, observes the result, and continues.  
-
-## Tool Calling
-
-Tool calling allows an LLM to use external functions.  
-Instead of only generating text, the model can ask the application to run specific actions such as searching files, reading data, or calling APIs.
-
-## Spaced Repetition
-
-Spaced repetition is a learning technique where topics are reviewed at increasing intervals.  
-Topics that are poorly remembered are repeated sooner.  
-Topics that are well remembered are repeated later.`,
+When you click **Next Review**, this panel will update with the full markdown file connected to the selected topic.`,
 
       review: null,
       userAnswer: "",
@@ -181,34 +352,14 @@ Topics that are well remembered are repeated later.`,
     };
   },
 
+  // comment this when no markdown loaded yet
   mounted() {
     this.startReview();
   },
 
   methods: {
     renderMarkdown(md) {
-        return md
-            .replace(/^# (.*)$/gm, "<strong>$1</strong>")
-            .replace(/^## (.*)$/gm, "<strong>$1</strong>")
-            .replace(/\n/g, "<br>");
-    },
-
-    uploadMarkdown(event) {
-        const file = event.target.files[0];
-
-        if (!file) {
-            return;
-        }
-
-        this.markdownFileName = file.name;
-
-        const reader = new FileReader();
-
-        reader.onload = () => {
-            this.markdown = reader.result;
-        };
-
-        reader.readAsText(file);
+      return marked.parse(md || "");
     },
 
     async startReview() {
@@ -223,14 +374,58 @@ Topics that are well remembered are repeated later.`,
         });
 
         if (!response.ok) {
-          throw new Error("Could not start review.");
+          const message = await response.text();
+          throw new Error(message || "Could not start review.");
         }
 
         this.review = await response.json();
+
+        if (this.review.markdownContent) {
+          this.markdown = this.review.markdownContent;
+        }
+
       } catch (err) {
-        this.error = err.message;
+        this.review = null;
+        this.error = err.message || "Could not start review.";
       } finally {
         this.loading = false;
+      }
+    },
+
+    async uploadMarkdown(event) {
+      const file = event.target.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      this.loading = true;
+      this.error = null;
+      this.result = null;
+
+      try {
+        const uploadedMarkdown = await file.text();
+
+        this.markdown = uploadedMarkdown;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("/api/markdown/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!response.ok) {
+          const message = await response.text();
+          throw new Error(message || "Could not upload markdown file.");
+        }
+
+      } catch (err) {
+        this.error = err.message || "Could not upload markdown file.";
+      } finally {
+        this.loading = false;
+        event.target.value = "";
       }
     },
 
@@ -252,12 +447,14 @@ Topics that are well remembered are repeated later.`,
         });
 
         if (!response.ok) {
-          throw new Error("Could not submit answer.");
+          const message = await response.text();
+          throw new Error(message || "Could not submit answer.");
         }
 
         this.result = await response.json();
+
       } catch (err) {
-        this.error = err.message;
+        this.error = err.message || "Could not submit answer.";
       } finally {
         this.loading = false;
       }

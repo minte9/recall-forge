@@ -206,6 +206,8 @@ You should see reviewd topic disappears (until nextReviewAt).
 
 ## 3. Dashboard
 
+### 3.1 Index file
+
 Create this file:
 
 ~~~sh
@@ -231,4 +233,211 @@ COMMAND    PID    USER   FD   TYPE  DEVICE SIZE/OFF NODE NAME
 java    882866 catalin   89u  IPv6 2652026      0t0  TCP *:9090 (LISTEN)
 
 kill -9 882866
+~~~
+
+## 4. Upload markdown file
+
+Markdown become part of the Topic stored in DB.  
+When /api/reviews/start returns the next review, it also returns the markdown content.  
+
+### 4.1 MarkdownFile Entity
+
+Create Markdown file entity:
+
+/domain/MarkdownFile.java
+
+Connect Topic to MarkdownFile
+
+/domain/Topic.java
+
+~~~java
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "markdown_file_id")
+private MarkdownFile markdownFile;
+~~~
+
+### 4.2 Add Repository
+
+/repository/MarkdownFileRepository
+
+~~~java
+public interface MarkdownFileRepository extends JpaRepository<MarkdownFile, Long> {
+}
+~~~
+
+### 4.3 Add upload endpoint
+
+/controller/MarkdownController.java
+
+~~~java
+@RestController
+@RequestMapping("/api/markdown")
+public class MarkdownUploadController {
+
+    private final MarkdownUploadService markdownUploadService;
+
+    public MarkdownUploadController(MarkdownUploadService markdownUploadService) {
+        this.markdownUploadService = markdownUploadService;
+    }
+
+    @PostMapping("/upload")
+    public void uploadMarkdown(@RequestParam("file") MultipartFile file) throws Exception {
+        markdownUploadService.upload(file);
+    }
+}
+~~~
+
+### 4.4 Upload Service
+
+This stores the full file, than creates topics from markdown headings.  
+
+/service/MarkdownService.java
+
+~~~java
+@Service
+public class MarkdownService {
+
+    private final MarkdownFileRepository markdownFileRepository;
+    private final TopicRepository topicRepository;
+    private final MarkdownTopicImporter markdownTopicImporter;
+
+    public MarkdownService(
+            MarkdownFileRepository markdownFileRepository,
+            TopicRepository topicRepository,
+            MarkdownTopicImporter markdownTopicImporter
+    ) {
+        this.markdownFileRepository = markdownFileRepository;
+        this.topicRepository = topicRepository;
+        this.markdownTopicImporter = markdownTopicImporter;
+    }
+
+    public void upload(MultipartFile file) throws Exception {
+        String content = new String(file.getBytes(), StandardCharsets.UTF_8);
+
+        MarkdownFile markdownFile = new MarkdownFile(file.getOriginalFilename(), content);
+        markdownFileRepository.save(markdownFile);
+
+        createTopicsFromMarkdown(markdownFile, content);
+    }
+
+    private void createTopicsFromMarkdown(MarkdownFile markdownFile, String markdown) {
+        List<MarkdownTopicImporter.ParsedTopic> parseTopics = 
+            markdownTopicImporter.parseMarkdown(markdown);
+
+        for (MarkdownTopicImporter.ParsedTopic parsedTopic : parseTopics) {
+            Topic topic = new Topic(
+                parsedTopic.title(),
+                parsedTopic.content(),
+                markdownFile
+            );
+
+            topicRepository.save(topic);
+        }
+    }
+}
+~~~
+
+Update review response DTO
+
+~~~java
+package dev.recallforge.dto;
+
+public record ReviewQuestionResponse(
+    Long topicId,
+    String topicTitle,
+    String question,
+    String markdownContent
+) {
+}
+~~~
+
+Update review service
+
+~~~java
+public ReviewQuestionResponse startReview() {
+        Topic topic = topicService.selectNextTopic();
+
+        String question = openAiService.generateQuestion(
+            topic.getTitle(), 
+            topic.getContent()
+        );
+
+        return new ReviewQuestionResponse(
+            topic.getId(), 
+            topic.getTitle(), 
+            question,
+            topic.getMarkdownFile().getContent()
+        );
+    }
+~~~
+
+
+### 4.5 Update dashboar upload
+
+Replace the browser-only upload with real backend upload.  
+
+~~~javascript
+async uploadMarkdown(event) {
+  const file = event.target.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  await fetch("/api/markdown/upload", {
+    method: "POST",
+    body: formData
+  });
+
+  await this.startReview();
+}
+~~~
+
+
+### 4.6 Clear old data
+
+~~~sh
+sudo apt install postgresql-client
+
+psql -h localhost -p 5432 -U recallforge -d recallforge
+
+\dt
+
+delete from reviews;
+delete from topics;
+delete from markdown_files;
+
+OR
+
+truncate reviews, topics, markdown_files restart identity cascade;
+~~~
+
+Since you already created the table:
+
+~~~sh
+alter table markdown_files
+add column content_hash varchar(64);
+
+update markdown_files
+set content_hash = md5(content);
+
+alter table markdown_files
+alter column content_hash set not null;
+
+alter table markdown_files
+add constraint uk_markdown_hash
+unique(content_hash);
+~~~
+
+Now:
+
+
+~~~sh
+README.md (content A) → accepted
+README.md (content B) → accepted
+README.md (same content A) → rejected
+notes.md (same content A) → rejected
 ~~~

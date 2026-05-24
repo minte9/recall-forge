@@ -12,53 +12,40 @@ import dev.recallforge.repository.TopicRepository;
 @Service
 public class TopicService {
     
-    private final TopicRepository repository;
-    private final MarkdownTopicImporter importer;
+    private final TopicRepository topicRepository;
 
-    public TopicService (TopicRepository repository, MarkdownTopicImporter importer) {
-        this.repository = repository;
-        this.importer = importer;
-    }
-
-    public List<Topic> importTopics() {
-        return importer.importFromLocalMarkdownFile();
+    public TopicService (TopicRepository topicRepository) {
+        this.topicRepository = topicRepository;
     }
 
     public List<Topic> getAllTopics() {
-        return repository.findAll()
+        return topicRepository.findAll()
             .stream()
             .sorted(Comparator.comparing(Topic::getMemoryScore))
             .toList();
     }
 
     public List<Topic> getDueTopics() {
-        return repository.findDueTopics(LocalDateTime.now());
+        return topicRepository.findDueTopics(LocalDateTime.now());
     }
 
     public Topic getTopic(Long topicId) {
-        return repository.findById(topicId)
+        return topicRepository.findById(topicId)
             .orElseThrow(() ->
                 new IllegalArgumentException("Topic not found: " + topicId)
             );
     }
 
     public Topic selectNextTopic() {
-        List<Topic> dueTopics = repository.findDueTopics(LocalDateTime.now());
-
-        if (!dueTopics.isEmpty()) {
-            return dueTopics.getFirst();
-        }
-
-        List<Topic> weakestTopics = repository.findWeakestTopics();
-
-        if (!weakestTopics.isEmpty()) {
-            return weakestTopics.getFirst();
-        }
-
-        throw new IllegalStateException("No topics found. Import topics first.");
-    }
+        return topicRepository.findDueTopics(LocalDateTime.now())
+            .stream()
+            .findFirst()
+            .orElseThrow(() ->
+                    new IllegalStateException("No topics available. Upload a markdown file first.")
+    );
+}
 
     public Topic save(Topic topic) {
-        return repository.save(topic);
+        return topicRepository.save(topic);
     }
 }

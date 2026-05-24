@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,20 +22,6 @@ public class TopicController {
     public TopicController(TopicService topicService, ReviewService reviewService) {
         this.topicService = topicService;
         this.reviewService = reviewService;
-    }
-
-    /**
-     * Import topics from README.md
-     * 
-     * Later, this will become:
-     * POST /api/topics/upload
-     */
-    @PostMapping("/import-local")
-    public List<TopicResponse> importLocalTopics() {
-        return topicService.importTopics()
-                .stream()
-                .map(TopicResponse::from)
-                .toList();
     }
 
     /**
