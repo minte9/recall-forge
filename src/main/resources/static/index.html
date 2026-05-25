@@ -297,14 +297,9 @@
       </textarea>
 
       <div class="actions-row">
-        <button
-          class="review-btn"
-          @click="startReview">
-          <span>→</span> Next Review
-        </button>
 
         <label class="upload-btn">
-          <span>📁</span> Choose File
+          Choose File
           <input
           hidden
           type="file"
@@ -317,6 +312,12 @@
           @click="submitAnswer">
           <span>✈</span> Submit Answer
         </button>
+
+        <button
+          class="review-btn"
+          @click="startReview">
+          <span>→</span> Next Review
+        </button>
       </div>
     </div>
 
@@ -325,12 +326,6 @@
     </div>
 
     <div v-if="!review" class="actions-row">
-      <button
-        class="review-btn"
-        @click="startReview"
-        :disabled="loading">
-        {{ loading ? "Loading..." : "Next Review" }}
-      </button>
 
       <label class="upload-btn">
         Choose File
@@ -342,6 +337,13 @@
           @change="uploadMarkdown"
         />
       </label>
+
+      <button
+        class="review-btn"
+        @click="startReview"
+        :disabled="loading">
+        {{ loading ? "Loading..." : "Next Review" }}
+      </button>
     </div>
 
     <div v-if="result" class="feedback">
@@ -412,14 +414,14 @@ When you click **Next Review**, this panel will update with the full markdown fi
           }
         );
     },
-    
+
     renderMarkdown(md) {
         let html = marked.parse(md || "");
         html = html.replace(
                 /<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g,
 `
 <details>
-<summary>Show example</summary>
+<summary>show code</summary>
 <pre><code>$1</code></pre>
 </details>
       `
