@@ -347,8 +347,14 @@
     <div v-if="result" class="feedback">
       <p><strong>Score:</strong> {{ result.score }}</p>
       <p><strong>Feedback:</strong> {{ result.feedback }}</p>
-      <p><strong>Updated memory score:</strong> {{ result.updateMemoryScore }}</p>
-      <p><strong>Next review:</strong> {{ result.nextReviewAt }}</p>
+      <p>
+        <strong>Updated memory score:</strong>
+        {{ formatScore(result.updateMemoryScore) }}
+      </p>
+      <p>
+        <strong>Next review:</strong>
+        {{ formatDate(result.nextReviewAt) }}
+      </p>
     </div>
 
     <div v-if="error" class="error">
@@ -386,6 +392,27 @@ When you click **Next Review**, this panel will update with the full markdown fi
   // },
 
   methods: {
+
+    formatScore(score) {
+      return Number(score).toFixed(2);
+    },
+
+    formatDate(date) {
+
+      return new Date(date)
+        .toLocaleString(
+          undefined,
+          {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+
+            hour: "2-digit",
+            minute: "2-digit"
+          }
+        );
+    },
+    
     renderMarkdown(md) {
         let html = marked.parse(md || "");
         html = html.replace(
