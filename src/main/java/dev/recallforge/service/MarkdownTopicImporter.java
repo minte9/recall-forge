@@ -8,10 +8,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class MarkdownTopicImporter {
 
-
-    public record ParsedTopic(String title, String content) {
-    }
-
     /**
      * Parse markdown into topics.
      * Every markdown heading starts a new topic:
@@ -19,55 +15,66 @@ public class MarkdownTopicImporter {
      * - everything until the next heading becomes content
      */
     public List<ParsedTopic> parseMarkdown(String markdown) {
-
         List<ParsedTopic> topics = new ArrayList<>();
+
+        String environment = null;
+        String category = null;
+        String subcategory = null;
+        String fileTitle = null;
 
         String currentTitle = null;
         StringBuilder currentContent = new StringBuilder();
 
         for (String line : markdown.split("\\R")) {
+            boolean isPathHeading = line.matches("^##\\s+.+");
+            boolean isTopicHeading = line.matches("^###\\s+.+");
 
-            // Match markdown headings
-            boolean isHeading = line.matches("^#{1,6}\\s+.+");
+            if (isPathHeading) {
+                String path = line.replaceFirst("^##\\s+", "").trim();
 
-            if (isHeading) {
+                String[] parts = path.split("\\s*/\\s*");
 
-                // Save previous topic before starting a new one
+                environment = parts.length > 0 ? parts[0] : "General";
+                category = parts.length > 1 ? parts[1] : "General";
+                subcategory = parts.length > 2 ? parts[2] : "General";
+                fileTitle = parts.length > 3 ? parts[3] : "General";
+
+                continue;
+            }
+
+            if (isTopicHeading) {
                 if (currentTitle != null) {
-
                     String content = currentContent.toString().trim();
 
                     if (!content.isBlank()) {
                         topics.add(new ParsedTopic(
+                                environment,
+                                category,
+                                subcategory,
+                                fileTitle,
                                 currentTitle,
                                 content
                         ));
                     }
                 }
 
-                // Remove leading # characters and spaces.
-                currentTitle =
-                        line.replaceFirst("^#+\\s+", "").trim();
-
-                // Start collecting content for the new topic.
+                currentTitle = line.replaceFirst("^###\\s+", "").trim();
                 currentContent = new StringBuilder();
 
             } else if (currentTitle != null) {
-
-                // Add body lines until the next heading appears.
-                currentContent
-                        .append(line)
-                        .append("\n");
+                currentContent.append(line).append("\n");
             }
         }
 
-        // Save the final topic after loop ends.
         if (currentTitle != null) {
-
             String content = currentContent.toString().trim();
 
             if (!content.isBlank()) {
                 topics.add(new ParsedTopic(
+                        environment,
+                        category,
+                        subcategory,
+                        fileTitle,
                         currentTitle,
                         content
                 ));
@@ -75,5 +82,15 @@ public class MarkdownTopicImporter {
         }
 
         return topics;
+    }
+
+    public record ParsedTopic(
+            String environment,
+            String category,
+            String subcategory,
+            String fileTitle,
+            String title,
+            String content
+    ) {
     }
 }

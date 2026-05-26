@@ -38,15 +38,40 @@ public class Topic {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    private String environment;
+
+    @Column(nullable = false)
+    private String category;
+
+    @Column(nullable = false)
+    private String subcategory;
+
+    @Column(nullable = false)
+    private String fileTitle;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "markdown_file_id")
     private MarkdownFile markdownFile;
 
-    public Topic(String title, String content, MarkdownFile markdownFile) {
+    public Topic(
+        String environment, 
+        String category,
+        String subcategory,
+        String fileTitle,
+        String title,
+        String content,
+        MarkdownFile markdownFile
+    ) {
+        this.environment = environment;
+        this.category = category;
+        this.subcategory = subcategory;
+        this.fileTitle = fileTitle;
+
         this.title = title;
         this.content = content;
         this.markdownFile = markdownFile;
-        
+
         this.memoryScore = 0.5;
         this.nextReviewAt = LocalDateTime.now();
         this.createdAt = LocalDateTime.now();

@@ -54,6 +54,10 @@ public class MarkdownService {
 
         for (MarkdownTopicImporter.ParsedTopic parsedTopic : parseTopics) {
             Topic topic = new Topic(
+                parsedTopic.environment(),
+                parsedTopic.category(),
+                parsedTopic.subcategory(),
+                parsedTopic.fileTitle(),
                 parsedTopic.title(),
                 parsedTopic.content(),
                 markdownFile

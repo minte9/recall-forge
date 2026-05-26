@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import dev.recallforge.domain.Topic;
+import dev.recallforge.exception.NoDueTopicsException;
 import dev.recallforge.repository.TopicRepository;
 
 @Service
@@ -40,10 +41,8 @@ public class TopicService {
         return topicRepository.findDueTopics(LocalDateTime.now())
             .stream()
             .findFirst()
-            .orElseThrow(() ->
-                    new IllegalStateException("No topics available. Upload a markdown file first.")
-    );
-}
+            .orElseThrow(NoDueTopicsException::new);
+    }
 
     public Topic save(Topic topic) {
         return topicRepository.save(topic);

@@ -441,3 +441,18 @@ README.md (content B) → accepted
 README.md (same content A) → rejected
 notes.md (same content A) → rejected
 ~~~
+
+
+### 4.7 Check due topics
+
+~~~sh
+sudo apt install postgresql-client
+
+psql -h localhost -p 5432 -U recallforge -d recallforge
+
+\dt
+
+select id, title, next_review_at, memory_score
+from topics
+order by next_review_at;
+~~~
