@@ -456,3 +456,21 @@ select id, title, next_review_at, memory_score
 from topics
 order by next_review_at;
 ~~~
+
+### 4.8 Add categories
+
+### 4.9 Dump db
+
+Dump from the container:
+
+~~~sh
+docker exec -t recallforge-postgres pg_dump -U recallforge -d recallforge > recallforge.sql
+
+ls -lh recallforge.sql
+~~~
+
+Restore on another computer/container:
+
+~~~sh
+cat recallforge.sql | docker exec -i recallforge-postgres psql -U recallforge -d recallforge
+~~~
