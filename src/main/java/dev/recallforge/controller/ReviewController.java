@@ -3,6 +3,7 @@ package dev.recallforge.controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.recallforge.dto.AnswerRequest;
@@ -28,8 +29,8 @@ public class ReviewController {
      * and asks OpenAI to generate one question.
      */
     @PostMapping("/start")
-    public ReviewQuestionResponse startReview() {
-        return reviewService.startReview();
+    public ReviewQuestionResponse startReview(@RequestParam(required = false) Long markdownFileId) {
+        return reviewService.startReview(markdownFileId);
     }
 
     /**

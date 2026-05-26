@@ -374,6 +374,7 @@ createApp({
     return {
       loading: false,
       error: null,
+      currentMarkdownFileId: null,
 
       markdown: `
 Upload a markdown file to start.
@@ -437,7 +438,13 @@ When you click **Next Review**, this panel will update with the full markdown fi
       this.userAnswer = "";
 
       try {
-        const response = await fetch("/api/reviews/start", {
+        let url = "/api/reviews/start";
+
+        if (this.currentMarkdownFileId) {
+          url += "?markdownFileId=" + this.currentMarkdownFileId;
+        }
+
+        const response = await fetch(url, {
           method: "POST"
         });
 
@@ -447,6 +454,8 @@ When you click **Next Review**, this panel will update with the full markdown fi
         }
 
         this.review = await response.json();
+
+        this.currentMarkdownFileId = this.review.markdownFileId;
 
         if (this.review.markdownContent) {
           this.markdown = this.review.markdownContent;
@@ -472,9 +481,7 @@ When you click **Next Review**, this panel will update with the full markdown fi
       this.result = null;
 
       try {
-        const uploadedMarkdown = await file.text();
-
-        this.markdown = uploadedMarkdown;
+        this.markdown = await file.text();
 
         const formData = new FormData();
         formData.append("file", file);
@@ -488,6 +495,13 @@ When you click **Next Review**, this panel will update with the full markdown fi
           const message = await response.text();
           throw new Error(message || "Could not upload markdown file.");
         }
+
+        const uploaded = await response.json();
+
+        this.currentMarkdownFileId = uploaded.markdownFileId;
+        this.markdown = uploaded.content;
+
+        await this.startReview();
 
       } catch (err) {
         this.error = err.message || "Could not upload markdown file.";

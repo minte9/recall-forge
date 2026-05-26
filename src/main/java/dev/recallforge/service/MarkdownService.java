@@ -3,12 +3,14 @@ package dev.recallforge.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Topic;
+import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.exception.MarkdownAlreadyImportedException;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.repository.TopicRepository;
@@ -30,15 +32,21 @@ public class MarkdownService {
         this.markdownTopicImporter = markdownTopicImporter;
     }
 
-    public void upload(MultipartFile file) throws Exception {
+    public MarkdownUploadResponse upload(MultipartFile file) throws Exception {
         String filename = file.getOriginalFilename();
-
         String content = new String(file.getBytes(), StandardCharsets.UTF_8);
         String contentHash = sha256(content);
 
-        if (markdownFileRepository.existsByContentHash(contentHash)) {
-            throw new MarkdownAlreadyImportedException(
-                "This markdown content was already uploaded."
+        Optional<MarkdownFile> existingFile =
+            markdownFileRepository.findByContentHash(contentHash);
+
+        if (existingFile.isPresent()) {
+            MarkdownFile markdownFile = existingFile.get();
+
+            return new MarkdownUploadResponse(
+                    markdownFile.getId(),
+                    markdownFile.getFilename(),
+                    markdownFile.getContent()
             );
         }
 
@@ -46,6 +54,12 @@ public class MarkdownService {
         markdownFileRepository.save(markdownFile);
 
         createTopicsFromMarkdown(markdownFile, content);
+
+        return new MarkdownUploadResponse(
+                markdownFile.getId(),
+                markdownFile.getFilename(),
+                markdownFile.getContent()
+        );
     }
 
     private void createTopicsFromMarkdown(MarkdownFile markdownFile, String markdown) {

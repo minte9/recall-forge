@@ -30,4 +30,16 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     """)
     List<Topic> findWeakestTopics();
 
+    @Query("""
+        select t
+        from Topic t
+        where t.nextReviewAt <= :now
+        and t.markdownFile.id = :markdownFileId
+        order by t.memoryScore asc, t.nextReviewAt asc
+    """)
+    List<Topic> findDueTopicsByMarkdownFileId(
+            Long markdownFileId,
+            LocalDateTime now
+    );
+
 }

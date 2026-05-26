@@ -31,23 +31,30 @@ public class ReviewService {
         this.repetitionService = repetitionService;
     }
 
-    public ReviewQuestionResponse startReview() {
-        Topic topic = topicService.selectNextTopic();
+    public ReviewQuestionResponse startReview(Long markdownFileId) {
+        Topic topic = markdownFileId == null
+                ? topicService.selectNextTopic()
+                : topicService.selectNextTopicByMarkdownFileId(markdownFileId);
 
         String question = openAiService.generateQuestion(
-            topic.getTitle(), 
-            topic.getContent()
+                topic.getTitle(),
+                topic.getContent()
         );
 
         String markdownContent = topic.getMarkdownFile() != null
-            ? topic.getMarkdownFile().getContent()
-            : "# " + topic.getTitle() + "\n\n" + topic.getContent();
+                ? topic.getMarkdownFile().getContent()
+                : "# " + topic.getTitle() + "\n\n" + topic.getContent();
+
+        Long responseMarkdownFileId = topic.getMarkdownFile() != null
+                ? topic.getMarkdownFile().getId()
+                : null;
 
         return new ReviewQuestionResponse(
-            topic.getId(), 
-            topic.getTitle(), 
-            question,
-            markdownContent
+                topic.getId(),
+                topic.getTitle(),
+                question,
+                markdownContent,
+                responseMarkdownFileId
         );
     }
 

@@ -44,6 +44,14 @@ public class TopicService {
             .orElseThrow(NoDueTopicsException::new);
     }
 
+    public Topic selectNextTopicByMarkdownFileId(Long markdownFileId) {
+        return topicRepository
+            .findDueTopicsByMarkdownFileId(markdownFileId, LocalDateTime.now())
+            .stream()
+            .findFirst()
+            .orElseThrow(NoDueTopicsException::new);
+    }
+
     public Topic save(Topic topic) {
         return topicRepository.save(topic);
     }
