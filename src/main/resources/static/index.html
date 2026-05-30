@@ -266,6 +266,26 @@
       padding: 8px;
     }
 
+    .category-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #374151;
+    }
+
+    .home-link-btn {
+      border: none;
+      background: none;
+      padding: 0;
+      margin: 4px 0 0 4px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      color: inherit;
+      filter: grayscale(100%);
+      float: right;
+    }
+
   </style>
 </head>
 
@@ -285,7 +305,10 @@
     <!--h2>Review</h2-->
 
     <div v-if="review">
-      <h3>{{ review.topicTitle }}</h3>
+          
+      <h3>
+        {{ review.topicTitle }}
+      </h3>
 
       <p>
         <!--strong>Question:</strong-->
@@ -296,6 +319,13 @@
         v-model="userAnswer"
         placeholder="Write your answer here...">
       </textarea>
+
+      <button
+        class="home-link-btn"
+        @click="goHome"
+        title="Back to home">
+        🏠
+      </button>
 
       <div class="actions-row">
 
@@ -320,9 +350,10 @@
           <span>→</span> Next Review
         </button>
 
-        <p v-if="queue && queue.dueCount > 0" class="queue-count">
+        <p v-if="queue && currentMarkdownFileId" class="category-status">
           Available in this category: {{ queue.dueCount }}
         </p>
+        
       </div>
     </div>
 
@@ -393,7 +424,7 @@ createApp({
       error: null,
       currentMarkdownFileId: null,
 
-      markdown: `
+      initialMarkdown: `
 <h3>Markdown File</h3>
 
 Upload a markdown file to start.
@@ -402,6 +433,7 @@ The uploaded markdown will be saved in the database.
 
 When you click **Start Review**, this panel will be updated.`,
 
+      markdown: null,
       review: null,
       userAnswer: "",
       result: null,
@@ -415,6 +447,7 @@ When you click **Start Review**, this panel will be updated.`,
   // },
 
   mounted() {
+    this.markdown = this.initialMarkdown;
     this.loadQueue();
   },
 
@@ -604,6 +637,15 @@ When you click **Start Review**, this panel will be updated.`,
       } catch (err) {
         console.error("Could not load review queue", err);
       }
+    },
+
+    goHome() {
+      this.review = null;
+      this.result = null;
+      this.userAnswer = "";
+      this.currentMarkdownFileId = null;
+      this.markdown = this.initialMarkdown;
+      this.loadQueue();
     }
   }
 }).mount("#app");
