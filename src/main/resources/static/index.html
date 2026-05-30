@@ -404,9 +404,6 @@
         <strong>Next review:</strong>
         {{ formatDate(result.nextReviewAt) }}
       </p>
-      <p v-if="queue && queue.dueCount > 0" class="queue-count">
-        Reviews available now: {{ queue.dueCount }}
-      </p>
     </div>
 
     <div v-if="error" class="error">
