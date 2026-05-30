@@ -518,17 +518,3 @@ curl http://localhost:9090/api/reviews/queue/today | jq
   "doneForToday": true
 }
 ~~~
-
-
-### 4.11 Choosing environment/category to review
-
-Controller endpoint
-
-ReviewController.java
-
-~~~java
-@GetMapping("/api/review-scopes")
-public List<ReviewScopeResponse> getReviewScopes() {
-    return markdownFileService.getReviewScopes();
-}
-~~~
