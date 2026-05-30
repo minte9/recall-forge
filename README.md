@@ -472,5 +472,49 @@ ls -lh recallforge.sql
 Restore on another computer/container:
 
 ~~~sh
+psql -h localhost -p 5432 -U recallforge -d postgres
+DROP DATABASE recallforge;
+CREATE DATABASE recallforge OWNER recallforge;
+\q
+
 cat recallforge.sql | docker exec -i recallforge-postgres psql -U recallforge -d recallforge
+~~~
+
+See how many reviews are due now:
+
+~~~sh
+select count(*) from topics where next_review_at <= now();
+~~~
+
+Force "all done" state:
+
+~~~sh
+update topics set next_review_at = now() + interval '1 day' where next_review_at <= now();
+~~~
+
+
+### 4.10 Queue Summary
+
+Implement this as a read-only “queue summary” first: backend count + next review time, then a small UI badge.
+
+In ReviewController:
+
+~~~java
+@GetMapping("/queue/today")
+public ReviewQueueResponse getDailyQueue() {
+    return reviewService.getDailyQueue();
+}
+~~~
+
+Test it:
+
+~~~sh
+curl http://localhost:9090/api/reviews/queue/today | jq
+~~~
+~~~json
+{
+  "dueCount": 0,
+  "nextReviewAt": "2026-05-30T23:26:37.379304",
+  "doneForToday": true
+}
 ~~~

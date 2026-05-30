@@ -3,11 +3,12 @@ package dev.recallforge.service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import dev.recallforge.domain.Topic;
-import dev.recallforge.exception.NoDueTopicsException;
 import dev.recallforge.repository.TopicRepository;
 
 @Service
@@ -37,19 +38,27 @@ public class TopicService {
             );
     }
 
-    public Topic selectNextTopic() {
+    public Optional<Topic> selectNextTopic() {
         return topicRepository.findDueTopics(LocalDateTime.now())
             .stream()
-            .findFirst()
-            .orElseThrow(NoDueTopicsException::new);
+            .findFirst();
     }
 
-    public Topic selectNextTopicByMarkdownFileId(Long markdownFileId) {
+    public Optional<Topic> selectNextTopicByMarkdownFileId(Long markdownFileId) {
         return topicRepository
             .findDueTopicsByMarkdownFileId(markdownFileId, LocalDateTime.now())
             .stream()
-            .findFirst()
-            .orElseThrow(NoDueTopicsException::new);
+            .findFirst();
+    }
+
+    public long countDueTopics(LocalDateTime now) {
+        return topicRepository.countDue(now);
+    }
+
+    public Optional<Topic> findNextReviewAfter(LocalDateTime now) {
+        return topicRepository.findNext(now, PageRequest.of(0, 1))
+                .stream()
+                .findFirst();
     }
 
     public Topic save(Topic topic) {

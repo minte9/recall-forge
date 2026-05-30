@@ -2,6 +2,7 @@ package dev.recallforge.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import dev.recallforge.domain.Topic;
 import dev.recallforge.dto.AnswerResponse;
 import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
+import dev.recallforge.dto.ReviewQueueResponse;
 import dev.recallforge.repository.ReviewRepository;
 import jakarta.transaction.Transactional;
 
@@ -32,14 +34,17 @@ public class ReviewService {
     }
 
     public ReviewQuestionResponse startReview(Long markdownFileId) {
-        Topic topic = markdownFileId == null
+        Optional<Topic> topicOptional = markdownFileId == null
                 ? topicService.selectNextTopic()
                 : topicService.selectNextTopicByMarkdownFileId(markdownFileId);
+        
+        if (topicOptional.isEmpty()) {
+            return ReviewQuestionResponse.noReviewsDue();
+        }
 
-        String question = openAiService.generateQuestion(
-                topic.getTitle(),
-                topic.getContent()
-        );
+        Topic topic = topicOptional.get();
+
+        String question = openAiService.generateQuestion(topic.getTitle(), topic.getContent());
 
         String markdownContent = topic.getMarkdownFile() != null
                 ? topic.getMarkdownFile().getContent()
@@ -54,7 +59,9 @@ public class ReviewService {
                 topic.getTitle(),
                 question,
                 markdownContent,
-                responseMarkdownFileId
+                responseMarkdownFileId,
+                false,
+                null
         );
     }
 
@@ -112,5 +119,21 @@ public class ReviewService {
                 .stream()
                 .map(ReviewHistoryResponse::from)
                 .toList();
+    }
+
+    public ReviewQueueResponse getDailyQueue() {
+        LocalDateTime now = LocalDateTime.now();
+
+        long dueCount = topicService.countDueTopics(now);
+
+        LocalDateTime nextReviewAt = topicService.findNextReviewAfter(now)
+            .map(Topic::getNextReviewAt)
+            .orElse(null);
+
+        return new ReviewQueueResponse(
+            dueCount,
+            nextReviewAt,
+            dueCount == 0
+        );
     }
 }

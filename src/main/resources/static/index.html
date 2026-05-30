@@ -283,6 +283,22 @@
   <section class="panel">
     <!--h2>Review</h2-->
 
+    <div v-if="queue" class="feedback">
+      <p>
+        <strong>Due now:</strong>
+        {{ queue.dueCount }}
+      </p>
+
+      <p v-if="queue.nextReviewAt">
+        <strong>Next review:</strong>
+        {{ formatDate(queue.nextReviewAt) }}
+      </p>
+
+      <p v-if="queue.doneForToday">
+        All reviews are done for now.
+      </p>
+    </div>
+
     <div v-if="review">
       <h3>{{ review.topicTitle }}</h3>
 
@@ -322,7 +338,10 @@
     </div>
 
     <div v-else class="empty-state">
-      Upload a markdown file, then click <strong>Next Review</strong>.
+      <span v-if="reviewMessage">{{ reviewMessage }}</span>
+      <span v-else>
+        Upload a markdown file, then click <strong>Next Review</strong>.
+      </span>
     </div>
 
     <div v-if="!review" class="actions-row">
@@ -385,7 +404,8 @@ When you click **Next Review**, this panel will update with the full markdown fi
 
       review: null,
       userAnswer: "",
-      result: null
+      result: null,
+      queue: null
     };
   },
 
@@ -393,6 +413,10 @@ When you click **Next Review**, this panel will update with the full markdown fi
   // mounted() {
   //   this.startReview();
   // },
+
+  mounted() {
+    this.loadQueue();
+  },
 
   methods: {
 
@@ -453,13 +477,23 @@ When you click **Next Review**, this panel will update with the full markdown fi
           throw new Error(message || "Could not start review.");
         }
 
-        this.review = await response.json();
+        const data = await response.json();
+
+        if (data.done) {
+          this.review = null;
+          this.reviewMessage = data.message;
+          return;
+        }
+
+        this.review = data;
 
         this.currentMarkdownFileId = this.review.markdownFileId;
 
         if (this.review.markdownContent) {
           this.markdown = this.review.markdownContent;
         }
+
+        await this.loadQueue();
 
       } catch (err) {
         this.review = null;
@@ -534,11 +568,27 @@ When you click **Next Review**, this panel will update with the full markdown fi
         }
 
         this.result = await response.json();
+        await this.loadQueue();
 
       } catch (err) {
         this.error = err.message || "Could not submit answer.";
       } finally {
         this.loading = false;
+      }
+    },
+
+    async loadQueue() {
+      try {
+        const response = await fetch("/api/reviews/queue/today");
+
+        if (!response.ok) {
+          return;
+        }
+
+        this.queue = await response.json();
+
+      } catch (err) {
+        console.error("Could not load review queue", err);
       }
     }
   }

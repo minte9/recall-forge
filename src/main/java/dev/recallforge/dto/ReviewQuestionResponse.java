@@ -5,6 +5,19 @@ public record ReviewQuestionResponse(
         String topicTitle,
         String question,
         String markdownContent,
-        Long markdownFileId
+        Long markdownFileId,
+        boolean done,
+        String message
 ) {
+    public static ReviewQuestionResponse noReviewsDue() {
+        return new ReviewQuestionResponse(
+			null,
+			null,
+			null,
+			null,
+			null,
+			true,
+			"All reviews are done for now. Come back later."
+        );
+    }
 }
