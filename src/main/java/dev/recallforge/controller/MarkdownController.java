@@ -7,15 +7,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import dev.recallforge.dto.MarkdownUploadResponse;
-import dev.recallforge.service.MarkdownService;
+import dev.recallforge.service.MarkdownFileService;
 
 @RestController
 @RequestMapping("/api/markdown")
 public class MarkdownController {
  
-    private final MarkdownService markdownService;
+    private final MarkdownFileService markdownService;
 
-    public MarkdownController(MarkdownService markdownService) {
+    public MarkdownController(MarkdownFileService markdownService) {
         this.markdownService = markdownService;
     }
 

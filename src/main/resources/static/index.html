@@ -321,7 +321,7 @@
         </button>
 
         <p v-if="queue && queue.dueCount > 0" class="queue-count">
-          Available in subcategory: {{ queue.dueCount }}
+          Available in this category: {{ queue.dueCount }}
         </p>
       </div>
     </div>
@@ -462,31 +462,21 @@ When you click **Start Review**, this panel will be updated.`,
       this.userAnswer = "";
 
       try {
-        let url = "/api/reviews/start";
+        let data = await this.startReviewRequest(this.currentMarkdownFileId);
 
-        if (this.currentMarkdownFileId) {
-          url += "?markdownFileId=" + this.currentMarkdownFileId;
+        if (data.done && this.currentMarkdownFileId) {
+          this.currentMarkdownFileId = null;
+          data = await this.startReviewRequest(null);
         }
-
-        const response = await fetch(url, {
-          method: "POST"
-        });
-
-        if (!response.ok) {
-          const message = await response.text();
-          throw new Error(message || "Could not start review.");
-        }
-
-        const data = await response.json();
 
         if (data.done) {
           this.review = null;
           this.reviewMessage = data.message;
+          await this.loadQueue();
           return;
         }
 
         this.review = data;
-
         this.currentMarkdownFileId = this.review.markdownFileId;
 
         if (this.review.markdownContent) {
@@ -494,13 +484,31 @@ When you click **Start Review**, this panel will be updated.`,
         }
 
         await this.loadQueue();
-
       } catch (err) {
         this.review = null;
         this.error = err.message || "Could not start review.";
       } finally {
         this.loading = false;
       }
+    },
+
+    async startReviewRequest(markdownFileId) {
+      let url = "/api/reviews/start";
+
+      if (markdownFileId) {
+        url += "?markdownFileId=" + encodeURIComponent(markdownFileId);
+      }
+
+      const response = await fetch(url, {
+        method: "POST"
+      });
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "Could not start review.");
+      }
+
+      return await response.json();
     },
 
     async uploadMarkdown(event) {
