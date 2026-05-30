@@ -55,10 +55,28 @@ public class TopicService {
         return topicRepository.countDue(now);
     }
 
-    public Optional<Topic> findNextReviewAfter(LocalDateTime now) {
+    public long countDueTopicsByMarkdownFileId(Long markdownFileId, LocalDateTime now) {
+        return topicRepository.countByMarkdownFileIdAndNextReviewAtLessThanEqual(
+                markdownFileId,
+                now
+        );
+    }
+
+    public Optional<Topic> findNextReviewAtAfter(LocalDateTime now) {
         return topicRepository.findNext(now, PageRequest.of(0, 1))
                 .stream()
                 .findFirst();
+    }
+
+    public Optional<Topic> findNextReviewAtAfterByMarkdownFileId(
+        Long markdownFileId,
+            LocalDateTime now
+    ) {
+        return topicRepository
+                .findFirstByMarkdownFileIdAndNextReviewAtGreaterThanOrderByNextReviewAtAsc(
+                        markdownFileId,
+                        now
+                );
     }
 
     public Topic save(Topic topic) {

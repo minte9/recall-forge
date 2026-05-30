@@ -51,7 +51,7 @@ public class ReviewController {
     }
 
     @GetMapping("/queue/today")
-    public ReviewQueueResponse getDailyQueue() {
-        return reviewService.getDailyQueue();
+    public ReviewQueueResponse getDailyQueue(@RequestParam(required = false) Long markdownFileId) {
+        return reviewService.getDailyQueue(markdownFileId);
     }
 }

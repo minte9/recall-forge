@@ -265,6 +265,7 @@
       border: 1px solid #d1d5db;
       padding: 8px;
     }
+
   </style>
 </head>
 
@@ -283,22 +284,6 @@
   <section class="panel">
     <!--h2>Review</h2-->
 
-    <div v-if="queue" class="feedback">
-      <p>
-        <strong>Due now:</strong>
-        {{ queue.dueCount }}
-      </p>
-
-      <p v-if="queue.nextReviewAt">
-        <strong>Next review:</strong>
-        {{ formatDate(queue.nextReviewAt) }}
-      </p>
-
-      <p v-if="queue.doneForToday">
-        All reviews are done for now.
-      </p>
-    </div>
-
     <div v-if="review">
       <h3>{{ review.topicTitle }}</h3>
 
@@ -314,14 +299,14 @@
 
       <div class="actions-row">
 
-        <label class="upload-btn">
+        <!--label class="upload-btn">
           Choose File
           <input
           hidden
           type="file"
           accept=".md,.markdown,text/plain"
           @change="uploadMarkdown"/>
-        </label>
+        </label-->
 
         <button
           class="submit-btn"
@@ -334,35 +319,44 @@
           @click="startReview">
           <span>→</span> Next Review
         </button>
+
+        <p v-if="queue && queue.dueCount > 0" class="queue-count">
+          Available in subcategory: {{ queue.dueCount }}
+        </p>
       </div>
     </div>
 
-    <div v-else class="empty-state">
-      <span v-if="reviewMessage">{{ reviewMessage }}</span>
-      <span v-else>
-        Upload a markdown file, then click <strong>Next Review</strong>.
-      </span>
-    </div>
+    <div v-if="!review" class="review-home">
 
-    <div v-if="!review" class="actions-row">
+      <h3>Recall Forge</h3>
 
-      <label class="upload-btn">
-        Choose File
+      <p v-if="queue && queue.dueCount > 0" class="queue-count">
+        Reviews available now: {{ queue.dueCount }}
+      </p>
 
-        <input
-          hidden
-          type="file"
-          accept=".md,.markdown,text/plain"
-          @change="uploadMarkdown"
-        />
-      </label>
+      <p v-else class="queue-count">
+        No reviews due right now.
+      </p>
 
-      <button
-        class="review-btn"
-        @click="startReview"
-        :disabled="loading">
-        {{ loading ? "Loading..." : "Next Review" }}
-      </button>
+      <div class="actions-row">
+        <button
+          class="review-btn"
+          @click="startReview"
+          :disabled="loading || !queue || queue.dueCount === 0">
+          {{ loading ? "Loading..." : "Start Review" }}
+        </button>
+
+        <label class="upload-btn">
+          Upload Markdown
+          <input
+            hidden
+            type="file"
+            accept=".md,.markdown,text/plain"
+            @change="uploadMarkdown"
+          />
+        </label>
+      </div>
+
     </div>
 
     <div v-if="result" class="feedback">
@@ -376,11 +370,15 @@
         <strong>Next review:</strong>
         {{ formatDate(result.nextReviewAt) }}
       </p>
+      <p v-if="queue && queue.dueCount > 0" class="queue-count">
+        Reviews available now: {{ queue.dueCount }}
+      </p>
     </div>
 
     <div v-if="error" class="error">
       {{ error }}
     </div>
+    
   </section>
 
 </div>
@@ -396,11 +394,13 @@ createApp({
       currentMarkdownFileId: null,
 
       markdown: `
+<h3>Markdown File</h3>
+
 Upload a markdown file to start.
 
 The uploaded markdown will be saved in the database.
 
-When you click **Next Review**, this panel will update with the full markdown file connected to the selected topic.`,
+When you click **Start Review**, this panel will be updated.`,
 
       review: null,
       userAnswer: "",
@@ -579,7 +579,13 @@ When you click **Next Review**, this panel will update with the full markdown fi
 
     async loadQueue() {
       try {
-        const response = await fetch("/api/reviews/queue/today");
+        let url = "/api/reviews/queue/today";
+
+        if (this.currentMarkdownFileId) {
+          url += "?markdownFileId=" + this.currentMarkdownFileId;
+        }
+
+        const response = await fetch(url);
 
         if (!response.ok) {
           return;

@@ -121,14 +121,20 @@ public class ReviewService {
                 .toList();
     }
 
-    public ReviewQueueResponse getDailyQueue() {
+    public ReviewQueueResponse getDailyQueue(Long markdownFileId) {
         LocalDateTime now = LocalDateTime.now();
 
-        long dueCount = topicService.countDueTopics(now);
+        long dueCount = markdownFileId == null
+            ? topicService.countDueTopics(now)
+            : topicService.countDueTopicsByMarkdownFileId(markdownFileId, now);
 
-        LocalDateTime nextReviewAt = topicService.findNextReviewAfter(now)
-            .map(Topic::getNextReviewAt)
-            .orElse(null);
+        LocalDateTime nextReviewAt = markdownFileId == null
+            ? topicService.findNextReviewAtAfter(now)
+                    .map(Topic::getNextReviewAt)
+                    .orElse(null)
+            : topicService.findNextReviewAtAfterByMarkdownFileId(markdownFileId, now)
+                    .map(Topic::getNextReviewAt)
+                    .orElse(null);
 
         return new ReviewQueueResponse(
             dueCount,

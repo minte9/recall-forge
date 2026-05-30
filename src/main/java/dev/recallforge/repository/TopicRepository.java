@@ -49,4 +49,14 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     """)
     List<Topic> findNext(@Param("now") LocalDateTime now, Pageable pageable);
 
+    long countByMarkdownFileIdAndNextReviewAtLessThanEqual(
+            Long markdownFileId,
+            LocalDateTime now
+    );
+
+    Optional<Topic> findFirstByMarkdownFileIdAndNextReviewAtGreaterThanOrderByNextReviewAtAsc(
+            Long markdownFileId,
+            LocalDateTime now
+    );
+
 }
