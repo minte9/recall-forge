@@ -266,24 +266,27 @@
       padding: 8px;
     }
 
-    .category-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #374151;
-    }
-
     .home-link-btn {
       border: none;
       background: none;
       padding: 0;
-      margin: 0 0 0 4px;
+      margin: 0 0 0 14px;
       cursor: pointer;
       font-size: 14px;
       line-height: 1;
       color: inherit;
-      filter: grayscale(100%);
+      opacity: 0.7;
       float: right;
+      filter: grayscale(100%);
+    }
+
+    .category-status {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #374151;
+      padding-left: 10px;
     }
 
   </style>
@@ -313,7 +316,7 @@
             class="home-link-btn"
             @click="goHome"
             title="Back to home">
-            🏠
+            <u>Home</u>
           </button>
       </h3>
 
