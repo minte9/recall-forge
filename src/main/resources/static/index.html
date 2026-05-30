@@ -277,7 +277,7 @@
       border: none;
       background: none;
       padding: 0;
-      margin: 4px 0 0 4px;
+      margin: 0 0 0 4px;
       cursor: pointer;
       font-size: 14px;
       line-height: 1;
@@ -308,6 +308,13 @@
           
       <h3>
         {{ review.topicTitle }}
+        
+        <button
+            class="home-link-btn"
+            @click="goHome"
+            title="Back to home">
+            🏠
+          </button>
       </h3>
 
       <p>
@@ -319,13 +326,6 @@
         v-model="userAnswer"
         placeholder="Write your answer here...">
       </textarea>
-
-      <button
-        class="home-link-btn"
-        @click="goHome"
-        title="Back to home">
-        🏠
-      </button>
 
       <div class="actions-row">
 
