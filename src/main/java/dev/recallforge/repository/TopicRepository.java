@@ -59,4 +59,11 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
             LocalDateTime now
     );
 
+    Optional<Topic> findByEnvironmentAndCategoryAndSubcategoryAndTitle(
+        String environment,
+        String category,
+        String subcategory,
+        String title
+    );
+
 }

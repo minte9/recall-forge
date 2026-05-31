@@ -43,10 +43,41 @@ public class MarkdownFile {
     @Column(nullable = false)
     private LocalDateTime uploadedAt;
 
-    public MarkdownFile(String filename, String content, String contentHash) {
+    @Column(nullable = false)
+    private String environment;
+
+    @Column(nullable = false)
+    private String category;
+
+    @Column(nullable = false)
+    private String subcategory;
+
+    @Column(name = "topic_group")
+    private String topicGroup;
+
+    public MarkdownFile(
+            String filename,
+            String content,
+            String contentHash,
+            String environment,
+            String category,
+            String subcategory,
+            String topicGroup
+    ) {
         this.filename = filename;
         this.content = content;
         this.contentHash = contentHash;
+
+        this.environment = environment;
+        this.category = category;
+        this.subcategory = subcategory;
+        this.topicGroup = topicGroup;
+
         this.uploadedAt = LocalDateTime.now();
+    }
+
+    public void updateContent(String content, String contentHash) {
+        this.content = content;
+        this.contentHash = contentHash;
     }
 }

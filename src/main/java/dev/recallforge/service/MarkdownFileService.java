@@ -13,6 +13,7 @@ import dev.recallforge.domain.Topic;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.repository.TopicRepository;
+import jakarta.transaction.Transactional;
 
 @Service
 public class MarkdownFileService {
@@ -31,28 +32,50 @@ public class MarkdownFileService {
         this.markdownTopicImporter = markdownTopicImporter;
     }
 
+    @Transactional
     public MarkdownUploadResponse upload(MultipartFile file) throws Exception {
         String filename = file.getOriginalFilename();
         String content = new String(file.getBytes(), StandardCharsets.UTF_8);
         String contentHash = sha256(content);
 
-        Optional<MarkdownFile> existingFile =
-            markdownFileRepository.findByContentHash(contentHash);
+        List<MarkdownTopicImporter.ParsedTopic> parsedTopics =
+                markdownTopicImporter.parseMarkdown(content);
 
-        if (existingFile.isPresent()) {
-            MarkdownFile markdownFile = existingFile.get();
-
-            return new MarkdownUploadResponse(
-                    markdownFile.getId(),
-                    markdownFile.getFilename(),
-                    markdownFile.getContent()
-            );
+        if (parsedTopics.isEmpty()) {
+            throw new IllegalArgumentException("Markdown file does not contain any topics.");
         }
 
-        MarkdownFile markdownFile = new MarkdownFile(filename, content, contentHash);
-        markdownFileRepository.save(markdownFile);
+        MarkdownTopicImporter.ParsedTopic firstTopic = parsedTopics.get(0);
 
-        createTopicsFromMarkdown(markdownFile, content);
+        Optional<MarkdownFile> existingFile =
+            markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroup(
+                    firstTopic.environment(),
+                    firstTopic.category(),
+                    firstTopic.subcategory(),
+                    firstTopic.fileTitle()
+            );
+                   
+        MarkdownFile markdownFile;
+
+        if (existingFile.isPresent()) {
+            markdownFile = existingFile.get();
+            markdownFile.updateContent(content, contentHash);
+            markdownFileRepository.save(markdownFile);
+        } else {
+            markdownFile = new MarkdownFile(
+                    filename,
+                    content,
+                    contentHash,
+                    firstTopic.environment(),
+                    firstTopic.category(),
+                    firstTopic.subcategory(),
+                    firstTopic.fileTitle()
+            );
+
+            markdownFileRepository.save(markdownFile);
+        }
+
+        syncTopicsFromMarkdown(markdownFile, parsedTopics);
 
         return new MarkdownUploadResponse(
                 markdownFile.getId(),
@@ -61,19 +84,40 @@ public class MarkdownFileService {
         );
     }
 
-    private void createTopicsFromMarkdown(MarkdownFile markdownFile, String markdown) {
-        List<MarkdownTopicImporter.ParsedTopic> parseTopics = 
-            markdownTopicImporter.parseMarkdown(markdown);
+    private void syncTopicsFromMarkdown(
+        MarkdownFile markdownFile,
+        List<MarkdownTopicImporter.ParsedTopic> parsedTopics
+    ) {
+        for (MarkdownTopicImporter.ParsedTopic parsedTopic : parsedTopics) {
+            Optional<Topic> existingTopic =
+                    topicRepository.findByEnvironmentAndCategoryAndSubcategoryAndTitle(
+                            parsedTopic.environment(),
+                            parsedTopic.category(),
+                            parsedTopic.subcategory(),
+                            parsedTopic.title()
+                    );
 
-        for (MarkdownTopicImporter.ParsedTopic parsedTopic : parseTopics) {
+            if (existingTopic.isPresent()) {
+                Topic topic = existingTopic.get();
+
+                topic.updateFromMarkdown(
+                        parsedTopic.fileTitle(),
+                        parsedTopic.content(),
+                        markdownFile
+                );
+
+                topicRepository.save(topic);
+                continue;
+            }
+
             Topic topic = new Topic(
-                parsedTopic.environment(),
-                parsedTopic.category(),
-                parsedTopic.subcategory(),
-                parsedTopic.fileTitle(),
-                parsedTopic.title(),
-                parsedTopic.content(),
-                markdownFile
+                    parsedTopic.environment(),
+                    parsedTopic.category(),
+                    parsedTopic.subcategory(),
+                    parsedTopic.fileTitle(),
+                    parsedTopic.title(),
+                    parsedTopic.content(),
+                    markdownFile
             );
 
             topicRepository.save(topic);

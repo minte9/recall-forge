@@ -93,4 +93,10 @@ public class Topic {
         this.nextReviewAt = nextReviewAt;
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void updateFromMarkdown(String fileTitle, String content, MarkdownFile markdownFile) {
+        this.fileTitle = fileTitle;
+        this.content = content;
+        this.markdownFile = markdownFile;
+    }
 }
