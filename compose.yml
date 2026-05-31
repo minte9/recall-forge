@@ -10,6 +10,21 @@ services:
       - "5432:5432"
     volumes:
       - recallforge-postgres-data:/var/lib/postgresql/data
+  
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    ports:
+      - "9090:9090"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/recallforge
+      SPRING_DATASOURCE_USERNAME: recallforge
+      SPRING_DATASOURCE_PASSWORD: recallforge
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      APP_SECURITY_USERNAME: ${APP_SECURITY_USERNAME}
+      APP_SECURITY_PASSWORD: ${APP_SECURITY_PASSWORD}
 
 volumes:
   recallforge-postgres-data:

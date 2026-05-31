@@ -27,3 +27,8 @@ recallforge:
 openai:
   api-key: ${OPENAI_API_KEY}
   model: gpt-4.1-mini
+
+app:
+  security:
+    username: ${APP_SECURITY_USERNAME:admin}
+    password: ${APP_SECURITY_PASSWORD:admin}
