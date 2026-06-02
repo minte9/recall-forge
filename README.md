@@ -36,7 +36,13 @@ v1.0.2
 - 2.9 Database backup
 - 2.10 Queue Summary
 
-## Screeshots
+## Recall Forge Architecture
+
+![Screenshot](images/recall-forge_architecture.png)
+
+## Marckdown Start / Screeshot
 
 ![Screenshot](images/recall-forge_1.png)
+
+## Review Queue, Feedback / Screenshot
 ![Screenshot](images/recall-forge_2.png)
