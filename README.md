@@ -38,12 +38,12 @@ v1.0.2
 
 ## Architecture
 
-![Screenshot](images/recall-forge_architecture.png)
+![Screenshot](docs/images/recall-forge_architecture.png)
 
 ## Screeshots
 
 #### Upload Markdown & Start 
-![Screenshot](images/recall-forge_1.png)
+![Screenshot](docs/images/recall-forge_1.png)
 
 #### Review Queue & Feedback
-![Screenshot](images/recall-forge_2.png)
+![Screenshot](docs/images/recall-forge_2.png)
