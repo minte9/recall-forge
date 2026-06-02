@@ -1,31 +1,6 @@
-# Recall Forge - v1.0.1
+# Recall Forge - v1.0.2
 
-The application import topics from a local README.md, ask review questions,  
-evaluates answers with OpenAI, and stores memory in database.  
-
-## 1. Backend-only
-v1.0.1
-
-- 1.1 Project structure
-- 1.2 Gradle Settings 
-- 1.3 Gradle Build
-- 1.4 Docker Compose
-- 1.5 OpenAPI 
-- 1.6 Application Properties
-- 1.7 Main App
-- 1.8 Domain model (JPA)
-- 1.9 Repositories
-- 1.10 DTOs
-- 1.11 OpenAI Config
-- 1.12 Services
-- 1.13 Controllers
-- 1.14 Run the project
-- 1.15 Api Requests
-
-## 2. Repetition System
-v1.0.2
-
-### 2.1 Review History Endpoint
+## 2.1 Review History Endpoint
 
 #### Add DTO
 
@@ -204,9 +179,7 @@ curl -X POST http://localhost:9090/api/reviews/start | jq
 You should see reviewd topic disappears (until nextReviewAt).  
 
 
-## 3. Dashboard
-
-### 3.1 Index file
+### 2.4 Dashboard
 
 Create this file:
 
@@ -235,12 +208,12 @@ java    882866 catalin   89u  IPv6 2652026      0t0  TCP *:9090 (LISTEN)
 kill -9 882866
 ~~~
 
-## 4. Upload markdown file
+### 2.5 Upload markdown file
 
 Markdown become part of the Topic stored in DB.  
 When /api/reviews/start returns the next review, it also returns the markdown content.  
 
-### 4.1 MarkdownFile Entity
+#### MarkdownFile Entity
 
 Create Markdown file entity:
 
@@ -256,7 +229,7 @@ Connect Topic to MarkdownFile
 private MarkdownFile markdownFile;
 ~~~
 
-### 4.2 Add Repository
+#### Add Repository
 
 /repository/MarkdownFileRepository
 
@@ -265,7 +238,7 @@ public interface MarkdownFileRepository extends JpaRepository<MarkdownFile, Long
 }
 ~~~
 
-### 4.3 Add upload endpoint
+#### Add upload endpoint
 
 /controller/MarkdownController.java
 
@@ -287,7 +260,7 @@ public class MarkdownUploadController {
 }
 ~~~
 
-### 4.4 Upload Service
+#### Upload Service
 
 This stores the full file, than creates topics from markdown headings.  
 
@@ -372,7 +345,7 @@ public ReviewQuestionResponse startReview() {
 ~~~
 
 
-### 4.5 Update dashboar upload
+#### Update dashboar upload
 
 Replace the browser-only upload with real backend upload.  
 
@@ -397,7 +370,7 @@ async uploadMarkdown(event) {
 ~~~
 
 
-### 4.6 Clear old data
+### 2.6 Database clear
 
 ~~~sh
 sudo apt install postgresql-client
@@ -443,7 +416,7 @@ notes.md (same content A) → rejected
 ~~~
 
 
-### 4.7 Check due topics
+### 2.7 Due topics
 
 ~~~sh
 sudo apt install postgresql-client
@@ -457,9 +430,9 @@ from topics
 order by next_review_at;
 ~~~
 
-### 4.8 Add categories
+### 2.8 Categories
 
-### 4.9 Dump db
+### 2.9 Database backup
 
 Dump from the container:
 
@@ -493,7 +466,7 @@ update topics set next_review_at = now() + interval '1 day' where next_review_at
 ~~~
 
 
-### 4.10 Queue Summary
+### 2.10 Queue Summary
 
 Implement this as a read-only “queue summary” first: backend count + next review time, then a small UI badge.
 
