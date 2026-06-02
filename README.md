@@ -35,3 +35,8 @@ v1.0.2
 - 2.8 Categories
 - 2.9 Database backup
 - 2.10 Queue Summary
+
+## Screeshots
+
+![Screenshot](images/recall-forge_1.png)
+![Screenshot](images/recall-forge_2.png)
