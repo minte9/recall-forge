@@ -24,14 +24,16 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/login",
-                    "/actuator/health",
-                    "/icon.png",
-                    "/favicon.ico"
+                    "/recall-forge.png"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
-            .formLogin(Customizer.withDefaults())
-            .logout(Customizer.withDefaults());
+            .formLogin(form -> form
+                .defaultSuccessUrl("/", true)
+            )
+            .logout(logout -> logout
+                .logoutSuccessUrl("/login?logout")
+            );
 
         return http.build();
     }

@@ -19,6 +19,10 @@ spring:
 
 server:
   port: 9090
+  servlet:
+    session:
+      cookie:
+        name: RECALLFORGESESSION
 
 recallforge:
   notes:

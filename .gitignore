@@ -6,3 +6,6 @@ gradlew.bat
 build/
 gradle/
 bin/
+sh/
+.rsyncignore
+.dockerignore

@@ -535,8 +535,14 @@ When you click **Start Review**, this panel will be updated.`,
       }
 
       const response = await fetch(url, {
-        method: "POST"
+        method: "POST",
+        credentials: "same-origin"
       });
+
+      if (response.redirected || response.url.includes("/login")) {
+        window.location.href = "/login";
+        return;
+      }
 
       if (!response.ok) {
         const message = await response.text();
@@ -565,7 +571,8 @@ When you click **Start Review**, this panel will be updated.`,
 
         const response = await fetch("/api/markdown/upload", {
           method: "POST",
-          body: formData
+          body: formData,
+          credentials: "same-origin"
         });
 
         if (!response.ok) {
@@ -595,6 +602,7 @@ When you click **Start Review**, this panel will be updated.`,
       try {
         const response = await fetch("/api/reviews/answer", {
           method: "POST",
+          credentials: "same-origin",
           headers: {
             "Content-Type": "application/json"
           },
@@ -628,7 +636,9 @@ When you click **Start Review**, this panel will be updated.`,
           url += "?markdownFileId=" + this.currentMarkdownFileId;
         }
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          credentials: "same-origin"
+        });
 
         if (!response.ok) {
           return;
