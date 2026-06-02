@@ -40,7 +40,7 @@ v1.0.2
 
 ![Screenshot](docs/images/recall-forge_architecture.png)
 
-## Screeshots
+## Screenshots
 
 #### Upload Markdown & Start 
 ![Screenshot](docs/images/recall-forge_1.png)
