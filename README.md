@@ -1,4 +1,4 @@
-# Recall Forge - v1.0.1
+# Recall Forge
 
 The application import topics from a local README.md, ask review questions,  
 evaluates answers with OpenAI, and stores memory in database.  
