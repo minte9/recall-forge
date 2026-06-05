@@ -67,6 +67,10 @@
             0 12px 20px rgba(0,0,0,.10);
     }
 
+    .actions-row {
+      padding-top: 10px;
+    }
+
     .review-btn {
 
         background:
@@ -291,6 +295,12 @@
       padding-left: 10px;
     }
 
+    .app-icon {
+      width: 100px;
+      float: right;
+      filter: grayscale(0%);
+    }
+
   </style>
 </head>
 
@@ -351,8 +361,10 @@
         
       </div>
     </div>
+    
+    <img src="recall-forge.png" class="app-icon">
 
-    <div v-if="!review" class="review-home">
+    <div v-if="!review" class="review-home">  
 
       <h3>Recall Forge</h3>
 
