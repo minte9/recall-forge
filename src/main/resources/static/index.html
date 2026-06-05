@@ -323,7 +323,6 @@
       </h3>
 
       <p>
-        <!--strong>Question:</strong-->
         {{ review.question }}
       </p>
 
@@ -333,15 +332,6 @@
       </textarea>
 
       <div class="actions-row">
-
-        <!--label class="upload-btn">
-          Choose File
-          <input
-          hidden
-          type="file"
-          accept=".md,.markdown,text/plain"
-          @change="uploadMarkdown"/>
-        </label-->
 
         <button
           class="submit-btn"
@@ -355,8 +345,8 @@
           <span>→</span> Next Review
         </button>
 
-        <p v-if="queue && currentMarkdownFileId" class="category-status">
-          Available in this category: {{ queue.dueCount }}
+        <p v-if="dashboard && currentMarkdownFileId" class="category-status">
+          Available in this category: {{ dashboard.dueNow }}
         </p>
         
       </div>
@@ -366,19 +356,43 @@
 
       <h3>Recall Forge</h3>
 
-      <p v-if="queue && queue.dueCount > 0" class="queue-count">
-        Reviews available now: {{ queue.dueCount }}
-      </p>
+      <div v-if="dashboard" class="dashboard-summary">
+        <p>
+          Reviews available now: {{ dashboard.dueNow }}
+        </p>
 
-      <p v-else class="queue-count">
-        No reviews due right now.
-      </p>
+        <div>
+          Tomorrow: {{ dashboard.dueTomorrow }}
+        </div>
+        <div>
+          This week: {{ dashboard.dueThisWeek }}
+        </div>
+        <div>
+          Total topics: {{ dashboard.totalTopics }}
+        </div>
+      </div>
+
+      <div
+        v-if="dashboard && dashboard.weakAreas && dashboard.weakAreas.length"
+        class="weak-areas">
+
+        <h3>Needs attention</h3>
+
+        <div
+          v-for="area in dashboard.weakAreas"
+          :key="area.environment + area.category + area.subcategory"
+          class="weak-area-row">
+
+          <div>
+            {{ area.category }}, {{ area.subcategory }}: {{ area.dueCount }}
+          </div>
+      </div>
 
       <div class="actions-row">
         <button
           class="review-btn"
           @click="startReview"
-          :disabled="loading || !queue || queue.dueCount === 0">
+          :disabled="loading || !dashboard || dashboard.dueNow === 0">
           {{ loading ? "Loading..." : "Start Review" }}
         </button>
 
@@ -439,7 +453,7 @@ When you click **Start Review**, this panel will be updated.`,
       review: null,
       userAnswer: "",
       result: null,
-      queue: null
+      dashboard: null
     };
   },
 
@@ -450,7 +464,7 @@ When you click **Start Review**, this panel will be updated.`,
 
   mounted() {
     this.markdown = this.initialMarkdown;
-    this.loadQueue();
+    this.loadDashboard();
   },
 
   methods: {
@@ -507,7 +521,7 @@ When you click **Start Review**, this panel will be updated.`,
         if (data.done) {
           this.review = null;
           this.reviewMessage = data.message;
-          await this.loadQueue();
+          await this.loadDashboard();
           return;
         }
 
@@ -518,7 +532,8 @@ When you click **Start Review**, this panel will be updated.`,
           this.markdown = this.review.markdownContent;
         }
 
-        await this.loadQueue();
+        await this.loadDashboard();
+
       } catch (err) {
         this.review = null;
         this.error = err.message || "Could not start review.";
@@ -586,6 +601,7 @@ When you click **Start Review**, this panel will be updated.`,
         this.markdown = uploaded.content;
 
         await this.startReview();
+        await this.loadDashboard();
 
       } catch (err) {
         this.error = err.message || "Could not upload markdown file.";
@@ -619,7 +635,8 @@ When you click **Start Review**, this panel will be updated.`,
         }
 
         this.result = await response.json();
-        await this.loadQueue();
+
+        await this.loadDashboard();
 
       } catch (err) {
         this.error = err.message || "Could not submit answer.";
@@ -628,15 +645,9 @@ When you click **Start Review**, this panel will be updated.`,
       }
     },
 
-    async loadQueue() {
+    async loadDashboard() {
       try {
-        let url = "/api/reviews/queue/today";
-
-        if (this.currentMarkdownFileId) {
-          url += "?markdownFileId=" + this.currentMarkdownFileId;
-        }
-
-        const response = await fetch(url, {
+        const response = await fetch("/api/dashboard", {
           credentials: "same-origin"
         });
 
@@ -644,10 +655,10 @@ When you click **Start Review**, this panel will be updated.`,
           return;
         }
 
-        this.queue = await response.json();
+        this.dashboard = await response.json();
 
       } catch (err) {
-        console.error("Could not load review queue", err);
+        console.error("Could not load dashboard", err);
       }
     },
 
@@ -657,7 +668,8 @@ When you click **Start Review**, this panel will be updated.`,
       this.userAnswer = "";
       this.currentMarkdownFileId = null;
       this.markdown = this.initialMarkdown;
-      this.loadQueue();
+
+      this.loadDashboard();
     }
   }
 }).mount("#app");

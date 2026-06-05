@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.recallforge.dto.AnswerRequest;
 import dev.recallforge.dto.AnswerResponse;
+import dev.recallforge.dto.DashboardResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
 import dev.recallforge.dto.ReviewQueueResponse;
 import dev.recallforge.service.ReviewService;

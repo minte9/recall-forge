@@ -66,4 +66,22 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         String title
     );
 
+    long countByNextReviewAtLessThanEqual(LocalDateTime dateTime);
+    long countByNextReviewAtBetween(LocalDateTime start, LocalDateTime end);
+    long count();
+
+    @Query("""
+        select
+            t.environment as environment,
+            t.category as category,
+            t.subcategory as subcategory,
+            count(t) as dueCount,
+            avg(t.memoryScore) as averageMemoryScore
+        from Topic t
+        where t.nextReviewAt <= :now
+        group by t.environment, t.category, t.subcategory
+        order by count(t) desc, avg(t.memoryScore) asc
+    """)
+    List<WeakAreaProjection> findWeakAreas(LocalDateTime now);
+
 }
