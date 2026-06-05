@@ -67,10 +67,6 @@
             0 12px 20px rgba(0,0,0,.10);
     }
 
-    .actions-row {
-      padding-top: 10px;
-    }
-
     .review-btn {
 
         background:
@@ -295,7 +291,7 @@
       padding-left: 10px;
     }
 
-    .app-icon {
+    .home-link-icon {
       width: 100px;
       float: right;
       filter: grayscale(100%);
@@ -317,20 +313,14 @@
   </section>
 
   <section class="panel">
-    <!--h2>Review</h2-->
+
+    <a href="#" class="home-link-btn" @click.prevent="goHome" title="Back to home">
+      <img src="recall-forge.png" alt="Home" class="home-link-icon">
+    </a>
 
     <div v-if="review">
           
-      <h3>
-        {{ review.topicTitle }}
-        
-        <button
-            class="home-link-btn"
-            @click="goHome"
-            title="Back to home">
-            <u>Home</u>
-          </button>
-      </h3>
+      <h3>{{ review.topicTitle }}</h3>
 
       <p>
         {{ review.question }}
@@ -356,13 +346,11 @@
         </button>
 
         <p v-if="dashboard && currentMarkdownFileId" class="category-status">
-          Available in this category: {{ dashboard.dueNow }}
+          Reviews available: {{ dashboard.dueNow }}
         </p>
         
       </div>
     </div>
-    
-    <img src="recall-forge.png" class="app-icon">
 
     <div v-if="!review" class="review-home">  
 
