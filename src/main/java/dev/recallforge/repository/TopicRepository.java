@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import dev.recallforge.domain.Topic;
+import dev.recallforge.dto.MarkdownSummaryDto;
 
 public interface TopicRepository extends JpaRepository<Topic, Long> {
 
@@ -105,4 +106,19 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     """)
     List<KnowledgeAreaProjection> findWeakKnowledgeAreas();
 
+    @Query("""
+        select new dev.recallforge.dto.MarkdownSummaryDto(
+            t.markdownFile.id,
+            t.category,
+            t.subcategory,
+            t.fileTitle,
+            count(t.id),
+            sum(case when t.nextReviewAt <= :now then 1 else 0 end),
+            avg(t.memoryScore)
+        )
+        from Topic t
+        group by t.markdownFile.id, t.category, t.subcategory, t.fileTitle
+        order by t.category, t.subcategory, t.markdownFile.id
+    """)
+    List<MarkdownSummaryDto> findMarkdownSummaries(LocalDateTime now);
 }

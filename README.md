@@ -36,6 +36,14 @@ v1.0.2
 - 2.9 Database backup
 - 2.10 Queue Summary
 
+## 3. Dashboard
+v1.0.3
+
+- 3.1 Improved Summary
+- 3.2 Dashboard Graphics
+- 3.3 Subdomain with Traefix
+- 3.4 Markdowns Summary
+
 ## Architecture
 
 ![Screenshot](docs/images/recall-forge_architecture.png)

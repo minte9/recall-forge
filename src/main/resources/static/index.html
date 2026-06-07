@@ -78,23 +78,11 @@
     }
 
     .upload-btn {
-
-        background:
-            linear-gradient(
-                135deg,
-                #F7A57B,
-                #F48B63
-            );
+        background: #F7A57B;
     }
 
-    .submit-btn {
-
-        background:
-            linear-gradient(
-                135deg,
-                #F96D00,
-                #E85800
-            );
+    .markdowns-btn {
+        background: #999999;
     }
 
     .actions-row {
@@ -442,6 +430,12 @@
             @change="uploadMarkdown"
           />
         </label>
+
+        <button
+          class="markdowns-btn"
+          @click="showMarkdownSummaries">
+          Markdowns
+        </button>
       </div>
 
     </div>
@@ -490,7 +484,8 @@ When you click **Start Review**, this panel will be updated.`,
       review: null,
       userAnswer: "",
       result: null,
-      dashboard: null
+      dashboard: null,
+      markdownSummaries: []
     };
   },
 
@@ -502,6 +497,7 @@ When you click **Start Review**, this panel will be updated.`,
   mounted() {
     this.markdown = this.initialMarkdown;
     this.loadDashboard();
+    this.loadMarkdownSummaries();
   },
 
   methods: {
@@ -531,7 +527,7 @@ When you click **Start Review**, this panel will be updated.`,
         html = html.replace(
                 /<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g,
 `
-<details>
+<details class="code-block">
 <summary>show code</summary>
 <pre><code>$1</code></pre>
 </details>
@@ -699,6 +695,23 @@ When you click **Start Review**, this panel will be updated.`,
       }
     },
 
+    async loadMarkdownSummaries() {
+      try {
+        const response = await fetch("/api/dashboard/markdowns", {
+          credentials: "same-origin"
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        this.markdownSummaries = await response.json();
+
+      } catch (err) {
+        console.error("Could not load markdown summaries", err);
+      }
+    },
+
     goHome() {
       this.review = null;
       this.result = null;
@@ -707,6 +720,65 @@ When you click **Start Review**, this panel will be updated.`,
       this.markdown = this.initialMarkdown;
 
       this.loadDashboard();
+    },
+
+    showMarkdownSummaries() {
+      const groups = {};
+
+      this.markdownSummaries.forEach(file => {
+        const key = `${file.category} / ${file.subcategory}`;
+
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+
+        groups[key].push(file);
+      });
+
+      let md = "";
+
+      Object.entries(groups).forEach(([groupName, files]) => {
+        md += `### ${groupName}\n\n`;
+        md += "<pre>\n";
+        md += this.renderTextTable(files);
+        md += "\n</pre>\n\n";
+      });
+
+      this.markdown = md;
+    },
+
+    renderTextTable(files) {
+      const rows = files.map(file => [
+        file.fileTitle,
+        String(file.topicCont),
+        String(file.dueCount),
+        this.formatScore(file.averageMemoryScore)
+      ]);
+
+      const headers = ["File", "Topics", "Due today", "Avg memory"];
+
+      const widths = headers.map((header, index) =>
+        Math.max(
+          header.length,
+          ...rows.map(row => row[index].length)
+        )
+      );
+
+      const line = (left, middle, right) =>
+        left + widths.map(width => "─".repeat(width + 2)).join(middle) + right;
+
+      const row = values =>
+        "│ " +
+        values.map((value, index) => value.padEnd(widths[index])).join(" │ ") +
+        " │";
+
+      return [
+        line("┌", "┬", "┐"),
+        row(headers),
+        line("├", "┼", "┤"),
+        ...rows.map(row),
+        line("└", "┴", "┘")
+      ].join("\n");
     }
   }
 }).mount("#app");

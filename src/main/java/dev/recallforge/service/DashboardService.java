@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import dev.recallforge.dto.DashboardResponse;
 import dev.recallforge.dto.KnowledgeAreaResponse;
+import dev.recallforge.dto.MarkdownSummaryDto;
 import dev.recallforge.dto.WeakAreaResponse;
 import dev.recallforge.repository.TopicRepository;
 
@@ -70,5 +71,9 @@ public class DashboardService {
             strongKnowledgeAreas,
             weakKnowledgeAreas
         );
+    }
+
+    public List<MarkdownSummaryDto> getMarkdownSummaries() {
+        return topicRepository.findMarkdownSummaries(LocalDateTime.now());
     }
 }
