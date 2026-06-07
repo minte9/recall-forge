@@ -7,5 +7,7 @@ public record DashboardResponse(
     long dueTomorrow,
     long dueThisWeek,
     long totalTopics,
-    List<WeakAreaResponse> weakAreas
+    List<WeakAreaResponse> weakAreas,
+    List<KnowledgeAreaResponse> strongAreas,
+    List<KnowledgeAreaResponse> weakKnowledgeAreas
 ) {}

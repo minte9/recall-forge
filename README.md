@@ -42,8 +42,4 @@ v1.0.2
 
 ## Screenshots
 
-#### Upload Markdown & Start 
 ![Screenshot](docs/images/recall-forge_1.png)
-
-#### Review Queue & Feedback
-![Screenshot](docs/images/recall-forge_2.png)

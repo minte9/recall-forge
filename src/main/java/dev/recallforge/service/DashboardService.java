@@ -1,14 +1,15 @@
 package dev.recallforge.service;
 
-import dev.recallforge.dto.DashboardResponse;
-import dev.recallforge.dto.WeakAreaResponse;
-import dev.recallforge.repository.TopicRepository;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+
+import dev.recallforge.dto.DashboardResponse;
+import dev.recallforge.dto.KnowledgeAreaResponse;
+import dev.recallforge.dto.WeakAreaResponse;
+import dev.recallforge.repository.TopicRepository;
 
 @Service
 public class DashboardService {
@@ -42,12 +43,32 @@ public class DashboardService {
             ))
             .toList();
 
+        List<KnowledgeAreaResponse> strongKnowledgeAreas = topicRepository.findStrongKnowledgeAreas()
+            .stream()
+            .limit(3)
+            .map(area -> new KnowledgeAreaResponse(
+                area.getTitle(), 
+                area.getAverageMemoryScore()
+            ))
+            .toList();
+
+        List<KnowledgeAreaResponse> weakKnowledgeAreas = topicRepository.findWeakKnowledgeAreas()
+            .stream()
+            .limit(3)
+            .map(area -> new KnowledgeAreaResponse(
+                area.getTitle(), 
+                area.getAverageMemoryScore()
+            ))
+            .toList();
+
         return new DashboardResponse(
             dueNow,
             dueTomorrow, 
             dueThisWeek,
             totalTopics,
-            weakAreas
+            weakAreas,
+            strongKnowledgeAreas,
+            weakKnowledgeAreas
         );
     }
 }

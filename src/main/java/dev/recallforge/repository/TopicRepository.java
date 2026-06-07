@@ -84,4 +84,25 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     """)
     List<WeakAreaProjection> findWeakAreas(LocalDateTime now);
 
+    @Query("""
+        select 
+            concat(t.category, ' ', t.subcategory) as title, 
+            avg(t.memoryScore) as averageMemoryScore
+        from Topic t
+        group by t.category, t.subcategory
+        order by avg(t.memoryScore) desc
+    """)
+    List<KnowledgeAreaProjection> findStrongKnowledgeAreas();
+
+
+    @Query("""
+       select 
+            concat(t.category, ' ', t.subcategory) as title, 
+            avg(t.memoryScore) as averageMemoryScore
+        from Topic t
+        group by t.category, t.subcategory
+        order by avg(t.memoryScore) asc 
+    """)
+    List<KnowledgeAreaProjection> findWeakKnowledgeAreas();
+
 }

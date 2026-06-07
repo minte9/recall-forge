@@ -174,12 +174,12 @@
     }
 
     .markdown h2 {
-      font-size: 24px;
+      font-size: 16px;
       margin: 22px 0 10px;
     }
 
     .markdown h3 {
-      font-size: 20px;
+      /*font-size: 20px;*/
       margin: 18px 0 8px;
     }
 
@@ -297,6 +297,14 @@
       filter: grayscale(100%);
     }
 
+    .knowledge-block {
+      margin-top: 18px;
+    }
+
+    .knowledge-block h3 {
+      margin-bottom: 8px;
+    }
+
   </style>
 </head>
 
@@ -354,13 +362,12 @@
 
     <div v-if="!review" class="review-home">  
 
-      <h3>Recall Forge</h3>
+      <h3>Reviews available</h3>
 
       <div v-if="dashboard" class="dashboard-summary">
-        <p>
-          Reviews available now: {{ dashboard.dueNow }}
-        </p>
-
+        <div>
+          Today: {{ dashboard.dueNow }}
+        </div>
         <div>
           Tomorrow: {{ dashboard.dueTomorrow }}
         </div>
@@ -372,7 +379,7 @@
         </div>
       </div>
 
-      <div
+      <div 
         v-if="dashboard && dashboard.weakAreas && dashboard.weakAreas.length"
         class="weak-areas">
 
@@ -384,10 +391,39 @@
           class="weak-area-row">
 
           <div>
-            {{ area.category }}, {{ area.subcategory }}: {{ area.dueCount }}
+            {{ area.category }} {{ area.subcategory }} → {{ area.dueCount }} due
           </div>
         </div>
+
+        <div
+          v-if="dashboard && dashboard.strongAreas && dashboard.strongAreas.length"
+          class="knowledge-block">
+
+          <h3>Strong</h3>
+
+          <div
+            v-for="area in dashboard.strongAreas"
+            :key="'strong-' + area.title">
+            {{ area.title }} — {{ formatScore(area.averageMemoryScore) }}
+          </div>
+        </div>
+
+        <div
+          v-if="dashboard && dashboard.weakKnowledgeAreas && dashboard.weakKnowledgeAreas.length"
+          class="knowledge-block">
+
+          <h3>Weak</h3>
+
+          <div
+            v-for="area in dashboard.weakKnowledgeAreas"
+            :key="'weak-' + area.title">
+            {{ area.title }} — {{ formatScore(area.averageMemoryScore) }}
+          </div>
+        </div>
+
       </div>
+
+      <br>
 
       <div class="actions-row">
         <button

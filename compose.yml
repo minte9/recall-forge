@@ -2,22 +2,24 @@ services:
   postgres:
     image: postgres:16
     container_name: recallforge-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: recallforge
       POSTGRES_USER: recallforge
       POSTGRES_PASSWORD: recallforge
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - recallforge-postgres-data:/var/lib/postgresql/data
-  
+
   app:
     build: .
+    container_name: recallforge-app
     restart: unless-stopped
     depends_on:
       - postgres
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/recallforge
       SPRING_DATASOURCE_USERNAME: recallforge
@@ -26,6 +28,13 @@ services:
       APP_SECURITY_ENABLED: ${APP_SECURITY_ENABLED}
       APP_SECURITY_USERNAME: ${APP_SECURITY_USERNAME}
       APP_SECURITY_PASSWORD: ${APP_SECURITY_PASSWORD}
+    networks:
+      - default
+      - traefik-net
 
 volumes:
   recallforge-postgres-data:
+
+networks:
+  traefik-net:
+    external: true
