@@ -410,7 +410,7 @@
         <div
           v-for="area in dashboard.weakKnowledgeAreas"
           :key="'weak-' + area.title">
-          
+
           {{ area.title }} → {{ formatScore(area.averageMemoryScore) }}
         </div>
       </div>
@@ -735,7 +735,7 @@ When you click **Start Review**, this panel will be updated.`,
       const groups = {};
 
       this.markdownSummaries.forEach(file => {
-        const key = `${file.category} / ${file.subcategory}`;
+        const key = `${file.category} ${file.subcategory}`;
 
         if (!groups[key]) {
           groups[key] = [];
