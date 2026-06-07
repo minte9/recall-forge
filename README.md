@@ -42,4 +42,4 @@ v1.0.2
 
 ## Screenshots
 
-![Screenshot](docs/images/recall-forge_1.png)
+![Screenshot](docs/images/recall-forge_3.png)
