@@ -293,7 +293,7 @@
       margin-top: 18px;
     }
 
-    .knowledge-block h3 {
+    .knowledge-block h3, .dashboard-summary h3, .weak-areas h3 {
       margin-bottom: 8px;
     }
 
@@ -354,9 +354,10 @@
 
     <div v-if="!review" class="review-home">  
 
-      <h3>Reviews available</h3>
-
       <div v-if="dashboard" class="dashboard-summary">
+        
+        <h3>Reviews available</h3>
+
         <div>
           Today: {{ dashboard.dueNow }}
         </div>
@@ -396,7 +397,7 @@
           <div
             v-for="area in dashboard.strongAreas"
             :key="'strong-' + area.title">
-            {{ area.title }} — {{ formatScore(area.averageMemoryScore) }}
+            {{ area.title }} → {{ formatScore(area.averageMemoryScore) }}
           </div>
         </div>
 
@@ -409,7 +410,7 @@
           <div
             v-for="area in dashboard.weakKnowledgeAreas"
             :key="'weak-' + area.title">
-            {{ area.title }} — {{ formatScore(area.averageMemoryScore) }}
+            {{ area.title }} → {{ formatScore(area.averageMemoryScore) }}
           </div>
         </div>
 
