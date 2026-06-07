@@ -85,6 +85,10 @@
         background: #999999;
     }
 
+    .submit-btn {
+      background: #E85800;
+    }
+
     .actions-row {
       margin-top: 18px;
       display: flex;
@@ -670,6 +674,11 @@ When you click **Start Review**, this panel will be updated.`,
         this.result = await response.json();
 
         await this.loadDashboard();
+        await this.loadMarkdownSummaries();
+
+        if (!this.review) {
+          this.showMarkdownSummaries();
+        }
 
       } catch (err) {
         this.error = err.message || "Could not submit answer.";
