@@ -382,38 +382,37 @@
           v-for="area in dashboard.weakAreas"
           :key="area.environment + area.category + area.subcategory"
           class="weak-area-row">
-
-          <div>
-            {{ area.category }} {{ area.subcategory }} → {{ area.dueCount }} due
-          </div>
+          
+          {{ area.category }} {{ area.subcategory }} → {{ area.dueCount }} due
         </div>
+      </div>
+
+      <div
+        v-if="dashboard && dashboard.strongAreas && dashboard.strongAreas.length"
+        class="knowledge-block">
+
+        <h3>Strong</h3>
 
         <div
-          v-if="dashboard && dashboard.strongAreas && dashboard.strongAreas.length"
-          class="knowledge-block">
+          v-for="area in dashboard.strongAreas"
+          :key="'strong-' + area.title">
 
-          <h3>Strong</h3>
-
-          <div
-            v-for="area in dashboard.strongAreas"
-            :key="'strong-' + area.title">
-            {{ area.title }} → {{ formatScore(area.averageMemoryScore) }}
-          </div>
+          {{ area.title }} → {{ formatScore(area.averageMemoryScore) }}
         </div>
+      </div>
+
+      <div
+        v-if="dashboard && dashboard.weakKnowledgeAreas && dashboard.weakKnowledgeAreas.length"
+        class="knowledge-block">
+
+        <h3>Weak</h3>
 
         <div
-          v-if="dashboard && dashboard.weakKnowledgeAreas && dashboard.weakKnowledgeAreas.length"
-          class="knowledge-block">
-
-          <h3>Weak</h3>
-
-          <div
-            v-for="area in dashboard.weakKnowledgeAreas"
-            :key="'weak-' + area.title">
-            {{ area.title }} → {{ formatScore(area.averageMemoryScore) }}
-          </div>
+          v-for="area in dashboard.weakKnowledgeAreas"
+          :key="'weak-' + area.title">
+          
+          {{ area.title }} → {{ formatScore(area.averageMemoryScore) }}
         </div>
-
       </div>
 
       <br>
