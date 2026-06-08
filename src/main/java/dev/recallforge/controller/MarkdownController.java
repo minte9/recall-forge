@@ -13,14 +13,14 @@ import dev.recallforge.service.MarkdownFileService;
 @RequestMapping("/api/markdown")
 public class MarkdownController {
  
-    private final MarkdownFileService markdownService;
+    private final MarkdownFileService markdownFileService;
 
-    public MarkdownController(MarkdownFileService markdownService) {
-        this.markdownService = markdownService;
+    public MarkdownController(MarkdownFileService markdownFileService) {
+        this.markdownFileService = markdownFileService;
     }
 
     @PostMapping("/upload")
     public MarkdownUploadResponse uploadMarkdown(@RequestParam("file") MultipartFile file) throws Exception {
-        return markdownService.upload(file);
+        return markdownFileService.upload(file);
     }
 }

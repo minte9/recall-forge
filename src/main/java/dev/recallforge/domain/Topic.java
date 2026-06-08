@@ -94,7 +94,23 @@ public class Topic {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateFromMarkdown(String fileTitle, String content, MarkdownFile markdownFile) {
+    /*public void updateFromMarkdown(String fileTitle, String content, MarkdownFile markdownFile) {
+        this.fileTitle = fileTitle;
+        this.content = content;
+        this.markdownFile = markdownFile;
+    }*/
+
+    public void updateFromMarkdown(
+        String environment,
+        String category,
+        String subcategory,
+        String fileTitle,
+        String content,
+        MarkdownFile markdownFile
+    ) {
+        this.environment = environment;
+        this.category = category;
+        this.subcategory = subcategory;
         this.fileTitle = fileTitle;
         this.content = content;
         this.markdownFile = markdownFile;

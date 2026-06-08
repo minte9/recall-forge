@@ -9,12 +9,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.dto.MarkdownSummaryDto;
 
 public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     Optional<Topic> findByTitle(String title);
+    Optional<Topic> findByTitleAndMarkdownFileIsNotNull(String title);
+    Optional<Topic> findByMarkdownFileAndTitle(MarkdownFile markdownFile, String title);
 
     @Query("""
         select t
@@ -23,7 +26,6 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         order by t.memoryScore asc, t.nextReviewAt asc
     """)
     List<Topic> findDueTopics(@Param("now") LocalDateTime now);
-
 
     @Query("""
         select t

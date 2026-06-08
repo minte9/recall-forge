@@ -80,4 +80,16 @@ public class MarkdownFile {
         this.content = content;
         this.contentHash = contentHash;
     }
+
+    public void updateMetadata(
+        String environment,
+        String category,
+        String subcategory,
+        String topicGroup
+    ) {
+        this.environment = environment;
+        this.category = category;
+        this.subcategory = subcategory;
+        this.topicGroup = topicGroup;
+    }
 }

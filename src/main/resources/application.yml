@@ -22,6 +22,7 @@ server:
   forward-headers-strategy: framework
   servlet:
     session:
+      timeout: 30d
       cookie:
         name: RECALLFORGESESSION
 

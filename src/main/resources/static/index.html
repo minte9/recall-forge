@@ -639,6 +639,7 @@ When you click **Start Review**, this panel will be updated.`,
 
         await this.startReview();
         await this.loadDashboard();
+        await this.loadMarkdownSummaries();
 
       } catch (err) {
         this.error = err.message || "Could not upload markdown file.";
