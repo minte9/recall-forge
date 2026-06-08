@@ -321,27 +321,29 @@
       v-html="renderMarkdown(markdown)">
     </div>
 
-    <div v-html="renderedMarkdown"></div>
+    <template v-if="markdown === initialMarkdown">
+      <div v-html="renderedMarkdown"></div>
 
-    <a href="#" @click.prevent="showMetadataHelp = !showMetadataHelp" class="markdown">
-      show details
-    </a>
+      <a href="#" @click.prevent="showMetadataHelp = !showMetadataHelp" class="markdown">
+        show details
+      </a>
 
-    <div v-if="showMetadataHelp" class="metadata-help">
+      <div v-if="showMetadataHelp" class="metadata-help">
 
-      <h3>Metadata Header (Optional)</h3>
+        <h3>Metadata Header (Optional)</h3>
 
-      First line in the file should have the following format:  <br>
-      ## Environment / Category / Subcategory / File Title 
+        First line in the file should have the following format:  <br>
+        ## Environment / Category / Subcategory / File Title 
 
-      <h3>Example:</h3>
+        <h3>Example:</h3>
 
-      ## JVM / Java / Threads / Theory <br>
-      ### Creating Threads <br>
+        ## JVM / Java / Threads / Theory <br>
+        ### Creating Threads <br>
 
-      Thread creation basics...
+        Thread creation basics...
 
-    </div>
+      </div>
+    </template>
 
   </section>
 
