@@ -297,6 +297,16 @@
       margin-bottom: 8px;
     }
 
+    .metadata-help {
+        padding-left: 20px;
+    }
+
+    .metadata-help pre {
+        white-space: pre-wrap;
+        font-family: monospace;
+        margin: 0;
+    }
+
   </style>
 </head>
 
@@ -310,6 +320,29 @@
       class="markdown"
       v-html="renderMarkdown(markdown)">
     </div>
+
+    <div v-html="renderedMarkdown"></div>
+
+    <a href="#" @click.prevent="showMetadataHelp = !showMetadataHelp" class="markdown">
+      show details
+    </a>
+
+    <div v-if="showMetadataHelp" class="metadata-help">
+
+      <h3>Metadata Header (Optional)</h3>
+
+      First line in the file should have the following format:  <br>
+      ## Environment / Category / Subcategory / File Title 
+
+      <h3>Example:</h3>
+
+      ## JVM / Java / Threads / Theory <br>
+      ### Creating Threads <br>
+
+      Thread creation basics...
+
+    </div>
+
   </section>
 
   <section class="panel">
@@ -478,12 +511,12 @@ createApp({
       initialMarkdown: `
 <h3>Markdown File</h3>
 
-Upload a markdown file to start.
-
-The uploaded markdown will be saved in the database.
-
-When you click **Start Review**, this panel will be updated.`,
-
+Upload a markdown file to start.  
+The uploaded markdown will be saved in the database.  
+When you click <strong>Start Review</strong>, this panel will be updated.  
+Add metadata header for automatic classification (optional).  
+`,
+      showMetadataHelp: false,
       markdown: null,
       review: null,
       userAnswer: "",
