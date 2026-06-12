@@ -307,6 +307,45 @@
         margin: 0;
     }
 
+    .reward-card {
+      padding: 20px 0px 0px 0px;
+    }
+
+    .reward-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .reward-xp,
+    .reward-streak {
+      color: #555;
+      margin-top: 10px;
+    }
+
+    .reward-bar {
+      height: 10px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .reward-bar-fill {
+      height: 100%;
+      background: #22c55e;
+    }
+
+    .dashboard-stats {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .reward-level {
+      float: right;
+    }
+
   </style>
 </head>
 
@@ -320,28 +359,6 @@
       class="markdown"
       v-html="renderMarkdown(markdown)">
     </div>
-
-    <template v-if="markdown === initialMarkdown">
-      <div v-html="renderedMarkdown"></div>
-
-      <a href="#" @click.prevent="showMetadataHelp = !showMetadataHelp" class="markdown">
-        show details
-      </a>
-
-      <div v-if="showMetadataHelp" class="metadata-help">
-
-        The first line in the file should have the following format:  <br>
-        ## Environment / Category / Subcategory / File Title <br><br>
-
-        Example: <br>
-
-        ## JVM / Java / Threads / Theory <br>
-        ### Creating Threads <br>
-
-        Thread creation basics...
-
-      </div>
-    </template>
 
   </section>
 
@@ -385,23 +402,18 @@
       </div>
     </div>
 
+    <!-- Available Reviews -->
     <div v-if="!review" class="review-home">  
 
       <div v-if="dashboard" class="dashboard-summary">
         
         <h3>Reviews available</h3>
 
-        <div>
-          Today: {{ dashboard.dueNow }}
-        </div>
-        <div>
-          Tomorrow: {{ dashboard.dueTomorrow }}
-        </div>
-        <div>
-          This week: {{ dashboard.dueThisWeek }}
-        </div>
-        <div>
-          Total topics: {{ dashboard.totalTopics }}
+        <div class="dashboard-stats">
+          <span>Today: {{ dashboard.dueNow }}</span> 
+          <span>Tomorrow: {{ dashboard.dueTomorrow }}</span>
+          <span>This week: {{ dashboard.dueThisWeek }}</span> 
+          <span>Total: {{ dashboard.totalTopics }}</span>
         </div>
       </div>
 
@@ -420,17 +432,18 @@
         </div>
       </div>
 
+      <!-- Strong / Week areas -->
       <div
         v-if="dashboard && dashboard.strongAreas && dashboard.strongAreas.length"
         class="knowledge-block">
 
         <h3>Strong</h3>
 
-        <div
+        <div 
           v-for="area in dashboard.strongAreas"
           :key="'strong-' + area.title">
 
-          {{ area.title }} → {{ formatScore(area.averageMemoryScore) }}
+          {{ area.title }}: {{ formatScore(area.averageMemoryScore) }}
         </div>
       </div>
 
@@ -444,12 +457,36 @@
           v-for="area in dashboard.weakKnowledgeAreas"
           :key="'weak-' + area.title">
 
-          {{ area.title }} → {{ formatScore(area.averageMemoryScore) }}
+          {{ area.title }}: {{ formatScore(area.averageMemoryScore) }}  
+        </div>
+      </div>
+
+      <!-- Reward -->
+      <div 
+        v-if="dashboard && dashboard.reward" 
+        class="card reward-card">
+        
+        <div class="reward-xp">
+          XP: {{ dashboard.reward.xpInLevel }} / {{ dashboard.reward.xpForNextLevel }}  
+          <span class="reward-level">Level {{ dashboard.reward.level }}</span>
+        </div>
+
+        <div class="reward-bar">
+          <div
+            class="reward-bar-fill"
+            :style="{ width: ((dashboard.reward.xpInLevel / dashboard.reward.xpForNextLevel) * 100) + '%' }">
+          </div>
+        </div>
+
+        <div class="reward-streak">
+          🔥 Streak: {{ dashboard.reward.streakDays }} days 
+          <span class="reward-level">{{ dashboard.reward.title }}</span>
         </div>
       </div>
 
       <br>
 
+      <!-- Action Buttons -->
       <div class="actions-row">
         <button
           class="review-btn"
@@ -477,6 +514,7 @@
 
     </div>
 
+    <!-- Feedback Result -->
     <div v-if="result" class="feedback">
       <p><strong>Score:</strong> {{ result.score }}</p>
       <p><strong>Feedback:</strong> {{ result.feedback }}</p>
@@ -514,7 +552,18 @@ createApp({
 Upload a markdown file to start.  
 The uploaded markdown will be saved in the database.  
 When you click <strong>Start Review</strong>, this panel will be updated.  
-Add metadata header for automatic classification (optional).  
+Add metadata header title for automatic classification (optional).  
+
+    The first line could contain the metadata header:    
+    ## Environment / Category / Subcategory / File Title   
+
+    Example:   
+    ## JVM / Java / Threads / Theory  
+    ### Creating Threads   
+    Thread creation basics...  
+    
+    You can upload markdown files without metadata.    
+    Those files will be set as 'Uncategorized'.  
 `,
       showMetadataHelp: false,
       markdown: null,

@@ -44,10 +44,13 @@ v1.0.3
 - 3.3 Subdomain with Traefix
 - 3.4 Markdowns Summary
 
+## 4. Reward Layer
+v1.0.4
+
 ## Architecture
 
 ![Screenshot](docs/images/recall-forge_architecture.png)
 
 ## Screenshots
 
-![Screenshot](docs/images/recall-forge_3.png)
+![Screenshot](docs/images/recall-forge_4.png)

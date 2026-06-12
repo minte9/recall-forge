@@ -12,6 +12,7 @@ import dev.recallforge.dto.AnswerResponse;
 import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
 import dev.recallforge.dto.ReviewQueueResponse;
+import dev.recallforge.dto.RewardResponse;
 import dev.recallforge.repository.ReviewRepository;
 import jakarta.transaction.Transactional;
 
@@ -22,15 +23,19 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final OpenAiService openAiService;
     private final RepetitionService repetitionService;
+    private final RewardService rewardService;
 
     public ReviewService(
             TopicService topicService, ReviewRepository reviewRepository, 
-            OpenAiService openAiService, RepetitionService repetitionService) {
+            OpenAiService openAiService, RepetitionService repetitionService,
+            RewardService rewardService
+        ) {
 
         this.topicService = topicService;
         this.reviewRepository = reviewRepository;
         this.openAiService = openAiService;
         this.repetitionService = repetitionService;
+        this.rewardService = rewardService;
     }
 
     public ReviewQuestionResponse startReview(Long markdownFileId) {
@@ -102,13 +107,16 @@ public class ReviewService {
         topic.updateMemory(updatedMemoryScore, nextReviewAt);
         topicService.save(topic);
 
+        RewardResponse reward = rewardService.rewardDefaultUser(evaluation.score());
+
         return new AnswerResponse(
             topic.getId(), 
             topic.getTitle(),
             evaluation.score(),
             evaluation.feedback(),
             updatedMemoryScore,
-            nextReviewAt
+            nextReviewAt,
+            reward
         );
     }
 

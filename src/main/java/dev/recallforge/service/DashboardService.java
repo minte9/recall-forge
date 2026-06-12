@@ -16,9 +16,11 @@ import dev.recallforge.repository.TopicRepository;
 public class DashboardService {
 
     private final TopicRepository topicRepository;
+    private final RewardService rewardService;
 
-    public DashboardService(TopicRepository topicRepository) {
+    public DashboardService(TopicRepository topicRepository, RewardService rewardService) {
         this.topicRepository = topicRepository;
+        this.rewardService = rewardService;
     }
     
     public DashboardResponse getDashboard() {
@@ -34,7 +36,7 @@ public class DashboardService {
 
         List<WeakAreaResponse> weakAreas = topicRepository.findWeakAreas(now)
             .stream()
-            .limit(5)
+            .limit(3)
             .map(area -> new WeakAreaResponse(
                 area.getEnvironment(),
                 area.getCategory(),
@@ -46,7 +48,7 @@ public class DashboardService {
 
         List<KnowledgeAreaResponse> strongKnowledgeAreas = topicRepository.findStrongKnowledgeAreas()
             .stream()
-            .limit(3)
+            .limit(2)
             .map(area -> new KnowledgeAreaResponse(
                 area.getTitle(), 
                 area.getAverageMemoryScore()
@@ -55,7 +57,7 @@ public class DashboardService {
 
         List<KnowledgeAreaResponse> weakKnowledgeAreas = topicRepository.findWeakKnowledgeAreas()
             .stream()
-            .limit(3)
+            .limit(2)
             .map(area -> new KnowledgeAreaResponse(
                 area.getTitle(), 
                 area.getAverageMemoryScore()
@@ -69,7 +71,8 @@ public class DashboardService {
             totalTopics,
             weakAreas,
             strongKnowledgeAreas,
-            weakKnowledgeAreas
+            weakKnowledgeAreas,
+            rewardService.getDefaultUserReward()
         );
     }
 

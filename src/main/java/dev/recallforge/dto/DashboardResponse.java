@@ -9,5 +9,6 @@ public record DashboardResponse(
     long totalTopics,
     List<WeakAreaResponse> weakAreas,
     List<KnowledgeAreaResponse> strongAreas,
-    List<KnowledgeAreaResponse> weakKnowledgeAreas
+    List<KnowledgeAreaResponse> weakKnowledgeAreas,
+    RewardResponse reward
 ) {}

@@ -28,9 +28,12 @@ services:
       APP_SECURITY_ENABLED: ${APP_SECURITY_ENABLED}
       APP_SECURITY_USERNAME: ${APP_SECURITY_USERNAME}
       APP_SECURITY_PASSWORD: ${APP_SECURITY_PASSWORD}
+      SPRING_WEB_RESOURCES_STATIC_LOCATIONS: file:/app/src/main/resources/static/
     networks:
       - default
       - traefik-net
+    volumes:
+      - ./src/main/resources/static:/app/src/main/resources/static
 
 volumes:
   recallforge-postgres-data:

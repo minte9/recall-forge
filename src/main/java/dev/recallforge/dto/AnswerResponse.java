@@ -8,6 +8,7 @@ public record AnswerResponse(
     double score,
     String feedback,
     double updateMemoryScore,
-    LocalDateTime nextReviewAt
+    LocalDateTime nextReviewAt,
+    RewardResponse reward
 ) {
 }
