@@ -468,7 +468,7 @@
         
         <div class="reward-xp">
           XP: {{ dashboard.reward.xpInLevel }} / {{ dashboard.reward.xpForNextLevel }}  
-          <span class="reward-level">Level {{ dashboard.reward.level + 1 }}</span>
+          <span class="reward-level">Next: Level {{ dashboard.reward.level + 1 }}</span>
         </div>
 
         <div class="reward-bar">
@@ -479,8 +479,7 @@
         </div>
 
         <div class="reward-streak">
-          Streak: {{ dashboard.reward.streakDays }} days 
-          <!--span class="reward-level">{{ dashboard.reward.title }}</span-->
+          Streak: {{ dashboard.reward.streakDays }} day<span v-if="dashboard.reward.streakDays !== 1">s</span>
         </div>
       </div>
 
