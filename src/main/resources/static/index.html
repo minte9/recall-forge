@@ -365,7 +365,7 @@
   <section class="panel">
 
     <a href="#" class="home-link-btn" @click.prevent="goHome" title="Back to home">
-      <img src="recall-forge.png" alt="Home" class="home-link-icon" width="100">
+      <img src="recall-forge.png" alt="Home" class="home-link-icon">
     </a>
 
     <div v-if="review">
@@ -479,7 +479,7 @@
         </div>
 
         <div class="reward-streak">
-          🔥 Streak: {{ dashboard.reward.streakDays }} days 
+          Streak: {{ dashboard.reward.streakDays }} days 
           <!--span class="reward-level">{{ dashboard.reward.title }}</span-->
         </div>
       </div>

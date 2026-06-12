@@ -28,7 +28,7 @@ public class UserReward {
     }
 
     public void addReviewReward(int xp, boolean perfect, LocalDate today) {
-        this.totalXp = xp;
+        this.totalXp += xp;
 
         if (lastReviewDate == null) {
             streakDays = 1;
