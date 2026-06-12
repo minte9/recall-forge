@@ -47,6 +47,11 @@ v1.0.3
 ## 4. Reward Layer
 v1.0.4
 
+- 4.1 XP points
+- 4.2 Perfect streak bonus
+- 4.3 Reward bar
+- 4.4 Level title
+
 ## Architecture
 
 ![Screenshot](docs/images/recall-forge_architecture.png)
