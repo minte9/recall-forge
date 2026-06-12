@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
 import dev.recallforge.repository.UserRewardRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RewardService {
@@ -15,6 +16,7 @@ public class RewardService {
         this.repository = repository;
     }
 
+    @Transactional
     public RewardResponse rewardDefaultUser(double score) {
         UserReward reward = repository.findByUserKey("default")
             .orElseGet(() -> repository.save(new UserReward("default")));
