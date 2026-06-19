@@ -52,6 +52,218 @@ v1.0.4
 - 4.3 Reward bar
 - 4.4 Level title
 
+## 5. OAuth2
+v1.0.5
+
+### 5.1 Add dependency
+
+Spring Boot/Security auto-configures OAuth clients from spring.security.oauth2.client.registration.*;  
+Google and GitHub are predefined providers when registration IDs are google and github.  
+
+#### build.gradle
+
+~~~sh
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+}
+~~~
+
+#### application.yml
+
+~~~sh
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            scope:
+              - openid
+              - profile
+              - email
+          github:
+            client-id: ${GITHUB_CLIENT_ID:}
+            client-secret: ${GITHUB_CLIENT_SECRET:}
+            scope:
+              - read:user
+              - user:email
+~~~
+
+Redirect URLs to register:
+
+~~~sh
+http://localhost:9090/login/oauth2/code/google
+http://localhost:9090/login/oauth2/code/github
+https://recall.minte9.com/login/oauth2/code/google
+https://recall.minte9.com/login/oauth2/code/github
+~~~
+
+
+#### .env.example
+
+~~~sh
+APP_SECURITY_ENABLED=true
+APP_SECURITY_USERNAME=myuser
+APP_SECURITY_PASSWORD=mypass
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+~~~
+
+#### compose.yml
+
+~~~yml
+    app:
+        build: .
+            container_name: recallforge-app
+            restart: unless-stopped
+        depends_on:
+            - postgres
+        ports:
+            - "127.0.0.1:9090:9090"
+        environment:
+            SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/recallforge
+            SPRING_DATASOURCE_USERNAME: recallforge
+            SPRING_DATASOURCE_PASSWORD: recallforge
+            OPENAI_API_KEY: ${OPENAI_API_KEY}
+            APP_SECURITY_ENABLED: ${APP_SECURITY_ENABLED}
+            APP_SECURITY_USERNAME: ${APP_SECURITY_USERNAME}
+            APP_SECURITY_PASSWORD: ${APP_SECURITY_PASSWORD}
+            GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+            GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+~~~
+
+#### SecurityConfig.java
+
+~~~java
+http
+    .authorizeHttpRequests(auth -> auth
+        .requestMatchers(
+            "/",
+            "/oauth2/**",
+            "/login/oauth2/**",
+            "/images",
+            "/css/**",
+            "/js/**"
+        ).permitAll()
+        .anyRequest().authenticated()
+    )
+    .formLogin(form -> form
+        .defaultSuccessUrl("/", true)
+    )
+    .oauth2Login(oauth2 -> oauth2
+        .defaultSuccessUrl("/", true)
+    )
+    .logout(logout -> logout
+        .logoutSuccessUrl("/login?logout")
+    );
+~~~
+
+Later, when we create our own landing page with login links, we add:
+
+~~~html
+<a href="/login">Login with username/password</a>
+<a href="/oauth2/authorization/google">Login with Google</a>
+<a href="/oauth2/authorization/github">Login with GitHub</a>
+~~~
+
+Only when you build a fully custom login page should we add:
+
+~~~java
+.formLogin(form -> form.loginPage("/login"))
+.oauth2Login(oauth2 -> oauth2.loginPage("/login"))
+~~~
+
+The OAuth endpoints exist automatically:
+
+~~~sh
+/oauth2/authorization/google
+/oauth2/authorization/github
+~~~
+
+
+### 5.2 Povider setup
+
+Google Cloud Console:  
+Create OAuth Project and create new client and test it.
+
+Github:  
+Developer Settings > New OAuth App
+
+#### Test  it:
+
+~~~sh
+docker compose up -d --build
+
+http://localhost:9090/
+~~~
+
+
+### 5.3 Database integration
+
+
+UserAccountEntity:  
+src/main/java/dev/recallforge/domain/UserAccount.java
+
+Repository:
+src/main/java/dev/recallforge/repository/UserAccountRepository.java
+
+Custom OAuth user service:
+src/main/java/dev/recallforge/security/DatabaseOAuth2UserService.java
+
+Wire it into SecurityConfig:
+
+~~~java
+private final DatabaseOAuth2UserService databaseOAuth2UserService;
+
+public SecurityConfig(DatabaseOAuth2UserService databaseOAuth2UserService) {
+    this.databaseOAuth2UserService = databaseOAuth2UserService;
+}
+~~~
+
+Then update OAuth config:
+
+~~~java
+.oauth2Login(oauth2 -> oauth2
+    .defaultSuccessUrl("/", true)
+    .userInfoEndpoint(userInfo -> userInfo
+        .userService(databaseOAuth2UserService)
+    )
+)
+~~~
+
+Create temporary endpoint:
+
+~~~java
+package dev.recallforge.controller;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class MeController {
+
+    @GetMapping("/api/me")
+    public Object me(Authentication authentication) {
+        return authentication;
+    }
+}
+~~~
+
+
+#### Test it
+
+Login with Google/GitHub and visit:
+http://localhost:9090/api/me
+
+Also check DB:
+select * from user_accounts;
+
+
 ## Architecture
 
 ![Screenshot](docs/images/recall-forge_architecture.png)

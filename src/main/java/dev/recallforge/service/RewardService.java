@@ -62,9 +62,17 @@ public class RewardService {
     }
 
     private String titleForLevel(int level) {
-        if (level < 3) return "JVM Initiate";
-        if (level < 6) return "JVM Apprentice";
-        if (level < 10) return "JVM Adept";
-        return "JVM Master";
+        return switch (Math.min(level, 10)) {
+            case 1 -> "Learner";
+            case 2 -> "Student";
+            case 3 -> "Apprentice";
+            case 4 -> "Practitioner";
+            case 5 -> "Specialist";
+            case 6 -> "Expert";
+            case 7 -> "Scholar";
+            case 8 -> "Mentor";
+            case 9 -> "Master";
+            default -> "Grandmaster";
+        };
     }
 }

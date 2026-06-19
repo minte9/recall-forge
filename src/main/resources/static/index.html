@@ -19,11 +19,19 @@
 
     #app {
       height: 100vh;
+    }
+
+    .layout {
+      height: 100vh;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
       padding: 16px;
       box-sizing: border-box;
+    }
+
+    .layout.expanded {
+      grid-template-columns: 1fr;
     }
 
     .panel {
@@ -68,7 +76,6 @@
     }
 
     .review-btn {
-
         background:
             linear-gradient(
                 135deg,
@@ -346,15 +353,40 @@
       float: right;
     }
 
+    .expand-btn {
+      float: right;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 18px;
+      opacity: .6;
+    }
+
+    .expand-btn:hover {
+      opacity: 1;
+    }
+
+    .actions-row button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
   </style>
 </head>
 
 <body>
 <div id="app">
+  <div class="layout" :class="{ expanded: leftExpanded }">
 
-  <section class="panel">
-    <!--h2>Current Markdown</h2-->
+  <section class="panel" :class="{ expanded: leftExpanded }">
 
+    <button
+      class="expand-btn"
+      @click="leftExpanded = !leftExpanded">
+      {{ leftExpanded ? '«' : '»' }}
+    </button>
+    
     <div
       class="markdown"
       v-html="renderMarkdown(markdown)">
@@ -362,7 +394,7 @@
 
   </section>
 
-  <section class="panel">
+  <section v-if="!leftExpanded" class="panel">
 
     <a href="#" class="home-link-btn" @click.prevent="goHome" title="Back to home">
       <img src="recall-forge.png" alt="Home" class="home-link-icon">
@@ -385,7 +417,8 @@
 
         <button
           class="submit-btn"
-          @click="submitAnswer">
+          @click="submitAnswer" 
+          :disabled="loading || answerSubmitted">
           <span>✈</span> Submit Answer
         </button>
 
@@ -468,7 +501,7 @@
         
         <div class="reward-xp">
           XP: {{ dashboard.reward.xpInLevel }} / {{ dashboard.reward.xpForNextLevel }}  
-          <span class="reward-level">Next: Level {{ dashboard.reward.level + 1 }}</span>
+          <span class="reward-level">Level {{ dashboard.reward.level }} — {{ dashboard.reward.title }}</span>
         </div>
 
         <div class="reward-bar">
@@ -533,6 +566,7 @@
     
   </section>
 
+  </div>
 </div>
 
 <script>
@@ -544,33 +578,48 @@ createApp({
       loading: false,
       error: null,
       currentMarkdownFileId: null,
-
-      initialMarkdown: `
-<h3>Markdown File</h3>
-
-Upload a markdown file to start.  
-The uploaded markdown will be saved in the database.  
-When you click <strong>Start Review</strong>, this panel will be updated.  
-Add metadata header title for automatic classification (optional).  
-
-    The first line could contain the metadata header:    
-    ## Environment / Category / Subcategory / File Title   
-
-    Example:   
-    ## JVM / Java / Threads / Theory  
-    ### Creating Threads   
-    Thread creation basics...  
-    
-    You can upload markdown files without metadata.    
-    Those files will be set as 'Uncategorized'.  
-`,
       showMetadataHelp: false,
       markdown: null,
       review: null,
       userAnswer: "",
       result: null,
       dashboard: null,
-      markdownSummaries: []
+      markdownSummaries: [],
+      leftExpanded: false,
+      answerSubmitted: false,
+
+      initialMarkdown: `
+<h3>Markdown File</h3>
+
+Upload a markdown file to start.  
+The uploaded markdown will be saved in the database.  
+When you click <strong>Start Review</strong>, this panel will be updated. 
+
+    Metadata Header (optional): 
+    ===========================
+    Add metadata header title for automatic classification.    
+    The files without metadata will be set Uncategorized. 
+    
+    Markdown File (pattern):
+    ========================
+    ## Environment / Category / Subcategory / File Title 
+
+    ### 1. Topic
+    Content....
+
+    ### 2. Topic
+    Content...
+    
+    Markdown File (example):
+    ========================
+    ## JVM / Java / Threads / Theory  
+
+    ### 1. Creating Threads   
+    Thread creation basics...  
+
+    ### 2. Implementing Runnable
+    Java supports single inheritance...     
+`
     };
   },
 
@@ -627,6 +676,7 @@ Add metadata header title for automatic classification (optional).
       this.error = null;
       this.result = null;
       this.userAnswer = "";
+      this.answerSubmitted = false;
 
       try {
         let data = await this.startReviewRequest(this.currentMarkdownFileId);
@@ -731,6 +781,11 @@ Add metadata header title for automatic classification (optional).
     },
 
     async submitAnswer() {
+      if (this.answerSubmitted || this.loading) {
+        return;
+      }
+
+      this.answerSubmitted = true;
       this.loading = true;
       this.error = null;
 

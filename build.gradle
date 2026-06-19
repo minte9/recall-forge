@@ -27,6 +27,8 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.38'
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
 
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testCompileOnly 'org.projectlombok:lombok:1.18.38'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
