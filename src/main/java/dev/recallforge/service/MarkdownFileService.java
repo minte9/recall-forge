@@ -13,6 +13,8 @@ import dev.recallforge.domain.Topic;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.repository.TopicRepository;
+import dev.recallforge.security.CurrentUserService;
+import dev.recallforge.domain.UserAccount;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -21,15 +23,18 @@ public class MarkdownFileService {
     private final MarkdownFileRepository markdownFileRepository;
     private final TopicRepository topicRepository;
     private final MarkdownTopicImporter markdownTopicImporter;
+    private final CurrentUserService currentUserService;
 
     public MarkdownFileService(
             MarkdownFileRepository markdownFileRepository,
             TopicRepository topicRepository,
-            MarkdownTopicImporter markdownTopicImporter
+            MarkdownTopicImporter markdownTopicImporter,
+            CurrentUserService currentUserService
     ) {
         this.markdownFileRepository = markdownFileRepository;
         this.topicRepository = topicRepository;
         this.markdownTopicImporter = markdownTopicImporter;
+        this.currentUserService = currentUserService;
     }
 
     @Transactional
@@ -37,6 +42,9 @@ public class MarkdownFileService {
         String filename = file.getOriginalFilename();
         String content = new String(file.getBytes(), StandardCharsets.UTF_8);
         String contentHash = sha256(content);
+
+        Long userId = currentUserService.currentUserId();
+        UserAccount user = currentUserService.currentUser();
 
         List<MarkdownTopicImporter.ParsedTopic> parsedTopics =
                 markdownTopicImporter.parseMarkdown(content);
@@ -47,15 +55,7 @@ public class MarkdownFileService {
 
         MarkdownTopicImporter.ParsedTopic firstTopic = parsedTopics.get(0);
 
-        // Optional<MarkdownFile> existingFile =
-        //     markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroup(
-        //             firstTopic.environment(),
-        //             firstTopic.category(),
-        //             firstTopic.subcategory(),
-        //             firstTopic.fileTitle()
-        //     );
-            
-        Optional<MarkdownFile> existingFile = findExistingMarkdownFile(firstTopic);
+        Optional<MarkdownFile> existingFile = findExistingMarkdownFile(firstTopic, userId);
                    
         MarkdownFile markdownFile;
 
@@ -80,13 +80,14 @@ public class MarkdownFileService {
                     firstTopic.environment(),
                     firstTopic.category(),
                     firstTopic.subcategory(),
-                    firstTopic.fileTitle()
+                    firstTopic.fileTitle(),
+                    user
             );
 
             markdownFileRepository.save(markdownFile);
         }
 
-        syncTopicsFromMarkdown(markdownFile, parsedTopics);
+        syncTopicsFromMarkdown(markdownFile, parsedTopics, userId, user);
 
         return new MarkdownUploadResponse(
                 markdownFile.getId(),
@@ -96,14 +97,16 @@ public class MarkdownFileService {
     }
 
     private Optional<MarkdownFile> findExistingMarkdownFile(
-        MarkdownTopicImporter.ParsedTopic firstTopic
+        MarkdownTopicImporter.ParsedTopic firstTopic,
+        Long userId
     ) {
         Optional<MarkdownFile> byMetadata =
-                markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroup(
+                markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                         firstTopic.environment(),
                         firstTopic.category(),
                         firstTopic.subcategory(),
-                        firstTopic.fileTitle()
+                        firstTopic.fileTitle(),
+                        userId
                 );
 
         if (byMetadata.isPresent()) {
@@ -111,28 +114,24 @@ public class MarkdownFileService {
         }
 
         Optional<Topic> byTopicTitle =
-                topicRepository.findByTitle(firstTopic.title());
+                topicRepository.findByTitleAndUserId(firstTopic.title(), userId);
 
         return byTopicTitle.map(Topic::getMarkdownFile);
     }
 
     private void syncTopicsFromMarkdown(
         MarkdownFile markdownFile,
-        List<MarkdownTopicImporter.ParsedTopic> parsedTopics
+        List<MarkdownTopicImporter.ParsedTopic> parsedTopics,
+        Long userId,
+        UserAccount user
     ) {
         for (MarkdownTopicImporter.ParsedTopic parsedTopic : parsedTopics) {
-            /*Optional<Topic> existingTopic =
-                    topicRepository.findByEnvironmentAndCategoryAndSubcategoryAndTitle(
-                            parsedTopic.environment(),
-                            parsedTopic.category(),
-                            parsedTopic.subcategory(),
-                            parsedTopic.title()
-                    );*/
 
             Optional<Topic> existingTopic =
-                topicRepository.findByMarkdownFileAndTitle(
-                        markdownFile,
-                        parsedTopic.title()
+                topicRepository.findByMarkdownFileAndTitleAndUserId(
+                    markdownFile,
+                    parsedTopic.title(),
+                    userId
                 );
 
             if (existingTopic.isPresent()) {
@@ -158,7 +157,8 @@ public class MarkdownFileService {
                     parsedTopic.fileTitle(),
                     parsedTopic.title(),
                     parsedTopic.content(),
-                    markdownFile
+                    markdownFile,
+                    user
             );
 
             topicRepository.save(topic);

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import dev.recallforge.domain.Review;
 import dev.recallforge.domain.Topic;
+import dev.recallforge.domain.UserAccount;
 import dev.recallforge.dto.AnswerResponse;
 import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
@@ -15,6 +16,8 @@ import dev.recallforge.dto.ReviewQueueResponse;
 import dev.recallforge.dto.RewardResponse;
 import dev.recallforge.repository.ReviewRepository;
 import jakarta.transaction.Transactional;
+
+import dev.recallforge.security.CurrentUserService;
 
 @Service
 public class ReviewService {
@@ -24,11 +27,12 @@ public class ReviewService {
     private final OpenAiService openAiService;
     private final RepetitionService repetitionService;
     private final RewardService rewardService;
+    private final CurrentUserService currentUserService;
 
     public ReviewService(
             TopicService topicService, ReviewRepository reviewRepository, 
             OpenAiService openAiService, RepetitionService repetitionService,
-            RewardService rewardService
+            RewardService rewardService, CurrentUserService currentUserService
         ) {
 
         this.topicService = topicService;
@@ -36,12 +40,15 @@ public class ReviewService {
         this.openAiService = openAiService;
         this.repetitionService = repetitionService;
         this.rewardService = rewardService;
+        this.currentUserService = currentUserService;
     }
 
     public ReviewQuestionResponse startReview(Long markdownFileId) {
+        Long userId = currentUserService.currentUserId();
+
         Optional<Topic> topicOptional = markdownFileId == null
-                ? topicService.selectNextTopic()
-                : topicService.selectNextTopicByMarkdownFileId(markdownFileId);
+                ? topicService.selectNextTopic(userId)
+                : topicService.selectNextTopicByMarkdownFileId(markdownFileId, userId);
         
         if (topicOptional.isEmpty()) {
             return ReviewQuestionResponse.noReviewsDue();
@@ -75,8 +82,14 @@ public class ReviewService {
         return saveAnswer(topicId, question, userAnswer, evaluation);
     }
 
-    public EvaluationResult evaluateAnswer(Long topicId, String question, String userAnswer) {
-        Topic topic = topicService.getTopic(topicId);
+    public EvaluationResult evaluateAnswer(
+        Long topicId, 
+        String question, 
+        String userAnswer
+    ) {
+        Long userId = currentUserService.currentUserId();
+        Topic topic = topicService.getTopic(topicId, userId);
+
         return openAiService.evaluateAnswer(
             topic.getTitle(), 
             topic.getContent(), 
@@ -92,9 +105,19 @@ public class ReviewService {
         String userAnswer, 
         EvaluationResult evaluation
     ) {
-        Topic topic = topicService.getTopic(topicId);
+        Long userId = currentUserService.currentUserId();
+        Topic topic = topicService.getTopic(topicId, userId);
 
-        Review review = new Review(topic, question, userAnswer, evaluation.score(), evaluation.feedback());
+        UserAccount user = currentUserService.currentUser();
+
+        Review review = new Review(
+            topic, 
+            user, 
+            question, 
+            userAnswer, 
+            evaluation.score(), 
+            evaluation.feedback());
+
         reviewRepository.save(review);
 
         double updatedMemoryScore = repetitionService.calculateUpdateMemoryScore(
@@ -102,7 +125,8 @@ public class ReviewService {
             evaluation.score()
         );
 
-        LocalDateTime nextReviewAt = repetitionService.calculateNextReviewAt(evaluation.score());
+        LocalDateTime nextReviewAt = 
+            repetitionService.calculateNextReviewAt(evaluation.score());
 
         topic.updateMemory(updatedMemoryScore, nextReviewAt);
         topicService.save(topic);
@@ -121,26 +145,28 @@ public class ReviewService {
     }
 
     public List<ReviewHistoryResponse> getReviewHistoryForTopic(Long topicId) {
-        topicService.getTopic(topicId);
+        Long userId = currentUserService.currentUserId();
+        topicService.getTopic(topicId, userId);
 
-        return reviewRepository.findByTopicIdOrderByReviewedAtDesc(topicId)
+        return reviewRepository.findByTopicIdAndTopicUserIdOrderByReviewedAtDesc(topicId, userId)
                 .stream()
                 .map(ReviewHistoryResponse::from)
                 .toList();
     }
 
     public ReviewQueueResponse getDailyQueue(Long markdownFileId) {
+        Long userId = currentUserService.currentUserId();
         LocalDateTime now = LocalDateTime.now();
 
         long dueCount = markdownFileId == null
-            ? topicService.countDueTopics(now)
-            : topicService.countDueTopicsByMarkdownFileId(markdownFileId, now);
+            ? topicService.countDueTopics(userId, now)
+            : topicService.countDueTopicsByMarkdownFileId(markdownFileId, userId, now);
 
         LocalDateTime nextReviewAt = markdownFileId == null
-            ? topicService.findNextReviewAtAfter(now)
+            ? topicService.findNextReviewAtAfter(userId, now)
                     .map(Topic::getNextReviewAt)
                     .orElse(null)
-            : topicService.findNextReviewAtAfterByMarkdownFileId(markdownFileId, now)
+            : topicService.findNextReviewAtAfterByMarkdownFileId(markdownFileId, userId, now)
                     .map(Topic::getNextReviewAt)
                     .orElse(null);
 

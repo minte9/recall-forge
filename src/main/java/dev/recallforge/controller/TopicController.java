@@ -11,6 +11,7 @@ import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.TopicResponse;
 import dev.recallforge.service.ReviewService;
 import dev.recallforge.service.TopicService;
+import dev.recallforge.security.CurrentUserService;
 
 @RestController
 @RequestMapping("/api/topics")
@@ -18,10 +19,16 @@ public class TopicController {
  
     private final TopicService topicService;
     private final ReviewService reviewService;
+    private final CurrentUserService currentUserService;
 
-    public TopicController(TopicService topicService, ReviewService reviewService) {
+    public TopicController(
+        TopicService topicService, 
+        ReviewService reviewService,
+        CurrentUserService currentUserService
+    ) {
         this.topicService = topicService;
         this.reviewService = reviewService;
+        this.currentUserService = currentUserService;
     }
 
     /**
@@ -29,7 +36,9 @@ public class TopicController {
      */
     @GetMapping
     public List<TopicResponse> getTopics() {
-        return topicService.getAllTopics()
+        Long userId = currentUserService.currentUserId();
+
+        return topicService.getAllTopics(userId)
                 .stream()
                 .map(TopicResponse::from)
                 .toList();
@@ -44,7 +53,9 @@ public class TopicController {
 
     @GetMapping("/due")
     public List<TopicResponse> getDueTopics() {
-        return topicService.getDueTopics()
+        Long userId = currentUserService.currentUserId();
+
+        return topicService.getDueTopics(userId)
                 .stream()
                 .map(TopicResponse::from)
                 .toList();

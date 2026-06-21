@@ -15,51 +15,72 @@ import dev.recallforge.dto.MarkdownSummaryDto;
 
 public interface TopicRepository extends JpaRepository<Topic, Long> {
 
-    Optional<Topic> findByTitle(String title);
-    Optional<Topic> findByTitleAndMarkdownFileIsNotNull(String title);
-    Optional<Topic> findByMarkdownFileAndTitle(MarkdownFile markdownFile, String title);
+    // Optional<Topic> findByTitle(String title);
+    // Optional<Topic> findByTitleAndMarkdownFileIsNotNull(String title);
+    // Optional<Topic> findByMarkdownFileAndTitle(MarkdownFile markdownFile, String title);
+
+    Optional<Topic> findByTitleAndUserId(String title, Long userId);
+
+    Optional<Topic> findByTitleAndMarkdownFileIsNotNullAndUserId(
+        String title,
+        Long userId
+    );
+
+    Optional<Topic> findByMarkdownFileAndTitleAndUserId(
+        MarkdownFile markdownFile,
+        String title,
+        Long userId
+    );
+
+    List<Topic> findByUserId(Long userId);
+    Optional<Topic> findByIdAndUserId(Long id, Long userId);
 
     @Query("""
-        select t
-        from Topic t
-        where t.nextReviewAt <= :now
+        select t from Topic t
+        where t.nextReviewAt <= :now 
+            and t.user.id = :userId
         order by t.memoryScore asc, t.nextReviewAt asc
     """)
-    List<Topic> findDueTopics(@Param("now") LocalDateTime now);
+    List<Topic> findDueTopics(Long userId, LocalDateTime now);
 
     @Query("""
         select t
         from Topic t
         where 
-            t.markdownFile.id = :markdownFileId and 
-            t.nextReviewAt <= :now
+            t.markdownFile.id = :markdownFileId 
+            and t.markdownFile.user.id = :userId
+            and t.nextReviewAt <= :now
         order by t.memoryScore asc, t.nextReviewAt asc
     """)
-    List<Topic> findDueTopicsByMarkdownFileId(Long markdownFileId, LocalDateTime now);
-
-    @Query("""
-        select count(t) 
-        from Topic t
-        where t.nextReviewAt <= :now
-    """)
-    long countDue(@Param("now") LocalDateTime now);
-
-    @Query("""
-        select t
-        from Topic t
-        where t.nextReviewAt > :now 
-        order by t.nextReviewAt asc
-    """)
-    List<Topic> findNext(@Param("now") LocalDateTime now, Pageable pageable);
-
-    long countByMarkdownFileIdAndNextReviewAtLessThanEqual(
-            Long markdownFileId,
-            LocalDateTime now
+    List<Topic> findDueTopicsByMarkdownFileId(
+        @Param("markdownFileId") Long markdownFileId,
+        @Param("userId") Long userId,
+        @Param("now") LocalDateTime now
     );
 
-    Optional<Topic> findFirstByMarkdownFileIdAndNextReviewAtGreaterThanOrderByNextReviewAtAsc(
-            Long markdownFileId,
-            LocalDateTime now
+    // @Query("""
+    //     select count(t) 
+    //     from Topic t
+    //     where t.nextReviewAt <= :now
+    // """)
+    // long countDue(@Param("now") LocalDateTime now);
+
+    @Query("""
+        select count(t) from Topic t
+        where t.user.id = :userId
+        and t.nextReviewAt <= :now
+    """)
+    long countDueByUser(Long userId, LocalDateTime now);
+
+    @Query("""
+        select count(t)
+        from Topic t
+        where t.markdownFile.user.id = :userId
+        and t.nextReviewAt <= :now
+    """)
+    long countDueNowByUser(
+        @Param("userId") Long userId,
+        @Param("now") LocalDateTime now
     );
 
     Optional<Topic> findByEnvironmentAndCategoryAndSubcategoryAndTitle(
@@ -69,9 +90,25 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         String title
     );
 
-    long countByNextReviewAtLessThanEqual(LocalDateTime dateTime);
-    long countByNextReviewAtBetween(LocalDateTime start, LocalDateTime end);
-    long count();
+    @Query("""
+        select count(t)
+        from Topic t
+        where t.markdownFile.user.id = :userId
+        and t.nextReviewAt >= :start
+        and t.nextReviewAt < :end
+    """)
+    long countDueBetweenByUser(
+        @Param("userId") Long userId,
+        @Param("start") LocalDateTime start,
+        @Param("end") LocalDateTime end
+    );
+
+    @Query("""
+        select count(t)
+        from Topic t
+        where t.markdownFile.user.id = :userId
+    """)
+    long countByUser(@Param("userId") Long userId);
 
     @Query("""
         select
@@ -82,31 +119,40 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
             avg(t.memoryScore) as averageMemoryScore
         from Topic t
         where t.nextReviewAt <= :now
+            and t.markdownFile.user.id = :userId
         group by t.environment, t.category, t.subcategory
         order by count(t) desc, avg(t.memoryScore) asc
     """)
-    List<WeakAreaProjection> findWeakAreas(LocalDateTime now);
+    List<WeakAreaProjection> findWeakAreas(
+        @Param("userId") Long userId, 
+        @Param("now") LocalDateTime now);
 
     @Query("""
         select 
             concat(t.category, ' ', t.subcategory) as title, 
             avg(t.memoryScore) as averageMemoryScore
         from Topic t
+        where t.markdownFile.user.id = :userId 
         group by t.category, t.subcategory
         order by avg(t.memoryScore) desc
     """)
-    List<KnowledgeAreaProjection> findStrongKnowledgeAreas();
+    List<KnowledgeAreaProjection> findStrongKnowledgeAreas(
+        @Param("userId") Long userId
+    );
 
 
     @Query("""
        select 
             concat(t.category, ' ', t.subcategory) as title, 
             avg(t.memoryScore) as averageMemoryScore
-        from Topic t
+        from Topic t 
+        where t.markdownFile.user.id = :userId 
         group by t.category, t.subcategory
         order by avg(t.memoryScore) asc 
     """)
-    List<KnowledgeAreaProjection> findWeakKnowledgeAreas();
+    List<KnowledgeAreaProjection> findWeakKnowledgeAreas(
+        @Param("userId") Long userId
+    );
 
     @Query("""
         select new dev.recallforge.dto.MarkdownSummaryDto(
@@ -119,8 +165,53 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
             avg(t.memoryScore)
         )
         from Topic t
+        where t.user.id = :userId
         group by t.markdownFile.id, t.category, t.subcategory, t.fileTitle
         order by t.category, t.subcategory, t.markdownFile.id
     """)
-    List<MarkdownSummaryDto> findMarkdownSummaries(LocalDateTime now);
+    List<MarkdownSummaryDto> findMarkdownSummaries(
+        @Param("userId") Long userId,
+        @Param("now") LocalDateTime now
+    );
+
+    @Query("""
+        select count(t)
+        from Topic t
+        where t.markdownFile.id = :markdownFileId
+        and t.user.id = :userId
+        and t.nextReviewAt <= :now
+    """)
+    long countDueByMarkdownFileIdAndUser(
+        Long markdownFileId,
+        Long userId,
+        LocalDateTime now
+    );
+
+    @Query("""
+        select t
+        from Topic t
+        where t.user.id = :userId
+        and t.nextReviewAt > :now
+        order by t.nextReviewAt asc
+    """)
+    List<Topic> findNextByUser(
+        Long userId,
+        LocalDateTime now,
+        Pageable pageable
+    );
+
+    @Query("""
+        select t
+        from Topic t
+        where t.markdownFile.id = :markdownFileId
+        and t.user.id = :userId
+        and t.nextReviewAt > :now
+        order by t.nextReviewAt asc
+    """)
+    List<Topic> findNextByMarkdownFileIdAndUser(
+        Long markdownFileId,
+        Long userId,
+        LocalDateTime now,
+        Pageable pageable
+    );
 }

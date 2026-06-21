@@ -75,7 +75,8 @@ public class MarkdownFile {
             String environment,
             String category,
             String subcategory,
-            String topicGroup
+            String topicGroup,
+            UserAccount user
     ) {
         this.filename = filename;
         this.content = content;
@@ -84,6 +85,7 @@ public class MarkdownFile {
         this.category = category;
         this.subcategory = subcategory;
         this.topicGroup = topicGroup;
+        this.user = user;
 
         this.uploadedAt = LocalDateTime.now();
     }

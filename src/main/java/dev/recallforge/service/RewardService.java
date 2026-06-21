@@ -5,21 +5,30 @@ import org.springframework.stereotype.Service;
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
 import dev.recallforge.repository.UserRewardRepository;
+import dev.recallforge.security.CurrentUserService;
+import dev.recallforge.domain.UserReward;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RewardService {
     
-    private final UserRewardRepository repository;
+    private final UserRewardRepository userRewardRepository;
+    private final CurrentUserService currentUserService;
 
-    public RewardService(UserRewardRepository repository) {
-        this.repository = repository;
+    public RewardService(
+        UserRewardRepository userRewardRepository,
+        CurrentUserService currentUserService
+    ) {
+        this.userRewardRepository = userRewardRepository;
+        this.currentUserService = currentUserService;
     }
 
     @Transactional
     public RewardResponse rewardDefaultUser(double score) {
-        UserReward reward = repository.findByUserKey("default")
-            .orElseGet(() -> repository.save(new UserReward("default")));
+        Long userId = currentUserService.currentUserId();
+
+        UserReward reward = userRewardRepository.findByUserId(userId)
+            .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
 
         int baseXp = xpForScore(score);
         boolean perfect = score >= 0.95;
@@ -27,14 +36,17 @@ public class RewardService {
         int gainedXp = baseXp + (perfect ? 5 : 0);
 
         reward.addReviewReward(gainedXp, perfect, LocalDate.now());
-        repository.save(reward);
+        userRewardRepository.save(reward);
 
         return toResponse(reward, gainedXp);
     }
 
-    public RewardResponse getDefaultUserReward() {
-        UserReward reward = repository.findByUserKey("default")
-            .orElseGet(() -> repository.save(new UserReward("default")));
+    @Transactional
+    public RewardResponse getCurrentUserReward() {
+        Long userId = currentUserService.currentUserId();
+
+        UserReward reward = userRewardRepository.findByUserId(userId)
+            .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
 
         return toResponse(reward, 0);
     }

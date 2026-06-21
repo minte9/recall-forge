@@ -6,12 +6,11 @@ import dev.recallforge.domain.MarkdownFile;
 
 public interface MarkdownFileRepository extends JpaRepository<MarkdownFile, Long> {
 
-    //Optional<MarkdownFile> findByContentHash(String contentHash);
-
-    Optional<MarkdownFile> findByEnvironmentAndCategoryAndSubcategoryAndTopicGroup(
-            String environment,
-            String category,
-            String subcategory,
-            String topicGroup
+    Optional<MarkdownFile> findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+        String environment,
+        String category,
+        String subcategory,
+        String topicGroup,
+        Long userId
     );
 }

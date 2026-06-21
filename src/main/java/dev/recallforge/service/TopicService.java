@@ -20,63 +20,73 @@ public class TopicService {
         this.topicRepository = topicRepository;
     }
 
-    public List<Topic> getAllTopics() {
-        return topicRepository.findAll()
+    public List<Topic> getAllTopics(Long userId) {
+        return topicRepository.findByUserId(userId)
             .stream()
             .sorted(Comparator.comparing(Topic::getMemoryScore))
             .toList();
     }
 
-    public List<Topic> getDueTopics() {
-        return topicRepository.findDueTopics(LocalDateTime.now());
+    public List<Topic> getDueTopics(Long userId) {
+        return topicRepository.findDueTopics(userId, LocalDateTime.now());
     }
 
-    public Topic getTopic(Long topicId) {
-        return topicRepository.findById(topicId)
+    public Topic getTopic(Long topicId, Long userId) {
+        return topicRepository.findByIdAndUserId(topicId, userId)
             .orElseThrow(() ->
                 new IllegalArgumentException("Topic not found: " + topicId)
             );
     }
 
-    public Optional<Topic> selectNextTopic() {
-        return topicRepository.findDueTopics(LocalDateTime.now())
+    public Optional<Topic> selectNextTopic(Long userId) {
+        return topicRepository.findDueTopics(userId, LocalDateTime.now())
             .stream()
             .findFirst();
     }
 
-    public Optional<Topic> selectNextTopicByMarkdownFileId(Long markdownFileId) {
+    public Optional<Topic> selectNextTopicByMarkdownFileId(Long markdownFileId, Long userId) {
         return topicRepository
-            .findDueTopicsByMarkdownFileId(markdownFileId, LocalDateTime.now())
+            .findDueTopicsByMarkdownFileId(
+                markdownFileId, userId, LocalDateTime.now())
             .stream()
             .findFirst();
     }
 
-    public long countDueTopics(LocalDateTime now) {
-        return topicRepository.countDue(now);
+    public long countDueTopics(Long userId, LocalDateTime now) {
+        return topicRepository.countDueByUser(userId, now);
     }
 
-    public long countDueTopicsByMarkdownFileId(Long markdownFileId, LocalDateTime now) {
-        return topicRepository.countByMarkdownFileIdAndNextReviewAtLessThanEqual(
-                markdownFileId,
-                now
+    public long countDueTopicsByMarkdownFileId(
+        Long markdownFileId,
+        Long userId,
+        LocalDateTime now
+    ) {
+        return topicRepository.countDueByMarkdownFileIdAndUser(
+            markdownFileId,
+            userId,
+            now
         );
     }
 
-    public Optional<Topic> findNextReviewAtAfter(LocalDateTime now) {
-        return topicRepository.findNext(now, PageRequest.of(0, 1))
-                .stream()
-                .findFirst();
+    public Optional<Topic> findNextReviewAtAfter(Long userId, LocalDateTime now) {
+        return topicRepository.findNextByUser(userId, now, PageRequest.of(0, 1))
+            .stream()
+            .findFirst();
     }
 
     public Optional<Topic> findNextReviewAtAfterByMarkdownFileId(
         Long markdownFileId,
-            LocalDateTime now
+        Long userId,
+        LocalDateTime now
     ) {
-        return topicRepository
-                .findFirstByMarkdownFileIdAndNextReviewAtGreaterThanOrderByNextReviewAtAsc(
-                        markdownFileId,
-                        now
-                );
+        return topicRepository.findNextByMarkdownFileIdAndUser(
+            markdownFileId,
+            userId,
+            now,
+            PageRequest.of(0, 1)
+        )
+        .stream()
+        .findFirst();
     }
 
     public Topic save(Topic topic) {

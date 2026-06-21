@@ -16,15 +16,15 @@ public class UserReward {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String userKey = "default";
+    private Long userId;
 
     private int totalXp;
     private int streakDays;
     private int perfectStreak;
     private LocalDate lastReviewDate;
 
-    public UserReward(String userKey) {
-        this.userKey = userKey;
+    public UserReward(Long userId) {
+        this.userId = userId;
     }
 
     public void addReviewReward(int xp, boolean perfect, LocalDate today) {

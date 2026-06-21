@@ -71,7 +71,8 @@ public class Topic {
         String fileTitle,
         String title,
         String content,
-        MarkdownFile markdownFile
+        MarkdownFile markdownFile,
+        UserAccount user
     ) {
         this.environment = environment;
         this.category = category;
@@ -81,6 +82,7 @@ public class Topic {
         this.title = title;
         this.content = content;
         this.markdownFile = markdownFile;
+        this.user = user;
 
         this.memoryScore = 0.5;
         this.nextReviewAt = LocalDateTime.now();
@@ -103,12 +105,6 @@ public class Topic {
         this.nextReviewAt = nextReviewAt;
         this.updatedAt = LocalDateTime.now();
     }
-
-    /*public void updateFromMarkdown(String fileTitle, String content, MarkdownFile markdownFile) {
-        this.fileTitle = fileTitle;
-        this.content = content;
-        this.markdownFile = markdownFile;
-    }*/
 
     public void updateFromMarkdown(
         String environment,

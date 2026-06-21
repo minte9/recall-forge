@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import dev.recallforge.domain.UserReward;
 
 public interface UserRewardRepository extends JpaRepository<UserReward, Long> {
-    Optional<UserReward> findByUserKey(String userKey);
+    Optional<UserReward> findByUserId(Long userId);
 }

@@ -11,11 +11,10 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.SecurityFilterChain;
 
 import dev.recallforge.security.DatabaseOAuth2UserService;
 import dev.recallforge.security.DatabaseOidcUserService;
-
-import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableConfigurationProperties(AppSecurityProperties.class)
@@ -57,9 +56,12 @@ public class SecurityConfig {
                 ).permitAll()
                 .anyRequest().authenticated()
             )
-            .formLogin(form -> form
-                .defaultSuccessUrl("/", true)
-            )
+            // .formLogin(form -> form
+            //     .defaultSuccessUrl("/", true)
+            // )
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable())
+
             .oauth2Login(oauth2 -> oauth2
                 .defaultSuccessUrl("/", true)
                 .userInfoEndpoint(userInfo -> userInfo
@@ -68,7 +70,7 @@ public class SecurityConfig {
                 )
             )
             .logout(logout -> logout
-                .logoutSuccessUrl("/login?logout")
+                .logoutSuccessUrl("/")
             );
 
         return http.build();

@@ -315,7 +315,7 @@
     }
 
     .reward-card {
-      padding: 20px 0px 0px 0px;
+      padding: 30px 0px 0px 0px;
     }
 
     .reward-title {
@@ -372,6 +372,10 @@
       transform: none;
     }
 
+    .userBox {
+      margin-left: 10px;
+    }
+
   </style>
 </head>
 
@@ -390,6 +394,12 @@
     <div
       class="markdown"
       v-html="renderMarkdown(markdown)">
+    </div>
+
+    <div v-if="currentUser" class='userBox'>
+      <div>User: {{ currentUser.displayName }}</div>
+      <div>Role: {{ currentUser.role?.toLowerCase() }}</div>
+      <a href="/logout">Logout</a>
     </div>
 
   </section>
@@ -474,9 +484,9 @@
 
         <div 
           v-for="area in dashboard.strongAreas"
-          :key="'strong-' + area.title">
-
-          {{ area.title }}: {{ formatScore(area.averageMemoryScore) }}
+          :key="'strong-' + area.title" 
+          class="dashboard-stats">
+          <span>{{ area.title }}</span> <!--: {{ formatScore(area.averageMemoryScore) }}-->
         </div>
       </div>
 
@@ -488,9 +498,10 @@
 
         <div
           v-for="area in dashboard.weakKnowledgeAreas"
-          :key="'weak-' + area.title">
+          :key="'weak-' + area.title" 
+          class="dashboard-stats">
 
-          {{ area.title }}: {{ formatScore(area.averageMemoryScore) }}  
+          <span>{{ area.title }}</span> <!--: {{ formatScore(area.averageMemoryScore) }}  -->
         </div>
       </div>
 
@@ -587,6 +598,7 @@ createApp({
       markdownSummaries: [],
       leftExpanded: false,
       answerSubmitted: false,
+      currentUser: [],
 
       initialMarkdown: `
 <h3>Markdown File</h3>
@@ -618,7 +630,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     Thread creation basics...  
 
     ### 2. Implementing Runnable
-    Java supports single inheritance...     
+    Java supports single inheritance...  
 `
     };
   },
@@ -632,6 +644,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     this.markdown = this.initialMarkdown;
     this.loadDashboard();
     this.loadMarkdownSummaries();
+    this.lodaCurrentUser();
   },
 
   methods: {
@@ -855,6 +868,23 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       } catch (err) {
         console.error("Could not load markdown summaries", err);
+      }
+    },
+
+    async lodaCurrentUser() {
+      try {
+        const response = await fetch("/api/me", {
+          credentials: "same-origin"
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        this.currentUser = await response.json();
+
+      } catch (err) {
+        console.error("Could not load current user", err);
       }
     },
 

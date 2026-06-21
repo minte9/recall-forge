@@ -54,12 +54,14 @@ public class Review {
     
     public Review(
         Topic topic, 
+        UserAccount user,
         String question, 
         String userAnswer, 
         double score, 
         String feedback
     ) {
         this.topic = topic;
+        this.user = user;
         this.question = question;
         this.userAnswer = userAnswer;
         this.score = score;

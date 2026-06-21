@@ -31,6 +31,10 @@ public class UserAccount {
     @Column(name = "provider_user_id", nullable = false)
     private String providerUserId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.USER;
+
     private String email;
     private String displayName;
     private String avatarUrl;
@@ -41,5 +45,9 @@ public class UserAccount {
     void onCreate() {
         this.createdAt = Instant.now();
         this.lastLoginAt = Instant.now();
+
+        if (this.role == null) { 
+            this.role = Role.USER; 
+        }
     }
 }
