@@ -603,12 +603,16 @@
               </div>
 
               <button @click="leftExpanded = !leftExpanded">
-                {{ leftExpanded ? 'Collapse Markdown' : 'Expand Markdown' }} 
+                {{ leftExpanded ? 'Collapse Panel' : 'Expand Panel' }} 
               </button>
 
               <button @click="showMarkdownExample()">
-                  Markdown Example
+                  Show Pattern
               </button>
+
+               <button @click="showMarkdownSummaries(); menuOpen = false">
+                  Markdowns
+                </button>
 
               <div class="menu-divider"></div>
 
