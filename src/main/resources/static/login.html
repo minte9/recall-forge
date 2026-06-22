@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recall Forge</title>
 
+    <link rel="icon" type="image/png" href="recall-forge.png">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
     * {
@@ -218,10 +221,8 @@
     }
 
     .feedback {
-        visibility: hidden;
+        display: none;
         margin-top: 18px;
-        min-height: 170px;
-
         padding: 18px 20px;
 
         background: #dcfce7;
@@ -229,6 +230,23 @@
         border-radius: 6px;
 
         color: #1e293b;
+    }
+
+    .feedback.visible {
+        display: block;
+        animation: fadeSlideIn 0.25s ease-out;
+    }
+
+    @keyframes fadeSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .feedback p {
@@ -294,6 +312,47 @@
         .login-card,
         .demo-card {
             padding: 28px;
+        }
+    }
+
+    @media (max-width: 900px) {
+        .page {
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .demo-card {
+            padding: 16px;
+        }
+
+        .demo-layout {
+            display: block;
+        }
+
+        .panel {
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+
+        .panel,
+        .question,
+        .notes,
+        textarea,
+        .demo-button {
+            font-size: 16px;
+        }
+
+        .question {
+            line-height: 1.35;
+            margin-bottom: 12px;
+        }
+
+        textarea {
+            min-height: 90px;
+        }
+
+        .demo-button {
+            padding: 14px;
         }
     }
 </style>
@@ -406,8 +465,12 @@
 
 <script>
     function submitDemoAnswer() {
-        const feedback = document.getElementById("demo-feedback");
-        feedback.style.visibility = "visible";
+        document
+            .getElementById("demo-feedback")
+            .classList
+            .add("visible");
+
+        document.querySelector(".demo-button").disabled = true;
     }
 </script>
 
