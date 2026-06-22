@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recall Forge</title>
+
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        min-height: 100vh;
+        font-family: Inter, Arial, sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+    }
+
+    .page {
+        max-width: 1400px;
+        margin: 0 auto;
+
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 16px;
+        padding: 16px;
+
+        align-items: start;
+    }
+
+    .login-card {
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        text-align: center;
+
+        align-self: start;
+    }
+
+    .demo-card {
+        padding: 44px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+
+        align-self: start;
+    }
+
+    .logo {
+        margin-bottom: 22px;
+    }
+
+    .logo img {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        filter: grayscale(100%);
+    }
+
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 34px;
+    }
+
+    .button {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        margin-bottom: 14px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: 0.15s ease;
+    }
+
+    .button:hover {
+        transform: translateY(-1px);
+    }
+
+    .google {
+        background: #5b3df5;
+        color: white;
+    }
+
+    .github {
+        background: white;
+        color: #0f172a;
+        border: 1px solid #cbd5e1;
+    }
+
+    .footer {
+        margin-top: 22px;
+        color: #94a3b8;
+        font-size: 0.95rem;
+    }
+
+    .demo-card {
+        padding: 44px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .demo-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 28px;
+    }
+
+    .demo-header h2 {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+    }
+
+    .demo-header p {
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .demo-header img {
+        width: 72px;
+        height: 72px;
+        object-fit: contain;
+        opacity: 0.55;
+    }
+
+    .demo-layout {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 24px;
+    }
+
+    .panel {
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 24px;
+        background: #ffffff;
+    }
+
+    .label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 8px;
+    }
+
+    .question {
+        font-size: 1.15rem;
+        font-weight: 700;
+        line-height: 1.4;
+        margin-bottom: 20px;
+    }
+
+    textarea {
+        width: 100%;
+        min-height: 110px;
+        resize: vertical;
+        padding: 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font: inherit;
+        line-height: 1.5;
+        margin-bottom: 14px;
+    }
+
+    textarea:focus {
+        outline: none;
+        border-color: #3b73ff;
+        box-shadow: 0 0 0 3px rgba(59, 115, 255, 0.15);
+    }
+
+    .demo-button {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        background: #ffb703;
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .demo-button:hover {
+        background: #f4a900;
+    }
+
+    .notes-title {
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+
+    .notes {
+        color: #334155;
+        line-height: 1.55;
+    }
+
+    .notes ul {
+        padding-left: 20px;
+        margin-top: 10px;
+    }
+
+    .feedback {
+        visibility: hidden;
+        margin-top: 18px;
+        min-height: 170px;
+
+        padding: 18px 20px;
+
+        background: #dcfce7;
+        border-left: 4px solid #22c55e;
+        border-radius: 6px;
+
+        color: #1e293b;
+    }
+
+    .feedback p {
+        margin-top: 12px;
+        line-height: 1.45;
+    }
+
+    .feedback-row {
+        margin-bottom: 12px;
+    }
+
+    .feedback-row strong {
+        color: #1e293b;
+    }
+
+    .progress {
+        display: none;
+    }
+
+    .score-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 14px;
+        color: #334155;
+        font-size: 0.95rem;
+    }
+
+    .progress {
+        margin-top: 18px;
+    }
+
+    .progress-top {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        color: #475569;
+    }
+
+    .bar {
+        height: 10px;
+        background: #e5e7eb;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .bar-fill {
+        height: 100%;
+        width: 72%;
+        background: #22c55e;
+    }
+
+    @media (max-width: 980px) {
+        .page {
+            grid-template-columns: 1fr;
+            padding: 20px;
+        }
+
+        .demo-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .login-card,
+        .demo-card {
+            padding: 28px;
+        }
+    }
+</style>
+
+
+</head>
+
+<body>
+
+<div class="page">
+
+
+<section class="login-card">
+    <div class="logo">
+        <img src="/recall-forge.png" alt="Recall Forge">
+    </div>
+
+    <h1>Recall Forge</h1>
+
+    <p class="subtitle">
+        Build long-term knowledge through AI-powered spaced repetition.
+    </p>
+
+    <a class="button google" href="/oauth2/authorization/google">
+        Continue with Google
+    </a>
+
+    <a class="button github" href="/oauth2/authorization/github">
+        Continue with GitHub
+    </a>
+
+    <div class="footer">
+        Sign in to access your topics, reviews, and progress.
+    </div>
+</section>
+
+<section class="demo-card">
+    <div class="demo-header">
+        <div>
+            <h2>See how a review works</h2>
+            <p>
+                Recall Forge turns your markdown notes into active recall questions,
+                evaluates your answer, gives feedback and schedules the next review.
+            </p>
+        </div>
+    </div>
+
+    <div class="demo-layout">
+
+        <div class="panel">
+            <div class="label">Source note</div>
+
+            <div class="notes">
+                <div class="notes-title">Spring Framework → IoC</div>
+
+                <p>
+                    Inversion of Control is a design principle where control over object
+                    creation and dependency management is moved from application code to
+                    the framework.
+                </p>
+
+                <ul>
+                    <li>Spring creates beans.</li>
+                    <li>Dependencies are injected automatically.</li>
+                    <li>Your code focuses on behavior, not wiring.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="label">Question</div>
+
+            <div class="question">
+                What is Inversion of Control in Spring?
+            </div>
+
+            <textarea id="demo-answer" placeholder="Type a quick answer...">Spring creates and manages objects for you instead of creating them manually.</textarea>
+
+            <button class="demo-button" onclick="submitDemoAnswer()">
+                Submit answer
+            </button>
+
+            <div id="demo-feedback" class="feedback">
+                <div class="feedback-row">
+                    <strong>Score:</strong> 0.82
+                </div>
+
+                <div class="feedback-row">
+                    <strong>Feedback:</strong>
+                    Good answer. Inversion of Control means the framework manages object
+                    creation and dependency wiring, instead of your code manually creating
+                    and connecting everything.
+                </div>
+
+                <div class="feedback-row">
+                    <strong>Updated memory score:</strong> 0.72
+                </div>
+
+                <div class="feedback-row">
+                    <strong>Next review:</strong> tomorrow
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+</div>
+
+<script>
+    function submitDemoAnswer() {
+        const feedback = document.getElementById("demo-feedback");
+        feedback.style.visibility = "visible";
+    }
+</script>
+
+</body>
+</html>

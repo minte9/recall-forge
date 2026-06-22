@@ -48,6 +48,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/",
+                    "/login",
+                    "/login.html",
                     "/oauth2/**",
                     "/login/oauth2/**",
                     "/recall-forge.png", // icon
@@ -63,6 +65,7 @@ public class SecurityConfig {
             .httpBasic(basic -> basic.disable())
 
             .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
                 .defaultSuccessUrl("/", true)
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(databaseOAuth2UserService)     // GitHub

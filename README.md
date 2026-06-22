@@ -361,7 +361,10 @@ public class MeController {
 ~~~
 
 
-### 5.7 Rate limits
+### 5.7 Demo layout
+
+- Left panel OAuth login
+- Right panel Static demo layout
 
 
 

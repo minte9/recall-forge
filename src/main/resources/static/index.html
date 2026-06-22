@@ -42,6 +42,61 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
+    .left-panel {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .left-content {
+      flex: 1;
+    }
+
+    .userBox {
+      margin-top: auto;
+      padding-top: 14px;
+
+      border-top: 1px solid #e5e7eb;
+
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    .userBox-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .userBox-name {
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .userBox-role {
+      margin-top: 2px;
+    }
+
+    .logout-btn {
+      display: inline-block;
+      margin-top: 8px;
+
+      color: #64748b;
+      text-decoration: underline;
+
+      background: none;
+      border: none;
+      padding: 0;
+
+      font: inherit;
+    }
+
+    .logout-btn:hover {
+      color: #ef4444;
+    }
+
     .actions-row button,
     .actions-row .upload-btn {
         display:flex;
@@ -360,6 +415,9 @@
       cursor: pointer;
       font-size: 18px;
       opacity: .6;
+      position: absolute;
+      top: 24px;
+      right: 24px;
     }
 
     .expand-btn:hover {
@@ -383,23 +441,33 @@
 <div id="app">
   <div class="layout" :class="{ expanded: leftExpanded }">
 
-  <section class="panel" :class="{ expanded: leftExpanded }">
+  <section class="panel left-panel" :class="{ expanded: leftExpanded }">
 
     <button
       class="expand-btn"
       @click="leftExpanded = !leftExpanded">
       {{ leftExpanded ? '«' : '»' }}
     </button>
-    
-    <div
-      class="markdown"
-      v-html="renderMarkdown(markdown)">
+
+    <div class="left-content">
+      <div
+        class="markdown"
+        v-html="renderMarkdown(markdown)">
+      </div>
     </div>
 
-    <div v-if="currentUser" class='userBox'>
-      <div>User: {{ currentUser.displayName }}</div>
-      <div>Role: {{ currentUser.role?.toLowerCase() }}</div>
-      <a href="/logout">Logout</a>
+    <div v-if="currentUser" class="userBox">
+      <div class="userBox-title">Account</div>
+
+      <div class="userBox-name">
+        {{ currentUser.displayName || currentUser.email }}
+      </div>
+
+      <div class="userBox-role">
+        {{ currentUser.role?.toLowerCase() }} / <a href="/logout" class="logout-btn">Logout</a>
+      </div>
+
+      
     </div>
 
   </section>
