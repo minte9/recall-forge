@@ -437,7 +437,7 @@
       margin-left: 10px;
     }
 
-    .panel-menu {
+    /* .panel-menu {
       position: absolute;
       top: 20px;
       right: 20px;
@@ -453,12 +453,32 @@
 
     .menu-btn:hover {
       opacity: 1;
+    } */
+
+    .panel-menu {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 100;
     }
+
+    .menu-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 20px;
+      opacity: .6;
+    }
+
+    .menu-btn:hover {
+        opacity: 1;
+    }
+    
 
     .menu-dropdown {
       position: absolute;
       right: 0;
-      top: 32px;
+      top: 26px;
 
       width: 170px;
 
@@ -566,42 +586,48 @@
   <section class="panel left-panel" :class="{ expanded: leftExpanded }">
 
     <div class="panel-menu">
-      <button class="menu-btn" @click="menuOpen = !menuOpen">
-        ☰
-      </button>
+      
+      <div
+        class="panel-menu"
+        @mouseenter="menuOpen = true"
+        @mouseleave="menuOpen = false">
 
-      <div v-if="menuOpen" class="menu-dropdown">
+          <button class="menu-btn">
+              ☰
+          </button>
 
-        <div class="menu-group-title">
-          View
-        </div>
+          <div v-if="menuOpen" class="menu-dropdown">
 
-        <button @click="leftExpanded = !leftExpanded; menuOpen = false">
-          {{ leftExpanded ? 'Collapse Markdown' : 'Expand Markdown' }} 
-        </button>
-        
-        <button @click="showMarkdownExample(); menuOpen = false">
-          Pattern Example
-        </button>
+              <div class="menu-group-title">
+                  Markdown
+              </div>
 
-        <button @click="showMarkdownSummaries(); menuOpen = false">
-          Markdowns Files
-        </button>
+              <button @click="leftExpanded = !leftExpanded">
+                {{ leftExpanded ? 'Collapse Markdown' : 'Expand Markdown' }} 
+              </button>
 
-        <div class="menu-divider"></div>
-        
-        <div class="menu-group-title">
-          Account
-        </div>        
+              <button @click="showMarkdownExample()">
+                  Markdown Example
+              </button>
 
-        <button @click="showAccount = !showAccount; menuOpen = false">
-          Account Details
-        </button>
+              <div class="menu-divider"></div>
 
-        <a href="/logout">
-          Logout
-        </a>
+              <div class="menu-group-title">
+                  Account
+              </div>
+
+              <button @click="showAccount = !showAccount">
+                  Account Details
+              </button>
+
+              <a href="/logout">
+                  Logout
+              </a>
+
+          </div>
+
       </div>
+
     </div>
 
     <div class="left-content">
