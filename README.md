@@ -368,7 +368,6 @@ public class MeController {
 
 
 
-
 ## Architecture
 
 ![Screenshot](docs/images/recall-forge_architecture.png)

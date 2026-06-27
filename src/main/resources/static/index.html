@@ -8,820 +8,1333 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <link rel="icon" type="image/png" href="recall-forge.png">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
   <style>
+  :root {
+    --bg: #f4f6f8;
+    --card: #fff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --line: #e5e7eb;
+    --orange: #f45b00;
+    --orange-dark: #e85800;
+    --yellow: #ffb020;
+    --green: #22c55e;
+    --red: #dc3412;
+    --shadow: 0 4px 14px rgba(15,23,42,.08);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    max-width: 1400px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+  }
+
+  button, input, textarea { font-family: inherit; }
+
+  #app { min-height: 100vh; }
+
+  .layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .layout.expanded {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px;
+    overflow: auto;
+    box-shadow: var(--shadow);
+  }
+
+  .left-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .left-content { flex: 1; }
+
+  .app-panel { position: relative; }
+
+  .panel-menu {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+  }
+
+  .menu-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 20px;
+    opacity: .65;
+    padding: 4px 8px;
+  }
+
+  .menu-dropdown {
+    position: absolute;
+    right: 0;
+    top: 32px;
+    width: 190px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+    padding: 8px;
+    z-index: 999;
+  }
+
+  .menu-dropdown button,
+  .menu-dropdown a {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    text-align: left;
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: #334155;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .menu-dropdown button:hover,
+  .menu-dropdown a:hover {
+    background: #f8fafc;
+  }
+
+  .mobile-menu-dropdown .menu-group-title {
+    padding: 6px 10px 2px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+
+  .mobile-menu-dropdown .menu-divider {
+    height: 1px;
+    margin: 4px 8px;
+    background: #f1f5f9;
+  }
+
+  .expand-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--orange);
+    opacity: .7;
+  }
+
+  .account-box {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* Markdown */
+  .markdown {
+    background: white;
+    color: #111827;
+    line-height: 1.4;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .markdown > :first-child { margin-top: 0; }
+  .markdown > :last-child { margin-bottom: 0; }
+
+  .markdown p { margin: 5px 0; }
+
+  .markdown h1 {
+    font-size: 24px;
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .markdown h2 { font-size: 18px; margin: 18px 0 8px; }
+  .markdown h3 { font-size: 17px; margin: 14px 0 6px; }
+  .markdown h4 { font-size: 15px; margin: 12px 0 6px; }
+
+  .markdown ul,
+  .markdown ol {
+    margin: 6px 0;
+    padding-left: 20px;
+  }
+
+  .markdown li { margin: 3px 0; }
+
+  .markdown pre {
+    margin: 0;
+    padding: 12px;
+    background: #f8fafc;
+    color: #1f2937;
+    overflow-x: auto;
+    line-height: 1.45;
+    border-radius: 8px;
+  }
+
+  .markdown code {
+    font-family: Consolas, monospace;
+    font-size: 13px;
+  }
+
+  .markdown details {
+    margin: 10px 0;
+    border: 1px solid #ececec;
+    border-radius: 10px;
+    background: #fafafa;
+    overflow: hidden;
+  }
+
+  .markdown summary {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #374151;
+    background: #f7f7f7;
+  }
+
+  /* Dashboard */
+  .review-home {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .dashboard-card,
+  .knowledge-card,
+  .reward-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 14px;
+    box-shadow: none;
+    border: 1px solid #eef2f7;
+  }
+
+  .reward-card {
+    border: 0px solid !important;
+  }
+
+  .dashboard-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0 0 12px;
+  }
+
+  .dashboard-hero {
+    display: block;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+
+  .stat-item {
+    text-align: center;
+    border-right: 1px solid var(--line);
+  }
+
+  .stat-item:last-child {
+    border-right: none;
+  }
+
+  .stat-number {
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .stat-label {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .attention-header,
+  .knowledge-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .attention-header h3,
+  .knowledge-card h3 {
+    margin: 0;
+    font-size: 18px;
+  }
+
+  .attention-link {
+    border: none;
+    background: transparent;
+    color: var(--orange);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .attention-row {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    border-top: 0px solid var(--line);
+  }
+
+  .attention-row .chevron {
+    display: none;
+  }
+
+  .attention-icon {
+    color: var(--orange);
+    font-size: 17px;
+  }
+
+  .attention-row span:nth-child(2) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .attention-due {
+    color: var(--orange);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .knowledge-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .knowledge-card {
+    min-height: auto;
+  }
+
+  .knowledge-card.strong h3 { color: var(--green); }
+  .knowledge-card.weak h3 { color: var(--orange); }
+
+  .knowledge-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 10px;
+  }
+
+  .knowledge-item {
+    display: flex;
+    gap: 7px;
+    align-items: baseline;
+    color: #1f2937;
+    font-size: 14px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    display: inline-block;
+    flex: 0 0 auto;
+  }
+
+  .dot.green { background: var(--green); }
+  .dot.red { background: var(--red); }
+
+  .reward-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: #334155;
+    font-size: 14px;
+  }
+
+  .reward-level {
+    text-align: right;
+  }
+
+  .reward-bar {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  .reward-bar-fill {
+    height: 100%;
+    background: var(--green);
+    min-width: 2px;
+  }
+
+  .reward-streak {
+    color: #555;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+
+  .actions-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+
+  .actions-row button,
+  .actions-row .upload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 130px;
+    height: 42px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .actions-row button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+
+  .review-btn {
+    background: linear-gradient(135deg, #ffc542, #ff9f1c);
+  }
+
+  .upload-btn,
+  .submit-btn {
+    background: var(--orange-dark);
+  }
+
+  .markdowns-btn {
+    background: white !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 15px;
+  }
+
+  .category-status {
+    margin-left: auto;
+    color: #374151;
+    font-size: 13px;
+  }
+
+  .feedback,
+  .error {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .feedback {
+    background: #ecfdf5;
+    border-left: 4px solid #10b981;
+  }
+
+  .error {
+    background: #fef2f2;
+    color: #991b1b;
+    border-left: 4px solid #ef4444;
+  }
+
+  /* Mobile shell */
+  .mobile-topbar,
+  .mobile-bottom-nav {
+    display: none;
+  }
+
+  .dashboard-card {
+    background: white;
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.08);
+  }
+
+  .card-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title-row h3 {
+      font-size:18px;
+      font-weight:700;
+      margin-bottom:10px;
+      margin-top: 0px;
+  }
+
+  .review-stats-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      align-items:start;
+      margin-top:12px;
+  }
+
+  .review-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+      padding: 0 14px;
+  }
+
+  .review-stat:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 24px;
+    right: 0;
+    width: 1px;
+    height: 68px;
+    background: #e5e7eb;
+  }
+
+  .stat-icon{
+      width:24px;
+      height:24px;
+      margin:0 auto 8px;
+  }
+
+  .stat-icon svg{
+      width:100%;
+      height:100%;
+  }
+
+  .orange{
+      color:#f97316;
+  }
+
+  .purple{
+      color:#9333ea;
+  }
+
+  .blue{
+      color:#3b82f6;
+  }
+
+  .green{
+      color:#22c55e;
+  }
+
+  .review-stat strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+  }
+
+  .review-stat span {
+      display: block;
+      margin-top: 6px;
+      font-size: 13px;
+      color: #64748b;
+      white-space: nowrap;
+  }
+  .total-row{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+  }
+
+  .btn-icon {
+      display: inline-block;
+      width: 20px;
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 18px;
+      font-weight: bold;
+  }
+
+  .brain-icon {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    opacity: 0.45;
+    filter: grayscale(100%);
+    float: right;
+    margin: 0 0 0 14px;
+  }
+
+  .panel-header {
+    margin-bottom: 14px;
+  }
+
+  .back-btn {
+    border: none;
+    background: transparent;
+    color: var(--orange);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .account-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .account-panel h3 {
+    margin: 0 0 16px;
+  }
+
+  .account-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .account-row span {
+    color: var(--muted);
+  }
+
+  .account-row strong {
+    text-align: right;
+  }
+
+  .account-logout {
+    display: inline-block;
+    margin-top: 16px;
+    color: var(--orange);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .mobile-topbar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mobile-topbar-spacer {
+      width: 38px;   /* same visual width as the menu button */
+  }
+
+  .markdown-list-page h3 {
+    margin: 0 0 14px;
+    font-size: 22px;
+  }
+
+  .markdown-group-card {
+    background: #fff;
+    border: 1px solid #eef2f7;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .markdown-group-card h4 {
+    margin: 0 0 10px;
+    font-size: 17px;
+    color: #0f172a;
+  }
+
+  .markdown-file-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .markdown-file-row:first-of-type {
+    border-top: none;
+  }
+
+  .markdown-file-meta {
+    margin-top: 4px;
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  .markdown-due {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: #fff7ed;
+    color: var(--orange);
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .menu-group-title {
+    padding: 6px 10px 2px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+
+  .menu-divider {
+    height: 1px;
+    margin: 4px 8px;
+    background: #f1f5f9;
+  }
+
+  @media (max-width: 900px) {
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      color: #1f2937;
+      background: #f5f7fa;
+      font-size: 14px;
     }
 
-    #app {
-      height: 100vh;
+    .mobile-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      height: 52px;
+      padding: 8px 14px;
+      background: #f5f7fa;
+      z-index: 450;
+    }
+
+    .mobile-title {
+      font-size: 22px;
+      font-weight: 800;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .mobile-topbar button,
+    .mobile-topbar a {
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 22px;
+      text-decoration: none;
+      cursor: pointer;
     }
 
     .layout {
-      height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      padding: 16px;
-      box-sizing: border-box;
-    }
-
-    .layout.expanded {
-      grid-template-columns: 1fr;
-    }
-
-    .panel {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      overflow: auto;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-
-    .left-panel {
-      position: relative;
       display: flex;
       flex-direction: column;
+      min-height: 100vh;
+      height: auto;
+      padding: 8px 8px 76px;
+      gap: 8px;
     }
 
-    .left-content {
-      flex: 1;
+    .layout > .app-panel { order: 1; }
+    .layout > .left-panel { order: 2; }
+
+    .layout.mobile-markdown > .left-panel { order: 1; }
+    .layout.mobile-markdown > .app-panel { order: 2; }
+
+    .panel {
+      border-radius: 16px;
+      padding: 12px;
+      overflow: visible;
+      box-shadow: none;
+      border: 1px solid #edf2f7;
     }
 
-    .userBox {
-      margin-top: auto;
-      padding-top: 34px;
-
-      border-top: 0px solid #e5e7eb;
-
-      color: #64748b;
-      font-size: 0.9rem;
+    .home-link-btn,
+    .desktop-menu,
+    .expand-btn,
+    .markdowns-btn {
+      display: none !important;
     }
 
-    .userBox-title {
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: #64748b;
+    .review-home {
+      gap: 8px;
+    }
+
+    .dashboard-card {
+      padding: 12px;
+      border-radius: 14px;
+    }
+
+    .dashboard-title {
+      font-size: 17px;
       margin-bottom: 10px;
     }
 
-    .userBox-name {
-      /* font-weight: 600; */
-      color: #334155;
-      padding-left: 10px; 
+    .stats-grid {
+      grid-template-columns: repeat(4, 1fr);
     }
 
-    .userBox-role {
-      margin-top: 2px;
+    .stat-number {
+      font-size: 22px;
     }
 
-    .logout-btn {
-      display: inline-block;
-      margin-top: 8px;
-
-      color: #64748b;
-      text-decoration: underline;
-
-      background: none;
-      border: none;
-      padding: 0;
-
-      font: inherit;
+    .stat-label {
+      font-size: 11px;
     }
 
-    .logout-btn:hover {
-      color: #ef4444;
+    .attention-header h3,
+    .knowledge-card h3 {
+      font-size: 17px;
+    }
+
+    .attention-row {
+      padding: 0px 0;
+      grid-template-columns: 20px minmax(0, 1fr) auto;
+    }
+
+    .attention-icon {
+      font-size: 15px;
+    }
+
+    .knowledge-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .knowledge-item {
+      font-size: 13px;
+    }
+
+    .reward-streak {
+      font-size: 13px;
+    }
+
+    .actions-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
     }
 
     .actions-row button,
     .actions-row .upload-btn {
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        gap:8px;
-        width:140px;
-        height:48px;
-        padding:0;
-        box-sizing:border-box;
-        border:none;
-        border-radius:14px;
-        color:white;
-        cursor:pointer;
-        font-size:14px;
-        font-weight:600;
-        font-family:inherit;
-        text-decoration:none;
-        white-space:nowrap;
-        transition:.18s;
-        box-shadow: 0 8px 18px rgba(0,0,0,.08);
-    }
-
-    .actions-row button:hover,
-    .actions-row .upload-btn:hover {
-
-        transform:
-            translateY(-1px);
-
-        box-shadow:
-            0 12px 20px rgba(0,0,0,.10);
-    }
-
-    .review-btn {
-        background:
-            linear-gradient(
-                135deg,
-                #FFC542,
-                #FFB020
-            );
-    }
-
-    .upload-btn {
-        background: #F7A57B;
-    }
-
-    .markdowns-btn {
-        background: #999999;
-    }
-
-    .submit-btn {
-      background: #E85800;
-    }
-
-    .actions-row {
-      margin-top: 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    textarea {
       width: 100%;
-      min-height: 140px;
-      margin-top: 12px;
-      padding: 12px;
-      box-sizing: border-box;
-      border-radius: 8px;
-      border: 1px solid #d1d5db;
-      font-size: 15px;
-    }
-
-    .feedback {
-      margin-top: 16px;
-      padding: 12px;
-      background: #ecfdf5;
-      border-left: 4px solid #10b981;
-      border-radius: 6px;
-    }
-
-    .error {
-      margin-top: 16px;
-      padding: 12px;
-      background: #fef2f2;
-      color: #991b1b;
-      border-left: 4px solid #ef4444;
-      border-radius: 6px;
-    }
-
-    .empty-state {
-      color: #6b7280;
-      margin-top: 20px;
+      min-width: 0;
+      height: 44px;
+      border-radius: 12px;
+      font-size: 13px;
     }
 
     .markdown {
-      background: white;
-      color: #111827;
-      line-height: 1.45;
-      padding: 16px;
-      border-radius: 8px;
-    }
-
-    .markdown > :first-child {
-      margin-top: 0;
-    }
-
-    .markdown > :last-child {
-      margin-bottom: 0;
-    }
-
-    .markdown p {
-      margin: 6px 0;
-    }
-
-    .markdown h1,
-    .markdown h2,
-    .markdown h3,
-    .markdown h4 {
-      font-weight: 700;
-      line-height: 1.25;
-    }
-
-    .markdown h1 {
-      font-size: 32px;
-      margin: 0 0 14px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .markdown h2 {
-      font-size: 16px;
-      margin: 22px 0 10px;
+      padding: 6px;
+      font-size: 14px;
     }
 
     .markdown h3 {
-      /*font-size: 20px;*/
-      margin: 18px 0 8px;
-    }
-
-    .markdown h4 {
       font-size: 17px;
-      margin: 14px 0 6px;
     }
 
-    .markdown ul,
-    .markdown ol {
-      margin: 8px 0;
-      padding-left: 24px;
+    .dashboard-card {
+      padding: 18px;
     }
 
-    .markdown li {
-      margin: 4px 0;
+    .card-title-row h3 {
+      font-size: 22px;
     }
 
-    .markdown details {
-      margin: 14px 0;
-      border: 1px solid #ececec;
-      border-radius: 10px;
-      background: #fafafa;
-      overflow: hidden;
-    }
-
-    .markdown summary {
-      padding: 12px 16px;
-      cursor: pointer;
-      font-weight: 600;
-      color: #374151;
-      background: #f7f7f7;
-      user-select: none;
-    }
-
-    .markdown summary:hover {
-      background: #f3f3f3;
-    }
-
-    .markdown details[open] summary {
-      border-bottom:
-          1px solid #ececec;
-    }
-
-    .markdown details pre {
-      margin: 0;
-      padding: 16px;
-      background: white;
-      color: #1f2937;
-      overflow-x: auto;
-      line-height: 1.55;
-    }
-
-    .markdown code {
-      font-family:
-          Consolas,
-          monospace;
-
-      font-size: 14px;
-    }
-
-    .markdown p code,
-    .markdown li code {
-      background: #f3f4f6;
-      color: #dc2626;
-      padding: 2px 5px;
-      border-radius: 4px;
-    }
-
-    .markdown blockquote {
-      margin: 10px 0;
-      border-left: 4px solid #d1d5db;
-      padding-left: 12px;
-      color: #4b5563;
-    }
-
-    .markdown table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 12px 0;
-    }
-
-    .markdown th,
-    .markdown td {
-      border: 1px solid #d1d5db;
-      padding: 8px;
-    }
-
-    .home-link-btn {
-      border: none;
-      background: none;
-      padding: 0;
-      margin: 0 0 0 14px;
-      cursor: pointer;
-      font-size: 14px;
-      line-height: 1;
-      color: inherit;
-      opacity: 0.7;
-      float: right;
-      filter: grayscale(100%);
-    }
-
-    .category-status {
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #374151;
-      padding-left: 10px;
-    }
-
-    .home-link-icon {
-      width: 100px;
-      float: right;
-      filter: grayscale(100%);
-    }
-
-    .knowledge-block {
+    .review-stats-grid {
       margin-top: 18px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    .knowledge-block h3, .dashboard-summary h3, .weak-areas h3 {
-      margin-bottom: 8px;
+    .review-stat {
+      padding: 0 6px;
     }
 
-    .metadata-help {
-        padding: 15px;
+    .review-stat:not(:last-child)::after{
+        content:"";
+        position:absolute;
+        right:0;
+        top:12px;
+        width:1px;
+        height:56px;
+        background:#e5e7eb;
     }
 
-    .metadata-help pre {
-        white-space: pre-wrap;
-        font-family: monospace;
-        margin: 0;
+    .stat-icon {
+      font-size: 22px;
+      margin-bottom: 14px;
     }
 
-    .reward-card {
-      padding: 30px 0px 0px 0px;
+    .review-stat strong {
+      font-size: 24px;
     }
 
-    .reward-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 8px;
+    .review-stat span {
+      font-size: 12px;
     }
 
-    .reward-xp,
-    .reward-streak {
-      color: #555;
-      margin-top: 10px;
+    .total-row {
+      gap: 8px;
     }
 
-    .reward-bar {
-      height: 10px;
-      background: #e5e7eb;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: 10px;
+    .mobile-menu-wrap {
+      position: relative;
     }
 
-    .reward-bar-fill {
-      height: 100%;
-      background: #22c55e;
+    .mobile-menu-dropdown {
+      position: absolute;
+      top: 38px;
+      left: 0;
+      width: 190px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+      padding: 8px;
+      z-index: 999;
     }
 
-    .dashboard-stats {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
+    .mobile-menu-dropdown button,
+    .mobile-menu-dropdown a {
+      display: block;
+      width: 100%;
+      padding: 10px 12px;
+      border: none;
+      background: transparent;
+      text-align: left;
+      text-decoration: none;
+      font: inherit;
+      color: #334155;
+      border-radius: 10px;
     }
+  }
+
+  @media (max-width: 560px) {
+    .stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .stat-number {
+      font-size: 20px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+    }
+
+    .knowledge-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .knowledge-card {
+      padding: 10px;
+    }
+
+    .knowledge-list {
+      gap: 5px;
+    }
+
 
     .reward-level {
-      float: right;
+      text-align: left;
     }
-
-    .expand-btn {
-      float: right;
-      border: none;
-      background: none;
-      cursor: pointer;
-      font-size: 18px;
-      opacity: .6;
-      position: absolute;
-      top: 24px;
-      right: 24px;
-    }
-
-    .expand-btn:hover {
-      opacity: 1;
-    }
-
-    .actions-row button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .userBox {
-      margin-left: 10px;
-    }
-
-    /* .panel-menu {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-
-    .menu-btn {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      font-size: 20px;
-      opacity: 0.65;
-    }
-
-    .menu-btn:hover {
-      opacity: 1;
-    } */
-
-    .panel-menu {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        z-index: 100;
-    }
-
-    .menu-btn {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      font-size: 20px;
-      opacity: .6;
-    }
-
-    .menu-btn:hover {
-        opacity: 1;
-    }
-    
-
-    .menu-dropdown {
-      position: absolute;
-      right: 0;
-      top: 26px;
-
-      width: 170px;
-
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
-
-      padding: 6px;
-      z-index: 10;
-    }
-
-    .menu-dropdown button,
-    .menu-dropdown a {
-        display: block;
-        width: 100%;
-
-        padding: 6px 12px;
-
-        text-align: left;
-        text-decoration: none;
-
-        border: none;
-        background: transparent;
-
-        font: inherit;
-        color: #334155;
-
-        border-radius: 6px;
-        cursor: pointer;
-    }
-
-    .menu-dropdown button:hover,
-    .menu-dropdown a:hover {
-      background: #f3f4f6;
-    }
-
-    .account-box {
-      margin-top: 20px;
-      padding-top: 14px;
-      border-top: 1px solid #e5e7eb;
-      color: #64748b;
-      font-size: 14px;
-    }
-
-    .menu-group-title {
-        padding: 6px 12px 2px;
-
-        font-size: 11px;
-        font-weight: 700;
-
-        letter-spacing: .08em;
-        text-transform: uppercase;
-
-        color: #94a3b8;
-    }
-
-    .menu-divider {
-        height: 1px;
-        margin: 4px 8px;
-        background: #ffffff;
-    }
-
-    @media (max-width: 900px) {
-      body {
-        background: #f4f6f8;
-      }
-
-      .layout {
-        display: flex;
-        flex-direction: column;
-        height: auto;
-        min-height: 100vh;
-        padding: 12px;
-        gap: 12px;
-      }
-
-      .layout > .panel:not(.left-panel) {
-        order: 1;
-      }
-
-      .left-panel {
-        order: 2;
-      }
-
-      .panel {
-        box-shadow: none;
-        border-radius: 16px;
-        padding: 18px;
-        overflow: visible;
-      }
-
-      .left-panel {
-        min-height: auto;
-      }
-    }
-      
-  </style>
+  }
+</style>
 </head>
 
 <body>
 <div id="app">
-  <div class="layout" :class="{ expanded: leftExpanded }">
 
-  <section class="panel left-panel" :class="{ expanded: leftExpanded }">
+  <header class="mobile-topbar">
+    
+    <div class="mobile-menu-wrap">
+      <button @click="mobileMenuOpen = !mobileMenuOpen" title="Menu">☰</button>
 
-    <div class="panel-menu">
-      
-      <div
-        class="panel-menu"
-        @mouseenter="menuOpen = true"
-        @mouseleave="menuOpen = false">
+      <div v-if="mobileMenuOpen" class="mobile-menu-dropdown">
+        <div class="menu-group-title">Markdown</div>
 
-          <button class="menu-btn">
-              ☰
-          </button>
+        <button @click="showMarkdownExample(); mobileMenuOpen = false">
+          Pattern Example
+        </button>
+
+        <button @click="showMarkdownSummaries(); mobileMenuOpen = false">
+          Markdowns
+        </button>
+
+        <div class="menu-divider"></div>
+
+        <div class="menu-group-title">Account</div>
+
+        <button @click="showAccountDetails(); mobileMenuOpen = false">
+          Account Details
+        </button>
+
+        <a href="/logout">Logout</a>
+      </div>
+    </div>
+
+    <div
+      class="mobile-title"
+      @click="showDashboard"
+      title="Dashboard">
+      {{ review ? 'Review' : 'Dashboard' }}
+    </div>
+
+    <div class="mobile-topbar-spacer"></div>
+  </header>
+
+  <div class="layout" :class="{ expanded: leftExpanded, 'mobile-markdown': mobileView === 'markdown' }">
+
+    <section class="panel left-panel" :class="{ expanded: leftExpanded }">
+      <button
+        class="expand-btn"
+        v-if="review"
+        :title="leftExpanded ? 'Restore split view' : 'Focus markdown'"
+        @click="leftExpanded = !leftExpanded">
+        {{ leftExpanded ? '◀' : '▶' }}
+      </button>
+
+      <div class="panel-menu desktop-menu" v-if="!review">
+        <div
+          class="panel-menu"
+          @mouseenter="menuOpen = true"
+          @mouseleave="menuOpen = false">
+
+          <button class="menu-btn">☰</button>
 
           <div v-if="menuOpen" class="menu-dropdown">
+            <div class="menu-group-title">Markdown</div>
 
-              <div class="menu-group-title">
-                  Markdown
-              </div>
+            <button @click="showMarkdownExample(); menuOpen = false">
+              Pattern Example
+            </button>
 
-              <button @click="leftExpanded = !leftExpanded">
-                {{ leftExpanded ? 'Collapse Panel' : 'Expand Panel' }} 
-              </button>
+            <button @click="showMarkdownSummaries(); menuOpen = false">
+              Markdowns
+            </button>
 
-              <button @click="showMarkdownExample()">
-                  Show Pattern
-              </button>
+            <div class="menu-divider"></div>
 
-               <button @click="showMarkdownSummaries(); menuOpen = false">
-                  Markdowns
-                </button>
+            <div class="menu-group-title">Account</div>
 
-              <div class="menu-divider"></div>
+            <button @click="showAccountDetails(); menuOpen = false">
+              Account Details
+            </button>
 
-              <div class="menu-group-title">
-                  Account
-              </div>
+            <a href="/logout">Logout</a>
+          </div>
+        </div>
+      </div>
 
-              <button @click="showAccount = !showAccount">
-                  Account Details
-              </button>
+      <div class="left-content">
 
-              <a href="/logout">
-                  Logout
-              </a>
+        <div v-if="leftPanel === 'account' && currentUser" class="account-panel">
+          <h3>Account</h3>
 
+          <div class="account-row">
+            <span>Name</span>
+            <strong>{{ currentUser.displayName || "-" }}</strong>
           </div>
 
-      </div>
+          <div class="account-row">
+            <span>Email</span>
+            <strong>{{ currentUser.email || "-" }}</strong>
+          </div>
 
-    </div>
+          <div class="account-row">
+            <span>Username</span>
+            <strong>{{ currentUser.username || "-" }}</strong>
+          </div>
 
-    <div class="left-content">
-      <div
-        class="markdown"
-        v-html="renderMarkdown(markdown)">
-      </div>
-    </div>
-    
-    <div v-if="showAccount && currentUser" class="account-box">
-      <strong>{{ currentUser.displayName || currentUser.email }}</strong>
-      <div>{{ currentUser.role?.toLowerCase() }}</div>
-    </div>
+          <div class="account-row">
+            <span>Role</span>
+            <strong>{{ currentUser.role || "-" }}</strong>
+          </div>
 
-  </section>
-
-  <section v-if="!leftExpanded" class="panel">
-
-    <a href="#" class="home-link-btn" @click.prevent="goHome" title="Back to home">
-      <img src="recall-forge.png" alt="Home" class="home-link-icon">
-    </a>
-
-    <div v-if="review">
-          
-      <h3>{{ review.topicTitle }}</h3>
-
-      <p>
-        {{ review.question }}
-      </p>
-
-      <textarea
-        v-model="userAnswer"
-        placeholder="Write your answer here...">
-      </textarea>
-
-      <div class="actions-row">
-
-        <button
-          class="submit-btn"
-          @click="submitAnswer" 
-          :disabled="loading || answerSubmitted">
-          <span>✈</span> Submit Answer
-        </button>
-
-        <button
-          class="review-btn"
-          @click="startReview">
-          <span>→</span> Next Review
-        </button>
-
-        <p v-if="dashboard && currentMarkdownFileId" class="category-status">
-          Reviews available: {{ dashboard.dueNow }}
-        </p>
-        
-      </div>
-    </div>
-
-    <!-- Available Reviews -->
-    <div v-if="!review" class="review-home">  
-
-      <div v-if="dashboard" class="dashboard-summary">
-        
-        <h3>Reviews available</h3>
-
-        <div class="dashboard-stats">
-          <span>Today: {{ dashboard.dueNow }}</span> 
-          <span>Tomorrow: {{ dashboard.dueTomorrow }}</span>
-          <span>This week: {{ dashboard.dueThisWeek }}</span> 
-          <span>Total: {{ dashboard.totalTopics }}</span>
-        </div>
-      </div>
-
-      <div 
-        v-if="dashboard && dashboard.weakAreas && dashboard.weakAreas.length"
-        class="weak-areas">
-
-        <h3>Needs attention</h3>
-
-        <div
-          v-for="area in dashboard.weakAreas"
-          :key="area.environment + area.category + area.subcategory"
-          class="weak-area-row">
-          
-          {{ area.category }} {{ area.subcategory }} → {{ area.dueCount }} due
-        </div>
-      </div>
-
-      <!-- Strong / Week areas -->
-      <div
-        v-if="dashboard && dashboard.strongAreas && dashboard.strongAreas.length"
-        class="knowledge-block">
-
-        <h3>Strong</h3>
-
-        <div 
-          v-for="area in dashboard.strongAreas"
-          :key="'strong-' + area.title" 
-          class="dashboard-stats">
-          <span>{{ area.title }}</span> <!--: {{ formatScore(area.averageMemoryScore) }}-->
-        </div>
-      </div>
-
-      <div
-        v-if="dashboard && dashboard.weakKnowledgeAreas && dashboard.weakKnowledgeAreas.length"
-        class="knowledge-block">
-
-        <h3>Weak</h3>
-
-        <div
-          v-for="area in dashboard.weakKnowledgeAreas"
-          :key="'weak-' + area.title" 
-          class="dashboard-stats">
-
-          <span>{{ area.title }}</span> <!--: {{ formatScore(area.averageMemoryScore) }}  -->
-        </div>
-      </div>
-
-      <!-- Reward -->
-      <div 
-        v-if="dashboard && dashboard.reward" 
-        class="card reward-card">
-        
-        <div class="reward-xp">
-          XP: {{ dashboard.reward.xpInLevel }} / {{ dashboard.reward.xpForNextLevel }}  
-          <span class="reward-level">Level {{ dashboard.reward.level }} — {{ dashboard.reward.title }}</span>
         </div>
 
-        <div class="reward-bar">
+        <div v-if="leftPanel === 'markdowns'" class="markdown-list-page">
+          <h3>Markdowns</h3>
+
           <div
-            class="reward-bar-fill"
-            :style="{ width: ((dashboard.reward.xpInLevel / dashboard.reward.xpForNextLevel) * 100) + '%' }">
+            v-for="(files, groupName) in markdownGroups"
+            :key="groupName"
+            class="markdown-group-card">
+
+            <h4>{{ groupName }}</h4>
+
+            <div
+              v-for="file in files"
+              :key="file.markdownFileId"
+              class="markdown-file-row">
+
+              <div>
+                <strong>{{ file.fileTitle }}</strong>
+                <div class="markdown-file-meta">
+                  {{ file.topicCont }} topics · {{ file.dueCount }} due · avg {{ formatScore(file.averageMemoryScore) }}
+                </div>
+              </div>
+
+              <span class="markdown-due" v-if="file.dueCount > 0">
+                {{ file.dueCount }}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div class="reward-streak">
-          Streak: {{ dashboard.reward.streakDays }} day<span v-if="dashboard.reward.streakDays !== 1">s</span>
+        <div
+          v-else-if="leftPanel === 'markdown'"
+          class="markdown"
+          v-html="renderMarkdown(markdown)">
+        </div>
+
+      </div>
+
+    </section>
+
+    <section v-if="!leftExpanded" class="panel app-panel">
+
+      <div v-if="review">
+        <a href="#" class="home-link-btn" @click.prevent="goHome" title="Back to home">
+          <img src="recall-forge.png" alt="" class="brain-icon">
+        </a>
+        
+        <h3>{{ review.topicTitle }}</h3>
+        <p>{{ review.question }}</p>
+
+        <textarea
+          v-model="userAnswer"
+          placeholder="Write your answer here...">
+        </textarea>
+
+        <div class="actions-row">
+          <button
+            class="submit-btn"
+            @click="submitAnswer"
+            :disabled="loading || answerSubmitted">
+            <span class="btn-icon">✓</span>
+            Submit Answer
+          </button>
+
+          <button
+            class="review-btn"
+            @click="startReview">
+            <span class="btn-icon">→</span>
+            Next Review
+          </button>
+
+          <p v-if="dashboard && currentMarkdownFileId" class="category-status">
+            Reviews available: {{ dashboard.dueNow }}
+          </p>
         </div>
       </div>
 
-      <br>
+      <div v-if="!review" class="review-home">
+        <div v-if="dashboard" class="dashboard-card reviews-card">
+          <div class="card-title-row">
+            <h3>Reviews available</h3>
+          </div>
 
-      <!-- Action Buttons -->
-      <div class="actions-row">
-        <button
-          class="review-btn"
-          @click="startReview"
-          :disabled="loading || !dashboard || dashboard.dueNow === 0">
-          {{ loading ? "Loading..." : "Start Review" }}
-        </button>
+          <div class="review-stats-grid">
+            <div class="review-stat stat-orange">
+              <div class="stat-icon orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="5" width="18" height="16" rx="2"/>
+                    <line x1="16" y1="3" x2="16" y2="7"/>
+                    <line x1="8" y1="3" x2="8" y2="7"/>
+                    <line x1="3" y1="11" x2="21" y2="11"/>
+                </svg>
+              </div>
+              <strong>{{ dashboard.dueNow }}</strong>
+              <span>Today</span>
+            </div>
 
-        <label class="upload-btn">
-          Upload Markdown
-          <input
-            hidden
-            type="file"
-            accept=".md,.markdown,text/plain"
-            @change="uploadMarkdown"
-          />
-        </label>
+            <div class="review-stat stat-purple">
+              <div class="stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="5" width="18" height="16" rx="2"/>
+                    <line x1="16" y1="3" x2="16" y2="7"/>
+                    <line x1="8" y1="3" x2="8" y2="7"/>
+                    <line x1="3" y1="11" x2="21" y2="11"/>
+                </svg>
+              </div>
+              <strong>{{ dashboard.dueTomorrow }}</strong>
+              <span>Tomorrow</span>
+            </div>
 
-        <!-- <button
-          class="markdowns-btn"
-          @click="showMarkdownSummaries">
-          Markdowns
-        </button> -->
+            <div class="review-stat stat-blue">
+              <div class="stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="5" width="18" height="16" rx="2"/>
+                    <line x1="16" y1="3" x2="16" y2="7"/>
+                    <line x1="8" y1="3" x2="8" y2="7"/>
+                    <line x1="3" y1="11" x2="21" y2="11"/>
+                </svg>
+              </div>
+              <strong>{{ dashboard.dueThisWeek }}</strong>
+              <span>This week</span>
+            </div>
+
+            <div class="review-stat stat-green total-stat">
+              <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 3 3 8l9 5 9-5-9-5z"/>
+                    <path d="M3 12l9 5 9-5"/>
+                    <path d="M3 16l9 5 9-5"/>
+                </svg>
+              </div>
+              <strong>{{ dashboard.totalTopics }}</strong>
+              <span>Total</span>              
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="dashboard && dashboard.weakAreas && dashboard.weakAreas.length"
+          class="dashboard-card">
+
+          <div
+            v-for="area in dashboard.weakAreas"
+            :key="area.environment + area.category + area.subcategory"
+            class="attention-row">
+            <span class="attention-icon">⚠</span>
+            <span>{{ area.category }} {{ area.subcategory }}</span>
+            <span class="attention-due">{{ area.dueCount }} due</span>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+
+        <div class="knowledge-grid">
+          <div
+            v-if="dashboard && dashboard.strongAreas && dashboard.strongAreas.length"
+            class="knowledge-card strong">
+            <div class="knowledge-header">
+              <h3>Strong</h3>
+            </div>
+
+            <div class="knowledge-list">
+              <div
+                v-for="area in dashboard.strongAreas"
+                :key="'strong-' + area.title"
+                class="knowledge-item">
+                <span class="dot green"></span>
+                <span>{{ area.title }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-if="dashboard && dashboard.weakKnowledgeAreas && dashboard.weakKnowledgeAreas.length"
+            class="knowledge-card weak">
+            <div class="knowledge-header">
+              <h3>Weak</h3>
+            </div>
+
+            <div class="knowledge-list">
+              <div
+                v-for="area in dashboard.weakKnowledgeAreas"
+                :key="'weak-' + area.title"
+                class="knowledge-item">
+                <span class="dot red"></span>
+                <span>{{ area.title }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="dashboard && dashboard.reward" class="reward-card">
+          <div class="reward-top">
+            <div>XP: {{ dashboard.reward.xpInLevel }} / {{ dashboard.reward.xpForNextLevel }}</div>
+            <div class="reward-level">Level {{ dashboard.reward.level }} — {{ dashboard.reward.title }}</div>
+          </div>
+
+          <div class="reward-bar">
+            <div
+              class="reward-bar-fill"
+              :style="{ width: rewardProgress + '%' }">
+            </div>
+          </div>
+
+          <div class="reward-streak">
+            🔥 Streak: {{ dashboard.reward.streakDays }} day<span v-if="dashboard.reward.streakDays !== 1">s</span>
+          </div>
+        </div>
+
+        <div class="actions-row">
+          <button
+            class="review-btn"
+            @click="startReview"
+            :disabled="loading || !dashboard || dashboard.dueNow === 0">
+            <span class="btn-icon">►</span>
+            {{ loading ? "Loading..." : "Start Review" }}
+          </button>
+
+          <label class="upload-btn">
+            <span class="btn-icon">→</span>
+            Upload Markdown
+            <input
+              hidden
+              type="file"
+              accept=".md,.markdown,text/plain"
+              @change="uploadMarkdown"
+            />
+          </label>
+
+          <button
+            class="markdowns-btn"
+            @click="showMarkdownSummaries">
+            Markdowns
+          </button>
+        </div>
       </div>
 
-    </div>
+      <div v-if="result" class="feedback">
+        <p><strong>Score:</strong> {{ result.score }}</p>
+        <p><strong>Feedback:</strong> {{ result.feedback }}</p>
+        <p><strong>Updated memory score:</strong> {{ formatScore(result.updateMemoryScore) }}</p>
+        <p><strong>Next review:</strong> {{ formatDate(result.nextReviewAt) }}</p>
+      </div>
 
-    <!-- Feedback Result -->
-    <div v-if="result" class="feedback">
-      <p><strong>Score:</strong> {{ result.score }}</p>
-      <p><strong>Feedback:</strong> {{ result.feedback }}</p>
-      <p>
-        <strong>Updated memory score:</strong>
-        {{ formatScore(result.updateMemoryScore) }}
-      </p>
-      <p>
-        <strong>Next review:</strong>
-        {{ formatDate(result.nextReviewAt) }}
-      </p>
-    </div>
-
-    <div v-if="error" class="error">
-      {{ error }}
-    </div>
-    
-  </section>
-
+      <div v-if="error" class="error">
+        {{ error }}
+      </div>
+    </section>
   </div>
+
 </div>
 
 <script>
@@ -842,75 +1355,97 @@ createApp({
       markdownSummaries: [],
       leftExpanded: false,
       answerSubmitted: false,
-      currentUser: [],
+      currentUser: null,
       menuOpen: false,
-      showAccount: false,
+      leftPanel: "markdown",
+      selectedGroup: null,
+      mobileView: "dashboard",
+      mobileMenuOpen: false,
 
       initialMarkdown: `
 <h3>Markdown File</h3>
 
 Upload a markdown file to start.  
 The uploaded markdown will be saved in the database.  
-When you click <strong>Start Review</strong>, this panel will be updated. 
+When you click <strong>Start Review</strong>, this panel will be updated.
 `
     };
   },
 
-  // comment this when no markdown loaded yet
-  // mounted() {
-  //   this.startReview();
-  // },
+  computed: {
+    rewardProgress() {
+      if (!this.dashboard || !this.dashboard.reward || !this.dashboard.reward.xpForNextLevel) {
+        return 0;
+      }
+
+      const value = (this.dashboard.reward.xpInLevel / this.dashboard.reward.xpForNextLevel) * 100;
+      return Math.max(0, Math.min(100, value));
+    },
+
+    markdownGroups() {
+      const groups = {};
+
+      this.markdownSummaries.forEach(file => {
+        const key = `${file.category} ${file.subcategory}`;
+
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+
+        groups[key].push(file);
+      });
+
+      return groups;
+    }
+  },
 
   mounted() {
     this.markdown = this.initialMarkdown;
     this.loadDashboard();
     this.loadMarkdownSummaries();
-    this.lodaCurrentUser();
+    this.loadCurrentUser();
   },
 
   methods: {
-
     formatScore(score) {
       return Number(score).toFixed(2);
     },
 
     formatDate(date) {
-
-      return new Date(date)
-        .toLocaleString(
-          undefined,
-          {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-
-            hour: "2-digit",
-            minute: "2-digit"
-          }
-        );
+      return new Date(date).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
     },
 
     renderMarkdown(md) {
-        let html = marked.parse(md || "");
-        html = html.replace(
-                /<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g,
+      let html = marked.parse(md || "");
+
+      html = html.replace(
+        /<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g,
 `
 <details class="code-block">
 <summary>show code</summary>
 <pre><code>$1</code></pre>
 </details>
-      `
+`
       );
 
-        return html;
+      return html;
     },
 
     async startReview() {
+      this.mobileView = "dashboard";
       this.loading = true;
       this.error = null;
       this.result = null;
       this.userAnswer = "";
       this.answerSubmitted = false;
+      this.showAccount = false;
+      this.leftPanel = "markdown";
 
       try {
         let data = await this.startReviewRequest(this.currentMarkdownFileId);
@@ -976,6 +1511,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return;
       }
 
+      this.mobileView = "dashboard";
       this.loading = true;
       this.error = null;
       this.result = null;
@@ -1092,7 +1628,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
-    async lodaCurrentUser() {
+    async loadCurrentUser() {
       try {
         const response = await fetch("/api/me", {
           credentials: "same-origin"
@@ -1115,33 +1651,15 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.userAnswer = "";
       this.currentMarkdownFileId = null;
       this.markdown = this.initialMarkdown;
-
+      this.mobileView = "dashboard";
+      this.showAccount = false;
+      this.leftPanel = "markdown";
       this.loadDashboard();
     },
 
     showMarkdownSummaries() {
-      const groups = {};
-
-      this.markdownSummaries.forEach(file => {
-        const key = `${file.category} ${file.subcategory}`;
-
-        if (!groups[key]) {
-          groups[key] = [];
-        }
-
-        groups[key].push(file);
-      });
-
-      let md = "";
-
-      Object.entries(groups).forEach(([groupName, files]) => {
-        md += `### ${groupName}\n\n`;
-        md += "<pre>\n";
-        md += this.renderTextTable(files);
-        md += "\n</pre>\n\n";
-      });
-
-      this.markdown = md;
+      this.leftPanel = "markdowns";
+      this.mobileView = "markdown";
     },
 
     renderTextTable(files) {
@@ -1178,7 +1696,34 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       ].join("\n");
     },
 
+    showAccountDetails() {
+      this.leftPanel = "account";
+      this.mobileView = "markdown";
+    },
+
+    showDashboard() {
+      this.review = null;
+      this.result = null;
+      this.userAnswer = "";
+
+      this.leftPanel = "markdown";
+      this.mobileView = "dashboard";
+
+      this.markdown = this.initialMarkdown;
+      this.currentMarkdownFileId = null;
+
+      this.loadDashboard();
+    },
+
+    closeLeftPanel() {
+        this.showAccount = false;
+        this.mobileView = "dashboard";
+    },
+
     showMarkdownExample() {
+      this.leftPanel = "markdown";
+      this.showAccount = false;
+      this.mobileView = "markdown";
       this.markdown = `
 <h3>Pattern</h3>
 
@@ -1188,7 +1733,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 Content...
 
 ### 2. Topic
-Content...</code></pre>
+Content...</pre>
 
 <h3>Example</h3>
 
