@@ -661,53 +661,148 @@
       width: 38px;   /* same visual width as the menu button */
   }
 
-  .markdown-list-page h3 {
-    margin: 0 0 14px;
-    font-size: 22px;
+  .markdown-page {
+      padding:8px;
   }
 
-  .markdown-group-card {
-    background: #fff;
-    border: 1px solid #eef2f7;
-    border-radius: 14px;
-    padding: 14px;
-    margin-bottom: 12px;
+  .back-link{
+      border:none;
+      background:none;
+      color:#f97316;
+      font-weight:700;
+      cursor:pointer;
+      margin-bottom:12px;
   }
 
-  .markdown-group-card h4 {
-    margin: 0 0 10px;
-    font-size: 17px;
-    color: #0f172a;
+  .subtitle{
+      color:#64748b;
+      margin-bottom:18px;
   }
 
-  .markdown-file-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 10px 0;
-    border-top: 1px solid #f1f5f9;
+  .markdown-group{
+      background:white;
+      border-top:1px solid #edf2f7;
+      margin-bottom:3px;
+      margin-top:3px;
+      overflow:hidden;
+      padding:3px 0px 3px 0px;
   }
 
-  .markdown-file-row:first-of-type {
-    border-top: none;
+  .markdown-group summary{
+      list-style:none;
+      cursor:pointer;
   }
 
-  .markdown-file-meta {
-    margin-top: 4px;
-    font-size: 13px;
-    color: #64748b;
+  .markdown-group summary::-webkit-details-marker{
+      display:none;
   }
 
-  .markdown-due {
-    min-width: 28px;
-    height: 28px;
-    border-radius: 999px;
-    background: #fff7ed;
-    color: var(--orange);
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .markdown-group-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:0px;
+  }
+
+  .group-left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+  }
+
+  .group-icon{
+      width:22px;
+      height:42px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:20px;
+  }
+
+  .group-title{
+      font-size:16px;
+      font-weight:700;
+  }
+
+  .group-right{
+      display:flex;
+      align-items:center;
+      gap:12px;
+  }
+
+  .group-badge{
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:700;
+  }
+
+  .group-arrow{
+      font-size:26px;
+      color:#94a3b8;
+      padding-bottom: 8px;
+  }
+
+  .markdown-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:8px 0px;
+      border-top:0px solid #f1f5f9;
+  }
+
+  .row-left{
+      display:flex;
+      gap:14px;
+      align-items:center;
+  }
+
+  .row-icon{
+      width:26px;
+      height:36px;
+      border-radius:50%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+  }
+
+  .row-title{
+      font-weight:700;
+      margin-bottom:4px;
+  }
+
+  .row-meta{
+      font-size:13px;
+      color:#64748b;
+  }
+
+  .row-meta .due{
+      color:#ea580c;
+      font-weight:700;
+  }
+
+  .row-right{
+      display:flex;
+      align-items:center;
+      gap:12px;
+  }
+
+  .due-badge{
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      background:#fff1eb;
+      color:#ea580c;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-weight:700;
+  }
+
+  .row-arrow{
+      font-size:24px;
+      color:#94a3b8;
   }
 
   .menu-group-title {
@@ -724,6 +819,33 @@
     margin: 4px 8px;
     background: #f1f5f9;
   }
+
+  .group-icon svg,
+  .row-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .group-icon {
+    color: #f97316;
+  }
+
+  .row-icon {
+    color: #999999;
+  }
+
+  .group-arrow {
+        transition: transform .2s;
+    }
+
+    .group-arrow.open {
+        transform: rotate(180deg);
+    }
 
   @media (max-width: 900px) {
     body {
@@ -941,6 +1063,14 @@
       color: #334155;
       border-radius: 10px;
     }
+
+    .layout.mobile-review > .app-panel {
+      display: block;
+    }
+
+    .layout.mobile-review > .left-panel {
+      display: block;
+    }
   }
 
   @media (max-width: 560px) {
@@ -972,6 +1102,14 @@
     .reward-level {
       text-align: left;
     }
+
+    .layout.mobile-markdown > .app-panel {
+      display: none;
+    }
+
+    .layout.mobile-dashboard > .left-panel {
+      display: none;
+    }
   }
 </style>
 </head>
@@ -981,18 +1119,22 @@
 
   <header class="mobile-topbar">
     
-    <div class="mobile-menu-wrap">
-      <button @click="mobileMenuOpen = !mobileMenuOpen" title="Menu">☰</button>
+    <div class="mobile-menu-wrap" ref="mobileMenu">
+      <button @click.stop="mobileMenuOpen = !mobileMenuOpen" title="Menu">☰</button>
 
       <div v-if="mobileMenuOpen" class="mobile-menu-dropdown">
-        <div class="menu-group-title">Markdown</div>
+        <div class="menu-group-title">Reviews</div>
 
-        <button @click="showMarkdownExample(); mobileMenuOpen = false">
-          Pattern Example
+        <button @click="showDashboard(); mobileMenuOpen = false">
+          Dashboard
         </button>
 
         <button @click="showMarkdownSummaries(); mobileMenuOpen = false">
           Markdowns
+        </button>
+
+        <button @click="showMarkdownExample(); mobileMenuOpen = false">
+          Example
         </button>
 
         <div class="menu-divider"></div>
@@ -1011,13 +1153,20 @@
       class="mobile-title"
       @click="showDashboard"
       title="Dashboard">
-      {{ review ? 'Review' : 'Dashboard' }}
+      {{ mobilePageTitle }}
     </div>
 
     <div class="mobile-topbar-spacer"></div>
   </header>
 
-  <div class="layout" :class="{ expanded: leftExpanded, 'mobile-markdown': mobileView === 'markdown' }">
+  <div
+    class="layout"
+    :class="{
+      expanded: leftExpanded,
+      'mobile-dashboard': mobileView === 'dashboard',
+      'mobile-markdown': mobileView === 'markdown',
+      'mobile-review': mobileView === 'review'
+    }">
 
     <section class="panel left-panel" :class="{ expanded: leftExpanded }">
       <button
@@ -1037,14 +1186,14 @@
           <button class="menu-btn">☰</button>
 
           <div v-if="menuOpen" class="menu-dropdown">
-            <div class="menu-group-title">Markdown</div>
+            <div class="menu-group-title">Reviews</div>
 
-            <button @click="showMarkdownExample(); menuOpen = false">
-              Pattern Example
+            <button @click="showDashboard(); mobileMenuOpen = false">
+              Dashboard
             </button>
 
-            <button @click="showMarkdownSummaries(); menuOpen = false">
-              Markdowns
+            <button @click="showMarkdownExample(); menuOpen = false">
+              Example
             </button>
 
             <div class="menu-divider"></div>
@@ -1063,7 +1212,7 @@
       <div class="left-content">
 
         <div v-if="leftPanel === 'account' && currentUser" class="account-panel">
-          <h3>Account</h3>
+          <h3>Account Details</h3>
 
           <div class="account-row">
             <span>Name</span>
@@ -1087,34 +1236,124 @@
 
         </div>
 
-        <div v-if="leftPanel === 'markdowns'" class="markdown-list-page">
-          <h3>Markdowns</h3>
+        <div v-if="leftPanel === 'markdowns'" class="markdown-page">
 
-          <div
-            v-for="(files, groupName) in markdownGroups"
-            :key="groupName"
-            class="markdown-group-card">
+          <h2>Markdowns</h2>
+          <div class="subtitle">
+              Browse your markdown files by category
+          </div>
 
-            <h4>{{ groupName }}</h4>
+          <details
+              v-for="(group, groupName, index) in markdownGroups"
+              :key="groupName"
+              class="markdown-group" 
+              :open="openMarkdownGroup === groupName">
 
-            <div
-              v-for="file in files"
-              :key="file.markdownFileId"
-              class="markdown-file-row">
+              <summary
+                class="markdown-group-header"
+                @click.prevent="
+                    openMarkdownGroup =
+                        openMarkdownGroup === groupName
+                            ? null
+                            : groupName
+                ">
 
-              <div>
-                <strong>{{ file.fileTitle }}</strong>
-                <div class="markdown-file-meta">
-                  {{ file.topicCont }} topics · {{ file.dueCount }} due · avg {{ formatScore(file.averageMemoryScore) }}
-                </div>
+                  <div class="group-left">
+                      <div 
+                        class="group-icon" 
+                        :style="{
+                            color: environmentColor(index),
+                            backgroundColor: softColor(environmentColor(groupName))
+                        }">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M21 8l-9-5-9 5 9 5 9-5z"></path>
+                          <path d="M3 8v8l9 5 9-5V8"></path>
+                          <path d="M12 13v8"></path>
+                        </svg>
+                      </div>
+
+                      <div class="group-title">
+                          {{ groupName }}
+                      </div>
+                  </div>
+
+                  <div class="group-right">
+                      <span
+                        class="group-badge">
+                          {{ group.files.length }} files
+                      </span>
+
+                      <span
+                          class="group-arrow"
+                          :class="{ open: openMarkdownGroup === groupName }">
+                          ⌄
+                      </span>
+                  </div>
+
+              </summary>
+
+              <div
+                  v-for="file in group.files"
+                  :key="file.markdownFileId"
+                  class="markdown-row">
+
+                  <div class="row-left">
+
+                      <div class="row-icon">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <path d="M14 2v6h6"></path>
+                          <path d="M8 13h8"></path>
+                          <path d="M8 17h6"></path>
+                        </svg>
+                      </div>
+
+                      <div>
+
+                          <div class="row-title">
+                              {{ file.fileTitle }}
+                          </div>
+
+                          <div class="row-meta">
+
+                              {{ file.topicCont }} topics
+
+                              •
+
+                              <!-- <span
+                                  :class="{due:file.dueCount>0}">
+                                  {{ file.dueCount }} due
+                              </span> -->
+
+                              {{ file.dueCount }} due
+
+                              •
+
+                              avg {{ formatScore(file.averageMemoryScore) }}
+
+                          </div>
+
+                      </div>
+
+                  </div>
+                  
+                  
+                  <div class="row-right">
+                      <span
+                          class="due-badge"
+                          v-if="file.dueCount>0">
+                          {{ file.dueCount }}
+                      </span>
+                      <!-- <span class="row-arrow">
+                          ›
+                      </span> -->
+                  </div>
+
               </div>
 
-              <span class="markdown-due" v-if="file.dueCount > 0">
-                {{ file.dueCount }}
-              </span>
-            </div>
-          </div>
-        </div>
+          </details>
+
+      </div>
 
         <div
           v-else-if="leftPanel === 'markdown'"
@@ -1314,11 +1553,11 @@
             />
           </label>
 
-          <button
+          <!-- <button
             class="markdowns-btn"
             @click="showMarkdownSummaries">
             Markdowns
-          </button>
+          </button> -->
         </div>
       </div>
 
@@ -1361,6 +1600,8 @@ createApp({
       selectedGroup: null,
       mobileView: "dashboard",
       mobileMenuOpen: false,
+      openMarkdownGroup: null,
+      mobilePageTitle: "Dashboard",
 
       initialMarkdown: `
 <h3>Markdown File</h3>
@@ -1382,6 +1623,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return Math.max(0, Math.min(100, value));
     },
 
+    isDesktop() {
+      return window.innerWidth > 900;
+    },
+
+    isLibraryMode() {
+      return this.leftPanel !== "markdown";
+    },
+
     markdownGroups() {
       const groups = {};
 
@@ -1389,21 +1638,29 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         const key = `${file.category} ${file.subcategory}`;
 
         if (!groups[key]) {
-          groups[key] = [];
+          groups[key] = {
+            environment: file.environment,
+            files: []
+          };
         }
 
-        groups[key].push(file);
+        groups[key].files.push(file);
       });
 
       return groups;
     }
   },
 
-  mounted() {
-    this.markdown = this.initialMarkdown;
-    this.loadDashboard();
-    this.loadMarkdownSummaries();
-    this.loadCurrentUser();
+  async mounted() {
+    document.addEventListener("click", this.handleBodyClick);
+
+    await this.loadDashboard();
+    await this.loadCurrentUser();
+    await this.loadMarkdownSummaries();
+  },
+
+  beforeUnmount() {
+      document.removeEventListener("click", this.handleBodyClick);
   },
 
   methods: {
@@ -1420,6 +1677,18 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         minute: "2-digit"
       });
     },
+
+    handleBodyClick(event) {
+      if (!this.mobileMenuOpen) {
+          return;
+      }
+
+      const menu = this.$refs.mobileMenu;
+
+      if (menu && !menu.contains(event.target)) {
+          this.mobileMenuOpen = false;
+      }
+  },
 
     renderMarkdown(md) {
       let html = marked.parse(md || "");
@@ -1438,6 +1707,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async startReview() {
+      this.mobilePageTitle = "Review";
       this.mobileView = "dashboard";
       this.loading = true;
       this.error = null;
@@ -1446,6 +1716,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.answerSubmitted = false;
       this.showAccount = false;
       this.leftPanel = "markdown";
+      this.mobileView = "review";
 
       try {
         let data = await this.startReviewRequest(this.currentMarkdownFileId);
@@ -1623,6 +1894,24 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         this.markdownSummaries = await response.json();
 
+        if (this.markdownSummaries.length === 0) {
+            this.markdown = this.initialMarkdown;
+            this.leftPanel = "markdown";
+            return;
+        }
+
+        // User has topics
+        if (this.isDesktop) {
+            this.showMarkdownSummaries();
+        } else {
+            // On mobile, don't show the default text
+            this.markdown = "";
+            this.leftPanel = "markdown";
+            this.mobileView = "dashboard";
+            this.mobilePageTitle = "Dashboard";
+            return;
+        }
+
       } catch (err) {
         console.error("Could not load markdown summaries", err);
       }
@@ -1645,19 +1934,27 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
-    goHome() {
+    async goHome() {
       this.review = null;
       this.result = null;
       this.userAnswer = "";
       this.currentMarkdownFileId = null;
-      this.markdown = this.initialMarkdown;
-      this.mobileView = "dashboard";
       this.showAccount = false;
-      this.leftPanel = "markdown";
-      this.loadDashboard();
+      this.mobileView = "dashboard";
+      this.leftExpanded = false;
+
+      await this.loadDashboard();
+
+      if (this.isDesktop && this.markdownSummaries.length > 0) {
+        this.showMarkdownSummaries();
+      } else {
+        this.markdown = this.initialMarkdown;
+        this.leftPanel = "markdown";
+      }
     },
 
     showMarkdownSummaries() {
+      this.mobilePageTitle = "Markdowns";
       this.leftPanel = "markdowns";
       this.mobileView = "markdown";
     },
@@ -1697,22 +1994,28 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     showAccountDetails() {
+      this.mobilePageTitle = "Account Details";
       this.leftPanel = "account";
       this.mobileView = "markdown";
     },
 
-    showDashboard() {
+    async showDashboard() {
       this.review = null;
       this.result = null;
       this.userAnswer = "";
-
-      this.leftPanel = "markdown";
-      this.mobileView = "dashboard";
-
-      this.markdown = this.initialMarkdown;
       this.currentMarkdownFileId = null;
+      this.mobileView = "dashboard";
+      this.leftExpanded = false;
+      this.mobilePageTitle = "Dashboard";
 
-      this.loadDashboard();
+      await this.loadDashboard();
+
+      if (this.isDesktop && this.markdownSummaries.length > 0) {
+        this.showMarkdownSummaries();
+      } else {
+        this.markdown = this.initialMarkdown;
+        this.leftPanel = "markdown";
+      }
     },
 
     closeLeftPanel() {
@@ -1720,7 +2023,32 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.mobileView = "dashboard";
     },
 
+    stringHash(value) {
+      let hash = 0;
+
+      for (let i = 0; i < value.length; i++) {
+        hash = value.charCodeAt(i) + ((hash << 5) - hash);
+      }
+
+      return Math.abs(hash);
+    },
+
+    environmentColor(index) {
+      const palette = [
+          "#f45b00", // orange
+          "#8b5cf6", // purple
+          "#3b82f6"  // blue
+      ];
+
+      return palette[index % palette.length];
+    },
+
+    softColor(hex) {
+      return hex + "18";
+    },
+
     showMarkdownExample() {
+      this.mobilePageTitle = "Example";
       this.leftPanel = "markdown";
       this.showAccount = false;
       this.mobileView = "markdown";

@@ -157,6 +157,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     @Query("""
         select new dev.recallforge.dto.MarkdownSummaryDto(
             t.markdownFile.id,
+            t.environment,
             t.category,
             t.subcategory,
             t.fileTitle,
@@ -166,8 +167,8 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         )
         from Topic t
         where t.user.id = :userId
-        group by t.markdownFile.id, t.category, t.subcategory, t.fileTitle
-        order by t.category, t.subcategory, t.markdownFile.id
+        group by t.markdownFile.id, t.environment, t.category, t.subcategory, t.fileTitle
+        order by t.environment, t.category, t.subcategory, t.markdownFile.id
     """)
     List<MarkdownSummaryDto> findMarkdownSummaries(
         @Param("userId") Long userId,
