@@ -1120,6 +1120,7 @@
   <header class="mobile-topbar">
     
     <div class="mobile-menu-wrap" ref="mobileMenu">
+      
       <button @click.stop="mobileMenuOpen = !mobileMenuOpen" title="Menu">☰</button>
 
       <div v-if="mobileMenuOpen" class="mobile-menu-dropdown">
@@ -1238,7 +1239,7 @@
 
         <div v-if="leftPanel === 'markdowns'" class="markdown-page">
 
-          <h2>Markdowns</h2>
+          <h3>Markdowns</h3>
           <div class="subtitle">
               Browse your markdown files by category
           </div>
