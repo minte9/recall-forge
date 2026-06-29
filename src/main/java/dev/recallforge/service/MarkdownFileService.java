@@ -25,6 +25,10 @@ public class MarkdownFileService {
     private final MarkdownTopicImporter markdownTopicImporter;
     private final CurrentUserService currentUserService;
 
+    private static final long MAX_FILE_SIZE = 200 * 1024;  // 200 KB
+    private static final int MAX_CONTENT_LENGTH = 200_000;
+    private static final int MAX_TOPICS_PER_FILE = 100;
+
     public MarkdownFileService(
             MarkdownFileRepository markdownFileRepository,
             TopicRepository topicRepository,
@@ -39,8 +43,26 @@ public class MarkdownFileService {
 
     @Transactional
     public MarkdownUploadResponse upload(MultipartFile file) throws Exception {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+
         String filename = file.getOriginalFilename();
+
+        if (filename == null || !filename.toLowerCase().endsWith(".md")) {
+            throw new IllegalArgumentException("Only .md files are allowed.");
+        }
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException("File is too large. Maximum size is 200 KB.");
+        }
+
         String content = new String(file.getBytes(), StandardCharsets.UTF_8);
+
+        if (content.length() > MAX_CONTENT_LENGTH) {
+            throw new IllegalArgumentException("Markdown content is too large.");
+        }
+        
         String contentHash = sha256(content);
 
         Long userId = currentUserService.currentUserId();
@@ -51,6 +73,14 @@ public class MarkdownFileService {
 
         if (parsedTopics.isEmpty()) {
             throw new IllegalArgumentException("Markdown file does not contain any topics.");
+        }
+
+        if (parsedTopics.isEmpty()) {
+            throw new IllegalArgumentException("Invalid markdown format.");
+        }
+
+        if (parsedTopics.size() > MAX_TOPICS_PER_FILE) {
+            throw new IllegalArgumentException("Too many topics in one markdown file.");
         }
 
         MarkdownTopicImporter.ParsedTopic firstTopic = parsedTopics.get(0);
@@ -74,7 +104,7 @@ public class MarkdownFileService {
 
         } else {
             markdownFile = new MarkdownFile(
-                    filename,
+                    sanitizeFilename(filename),
                     content,
                     contentHash,
                     firstTopic.environment(),
@@ -94,6 +124,14 @@ public class MarkdownFileService {
                 markdownFile.getFilename(),
                 markdownFile.getContent()
         );
+    }
+
+    private String sanitizeFilename(String filename) {
+        return filename
+            .replace("\\", "")
+            .replace("/", "")
+            .replace("..", "")
+            .trim();
     }
 
     private Optional<MarkdownFile> findExistingMarkdownFile(

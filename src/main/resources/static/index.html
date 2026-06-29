@@ -749,7 +749,15 @@
       justify-content:space-between;
       align-items:center;
       padding:8px 0px;
-      border-top:0px solid #f1f5f9;
+      border-top:0px solid #010102;
+  }
+
+  .clickable {
+      cursor: pointer;
+  }
+
+  .clickable:hover {
+      background: #f8fafc;
   }
 
   .row-left{
@@ -1071,9 +1079,7 @@
     .layout.mobile-review > .left-panel {
       display: block;
     }
-  }
 
-  @media (max-width: 560px) {
     .stats-grid {
       grid-template-columns: repeat(4, 1fr);
     }
@@ -1110,7 +1116,9 @@
     .layout.mobile-dashboard > .left-panel {
       display: none;
     }
+    
   }
+
 </style>
 </head>
 
@@ -1293,11 +1301,17 @@
 
               </summary>
 
-              <div
+              <!-- <div
                   v-for="file in group.files"
                   :key="file.markdownFileId"
-                  class="markdown-row">
-
+                  class="markdown-row"> -->
+              <div
+                v-for="file in group.files"
+                :key="file.markdownFileId"
+                class="markdown-row"
+                :class="{ clickable: file.dueCount > 0 }"
+                @click="file.dueCount > 0 && startReviewForFile(file.markdownFileId)">
+              
                   <div class="row-left">
 
                       <div class="row-icon">
@@ -1472,9 +1486,9 @@
             :key="area.environment + area.category + area.subcategory"
             class="attention-row">
             <span class="attention-icon">⚠</span>
-            <span>{{ area.category }} {{ area.subcategory }}</span>
+            <span>{{ area.category }}, {{ area.subcategory }}</span>
             <span class="attention-due">{{ area.dueCount }} due</span>
-            <span class="chevron">›</span>
+            <!-- <span class="chevron">›</span> -->
           </div>
         </div>
 
@@ -1636,7 +1650,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       const groups = {};
 
       this.markdownSummaries.forEach(file => {
-        const key = `${file.category} ${file.subcategory}`;
+        const key = `${file.category}, ${file.subcategory}`;
 
         if (!groups[key]) {
           groups[key] = {
@@ -1657,7 +1671,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     await this.loadDashboard();
     await this.loadCurrentUser();
-    await this.loadMarkdownSummaries();
+    await this.loadMarkdownSummaries(true);
   },
 
   beforeUnmount() {
@@ -1709,7 +1723,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     async startReview() {
       this.mobilePageTitle = "Review";
-      this.mobileView = "dashboard";
       this.loading = true;
       this.error = null;
       this.result = null;
@@ -1776,6 +1789,11 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return await response.json();
     },
 
+    async startReviewForFile(markdownFileId) {
+        this.currentMarkdownFileId = markdownFileId;
+        await this.startReview();
+    },
+
     async uploadMarkdown(event) {
       const file = event.target.files[0];
 
@@ -1809,11 +1827,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         this.currentMarkdownFileId = uploaded.markdownFileId;
         this.markdown = uploaded.content;
+        this.leftPanel = "markdown";
+        this.mobileView = "review"; // show markdown + right panel on mobile
 
         await this.startReview();
         await this.loadDashboard();
-        await this.loadMarkdownSummaries();
-
+        await this.loadMarkdownSummaries(false);
+        
       } catch (err) {
         this.error = err.message || "Could not upload markdown file.";
       } finally {
@@ -1883,7 +1903,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
-    async loadMarkdownSummaries() {
+    async loadMarkdownSummaries(autoShow = true) {
       try {
         const response = await fetch("/api/dashboard/markdowns", {
           credentials: "same-origin"
@@ -1895,22 +1915,24 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         this.markdownSummaries = await response.json();
 
-        if (this.markdownSummaries.length === 0) {
-            this.markdown = this.initialMarkdown;
-            this.leftPanel = "markdown";
-            return;
+        if (!autoShow) {
+          return;
         }
 
-        // User has topics
         if (this.isDesktop) {
-            this.showMarkdownSummaries();
+          this.showMarkdownSummaries();
         } else {
-            // On mobile, don't show the default text
-            this.markdown = "";
-            this.leftPanel = "markdown";
-            this.mobileView = "dashboard";
-            this.mobilePageTitle = "Dashboard";
-            return;
+          this.markdown = "";
+          this.leftPanel = "markdown";
+          this.mobileView = "dashboard";
+          this.mobilePageTitle = "Dashboard";
+        }
+
+        if (!this.isDesktop) { // On mobile, don't show the default text
+          this.markdown = "";
+          this.leftPanel = "markdown";
+          this.mobileView = "dashboard";
+          this.mobilePageTitle = "Dashboard";
         }
 
       } catch (err) {

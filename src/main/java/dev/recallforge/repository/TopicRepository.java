@@ -129,7 +129,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     @Query("""
         select 
-            concat(t.category, ' ', t.subcategory) as title, 
+            concat(t.category, ', ', t.subcategory) as title, 
             avg(t.memoryScore) as averageMemoryScore
         from Topic t
         where t.markdownFile.user.id = :userId 
@@ -143,7 +143,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     @Query("""
        select 
-            concat(t.category, ' ', t.subcategory) as title, 
+            concat(t.category, ', ', t.subcategory) as title, 
             avg(t.memoryScore) as averageMemoryScore
         from Topic t 
         where t.markdownFile.user.id = :userId 
