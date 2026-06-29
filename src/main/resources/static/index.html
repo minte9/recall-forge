@@ -137,14 +137,13 @@
 
   .expand-btn {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 22px;
+    right: 50px;
     border: none;
     background: none;
     cursor: pointer;
     font-size: 18px;
-    color: var(--orange);
-    opacity: .7;
+    color: #ccc;
   }
 
   .account-box {
@@ -217,6 +216,16 @@
     font-weight: 600;
     color: #374151;
     background: #f7f7f7;
+  }
+
+  .markdown-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6b7280;
+    font-size: 18px;
+    padding-top: 10px;
   }
 
   /* Dashboard */
@@ -858,7 +867,7 @@
   @media (max-width: 900px) {
     body {
       background: #f5f7fa;
-      font-size: 14px;
+      font-size: 15px;
     }
 
     .mobile-topbar {
@@ -885,7 +894,7 @@
       border: none;
       background: transparent;
       color: var(--text);
-      font-size: 22px;
+      font-size: 30px;
       text-decoration: none;
       cursor: pointer;
     }
@@ -957,7 +966,8 @@
     }
 
     .attention-icon {
-      font-size: 15px;
+      font-size: 13px;
+      line-height: 20px;
     }
 
     .knowledge-grid {
@@ -1160,7 +1170,7 @@
 
     <div
       class="mobile-title"
-      @click="showDashboard"
+      @click="onTitleClick"
       title="Dashboard">
       {{ mobilePageTitle }}
     </div>
@@ -1181,12 +1191,12 @@
       <button
         class="expand-btn"
         v-if="review"
-        :title="leftExpanded ? 'Restore split view' : 'Focus markdown'"
+        :title="leftExpanded ? 'Restore split view' : 'Expand markdown panel'"
         @click="leftExpanded = !leftExpanded">
         {{ leftExpanded ? '◀' : '▶' }}
       </button>
 
-      <div class="panel-menu desktop-menu" v-if="!review">
+      <div class="panel-menu desktop-menu">
         <div
           class="panel-menu"
           @mouseenter="menuOpen = true"
@@ -1369,9 +1379,15 @@
           </details>
 
       </div>
+        
+      <div v-else-if="leftPanel === 'markdown'">
+
+        <div v-if="markdownLoading" class="markdown-loading">
+          Loading...
+        </div>
 
         <div
-          v-else-if="leftPanel === 'markdown'"
+          v-else
           class="markdown"
           v-html="renderMarkdown(markdown)">
         </div>
@@ -1396,19 +1412,20 @@
         </textarea>
 
         <div class="actions-row">
+
+          <button
+            class="review-btn"
+            @click="startReview"
+            :disabled="loading || !answerSubmitted">
+            <span>→</span> Next Review
+          </button>
+
           <button
             class="submit-btn"
             @click="submitAnswer"
             :disabled="loading || answerSubmitted">
             <span class="btn-icon">✓</span>
             Submit Answer
-          </button>
-
-          <button
-            class="review-btn"
-            @click="startReview">
-            <span class="btn-icon">→</span>
-            Next Review
           </button>
 
           <p v-if="dashboard && currentMarkdownFileId" class="category-status">
@@ -1617,6 +1634,7 @@ createApp({
       mobileMenuOpen: false,
       openMarkdownGroup: null,
       mobilePageTitle: "Dashboard",
+      markdownLoading: false,
 
       initialMarkdown: `
 <h3>Markdown File</h3>
@@ -1703,7 +1721,15 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       if (menu && !menu.contains(event.target)) {
           this.mobileMenuOpen = false;
       }
-  },
+    },
+
+    onTitleClick() {
+      if (this.mobilePageTitle === "Dashboard") {
+        this.showMarkdownSummaries();
+      } else {
+        this.showDashboard();
+      }
+    },
 
     renderMarkdown(md) {
       let html = marked.parse(md || "");
@@ -1722,8 +1748,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async startReview() {
-      this.mobilePageTitle = "Review";
       this.loading = true;
+      this.markdownLoading = true;
+      this.mobilePageTitle = "Review";
       this.error = null;
       this.result = null;
       this.userAnswer = "";
@@ -1751,6 +1778,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.currentMarkdownFileId = this.review.markdownFileId;
 
         if (this.review.markdownContent) {
+          this.markdownLoading = false;
           this.markdown = this.review.markdownContent;
         }
 
@@ -1761,6 +1789,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.error = err.message || "Could not start review.";
       } finally {
         this.loading = false;
+        this.markdownLoading = false;
       }
     },
 
