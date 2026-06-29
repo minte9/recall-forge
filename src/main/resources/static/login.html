@@ -404,18 +404,18 @@
             <div class="label">Source note</div>
 
             <div class="notes">
-                <div class="notes-title">Spring Framework → IoC</div>
+                <div class="notes-title">Algorithms → Binary Search</div>
 
                 <p>
-                    Inversion of Control is a design principle where control over object
-                    creation and dependency management is moved from application code to
-                    the framework.
+                    Binary Search finds a value in a sorted array by repeatedly comparing
+                    the target with the middle element and eliminating half of the remaining
+                    search space.
                 </p>
 
                 <ul>
-                    <li>Spring creates beans.</li>
-                    <li>Dependencies are injected automatically.</li>
-                    <li>Your code focuses on behavior, not wiring.</li>
+                    <li>Works only on sorted data.</li>
+                    <li>Halves the search space on each step.</li>
+                    <li>Time complexity: O(log n).</li>
                 </ul>
             </div>
         </div>
@@ -424,10 +424,10 @@
             <div class="label">Question</div>
 
             <div class="question">
-                What is Inversion of Control in Spring?
+                When should Binary Search be used?
             </div>
 
-            <textarea id="demo-answer" placeholder="Type a quick answer...">Spring creates and manages objects for you instead of creating them manually.</textarea>
+            <textarea id="demo-answer" placeholder="Type a quick answer...">Binary Search repeatedly checks the middle element to find a value faster than a linear search.</textarea>
 
             <button class="demo-button" onclick="submitDemoAnswer()">
                 Submit answer
@@ -440,9 +440,9 @@
 
                 <div class="feedback-row">
                     <strong>Feedback:</strong>
-                    Good answer. Inversion of Control means the framework manages object
-                    creation and dependency wiring, instead of your code manually creating
-                    and connecting everything.
+                    Good answer. Binary Search repeatedly checks the middle element to narrow
+                    the search space, but it only works correctly on sorted
+                    collections.
                 </div>
 
                 <div class="feedback-row">
