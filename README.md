@@ -1,102 +1,67 @@
 # Recall Forge
 
-### 5.6 App user integration
+The application import topics from a local README.md, ask review questions,  
+evaluates answers with OpenAI, and stores memory in database.  
 
-Add current user service.
+## 1. Backend-only
+v1.0.1
 
-src/main/java/dev/recallforge/security/CurrentUserService.java
+- 1.1 Project structure
+- 1.2 Gradle Settings 
+- 1.3 Gradle Build
+- 1.4 Docker Compose
+- 1.5 OpenAPI 
+- 1.6 Application Properties
+- 1.7 Main App
+- 1.8 Domain model (JPA)
+- 1.9 Repositories
+- 1.10 DTOs
+- 1.11 OpenAI Config
+- 1.12 Services
+- 1.13 Controllers
+- 1.14 Run the project
+- 1.15 Api Requests
 
-~~~java
-package dev.recallforge.security;
+## 2. Repetition System
+v1.0.2
 
-import dev.recallforge.domain.UserAccount;
-import dev.recallforge.repository.UserAccountRepository;
+- 2.1 Review History Endpoint
+- 2.2 Due Topics Endpoint
+- 2.3 Test it
+- 2.4 Dashboard
+- 2.5 Upload markdown file
+- 2.6 Database clear
+- 2.7 Due topics
+- 2.8 Categories
+- 2.9 Database backup
+- 2.10 Queue Summary
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.stereotype.Service;
+## 3. Dashboard
+v1.0.3
 
-@Service
-public class CurrentUserService {
+- 3.1 Improved Summary
+- 3.2 Dashboard Graphics
+- 3.3 Subdomain with Traefix
+- 3.4 Markdowns Summary
 
-    private final UserAccountRepository userAccountRepository;
+## 4. Reward Layer
+v1.0.4
 
-    public CurrentUserService(UserAccountRepository userAccountRepository) {
-        this.userAccountRepository = userAccountRepository;
-    }
-
-    public UserAccount currentUser() {
-        Authentication auth =
-            SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(auth instanceof OAuth2AuthenticationToken token)) {
-            throw new IllegalStateException("Current user is not OAuth2 authenticated");
-        }
-
-        OAuth2User oauthUser = token.getPrincipal();
-
-        String provider = token.getAuthorizedClientRegistrationId();
-        String providerUserId = extractProviderUserId(oauthUser);
-
-        return userAccountRepository
-            .findByProviderAndProviderUserId(provider, providerUserId)
-            .orElseThrow(() -> new IllegalStateException("User not found in database"));
-    }
-
-    public Long currentUserId() {
-        return currentUser().getId();
-    }
-
-    private String extractProviderUserId(OAuth2User oauthUser) {
-        Object id = oauthUser.getAttribute("sub"); // Google
-
-        if (id == null) {
-            id = oauthUser.getAttribute("id"); // GitHub
-        }
-
-        if (id == null) {
-            throw new IllegalStateException("Missing OAuth provider user id");
-        }
-
-        return id.toString();
-    }
-}
-~~~
-
-Add a temporary debug endpoint:
-
-~~~java
-package dev.recallforge.controller;
-
-import dev.recallforge.domain.UserAccount;
-import dev.recallforge.security.CurrentUserService;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-public class MeController {
-
-    private final CurrentUserService currentUserService;
-
-    public MeController(CurrentUserService currentUserService) {
-        this.currentUserService = currentUserService;
-    }
-
-    @GetMapping("/api/me")
-    public UserAccount me() {
-        return currentUserService.currentUser();
-    }
-}
-~~~
+- 4.1 XP points
+- 4.2 Perfect streak bonus
+- 4.3 Reward bar
+- 4.4 Level title
 
 
-### 5.7 Demo layout
+## 5. OAuth2
+v1.0.5
 
-- Left panel OAuth login
-- Right panel Static demo layout
+- 5.1 Add oauth2 dependency
+- 5.2 Modify SecurityConfig.java
+- 5.3 Povider setup (googl, github)
+- 5.4 Database integration
+- 5.5 App user integration
+- 5.7 Demo layout
 
 
 
