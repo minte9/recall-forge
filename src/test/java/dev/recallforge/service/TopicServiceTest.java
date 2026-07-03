@@ -1,0 +1,166 @@
+package dev.recallforge.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
+
+import dev.recallforge.domain.Topic;
+import dev.recallforge.domain.UserAccount;
+import dev.recallforge.repository.TopicRepository;
+
+@ExtendWith(MockitoExtension.class)
+class TopicServiceTest {
+
+    @Mock
+    private TopicRepository topicRepository;
+
+    private TopicService topicService;
+
+    private void setUp() {
+        topicService = new TopicService(topicRepository);
+    }
+
+    private Topic topicWithMemoryScore(double memoryScore) {
+        Topic topic = new Topic(
+            "General", "Uncategorized", "Uncategorized", "File",
+            "Title", "Content", null, new UserAccount()
+        );
+        topic.updateMemory(memoryScore, LocalDateTime.now());
+        return topic;
+    }
+
+    @Test
+    void getAllTopics_sortsResultsByMemoryScoreAscending() {
+        setUp();
+        Topic low = topicWithMemoryScore(0.2);
+        Topic mid = topicWithMemoryScore(0.5);
+        Topic high = topicWithMemoryScore(0.9);
+        when(topicRepository.findByUserId(1L)).thenReturn(List.of(high, low, mid));
+
+        List<Topic> result = topicService.getAllTopics(1L);
+
+        assertThat(result).containsExactly(low, mid, high);
+    }
+
+    @Test
+    void getTopic_returnsTopicWhenFoundForUser() {
+        setUp();
+        Topic topic = topicWithMemoryScore(0.5);
+        when(topicRepository.findByIdAndUserId(5L, 1L)).thenReturn(Optional.of(topic));
+
+        assertThat(topicService.getTopic(5L, 1L)).isSameAs(topic);
+    }
+
+    @Test
+    void getTopic_throwsIllegalArgumentExceptionMentioningIdWhenNotFound() {
+        setUp();
+        when(topicRepository.findByIdAndUserId(99L, 1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> topicService.getTopic(99L, 1L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("99");
+    }
+
+    @Test
+    void selectNextTopic_returnsFirstDueTopicInRepositoryOrder() {
+        setUp();
+        Topic first = topicWithMemoryScore(0.1);
+        Topic second = topicWithMemoryScore(0.3);
+        when(topicRepository.findDueTopics(eq(1L), any())).thenReturn(List.of(first, second));
+
+        assertThat(topicService.selectNextTopic(1L)).contains(first);
+    }
+
+    @Test
+    void selectNextTopic_returnsEmptyWhenNoTopicsAreDue() {
+        setUp();
+        when(topicRepository.findDueTopics(eq(1L), any())).thenReturn(List.of());
+
+        assertThat(topicService.selectNextTopic(1L)).isEmpty();
+    }
+
+    @Test
+    void selectNextTopicByMarkdownFileId_returnsFirstDueTopicScopedToThatFile() {
+        setUp();
+        Topic first = topicWithMemoryScore(0.1);
+        Topic second = topicWithMemoryScore(0.4);
+        when(topicRepository.findDueTopicsByMarkdownFileId(eq(7L), eq(1L), any()))
+            .thenReturn(List.of(first, second));
+
+        assertThat(topicService.selectNextTopicByMarkdownFileId(7L, 1L)).contains(first);
+    }
+
+    @Test
+    void countDueTopics_delegatesUserAndTimeToRepository() {
+        setUp();
+        LocalDateTime now = LocalDateTime.now();
+        when(topicRepository.countDueByUser(1L, now)).thenReturn(4L);
+
+        assertThat(topicService.countDueTopics(1L, now)).isEqualTo(4L);
+    }
+
+    @Test
+    void countDueTopicsByMarkdownFileId_delegatesAllArgsToRepository() {
+        setUp();
+        LocalDateTime now = LocalDateTime.now();
+        when(topicRepository.countDueByMarkdownFileIdAndUser(7L, 1L, now)).thenReturn(2L);
+
+        assertThat(topicService.countDueTopicsByMarkdownFileId(7L, 1L, now)).isEqualTo(2L);
+    }
+
+    @Test
+    void findNextReviewAtAfter_returnsFirstResultAndRequestsOnlyOnePage() {
+        setUp();
+        LocalDateTime now = LocalDateTime.now();
+        Topic topic = topicWithMemoryScore(0.5);
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        when(topicRepository.findNextByUser(eq(1L), eq(now), pageableCaptor.capture()))
+            .thenReturn(List.of(topic));
+
+        Optional<Topic> result = topicService.findNextReviewAtAfter(1L, now);
+
+        assertThat(result).contains(topic);
+        assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(1);
+        assertThat(pageableCaptor.getValue().getPageNumber()).isZero();
+    }
+
+    @Test
+    void findNextReviewAtAfterByMarkdownFileId_returnsFirstResultAndRequestsOnlyOnePage() {
+        setUp();
+        LocalDateTime now = LocalDateTime.now();
+        Topic topic = topicWithMemoryScore(0.5);
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        when(topicRepository.findNextByMarkdownFileIdAndUser(
+                eq(7L), eq(1L), eq(now), pageableCaptor.capture()))
+            .thenReturn(List.of(topic));
+
+        Optional<Topic> result = topicService.findNextReviewAtAfterByMarkdownFileId(7L, 1L, now);
+
+        assertThat(result).contains(topic);
+        assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(1);
+    }
+
+    @Test
+    void save_delegatesToRepositoryAndReturnsItsResult() {
+        setUp();
+        Topic topic = topicWithMemoryScore(0.5);
+        when(topicRepository.save(topic)).thenReturn(topic);
+
+        assertThat(topicService.save(topic)).isSameAs(topic);
+        verify(topicRepository).save(topic);
+    }
+}
