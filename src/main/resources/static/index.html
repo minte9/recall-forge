@@ -342,21 +342,21 @@
               :key="item.id"
               class="feedback-history-item">
 
-              <div class="feedback-history-meta">
-                <span>{{ formatShortDate(item.createdAt) }}</span>
-                <span v-if="item.score !== null">
-                  <span>Score {{ formatScore(item.score) }}</span>
-              </div>
-
               <div class="feedback-history-section">
-                <div class="feedback-history-label">Feedback</div>
+                <div class="feedback-history-label">💬 Feedback</div>
                 <div class="feedback-preview">
                   {{ item.feedback }}
                 </div>
               </div>
 
               <details class="feedback-answer-details">
-                <summary>Show my answer</summary>
+                <summary>
+                  <span>Show my answer</span>
+                  <span class="feedback-history-meta-inline">
+                    <span class="feedback-history-date">{{ formatShortDate(item.createdAt) }}</span>
+                    <span v-if="item.score !== null" class="feedback-history-score">Score {{ formatScore(item.score) }}</span>
+                  </span>
+                </summary>
                 <div class="feedback-answer-text">
                   {{ item.userAnswer }}
                 </div>
