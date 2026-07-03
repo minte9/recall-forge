@@ -64,7 +64,7 @@ v1.0.5
 - 5.7 Demo layout
 
 
-## 6. Claude Unit Testing
+## 6. Unit Testing (with Claude)
 
 - 6.1 Claude Code
 - 6.2 Create account
