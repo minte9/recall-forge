@@ -121,4 +121,32 @@ class RewardServiceTest {
 
         verify(userRewardRepository, never()).save(any());
     }
+
+    @Test
+    void getCurrentUserReward_streakReadsZero_whenUserMissedMoreThanOneDay() {
+        setUp();
+        UserReward existingReward = new UserReward(1L);
+        existingReward.addReviewReward(50, false, LocalDate.now().minusDays(3));
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
+
+        RewardResponse response = rewardService.getCurrentUserReward();
+
+        assertThat(response.streakDays()).isZero();
+    }
+
+    @Test
+    void getCurrentUserReward_streakStillCounts_whenLastReviewWasYesterday() {
+        setUp();
+        UserReward existingReward = new UserReward(1L);
+        existingReward.addReviewReward(50, false, LocalDate.now().minusDays(1));
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
+
+        RewardResponse response = rewardService.getCurrentUserReward();
+
+        assertThat(response.streakDays()).isEqualTo(1);
+    }
 }

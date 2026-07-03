@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import dev.recallforge.dto.FeedbackHistoryResponse;
 import dev.recallforge.domain.Review;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
@@ -175,5 +176,23 @@ public class ReviewService {
             nextReviewAt,
             dueCount == 0
         );
+    }
+
+    public List<FeedbackHistoryResponse> getFeedbackHistory(Long topicId) {
+        Long userId = currentUserService.currentUserId();
+
+        topicService.getTopic(topicId, userId);
+
+        return reviewRepository
+            .findTop10ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(topicId, userId)
+            .stream()
+            .map(r -> new FeedbackHistoryResponse(
+                r.getId(),
+                r.getUserAnswer(),
+                r.getFeedback(),
+                r.getReviewedAt(),
+                r.getScore()
+            ))
+            .toList();
     }
 }

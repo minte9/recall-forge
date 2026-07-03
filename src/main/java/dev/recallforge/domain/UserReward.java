@@ -41,4 +41,14 @@ public class UserReward {
         perfectStreak = perfect ? perfectStreak + 1 : 0;
         lastReviewDate = today;
     }
+
+    // The stored streakDays only updates on the next review, so it can be stale
+    public int currentStreakDays(LocalDate today) {
+        if (lastReviewDate == null) {
+            return 0;
+        }
+
+        boolean streakAlive = lastReviewDate.equals(today) || lastReviewDate.equals(today.minusDays(1));
+        return streakAlive ? streakDays : 0;
+    }
 }

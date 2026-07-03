@@ -68,7 +68,7 @@ public class RewardService {
             titleForLevel(level),
             xpInLevel,
             100,
-            reward.getStreakDays(),
+            reward.currentStreakDays(LocalDate.now()),
             gainedXp
         );
     }

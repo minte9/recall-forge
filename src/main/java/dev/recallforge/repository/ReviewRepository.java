@@ -10,4 +10,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         Long topicId,
         Long userId
     );
+
+    List<Review> findTop10ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(
+        Long topicId,
+        Long userId
+    );
 }

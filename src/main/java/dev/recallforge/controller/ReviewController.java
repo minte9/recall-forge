@@ -6,13 +6,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import dev.recallforge.dto.AnswerRequest;
 import dev.recallforge.dto.AnswerResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
 import dev.recallforge.dto.ReviewQueueResponse;
+import dev.recallforge.dto.FeedbackHistoryResponse;
 import dev.recallforge.service.ReviewService;
 import jakarta.validation.Valid;
+
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -53,5 +58,11 @@ public class ReviewController {
     @GetMapping("/queue/today")
     public ReviewQueueResponse getDailyQueue(@RequestParam(required = false) Long markdownFileId) {
         return reviewService.getDailyQueue(markdownFileId);
+    }
+
+    @GetMapping("/{topicId}/feedback-history")
+    public List<FeedbackHistoryResponse> getFeedbackHistory(
+            @PathVariable Long topicId) {
+        return reviewService.getFeedbackHistory(topicId);
     }
 }
