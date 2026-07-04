@@ -11,3 +11,14 @@ Task guides:
 - For frontend work, read `docs/ai/frontend.md`.
 
 Read only the guides relevant to the current task.
+
+## Safety
+
+Before editing:
+- Explain your plan.
+- List the files you intend to modify.
+- Wait for approval.
+
+After editing:
+- Stop after running the relevant tests.
+- Do not continue with additional refactorings unless requested.

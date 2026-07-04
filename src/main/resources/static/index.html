@@ -37,6 +37,16 @@
           Upload Example
         </button>
 
+        <template v-if="review">
+          <div class="menu-divider"></div>
+
+          <div class="menu-group-title">Answers</div>
+
+          <button @click="toggleFeedbackHistory(); mobileMenuOpen = false">
+            Feedbacks
+          </button>
+        </template>
+
         <div class="menu-divider"></div>
 
         <div class="menu-group-title">Account</div>
@@ -96,6 +106,16 @@
               Upload Example
             </button>
 
+            <template v-if="review">
+              <div class="menu-divider"></div>
+
+              <div class="menu-group-title">Answers</div>
+
+              <button @click="toggleFeedbackHistory(); menuOpen = false">
+                Feedbacks
+              </button>
+            </template>
+
             <div class="menu-divider"></div>
 
             <div class="menu-group-title">Account</div>
@@ -143,8 +163,46 @@
               Browse your markdown files by category
           </div>
 
+          <div class="environment-selector">
+            <!-- <label>Environment</label> -->
+
+            <div class="environment-menu-wrap">
+              <button class="environment-menu-btn" @click="toggleEnvironmentMenu">
+                <span>{{ selectedEnvironment }}</span>
+                <span>⌄</span>
+              </button>
+
+              <div v-if="environmentMenuOpen" class="environment-menu-dropdown">
+                <template
+                  v-for="(items, groupName, index) in environmentGroups"
+                  :key="groupName">
+
+                  <div
+                      v-if="index > 0"
+                      class="menu-divider">
+                  </div>
+
+                  <div class="menu-group-title">
+                      {{ groupName }}
+                  </div>
+
+                  <button
+                      v-for="environment in items"
+                      :key="environment"
+                      :class="{ active: selectedEnvironment === environment }"
+                      @click="selectEnvironment(environment)">
+
+                      {{ environment }}
+
+                  </button>
+
+              </template>
+              </div>
+            </div>
+        </div>
+
           <details
-              v-for="(group, groupName, index) in markdownGroups"
+              v-for="(group, groupName, index) in filteredMarkdownGroups"
               :key="groupName"
               class="markdown-group" 
               :open="openMarkdownGroup === groupName">
@@ -192,10 +250,6 @@
 
               </summary>
 
-              <!-- <div
-                  v-for="file in group.files"
-                  :key="file.markdownFileId"
-                  class="markdown-row"> -->
               <div
                 v-for="file in group.files"
                 :key="file.markdownFileId"
@@ -204,15 +258,6 @@
                 @click="file.dueCount > 0 && startReviewForFile(file.markdownFileId)">
               
                   <div class="row-left">
-
-                      <div class="row-icon">
-                        <svg viewBox="0 0 24 24">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                          <path d="M14 2v6h6"></path>
-                          <path d="M8 13h8"></path>
-                          <path d="M8 17h6"></path>
-                        </svg>
-                      </div>
 
                       <div>
 
@@ -225,11 +270,6 @@
                               {{ file.topicCont }} topics
 
                               •
-
-                              <!-- <span
-                                  :class="{due:file.dueCount>0}">
-                                  {{ file.dueCount }} due
-                              </span> -->
 
                               {{ file.dueCount }} due
 
@@ -284,7 +324,26 @@
           <img src="recall-forge.png" alt="" class="brain-icon">
         </a>
         
-        <h3>{{ review.topicTitle }}</h3>
+        <h3
+          class="review-title"
+          @click="toggleFeedbackHistory">
+
+          <span>{{ review.topicTitle }}</span>
+
+          <span class="review-title-right">
+              <span
+                  v-if="lastReview"
+                  class="last-score-badge"
+                  title="Show feedback history">
+
+                  Score: {{ formatScore(lastReview.score) }} 
+                  <!-- <span class="history-arrow">
+                    {{ feedbackHistoryVisible ? "▲" : "▼" }}
+                </span> -->
+              </span>
+          </span>
+      </h3>
+
         <p>{{ review.question }}</p>
 
         <textarea
@@ -309,20 +368,15 @@
             Submit Answer
           </button>
 
+          <!-- <button
+              class="feedback-history-toggle"
+              @click="toggleFeedbackHistory">
+              <span>🕘 Feedbacks</span>
+          </button> -->
+
           <!-- <p v-if="dashboard && currentMarkdownFileId" class="category-status">
             Reviews available: {{ dashboard.dueNow }}
           </p> -->
-
-          <button
-              class="feedback-history-toggle"
-              @click="toggleFeedbackHistory">
-
-              <span>🕘 Feedback</span>
-
-              <!-- <span>
-                  {{ feedbackHistoryVisible ? "▲" : "▼" }}
-              </span> -->
-          </button>
 
         </div>
 
@@ -342,25 +396,41 @@
               :key="item.id"
               class="feedback-history-item">
 
-              <div class="feedback-history-section">
-                <div class="feedback-history-label">💬 Feedback</div>
-                <div class="feedback-preview">
-                  {{ item.feedback }}
+              <div class="feedback-history-card-header">
+                <div>
+                  <div class="feedback-history-title">💬 Feedback</div>
+                  <div class="feedback-history-date">
+                    {{ formatShortDate(item.createdAt) }}
+                  </div>
+                </div>
+
+                <div class="feedback-history-score">
+                  Score {{ formatScore(item.score) }}
                 </div>
               </div>
 
-              <details class="feedback-answer-details">
-                <summary>
-                  <span>Show my answer</span>
-                  <span class="feedback-history-meta-inline">
-                    <span class="feedback-history-date">{{ formatShortDate(item.createdAt) }}</span>
-                    <span v-if="item.score !== null" class="feedback-history-score">Score {{ formatScore(item.score) }}</span>
-                  </span>
-                </summary>
-                <div class="feedback-answer-text">
-                  {{ item.userAnswer }}
-                </div>
-              </details>
+              <div class="feedback-preview">
+                {{ item.feedback }}
+              </div>
+
+              <div class="feedback-history-actions">
+                <details class="feedback-qa-details">
+                  <summary>Question / Answer</summary>
+
+                  <div class="feedback-qa-box">
+                    <div class="feedback-qa-label">Question</div>
+                    <div class="feedback-qa-text">
+                      {{ item.question || "No question saved for this review." }}
+                    </div>
+
+                    <div class="feedback-qa-label feedback-qa-answer-label">My answer</div>
+                    <div class="feedback-qa-text">
+                      {{ item.userAnswer || "No answer saved." }}
+                    </div>
+                  </div>
+                </details>
+              </div>
+
             </div>
           </div>
         </div>

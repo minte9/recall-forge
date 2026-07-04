@@ -28,6 +28,8 @@ createApp({
       feedbackHistoryVisible: false,
       feedbackHistoryLoading: false,
       feedbackHistoryLoadedForTopicId: null,
+      selectedEnvironment: "Java",
+      environmentMenuOpen: false,
 
       initialMarkdown: `
 <h3>Markdown File</h3>
@@ -57,21 +59,55 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return this.leftPanel !== "markdown";
     },
 
-    markdownGroups() {
+    lastReview() {
+        return this.feedbackHistory.length > 0
+            ? this.feedbackHistory[0]
+            : null;
+    },
+
+    environmentGroups() {
+      return {
+        JVM: ["Java", "Spring"],
+        PVM: ["Python"]
+      };
+    },
+
+    // markdownGroups() {
+    //   const groups = {};
+
+    //   this.markdownSummaries.forEach(file => {
+    //     const key = `${file.category}, ${file.subcategory}`;
+
+    //     if (!groups[key]) {
+    //       groups[key] = {
+    //         environment: file.environment,
+    //         files: []
+    //       };
+    //     }
+
+    //     groups[key].files.push(file);
+    //   });
+
+    //   return groups;
+    // }
+
+    filteredMarkdownGroups() {
       const groups = {};
 
-      this.markdownSummaries.forEach(file => {
-        const key = `${file.category}, ${file.subcategory}`;
+      this.markdownSummaries
+        .filter(file => file.category === this.selectedEnvironment)
+        .forEach(file => {
+          const key = file.subcategory;
 
-        if (!groups[key]) {
-          groups[key] = {
-            environment: file.environment,
-            files: []
-          };
-        }
+          if (!groups[key]) {
+            groups[key] = {
+              environment: file.environment,
+              files: []
+            };
+          }
 
-        groups[key].files.push(file);
-      });
+          groups[key].files.push(file);
+        });
 
       return groups;
     }
@@ -144,6 +180,16 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return Markdown.render(md);
     },
 
+    selectEnvironment(environment) {
+      this.selectedEnvironment = environment;
+      this.environmentMenuOpen = false;
+      this.openMarkdownGroup = null;
+    },
+
+    toggleEnvironmentMenu() {
+      this.environmentMenuOpen = !this.environmentMenuOpen;
+    },
+
     async startReview() {
       this.loading = true;
       this.markdownLoading = true;
@@ -183,6 +229,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         }
 
         await this.loadDashboard();
+
+        await this.loadFeedbackHistory(this.review.topicId);
 
       } catch (err) {
         this.review = null;
@@ -436,18 +484,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return hex + "18";
     },
 
-    async toggleFeedbackHistory() {
-      this.feedbackHistoryVisible = !this.feedbackHistoryVisible;
-
-      if (!this.feedbackHistoryVisible) return;
-
-      const topicId = this.review?.topicId;
-
-      if (!topicId) return;
-
-      if (this.feedbackHistoryLoadedForTopicId === topicId) return;
-
-      await this.loadFeedbackHistory(topicId);
+    toggleFeedbackHistory() {
+        this.feedbackHistoryVisible = !this.feedbackHistoryVisible;
     },
 
     async loadFeedbackHistory(topicId) {

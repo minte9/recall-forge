@@ -188,6 +188,7 @@ public class ReviewService {
             .stream()
             .map(r -> new FeedbackHistoryResponse(
                 r.getId(),
+                r.getQuestion(),
                 r.getUserAnswer(),
                 r.getFeedback(),
                 r.getReviewedAt(),
