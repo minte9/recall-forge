@@ -74,6 +74,12 @@ v1.0.5
 - 6.6 Recommended structure
 - 6.7 Claude Usage
 
+## 7. Users
+
+- 7.1 Users list (admin)
+- 7.2 Category aware (dashboard)
+- 7.3 Danger zone (reset learning)
+- 7.4 Starter pack
 
 ## Architecture
 
