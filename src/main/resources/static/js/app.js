@@ -210,11 +210,11 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.feedbackHistoryLoadedForTopicId = null;
 
       try {
-        let data = await Api.startReview(this.currentMarkdownFileId);
+        let data = await Api.startReview(this.currentMarkdownFileId, this.currentCategory);
 
         if (data.done && this.currentMarkdownFileId) {
           this.currentMarkdownFileId = null;
-          data = await Api.startReview(null);
+          data = await Api.startReview(null, this.currentCategory);
         }
 
         if (data.done) {

@@ -27,8 +27,8 @@ public class TopicService {
             .toList();
     }
 
-    public List<Topic> getDueTopics(Long userId) {
-        return topicRepository.findDueTopics(userId, LocalDateTime.now());
+    public List<Topic> getDueTopics(Long userId, String category) {
+        return topicRepository.findDueTopicsByCategory(userId, category, LocalDateTime.now());
     }
 
     public Topic getTopic(Long topicId, Long userId) {
@@ -38,8 +38,8 @@ public class TopicService {
             );
     }
 
-    public Optional<Topic> selectNextTopic(Long userId) {
-        return topicRepository.findDueTopics(userId, LocalDateTime.now())
+    public Optional<Topic> selectNextTopic(Long userId, String category) {
+        return topicRepository.findDueTopicsByCategory(userId, category, LocalDateTime.now())
             .stream()
             .findFirst();
     }
@@ -66,8 +66,8 @@ public class TopicService {
             );
     }
 
-    public long countDueTopics(Long userId, LocalDateTime now) {
-        return topicRepository.countDueByUser(userId, now);
+    public long countDueTopics(Long userId, String category, LocalDateTime now) {
+        return topicRepository.countDueByUser(userId, category, now);
     }
 
     public long countDueTopicsByMarkdownFileId(
@@ -82,8 +82,8 @@ public class TopicService {
         );
     }
 
-    public Optional<Topic> findNextReviewAtAfter(Long userId, LocalDateTime now) {
-        return topicRepository.findNextByUser(userId, now, PageRequest.of(0, 1))
+    public Optional<Topic> findNextReviewAtAfter(Long userId, String category, LocalDateTime now) {
+        return topicRepository.findNextByUser(userId, category, now, PageRequest.of(0, 1))
             .stream()
             .findFirst();
     }

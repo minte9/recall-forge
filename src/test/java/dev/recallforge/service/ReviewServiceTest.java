@@ -74,9 +74,9 @@ class ReviewServiceTest {
     void startReview_noDueTopics_returnsNoReviewsDueResponse() {
         setUp();
         when(currentUserService.currentUserId()).thenReturn(1L);
-        when(topicService.selectNextTopic(1L)).thenReturn(Optional.empty());
+        when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.empty());
 
-        ReviewQuestionResponse response = reviewService.startReview(null);
+        ReviewQuestionResponse response = reviewService.startReview(null, "java");
 
         assertThat(response.done()).isTrue();
         assertThat(response.message()).isEqualTo("All reviews are done for now. Come back later.");
@@ -89,10 +89,10 @@ class ReviewServiceTest {
         setUp();
         Topic topic = topicWithId(10L, null);
         when(currentUserService.currentUserId()).thenReturn(1L);
-        when(topicService.selectNextTopic(1L)).thenReturn(Optional.of(topic));
+        when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
         when(openAiService.generateQuestion("Title", "Content body")).thenReturn("What is X?");
 
-        ReviewQuestionResponse response = reviewService.startReview(null);
+        ReviewQuestionResponse response = reviewService.startReview(null, "java");
 
         assertThat(response.topicId()).isEqualTo(10L);
         assertThat(response.question()).isEqualTo("What is X?");
@@ -112,10 +112,10 @@ class ReviewServiceTest {
         Topic topic = topicWithId(11L, markdownFile);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
-        when(topicService.selectNextTopic(1L)).thenReturn(Optional.of(topic));
+        when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
         when(openAiService.generateQuestion(any(), any())).thenReturn("Q");
 
-        ReviewQuestionResponse response = reviewService.startReview(null);
+        ReviewQuestionResponse response = reviewService.startReview(null, "java");
 
         assertThat(response.markdownContent()).isEqualTo("# File content");
         assertThat(response.markdownFileId()).isEqualTo(99L);
@@ -127,11 +127,11 @@ class ReviewServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.selectNextTopicByMarkdownFileId(5L, 1L)).thenReturn(Optional.empty());
 
-        ReviewQuestionResponse response = reviewService.startReview(5L);
+        ReviewQuestionResponse response = reviewService.startReview(5L, "java");
 
         assertThat(response.done()).isTrue();
         verify(topicService).selectNextTopicByMarkdownFileId(5L, 1L);
-        verify(topicService, never()).selectNextTopic(any());
+        verify(topicService, never()).selectNextTopic(any(), any());
     }
 
     @Test
@@ -145,7 +145,7 @@ class ReviewServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(7L, 1L)).thenReturn(topic);
         when(currentUserService.currentUser()).thenReturn(new UserAccount());
-        when(repetitionService.calculateUpdateMemoryScore(0.5, 0.8)).thenReturn(0.65);
+        when(repetitionService.calculateUpdateMemoryScore(0.6, 0.8)).thenReturn(0.65);
         when(repetitionService.calculateNextReviewAt(0.8)).thenReturn(nextReviewAt);
         when(rewardService.rewardDefaultUser(0.8, "Uncategorized")).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -216,10 +216,10 @@ class ReviewServiceTest {
     void getDailyQueue_withoutMarkdownFileId_usesGlobalCountsAndIsDoneWhenZero() {
         setUp();
         when(currentUserService.currentUserId()).thenReturn(1L);
-        when(topicService.countDueTopics(eq(1L), any())).thenReturn(0L);
-        when(topicService.findNextReviewAtAfter(eq(1L), any())).thenReturn(Optional.empty());
+        when(topicService.countDueTopics(eq(1L), eq("java"), any())).thenReturn(0L);
+        when(topicService.findNextReviewAtAfter(eq(1L), eq("java"), any())).thenReturn(Optional.empty());
 
-        ReviewQueueResponse response = reviewService.getDailyQueue(null);
+        ReviewQueueResponse response = reviewService.getDailyQueue(null, "java");
 
         assertThat(response.dueCount()).isZero();
         assertThat(response.nextReviewAt()).isNull();
@@ -238,11 +238,11 @@ class ReviewServiceTest {
         when(topicService.findNextReviewAtAfterByMarkdownFileId(eq(5L), eq(1L), any()))
             .thenReturn(Optional.of(nextTopic));
 
-        ReviewQueueResponse response = reviewService.getDailyQueue(5L);
+        ReviewQueueResponse response = reviewService.getDailyQueue(5L, "java");
 
         assertThat(response.dueCount()).isEqualTo(3L);
         assertThat(response.nextReviewAt()).isEqualTo(nextTopic.getNextReviewAt());
         assertThat(response.doneForToday()).isFalse();
-        verify(topicService, never()).countDueTopics(any(), any());
+        verify(topicService, never()).countDueTopics(any(), any(), any());
     }
 }

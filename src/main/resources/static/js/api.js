@@ -1,10 +1,14 @@
 const Api = {
-  async startReview(markdownFileId) {
-    let url = "/api/reviews/start";
+  async startReview(markdownFileId, category) {
+    const params = new URLSearchParams();
 
     if (markdownFileId) {
-      url += "?markdownFileId=" + encodeURIComponent(markdownFileId);
+      params.set("markdownFileId", markdownFileId);
     }
+
+    params.set("category", category || "Java");
+
+    const url = "/api/reviews/start?" + params.toString();
 
     const response = await fetch(url, {
       method: "POST",

@@ -44,11 +44,11 @@ public class ReviewService {
         this.currentUserService = currentUserService;
     }
 
-    public ReviewQuestionResponse startReview(Long markdownFileId) {
+    public ReviewQuestionResponse startReview(Long markdownFileId, String category) {
         Long userId = currentUserService.currentUserId();
 
         Optional<Topic> topicOptional = markdownFileId == null
-                ? topicService.selectNextTopic(userId)
+                ? topicService.selectNextTopic(userId, category)
                 : topicService.selectNextTopicByMarkdownFileId(markdownFileId, userId);
         
         if (topicOptional.isEmpty()) {
@@ -156,16 +156,16 @@ public class ReviewService {
                 .toList();
     }
 
-    public ReviewQueueResponse getDailyQueue(Long markdownFileId) {
+    public ReviewQueueResponse getDailyQueue(Long markdownFileId, String category) {
         Long userId = currentUserService.currentUserId();
         LocalDateTime now = LocalDateTime.now();
 
         long dueCount = markdownFileId == null
-            ? topicService.countDueTopics(userId, now)
+            ? topicService.countDueTopics(userId, category, now)
             : topicService.countDueTopicsByMarkdownFileId(markdownFileId, userId, now);
 
         LocalDateTime nextReviewAt = markdownFileId == null
-            ? topicService.findNextReviewAtAfter(userId, now)
+            ? topicService.findNextReviewAtAfter(userId, category, now)
                     .map(Topic::getNextReviewAt)
                     .orElse(null)
             : topicService.findNextReviewAtAfterByMarkdownFileId(markdownFileId, userId, now)

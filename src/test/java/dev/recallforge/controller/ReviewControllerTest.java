@@ -48,7 +48,7 @@ class ReviewControllerTest {
         ReviewQuestionResponse response = new ReviewQuestionResponse(
             1L, "Topic One", "What is X?", "# markdown content", 7L, false, null
         );
-        when(reviewService.startReview(7L)).thenReturn(response);
+        when(reviewService.startReview(7L, "Java")).thenReturn(response);
 
         mockMvcTester.post().uri("/api/reviews/start?markdownFileId=7")
             .assertThat()
@@ -66,12 +66,12 @@ class ReviewControllerTest {
                 }
                 """);
 
-        verify(reviewService).startReview(7L);
+        verify(reviewService).startReview(7L, "Java");
     }
 
     @Test
     void startReview_withoutMarkdownFileId_passesNullToService() {
-        when(reviewService.startReview(isNull())).thenReturn(ReviewQuestionResponse.noReviewsDue());
+        when(reviewService.startReview(isNull(), eq("Java"))).thenReturn(ReviewQuestionResponse.noReviewsDue());
 
         mockMvcTester.post().uri("/api/reviews/start")
             .assertThat()
@@ -89,7 +89,7 @@ class ReviewControllerTest {
                 }
                 """);
 
-        verify(reviewService).startReview(isNull());
+        verify(reviewService).startReview(isNull(), eq("Java"));
     }
 
     @Test
@@ -164,7 +164,7 @@ class ReviewControllerTest {
         ReviewQueueResponse response = new ReviewQueueResponse(
             3L, LocalDateTime.of(2026, 7, 6, 8, 0), false
         );
-        when(reviewService.getDailyQueue(5L)).thenReturn(response);
+        when(reviewService.getDailyQueue(5L, "Java")).thenReturn(response);
 
         mockMvcTester.get().uri("/api/reviews/queue/today?markdownFileId=5")
             .assertThat()
@@ -178,7 +178,7 @@ class ReviewControllerTest {
                 }
                 """);
 
-        verify(reviewService).getDailyQueue(5L);
+        verify(reviewService).getDailyQueue(5L, "Java");
     }
 
     @Test

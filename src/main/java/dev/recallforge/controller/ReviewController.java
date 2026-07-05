@@ -36,8 +36,10 @@ public class ReviewController {
      * and asks OpenAI to generate one question.
      */
     @PostMapping("/start")
-    public ReviewQuestionResponse startReview(@RequestParam(required = false) Long markdownFileId) {
-        return reviewService.startReview(markdownFileId);
+    public ReviewQuestionResponse startReview(
+            @RequestParam(required = false) Long markdownFileId,
+            @RequestParam(required = false, defaultValue = "Java") String category) {
+        return reviewService.startReview(markdownFileId, category);
     }
 
     /**
@@ -56,8 +58,10 @@ public class ReviewController {
     }
 
     @GetMapping("/queue/today")
-    public ReviewQueueResponse getDailyQueue(@RequestParam(required = false) Long markdownFileId) {
-        return reviewService.getDailyQueue(markdownFileId);
+    public ReviewQueueResponse getDailyQueue(
+            @RequestParam(required = false) Long markdownFileId,
+            @RequestParam(required = false, defaultValue = "Java") String category) {
+        return reviewService.getDailyQueue(markdownFileId, category);
     }
 
     @GetMapping("/{topicId}/feedback-history")

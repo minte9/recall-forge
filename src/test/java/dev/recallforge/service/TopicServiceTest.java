@@ -80,17 +80,17 @@ class TopicServiceTest {
         setUp();
         Topic first = topicWithMemoryScore(0.1);
         Topic second = topicWithMemoryScore(0.3);
-        when(topicRepository.findDueTopics(eq(1L), any())).thenReturn(List.of(first, second));
+        when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any())).thenReturn(List.of(first, second));
 
-        assertThat(topicService.selectNextTopic(1L)).contains(first);
+        assertThat(topicService.selectNextTopic(1L, "java")).contains(first);
     }
 
     @Test
     void selectNextTopic_returnsEmptyWhenNoTopicsAreDue() {
         setUp();
-        when(topicRepository.findDueTopics(eq(1L), any())).thenReturn(List.of());
+        when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any())).thenReturn(List.of());
 
-        assertThat(topicService.selectNextTopic(1L)).isEmpty();
+        assertThat(topicService.selectNextTopic(1L, "java")).isEmpty();
     }
 
     @Test
@@ -108,9 +108,9 @@ class TopicServiceTest {
     void countDueTopics_delegatesUserAndTimeToRepository() {
         setUp();
         LocalDateTime now = LocalDateTime.now();
-        when(topicRepository.countDueByUser(1L, now)).thenReturn(4L);
+        when(topicRepository.countDueByUser(1L, "java", now)).thenReturn(4L);
 
-        assertThat(topicService.countDueTopics(1L, now)).isEqualTo(4L);
+        assertThat(topicService.countDueTopics(1L, "java", now)).isEqualTo(4L);
     }
 
     @Test
@@ -128,10 +128,10 @@ class TopicServiceTest {
         LocalDateTime now = LocalDateTime.now();
         Topic topic = topicWithMemoryScore(0.5);
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        when(topicRepository.findNextByUser(eq(1L), eq(now), pageableCaptor.capture()))
+        when(topicRepository.findNextByUser(eq(1L), eq("java"), eq(now), pageableCaptor.capture()))
             .thenReturn(List.of(topic));
 
-        Optional<Topic> result = topicService.findNextReviewAtAfter(1L, now);
+        Optional<Topic> result = topicService.findNextReviewAtAfter(1L, "java", now);
 
         assertThat(result).contains(topic);
         assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(1);

@@ -37,11 +37,16 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     @Query("""
         select t from Topic t
-        where t.nextReviewAt <= :now 
+        where t.nextReviewAt <= :now
             and t.user.id = :userId
+            and lower(t.category) = lower(:category)
         order by t.memoryScore asc, t.nextReviewAt asc
     """)
-    List<Topic> findDueTopics(Long userId, LocalDateTime now);
+    List<Topic> findDueTopicsByCategory(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("now") LocalDateTime now
+    );
 
     @Query("""
         select t from Topic t
@@ -72,9 +77,14 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     @Query("""
         select count(t) from Topic t
         where t.user.id = :userId
+        and lower(t.category) = lower(:category)
         and t.nextReviewAt <= :now
     """)
-    long countDueByUser(Long userId, LocalDateTime now);
+    long countDueByUser(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("now") LocalDateTime now
+    );
 
     @Query("""
         select count(t)
@@ -212,12 +222,14 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         select t
         from Topic t
         where t.user.id = :userId
+        and lower(t.category) = lower(:category)
         and t.nextReviewAt > :now
         order by t.nextReviewAt asc
     """)
     List<Topic> findNextByUser(
-        Long userId,
-        LocalDateTime now,
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("now") LocalDateTime now,
         Pageable pageable
     );
 

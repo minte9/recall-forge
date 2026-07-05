@@ -96,7 +96,7 @@ class TopicControllerTest {
     @Test
     void getDueTopics_returnsDueTopicsForCurrentUserAsJson() {
         when(currentUserService.currentUserId()).thenReturn(7L);
-        when(topicService.getDueTopics(7L)).thenReturn(List.of(
+        when(topicService.getDueTopics(7L, "Java")).thenReturn(List.of(
             topicFixture(2L, "Topic Two", 0.3, LocalDateTime.of(2026, 7, 5, 8, 30))
         ));
 
@@ -115,13 +115,13 @@ class TopicControllerTest {
                 ]
                 """);
 
-        verify(topicService).getDueTopics(7L);
+        verify(topicService).getDueTopics(7L, "Java");
     }
 
     @Test
     void getDueTopics_serviceReturnsEmptyList_returnsEmptyJsonArray() {
         when(currentUserService.currentUserId()).thenReturn(7L);
-        when(topicService.getDueTopics(7L)).thenReturn(List.of());
+        when(topicService.getDueTopics(7L, "Java")).thenReturn(List.of());
 
         mockMvcTester.get().uri("/api/topics/due")
             .assertThat()

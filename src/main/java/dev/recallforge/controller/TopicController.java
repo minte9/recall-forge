@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.recallforge.dto.ReviewHistoryResponse;
@@ -52,10 +53,11 @@ public class TopicController {
     }
 
     @GetMapping("/due")
-    public List<TopicResponse> getDueTopics() {
+    public List<TopicResponse> getDueTopics(
+            @RequestParam(required = false, defaultValue = "Java") String category) {
         Long userId = currentUserService.currentUserId();
 
-        return topicService.getDueTopics(userId)
+        return topicService.getDueTopics(userId, category)
                 .stream()
                 .map(TopicResponse::from)
                 .toList();
