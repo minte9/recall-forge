@@ -65,6 +65,7 @@ public class DatabaseOAuth2UserService
             id = attrs.get("id"); // GitHub
 
             // https://recallforge.dev/login/oauth2/code/github
+            // http://localhost:9090/login/oauth2/code/github
         }
 
         if (id == null) {
