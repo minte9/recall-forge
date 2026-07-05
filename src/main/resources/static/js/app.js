@@ -116,6 +116,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     await this.loadMarkdownSummaries(true);
 
     this.autoOpenSingleMarkdownGroup();
+
+    if (this.categoryOptions.length === 0) {
+      this.showMarkdownSummaries();
+    }
   },
 
   beforeUnmount() {
