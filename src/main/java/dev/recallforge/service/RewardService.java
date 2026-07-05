@@ -67,21 +67,6 @@ public class RewardService {
         return 10;                      // Easy
     }
 
-    // private RewardResponse toResponse(UserReward reward, int gainedXp) {
-    //     int level = reward.getTotalXp() / 100 + 1;
-    //     int xpInLevel = reward.getTotalXp() % 100;
-
-    //     return new RewardResponse(
-    //         reward.getTotalXp(),
-    //         level,
-    //         titleForLevel(level),
-    //         xpInLevel,
-    //         100,
-    //         reward.currentStreakDays(LocalDate.now()),
-    //         gainedXp
-    //     );
-    // }
-
     private RewardResponse toResponse(
         UserReward reward,
         int gainedXp,
@@ -92,10 +77,7 @@ public class RewardService {
 
         Long userId = reward.getUserId();
 
-        long totalTopics = topicRepository.countByUserIdAndCategory(
-            userId,
-            category
-        );
+        long totalTopics = topicRepository.countByUserIdAndCategory(userId, category);
 
         LocalDateTime masteryDate = LocalDateTime.now().plusDays(MASTERY_DAYS);
         

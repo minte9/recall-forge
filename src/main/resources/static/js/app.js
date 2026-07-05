@@ -301,6 +301,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           userAnswer: this.userAnswer
         });
 
+        this.feedbackHistoryVisible = false;
+
         await this.loadDashboard();
         await this.loadMarkdownSummaries();
 

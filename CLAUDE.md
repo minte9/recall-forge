@@ -26,3 +26,20 @@ Before editing:
 After editing:
 - Stop after running the relevant tests.
 - Do not continue with additional refactorings unless requested.
+
+## Security
+
+Do not read or display secrets unless explicitly requested.
+
+This includes:
+- .env
+- .env.*
+- *.pem
+- *.key
+- id_rsa*
+- credentials files
+- API keys
+- passwords
+- tokens
+
+If access to one of these files appears necessary, explain why and wait for approval.

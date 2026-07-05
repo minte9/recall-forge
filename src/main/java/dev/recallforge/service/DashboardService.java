@@ -3,6 +3,8 @@ package dev.recallforge.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -75,10 +77,24 @@ public class DashboardService {
             ))
             .toList();
 
+        Set<String> weakTitles = weakKnowledgeAreas.stream()
+            .map(area -> area.title())
+            .collect(Collectors.toSet());
+
+        List<KnowledgeAreaResponse> strongOnly = strongKnowledgeAreas.stream()
+            .filter(area -> !weakTitles.contains(area.title()))
+            .toList();
+
+        Set<String> strongTitles = strongKnowledgeAreas.stream()
+            .map(area -> area.title())
+            .collect(Collectors.toSet());
+
+        List<KnowledgeAreaResponse> weakOnly = weakKnowledgeAreas.stream()
+            .filter(area -> !strongTitles.contains(area.title()))
+            .toList();
+
         boolean showKnowledgeInsights =
-            !strongKnowledgeAreas.isEmpty()
-            && !weakKnowledgeAreas.isEmpty()
-            && !strongKnowledgeAreas.get(0).title().equals(weakKnowledgeAreas.get(0).title());
+            !strongOnly.isEmpty() && !weakOnly.isEmpty();
 
         return new DashboardResponse(
             dueNow,
