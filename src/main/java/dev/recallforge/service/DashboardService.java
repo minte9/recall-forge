@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import dev.recallforge.dto.CategoryOptionResponse;
 import dev.recallforge.dto.DashboardResponse;
 import dev.recallforge.dto.KnowledgeAreaResponse;
 import dev.recallforge.dto.MarkdownSummaryDto;
@@ -96,5 +97,17 @@ public class DashboardService {
         Long userId = currentUserService.currentUserId();
 
         return topicRepository.findMarkdownSummaries(userId, category, LocalDateTime.now());
+    }
+
+    public List<CategoryOptionResponse> getCategoryOptions() {
+        Long userId = currentUserService.currentUserId();
+
+        return topicRepository.findDistinctEnvironmentCategories(userId)
+            .stream()
+            .map(option -> new CategoryOptionResponse(
+                option.getEnvironment(),
+                option.getCategory()
+            ))
+            .toList();
     }
 }

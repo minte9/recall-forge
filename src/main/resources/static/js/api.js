@@ -88,6 +88,18 @@ const Api = {
     return await response.json();
   },
 
+  async loadCategoryOptions() {
+    const response = await fetch("/api/dashboard/categories", {
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    return await response.json();
+  },
+
   async loadCurrentUser() {
     const response = await fetch("/api/me", {
       credentials: "same-origin"

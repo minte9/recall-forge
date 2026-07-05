@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.recallforge.dto.CategoryOptionResponse;
 import dev.recallforge.dto.DashboardResponse;
 import dev.recallforge.dto.MarkdownSummaryDto;
 import dev.recallforge.service.DashboardService;
@@ -32,5 +33,10 @@ public class DashboardController {
             @RequestParam(required = false, defaultValue = "Java") String category) {
         return dashboardService.getMarkdownSummaries(category);
     }
-    
+
+    @GetMapping("/categories")
+    public List<CategoryOptionResponse> categories() {
+        return dashboardService.getCategoryOptions();
+    }
+
 }

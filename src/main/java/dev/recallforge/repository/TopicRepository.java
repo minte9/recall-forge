@@ -261,4 +261,16 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         @Param("memoryScore") double memoryScore,
         @Param("reviewDate") LocalDateTime reviewDate
     );
+
+    @Query("""
+        select distinct
+            t.environment as environment,
+            t.category as category
+        from Topic t
+        where t.user.id = :userId
+        order by t.environment, t.category
+    """)
+    List<EnvironmentCategoryProjection> findDistinctEnvironmentCategories(
+        @Param("userId") Long userId
+    );
 }

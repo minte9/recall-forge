@@ -32,6 +32,7 @@ createApp({
       selectedEnvironment: "Java",
       environmentMenuOpen: false,
       adminUsers: [],
+      categoryOptions: [],
 
       initialMarkdown: `
 <h3>Markdown File</h3>
@@ -70,10 +71,17 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     environmentGroups() {
-      return {
-        JVM: ["Java", "Spring"],
-        PVM: ["Python"]
-      };
+      const groups = {};
+
+      this.categoryOptions.forEach(option => {
+        if (!groups[option.environment]) {
+          groups[option.environment] = [];
+        }
+
+        groups[option.environment].push(option.category);
+      });
+
+      return groups;
     },
 
     filteredMarkdownGroups() {
@@ -101,6 +109,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
   async mounted() {
     document.addEventListener("click", this.handleBodyClick);
 
+    await this.loadCategoryOptions();
     await this.loadDashboard();
     await this.loadCurrentUser();
     await this.loadMarkdownSummaries(true);
@@ -264,6 +273,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.mobileView = "review"; // show markdown + right panel on mobile
 
         await this.startReview();
+        await this.loadCategoryOptions();
         await this.loadDashboard();
         await this.loadMarkdownSummaries(false);
 
@@ -302,6 +312,25 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.error = err.message || "Could not submit answer.";
       } finally {
         this.loading = false;
+      }
+    },
+
+    async loadCategoryOptions() {
+      try {
+        const options = await Api.loadCategoryOptions();
+        this.categoryOptions = options || [];
+
+        const hasCurrentCategory = this.categoryOptions.some(
+          option => option.category === this.currentCategory
+        );
+
+        if (!hasCurrentCategory && this.categoryOptions.length > 0) {
+          this.selectedEnvironment = this.categoryOptions[0].category;
+          this.currentCategory = this.categoryOptions[0].category;
+        }
+
+      } catch (err) {
+        console.error("Could not load category options", err);
       }
     },
 

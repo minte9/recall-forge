@@ -13,11 +13,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import dev.recallforge.dto.CategoryOptionResponse;
 import dev.recallforge.dto.DashboardResponse;
 import dev.recallforge.dto.KnowledgeAreaResponse;
 import dev.recallforge.dto.MarkdownSummaryDto;
 import dev.recallforge.dto.RewardResponse;
 import dev.recallforge.dto.WeakAreaResponse;
+import dev.recallforge.repository.EnvironmentCategoryProjection;
 import dev.recallforge.repository.KnowledgeAreaProjection;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.WeakAreaProjection;
@@ -57,6 +59,13 @@ class DashboardServiceTest {
         KnowledgeAreaProjection projection = mock(KnowledgeAreaProjection.class);
         when(projection.getTitle()).thenReturn(title);
         when(projection.getAverageMemoryScore()).thenReturn(averageMemoryScore);
+        return projection;
+    }
+
+    private EnvironmentCategoryProjection environmentCategory(String environment, String category) {
+        EnvironmentCategoryProjection projection = mock(EnvironmentCategoryProjection.class);
+        when(projection.getEnvironment()).thenReturn(environment);
+        when(projection.getCategory()).thenReturn(category);
         return projection;
     }
 
@@ -176,5 +185,34 @@ class DashboardServiceTest {
         List<MarkdownSummaryDto> result = dashboardService.getMarkdownSummaries("java");
 
         assertThat(result).isEqualTo(summaries);
+    }
+
+    @Test
+    void getCategoryOptions_delegatesToRepositoryForCurrentUserAndMapsFields() {
+        setUp();
+        List<EnvironmentCategoryProjection> options = List.of(
+            environmentCategory("JVM", "Java"),
+            environmentCategory("JVM", "Spring"),
+            environmentCategory("PVM", "Python")
+        );
+        when(topicRepository.findDistinctEnvironmentCategories(1L)).thenReturn(options);
+
+        List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
+
+        assertThat(result).containsExactly(
+            new CategoryOptionResponse("JVM", "Java"),
+            new CategoryOptionResponse("JVM", "Spring"),
+            new CategoryOptionResponse("PVM", "Python")
+        );
+    }
+
+    @Test
+    void getCategoryOptions_repositoryReturnsEmptyList_returnsEmptyList() {
+        setUp();
+        when(topicRepository.findDistinctEnvironmentCategories(1L)).thenReturn(List.of());
+
+        List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
+
+        assertThat(result).isEmpty();
     }
 }
