@@ -84,7 +84,7 @@ public class Topic {
         this.markdownFile = markdownFile;
         this.user = user;
 
-        this.memoryScore = 0.5;
+        this.memoryScore = 0.6;
         this.nextReviewAt = LocalDateTime.now();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
