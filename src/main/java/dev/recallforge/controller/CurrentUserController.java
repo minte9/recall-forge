@@ -25,6 +25,7 @@ public class CurrentUserController {
         return new CurrentUserResponse(
             user.getId(),
             user.getEmail(),
+            user.isAdmin(),
             user.getDisplayName(),
             user.getRole().name(),
             user.getAvatarUrl()

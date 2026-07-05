@@ -41,6 +41,10 @@ public class UserAccount {
     private Instant createdAt;
     private Instant lastLoginAt;
 
+    public boolean isAdmin() {
+        return role == Role.ADMIN;
+    }
+
     @PrePersist
     void onCreate() {
         this.createdAt = Instant.now();

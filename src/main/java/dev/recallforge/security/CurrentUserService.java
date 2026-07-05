@@ -1,13 +1,15 @@
 package dev.recallforge.security;
 
-import dev.recallforge.domain.UserAccount;
-import dev.recallforge.repository.UserAccountRepository;
+import org.springframework.security.access.AccessDeniedException;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import dev.recallforge.domain.UserAccount;
+import dev.recallforge.repository.UserAccountRepository;
 
 @Service
 public class CurrentUserService {
@@ -52,5 +54,13 @@ public class CurrentUserService {
         }
 
         return id.toString();
+    }
+
+    public void requireAdmin() {
+        UserAccount user = currentUser();
+
+        if (!user.isAdmin()) {
+            throw new AccessDeniedException("Admin access required");
+        }
     }
 }

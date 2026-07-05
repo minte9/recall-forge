@@ -30,6 +30,7 @@ createApp({
       feedbackHistoryLoadedForTopicId: null,
       selectedEnvironment: "Java",
       environmentMenuOpen: false,
+      adminUsers: [],
 
       initialMarkdown: `
 <h3>Markdown File</h3>
@@ -60,9 +61,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     lastReview() {
-        return this.feedbackHistory.length > 0
-            ? this.feedbackHistory[0]
-            : null;
+      return this.feedbackHistory.length > 0
+        ? this.feedbackHistory[0]
+        : null;
     },
 
     environmentGroups() {
@@ -71,25 +72,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         PVM: ["Python"]
       };
     },
-
-    // markdownGroups() {
-    //   const groups = {};
-
-    //   this.markdownSummaries.forEach(file => {
-    //     const key = `${file.category}, ${file.subcategory}`;
-
-    //     if (!groups[key]) {
-    //       groups[key] = {
-    //         environment: file.environment,
-    //         files: []
-    //       };
-    //     }
-
-    //     groups[key].files.push(file);
-    //   });
-
-    //   return groups;
-    // }
 
     filteredMarkdownGroups() {
       const groups = {};
@@ -122,7 +104,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
   },
 
   beforeUnmount() {
-      document.removeEventListener("click", this.handleBodyClick);
+    document.removeEventListener("click", this.handleBodyClick);
   },
 
   methods: {
@@ -158,13 +140,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     handleBodyClick(event) {
       if (!this.mobileMenuOpen) {
-          return;
+        return;
       }
 
       const menu = this.$refs.mobileMenu;
 
       if (menu && !menu.contains(event.target)) {
-          this.mobileMenuOpen = false;
+        this.mobileMenuOpen = false;
       }
     },
 
@@ -242,8 +224,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async startReviewForFile(markdownFileId) {
-        this.currentMarkdownFileId = markdownFileId;
-        await this.startReview();
+      this.currentMarkdownFileId = markdownFileId;
+      await this.startReview();
     },
 
     async uploadMarkdown(event) {
@@ -456,8 +438,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     closeLeftPanel() {
-        this.showAccount = false;
-        this.mobileView = "dashboard";
+      this.showAccount = false;
+      this.mobileView = "dashboard";
     },
 
     stringHash(value) {
@@ -472,9 +454,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     environmentColor(index) {
       const palette = [
-          "#f45b00", // orange
-          "#8b5cf6", // purple
-          "#3b82f6"  // blue
+        "#f45b00", // orange
+        "#8b5cf6", // purple
+        "#3b82f6"  // blue
       ];
 
       return palette[index % palette.length];
@@ -485,7 +467,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     toggleFeedbackHistory() {
-        this.feedbackHistoryVisible = !this.feedbackHistoryVisible;
+      this.feedbackHistoryVisible = !this.feedbackHistoryVisible;
     },
 
     async loadFeedbackHistory(topicId) {
@@ -497,6 +479,23 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       } finally {
         this.feedbackHistoryLoading = false;
       }
+    },
+
+    openAdminUsers() {
+      this.leftPanel = "admin-users";
+      this.mobilePageTitle = "Admin Users";
+      this.mobileView = "markdown";
+      this.loadAdminUsers();
+    },
+
+    async loadAdminUsers() {
+      const response = await fetch("/api/admin/users");
+
+      if (!response.ok) {
+        throw new Error("Failed to load admin users");
+      }
+
+      this.adminUsers = await response.json();
     },
 
     showMarkdownExample() {

@@ -39,9 +39,7 @@
 
         <template v-if="review">
           <div class="menu-divider"></div>
-
           <div class="menu-group-title">Answers</div>
-
           <button @click="toggleFeedbackHistory(); mobileMenuOpen = false">
             Feedbacks
           </button>
@@ -50,12 +48,20 @@
         <div class="menu-divider"></div>
 
         <div class="menu-group-title">Account</div>
-
         <button @click="showAccountDetails(); mobileMenuOpen = false">
           Account Details
         </button>
-
         <a href="/logout">Logout</a>
+
+        <div class="menu-divider"></div>
+
+        <div v-if="currentUser?.role == 'ADMIN'" class="menu-group">
+          <div class="menu-group-title">Admin</div>
+          <button @click="openAdminUsers(); menuOpen = false">
+            Users
+          </button>
+        </div>
+
       </div>
     </div>
 
@@ -97,20 +103,16 @@
 
           <div v-if="menuOpen" class="menu-dropdown">
             <div class="menu-group-title">Reviews</div>
-
             <button @click="showDashboard(); mobileMenuOpen = false">
               Dashboard
             </button>
-
             <button @click="showMarkdownExample(); menuOpen = false">
               Upload Example
             </button>
 
             <template v-if="review">
               <div class="menu-divider"></div>
-
               <div class="menu-group-title">Answers</div>
-
               <button @click="toggleFeedbackHistory(); menuOpen = false">
                 Feedbacks
               </button>
@@ -119,12 +121,20 @@
             <div class="menu-divider"></div>
 
             <div class="menu-group-title">Account</div>
-
             <button @click="showAccountDetails(); menuOpen = false">
               Account Details
             </button>
-
             <a href="/logout">Logout</a>
+
+            <div class="menu-divider"></div>
+
+            <div v-if="currentUser?.role == 'ADMIN'" class="menu-group">
+              <div class="menu-group-title">Admin</div>
+              <button @click="openAdminUsers(); menuOpen = false">
+                Users
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
@@ -166,8 +176,13 @@
           <div class="environment-selector">
             <!-- <label>Environment</label> -->
 
-            <div class="environment-menu-wrap">
-              <button class="environment-menu-btn" @click="toggleEnvironmentMenu">
+            <div
+              class="environment-menu-wrap"
+              @mouseenter="isDesktop && (environmentMenuOpen = true)"
+              @mouseleave="isDesktop && (environmentMenuOpen = false)">
+              <button 
+                class="environment-menu-btn"
+                  @click="!isDesktop && toggleEnvironmentMenu()">
                 <span>{{ selectedEnvironment }}</span>
                 <span>⌄</span>
               </button>
@@ -253,9 +268,8 @@
               <div
                 v-for="file in group.files"
                 :key="file.markdownFileId"
-                class="markdown-row"
-                :class="{ clickable: file.dueCount > 0 }"
-                @click="file.dueCount > 0 && startReviewForFile(file.markdownFileId)">
+                class="markdown-row clickable"
+                @click="startReviewForFile(file.markdownFileId)">
               
                   <div class="row-left">
 
@@ -302,18 +316,40 @@
       </div>
         
       <div v-else-if="leftPanel === 'markdown'">
-
         <div v-if="markdownLoading" class="markdown-loading">
           Loading...
         </div>
-
         <div
           v-else
           class="markdown"
           v-html="renderMarkdown(markdown)">
         </div>
-
       </div>
+
+
+      <div v-if="leftPanel === 'admin-users'" class="panel">
+        <h2>Users</h2>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Topics</th>
+                    <th>Reviews</th>
+                    <th>Tokens</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr v-for="user in adminUsers" :key="user.userId">
+                    <td>{{ user.email ?? user.displayName }}</td>
+                    <td>{{ user.totalTopics }}</td>
+                    <td>{{ user.totalReviews }}</td>
+                    <td>{{ user.totalTokensSpent ?? "-" }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     </section>
 
