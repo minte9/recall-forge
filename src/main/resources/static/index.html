@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8" />
   <title>Recall Forge</title>
@@ -14,659 +15,631 @@
 </head>
 
 <body>
-<div id="app">
+  <div id="app">
 
-  <header class="mobile-topbar">
-    
-    <div class="mobile-menu-wrap" ref="mobileMenu">
-      
-      <button @click.stop="mobileMenuOpen = !mobileMenuOpen" title="Menu">☰</button>
+    <header class="mobile-topbar">
 
-      <div v-if="mobileMenuOpen" class="mobile-menu-dropdown">
-        <div class="menu-group-title">Reviews</div>
+      <div class="mobile-menu-wrap" ref="mobileMenu">
 
-        <button @click="showDashboard(); mobileMenuOpen = false">
-          Dashboard
-        </button>
+        <button @click.stop="mobileMenuOpen = !mobileMenuOpen" title="Menu">☰</button>
 
-        <button @click="showMarkdownSummaries(); mobileMenuOpen = false">
-          Markdowns
-        </button>
+        <div v-if="mobileMenuOpen" class="mobile-menu-dropdown">
+          <div class="menu-group-title">Reviews</div>
 
-        <button @click="showMarkdownExample(); mobileMenuOpen = false">
-          Upload Example
-        </button>
+          <button @click="showDashboard(); mobileMenuOpen = false">
+            Dashboard
+          </button>
 
-        <template v-if="review">
+          <button @click="showMarkdownSummaries(); mobileMenuOpen = false">
+            Markdowns
+          </button>
+
+          <button @click="showMarkdownExample(); mobileMenuOpen = false">
+            Upload Example
+          </button>
+
+          <template v-if="review">
+            <div class="menu-divider"></div>
+            <div class="menu-group-title">Answers</div>
+            <button @click="toggleFeedbackHistory(); mobileMenuOpen = false">
+              Feedbacks
+            </button>
+          </template>
+
           <div class="menu-divider"></div>
-          <div class="menu-group-title">Answers</div>
-          <button @click="toggleFeedbackHistory(); mobileMenuOpen = false">
-            Feedbacks
+
+          <div class="menu-group-title">Account</div>
+          <button @click="showAccountDetails(); mobileMenuOpen = false">
+            Account Details
           </button>
-        </template>
-
-        <div class="menu-divider"></div>
-
-        <div class="menu-group-title">Account</div>
-        <button @click="showAccountDetails(); mobileMenuOpen = false">
-          Account Details
-        </button>
-        <a href="/logout">Logout</a>
-
-        <div class="menu-divider"></div>
-
-        <div v-if="currentUser?.role == 'ADMIN'" class="menu-group">
-          <div class="menu-group-title">Admin</div>
-          <button @click="openAdminUsers(); menuOpen = false">
-            Users
+          <button class="account-menu-item" @click="showDangerZonePage">
+            Danger zone
           </button>
+          <a href="/logout">Logout</a>
+
+          <div class="menu-divider"></div>
+
+          <div v-if="currentUser?.role == 'ADMIN'" class="menu-group">
+            <div class="menu-group-title">Admin</div>
+            <button @click="openAdminUsers(); menuOpen = false">
+              Users
+            </button>
+          </div>
+
         </div>
-
       </div>
-    </div>
 
-    <div
-      class="mobile-title"
-      @click="onTitleClick"
-      title="Dashboard">
-      {{ mobilePageTitle }}
-    </div>
+      <div class="mobile-title" @click="onTitleClick" title="Dashboard">
+        {{ mobilePageTitle }}
+      </div>
 
-    <div class="mobile-topbar-spacer"></div>
-  </header>
+      <div class="mobile-topbar-spacer"></div>
+    </header>
 
-  <div
-    class="layout"
-    :class="{
+    <div class="layout" :class="{
       expanded: leftExpanded,
       'mobile-dashboard': mobileView === 'dashboard',
       'mobile-markdown': mobileView === 'markdown',
       'mobile-review': mobileView === 'review'
     }">
 
-    <section class="panel left-panel" :class="{ expanded: leftExpanded }">
-      <button
-        class="expand-btn"
-        v-if="review"
-        :title="leftExpanded ? 'Restore split view' : 'Expand markdown panel'"
-        @click="leftExpanded = !leftExpanded">
-        {{ leftExpanded ? '◀' : '▶' }}
-      </button>
+      <section class="panel left-panel" :class="{ expanded: leftExpanded }">
+        <button class="expand-btn" v-if="review" :title="leftExpanded ? 'Restore split view' : 'Expand markdown panel'"
+          @click="leftExpanded = !leftExpanded">
+          {{ leftExpanded ? '◀' : '▶' }}
+        </button>
 
-      <div class="panel-menu desktop-menu">
-        <div
-          class="panel-menu"
-          @mouseenter="menuOpen = true"
-          @mouseleave="menuOpen = false">
+        <div class="panel-menu desktop-menu">
+          <div class="panel-menu" @mouseenter="menuOpen = true" @mouseleave="menuOpen = false">
 
-          <button class="menu-btn">☰</button>
+            <button class="menu-btn">☰</button>
 
-          <div v-if="menuOpen" class="menu-dropdown">
-            <div class="menu-group-title">Reviews</div>
-            <button @click="showDashboard(); mobileMenuOpen = false">
-              Dashboard
-            </button>
-            <button @click="showMarkdownExample(); menuOpen = false">
-              Upload Example
-            </button>
+            <div v-if="menuOpen" class="menu-dropdown">
+              <div class="menu-group-title">Reviews</div>
+              <button @click="showDashboard(); mobileMenuOpen = false">
+                Dashboard
+              </button>
+              <button @click="showMarkdownExample(); menuOpen = false">
+                Upload Example
+              </button>
 
-            <template v-if="review">
+              <template v-if="review">
+                <div class="menu-divider"></div>
+                <div class="menu-group-title">Answers</div>
+                <button @click="toggleFeedbackHistory(); menuOpen = false">
+                  Feedbacks
+                </button>
+              </template>
+
               <div class="menu-divider"></div>
-              <div class="menu-group-title">Answers</div>
-              <button @click="toggleFeedbackHistory(); menuOpen = false">
-                Feedbacks
+
+              <div class="menu-group-title">Account</div>
+              <button @click="showAccountDetails(); menuOpen = false">
+                Account Details
               </button>
-            </template>
-
-            <div class="menu-divider"></div>
-
-            <div class="menu-group-title">Account</div>
-            <button @click="showAccountDetails(); menuOpen = false">
-              Account Details
-            </button>
-            <a href="/logout">Logout</a>
-
-            <div class="menu-divider"></div>
-
-            <div v-if="currentUser?.role == 'ADMIN'" class="menu-group">
-              <div class="menu-group-title">Admin</div>
-              <button @click="openAdminUsers(); menuOpen = false">
-                Users
+              <button class="account-menu-item" @click="showDangerZonePage">
+                Danger zone
               </button>
+              <a href="/logout">Logout</a>
+
+              <div class="menu-divider"></div>
+
+              <div v-if="currentUser?.role == 'ADMIN'" class="menu-group">
+                <div class="menu-group-title">Admin</div>
+                <button @click="openAdminUsers(); menuOpen = false">
+                  Users
+                </button>
+              </div>
+
             </div>
-
           </div>
         </div>
-      </div>
 
-      <div class="left-content">
 
-        <div v-if="leftPanel === 'account' && currentUser" class="account-panel">
-          <h3>Account Details</h3>
-
-          <div class="account-row">
-            <span>Name</span>
-            <strong>{{ currentUser.displayName || "-" }}</strong>
-          </div>
-
-          <div class="account-row">
-            <span>Email</span>
-            <strong>{{ currentUser.email || "-" }}</strong>
-          </div>
-
-          <div class="account-row">
-            <span>Username</span>
-            <strong>{{ currentUser.username || "-" }}</strong>
-          </div>
-
-          <div class="account-row">
-            <span>Role</span>
-            <strong>{{ currentUser.role || "-" }}</strong>
-          </div>
-
-        </div>
 
         <div v-if="leftPanel === 'markdowns'" class="markdown-page">
 
-          <h3>Markdowns</h3>
-          <div class="subtitle">
+          <div v-if="categoryOptions.length > 0" class="environment-selector">
+
+            <h3>Markdowns</h3>
+            <div class="subtitle">
               Browse your markdown files by category
-          </div>
+            </div>
 
-          <div class="environment-selector">
-            <!-- <label>Environment</label> -->
-
-            <div
-              class="environment-menu-wrap"
-              @mouseenter="isDesktop && (environmentMenuOpen = true)"
+            <div class="environment-menu-wrap" @mouseenter="isDesktop && (environmentMenuOpen = true)"
               @mouseleave="isDesktop && (environmentMenuOpen = false)">
-              <button 
-                class="environment-menu-btn"
-                  @click="!isDesktop && toggleEnvironmentMenu()">
+              <button class="environment-menu-btn" @click="!isDesktop && toggleEnvironmentMenu()">
                 <span>{{ selectedEnvironment }}</span>
                 <span>⌄</span>
               </button>
 
               <div v-if="environmentMenuOpen" class="environment-menu-dropdown">
-                <template
-                  v-for="(items, groupName, index) in environmentGroups"
-                  :key="groupName">
+                <template v-for="(items, groupName, index) in environmentGroups" :key="groupName">
 
-                  <div
-                      v-if="index > 0"
-                      class="menu-divider">
+                  <div v-if="index > 0" class="menu-divider">
                   </div>
 
                   <div class="menu-group-title">
-                      {{ groupName }}
+                    {{ groupName }}
                   </div>
 
-                  <button
-                      v-for="environment in items"
-                      :key="environment"
-                      :class="{ active: selectedEnvironment === environment }"
-                      @click="selectEnvironment(environment)">
+                  <button v-for="environment in items" :key="environment"
+                    :class="{ active: selectedEnvironment === environment }" @click="selectEnvironment(environment)">
 
-                      {{ environment }}
+                    {{ environment }}
 
                   </button>
 
-              </template>
+                </template>
               </div>
             </div>
-        </div>
+          </div>
 
-          <details
-              v-for="(group, groupName, index) in filteredMarkdownGroups"
-              :key="groupName"
-              class="markdown-group" 
-              :open="openMarkdownGroup === groupName">
+          <div v-else class="markdown empty-markdown">
 
-              <summary
-                class="markdown-group-header"
-                @click.prevent="
-                    openMarkdownGroup =
-                        openMarkdownGroup === groupName
-                            ? null
-                            : groupName
-                ">
+            <h3>Markdowns</h3>
 
-                  <div class="group-left">
-                      <div 
-                        class="group-icon" 
-                        :style="{
-                            color: environmentColor(index),
-                            backgroundColor: softColor(environmentColor(groupName))
-                        }">
-                        <svg viewBox="0 0 24 24">
-                          <path d="M21 8l-9-5-9 5 9 5 9-5z"></path>
-                          <path d="M3 8v8l9 5 9-5V8"></path>
-                          <path d="M12 13v8"></path>
-                        </svg>
-                      </div>
+            Upload a markdown file to start. <br>
+            The uploaded markdown will be saved in the database. <br>
+            When you click <strong>Start Review</strong>, this panel will be updated.
 
-                      <div class="group-title">
-                          {{ groupName }}
-                      </div>
+            <h3>Starter Pack</h3>
+
+            <p>Choose a starter pack or upload your own notes.</p>
+
+            <div class="starter-pack-list">
+              <button class="starter-pack-btn" @click="importStarterPack('Java')">
+                Java Starter Pack
+              </button>
+
+              <button class="starter-pack-btn" @click="importStarterPack('Spring')">
+                Spring Starter Pack
+              </button>
+
+              <button class="starter-pack-btn" @click="importStarterPack('Python')">
+                Python Starter Pack
+              </button>
+            </div>
+
+          </div>
+
+          <details v-for="(group, groupName, index) in filteredMarkdownGroups" :key="groupName" class="markdown-group"
+            :open="openMarkdownGroup === groupName">
+
+            <summary class="markdown-group-header" @click.prevent="
+                openMarkdownGroup =
+                    openMarkdownGroup === groupName
+                        ? null
+                        : groupName
+            ">
+
+              <div class="group-left">
+                <div class="group-icon" :style="{
+                        color: environmentColor(index),
+                        backgroundColor: softColor(environmentColor(groupName))
+                    }">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M21 8l-9-5-9 5 9 5 9-5z"></path>
+                    <path d="M3 8v8l9 5 9-5V8"></path>
+                    <path d="M12 13v8"></path>
+                  </svg>
+                </div>
+
+                <div class="group-title">
+                  {{ groupName }}
+                </div>
+              </div>
+
+              <div class="group-right">
+                <span class="group-badge">
+                  {{ group.files.length }} files
+                </span>
+
+                <span class="group-arrow" :class="{ open: openMarkdownGroup === groupName }">
+                  ⌄
+                </span>
+              </div>
+
+            </summary>
+
+            <div v-for="file in group.files" :key="file.markdownFileId" class="markdown-row clickable"
+              @click="startReviewForFile(file.markdownFileId)">
+
+              <div class="row-left">
+
+                <div>
+
+                  <div class="row-title">
+                    {{ file.fileTitle }}
                   </div>
 
-                  <div class="group-right">
-                      <span
-                        class="group-badge">
-                          {{ group.files.length }} files
-                      </span>
+                  <div class="row-meta">
 
-                      <span
-                          class="group-arrow"
-                          :class="{ open: openMarkdownGroup === groupName }">
-                          ⌄
-                      </span>
-                  </div>
+                    {{ file.topicCont }} topics
 
-              </summary>
+                    •
 
-              <div
-                v-for="file in group.files"
-                :key="file.markdownFileId"
-                class="markdown-row clickable"
-                @click="startReviewForFile(file.markdownFileId)">
-              
-                  <div class="row-left">
+                    {{ file.dueCount }} due
 
-                      <div>
+                    •
 
-                          <div class="row-title">
-                              {{ file.fileTitle }}
-                          </div>
-
-                          <div class="row-meta">
-
-                              {{ file.topicCont }} topics
-
-                              •
-
-                              {{ file.dueCount }} due
-
-                              •
-
-                              avg {{ formatScore(file.averageMemoryScore) }}
-
-                          </div>
-
-                      </div>
+                    avg {{ formatScore(file.averageMemoryScore) }}
 
                   </div>
-                  
-                  
-                  <div class="row-right">
-                      <span
-                          class="due-badge"
-                          v-if="file.dueCount>0">
-                          {{ file.dueCount }}
-                      </span>
-                      <!-- <span class="row-arrow">
-                          ›
-                      </span> -->
-                  </div>
+
+                </div>
 
               </div>
+
+
+              <div class="row-right">
+                <span class="due-badge" v-if="file.dueCount>0">
+                  {{ file.dueCount }}
+                </span>
+                <!-- <span class="row-arrow">
+                      ›
+                  </span> -->
+              </div>
+
+            </div>
 
           </details>
 
-      </div>
-        
-      <div v-else-if="leftPanel === 'markdown'">
-        <div v-if="markdownLoading" class="markdown-loading">
-          Loading...
         </div>
-        <div
-          v-else
-          class="markdown"
-          v-html="renderMarkdown(markdown)">
+
+        <div v-else-if="leftPanel === 'markdown'">
+          <div v-if="markdownLoading" class="markdown-loading">
+            Loading...
+          </div>
+          <div v-else class="markdown" v-html="renderMarkdown(markdown)">
+          </div>
         </div>
-      </div>
 
 
-      <div v-if="leftPanel === 'admin-users'" class="panel">
-        <h2>Users</h2>
+        <div v-if="leftPanel === 'admin-users'" class="panel">
+          <h2>Users</h2>
 
-        <table class="admin-table">
+          <table class="admin-table">
             <thead>
-                <tr>
-                    <th>Email</th>
-                    <th>Topics</th>
-                    <th>Reviews</th>
-                    <th>Tokens</th>
-                </tr>
+              <tr>
+                <th>Name</th>
+                <th>Topics</th>
+                <th>Reviews</th>
+                <!-- <th>Tokens</th> -->
+              </tr>
             </thead>
 
             <tbody>
-                <tr v-for="user in adminUsers" :key="user.userId">
-                    <td>{{ user.email ?? user.displayName }}</td>
-                    <td>{{ user.totalTopics }}</td>
-                    <td>{{ user.totalReviews }}</td>
-                    <td>{{ user.totalTokensSpent ?? "-" }}</td>
-                </tr>
+              <tr v-for="user in adminUsers" :key="user.userId">
+                <td>{{ user.displayName ?? user.email }}</td>
+                <td>{{ user.totalTopics }}</td>
+                <td>{{ user.totalReviews }}</td>
+                <!-- <td>{{ user.totalTokensSpent ?? "-" }}</td> -->
+              </tr>
             </tbody>
-        </table>
-    </div>
+          </table>
+        </div>
 
-    </section>
+        <div class="left-content">
 
-    <section v-if="!leftExpanded" class="panel app-panel">
+          <div v-if="leftPanel === 'account' && currentUser" class="account-panel">
+            <h3>Account Details</h3>
 
-      <div v-if="review">
-        <a href="#" class="home-link-btn" @click.prevent="goHome" title="Back to home">
-          <img src="recall-forge.png" alt="" class="brain-icon">
-        </a>
-        
-        <h3
-          class="review-title"
-          @click="toggleFeedbackHistory">
+            <div class="account-row">
+              <span>Name</span>
+              <strong>{{ currentUser.displayName || "-" }}</strong>
+            </div>
 
-          <span>{{ review.topicTitle }}</span>
+            <div class="account-row">
+              <span>Email</span>
+              <strong>{{ currentUser.email || "-" }}</strong>
+            </div>
 
-          <span class="review-title-right">
-              <span
-                  v-if="lastReview"
-                  class="last-score-badge"
-                  title="Show feedback history">
+            <div class="account-row">
+              <span>Username</span>
+              <strong>{{ currentUser.username || "-" }}</strong>
+            </div>
 
-                  Score: {{ formatScore(lastReview.score) }} 
-                  <!-- <span class="history-arrow">
-                    {{ feedbackHistoryVisible ? "▲" : "▼" }}
-                </span> -->
+            <div class="account-row">
+              <span>Role</span>
+              <strong>{{ currentUser.role || "-" }}</strong>
+            </div>
+
+          </div>
+
+          <div v-if="leftPanel === 'danger-zone'" class="account-panel">
+            <h3>Danger Zone</h3>
+
+            <p class="muted">
+              Reset your learning data. <br>
+              This deletes uploaded markdown files, topics, reviews, mastery, and reward progress.
+            </p>
+
+            <p class="muted">
+              Your account and login will remain active.
+            </p>
+
+            <button class="danger-button" @click="resetLearningData">
+              Reset learning data
+            </button>
+          </div>
+
+        </div>
+
+
+
+      </section>
+
+      <section v-if="!leftExpanded" class="panel app-panel">
+
+        <div v-if="review">
+          <a href="#" class="home-link-btn" @click.prevent="goHome" title="Back to home">
+            <img src="recall-forge.png" alt="" class="brain-icon">
+          </a>
+
+          <h3 class="review-title" @click="toggleFeedbackHistory">
+
+            <span>{{ review.topicTitle }}</span>
+
+            <span class="review-title-right">
+              <span v-if="lastReview" class="last-score-badge" title="Show feedback history">
+
+                Score: {{ formatScore(lastReview.score) }}
               </span>
-          </span>
-      </h3>
+            </span>
+          </h3>
 
-        <p>{{ review.question }}</p>
+          <p>{{ review.question }}</p>
 
-        <textarea
-          v-model="userAnswer"
-          placeholder="Write your answer here...">
+          <textarea v-model="userAnswer" placeholder="Write your answer here...">
         </textarea>
 
-        <div class="actions-row">
+          <div class="actions-row">
 
-          <button
-            class="review-btn"
-            @click="startReview"
-            :disabled="loading || !answerSubmitted">
-            <span>→</span> Next Review
-          </button>
+            <button class="review-btn" @click="startReview" :disabled="loading || !answerSubmitted">
+              <span>→</span> Next Review
+            </button>
 
-          <button
-            class="submit-btn"
-            @click="submitAnswer"
-            :disabled="loading || answerSubmitted">
-            <span class="btn-icon">✓</span>
-            Submit Answer
-          </button>
+            <button class="submit-btn" @click="submitAnswer" :disabled="loading || answerSubmitted">
+              <span class="btn-icon">✓</span>
+              Submit Answer
+            </button>
 
-        </div>
-
-
-        <div v-if="feedbackHistoryVisible" class="feedback-history-panel">
-          <div v-if="feedbackHistoryLoading" class="muted">
-            Loading feedback history...
           </div>
 
-          <div v-else-if="feedbackHistory.length === 0" class="muted">
-            No feedback history yet.
-          </div>
 
-          <div v-else>
-            <div
-              v-for="item in feedbackHistory"
-              :key="item.id"
-              class="feedback-history-item">
+          <div v-if="feedbackHistoryVisible" class="feedback-history-panel">
+            <div v-if="feedbackHistoryLoading" class="muted">
+              Loading feedback history...
+            </div>
 
-              <div class="feedback-history-card-header">
-                <div>
-                  <div class="feedback-history-title">💬 Feedback</div>
-                  <div class="feedback-history-date">
-                    {{ formatShortDate(item.createdAt) }}
+            <div v-else-if="feedbackHistory.length === 0" class="muted">
+              No feedback history yet.
+            </div>
+
+            <div v-else>
+              <div v-for="item in feedbackHistory" :key="item.id" class="feedback-history-item">
+
+                <div class="feedback-history-card-header">
+                  <div>
+                    <div class="feedback-history-title">💬 Feedback</div>
+                    <div class="feedback-history-date">
+                      {{ formatShortDate(item.createdAt) }}
+                    </div>
+                  </div>
+
+                  <div class="feedback-history-score">
+                    Score {{ formatScore(item.score) }}
                   </div>
                 </div>
 
-                <div class="feedback-history-score">
-                  Score {{ formatScore(item.score) }}
+                <div class="feedback-preview">
+                  {{ item.feedback }}
+                </div>
+
+                <div class="feedback-history-actions">
+                  <details class="feedback-qa-details">
+                    <summary>Question / Answer</summary>
+
+                    <div class="feedback-qa-box">
+                      <div class="feedback-qa-label">Question</div>
+                      <div class="feedback-qa-text">
+                        {{ item.question || "No question saved for this review." }}
+                      </div>
+
+                      <div class="feedback-qa-label feedback-qa-answer-label">My answer</div>
+                      <div class="feedback-qa-text">
+                        {{ item.userAnswer || "No answer saved." }}
+                      </div>
+                    </div>
+                  </details>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div v-if="!review" class="review-home">
+          <div v-if="dashboard" class="dashboard-card reviews-card">
+
+            <div class="card-title-row">
+              <h3 v-if="currentCategory">
+                {{ currentCategory }} Reviews
+              </h3>
+
+              <h3 v-else>
+                Welcome to RecallForge
+              </h3>
+            </div>
+
+            <div class="review-stats-grid">
+              <div class="review-stat stat-orange">
+                <div class="stat-icon orange">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="5" width="18" height="16" rx="2" />
+                    <line x1="16" y1="3" x2="16" y2="7" />
+                    <line x1="8" y1="3" x2="8" y2="7" />
+                    <line x1="3" y1="11" x2="21" y2="11" />
+                  </svg>
+                </div>
+                <strong>{{ dashboard.dueNow }}</strong>
+                <span>Today</span>
+              </div>
+
+              <div class="review-stat stat-purple">
+                <div class="stat-icon purple">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="5" width="18" height="16" rx="2" />
+                    <line x1="16" y1="3" x2="16" y2="7" />
+                    <line x1="8" y1="3" x2="8" y2="7" />
+                    <line x1="3" y1="11" x2="21" y2="11" />
+                  </svg>
+                </div>
+                <strong>{{ dashboard.dueTomorrow }}</strong>
+                <span>Tomorrow</span>
+              </div>
+
+              <div class="review-stat stat-blue">
+                <div class="stat-icon blue">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="5" width="18" height="16" rx="2" />
+                    <line x1="16" y1="3" x2="16" y2="7" />
+                    <line x1="8" y1="3" x2="8" y2="7" />
+                    <line x1="3" y1="11" x2="21" y2="11" />
+                  </svg>
+                </div>
+                <strong>{{ dashboard.dueThisWeek }}</strong>
+                <span>This week</span>
+              </div>
+
+              <div class="review-stat stat-green total-stat">
+                <div class="stat-icon green">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 3 3 8l9 5 9-5-9-5z" />
+                    <path d="M3 12l9 5 9-5" />
+                    <path d="M3 16l9 5 9-5" />
+                  </svg>
+                </div>
+                <strong>{{ dashboard.totalTopics }}</strong>
+                <span>Total</span>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="dashboard && dashboard.weakAreas && dashboard.weakAreas.length" class="dashboard-card">
+
+            <div v-for="area in dashboard.weakAreas" :key="area.environment + area.category + area.subcategory"
+              class="attention-row">
+              <span class="attention-icon">⚠</span>
+              <span>{{ area.subcategory }}</span>
+              <span class="attention-due">{{ area.dueCount }} due</span>
+            </div>
+          </div>
+
+          <div v-if="dashboard && dashboard.showKnowledgeInsights" class="knowledge-grid">
+            <div v-if="dashboard && dashboard.strongAreas && dashboard.strongAreas.length"
+              class="knowledge-card strong">
+              <div class="knowledge-header">
+                <h3>Strong</h3>
+              </div>
+
+              <div class="knowledge-list">
+                <div v-for="area in dashboard.strongAreas" :key="'strong-' + area.title" class="knowledge-item">
+                  <span class="dot green"></span>
+                  <span>{{ area.title }}</span>
                 </div>
               </div>
-
-              <div class="feedback-preview">
-                {{ item.feedback }}
-              </div>
-
-              <div class="feedback-history-actions">
-                <details class="feedback-qa-details">
-                  <summary>Question / Answer</summary>
-
-                  <div class="feedback-qa-box">
-                    <div class="feedback-qa-label">Question</div>
-                    <div class="feedback-qa-text">
-                      {{ item.question || "No question saved for this review." }}
-                    </div>
-
-                    <div class="feedback-qa-label feedback-qa-answer-label">My answer</div>
-                    <div class="feedback-qa-text">
-                      {{ item.userAnswer || "No answer saved." }}
-                    </div>
-                  </div>
-                </details>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div v-if="!review" class="review-home">
-        <div v-if="dashboard" class="dashboard-card reviews-card">
-          <div class="card-title-row">
-            <h3>{{ currentCategory }} Reviews</h3>
-          </div>
-
-          <div class="review-stats-grid">
-            <div class="review-stat stat-orange">
-              <div class="stat-icon orange">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="5" width="18" height="16" rx="2"/>
-                    <line x1="16" y1="3" x2="16" y2="7"/>
-                    <line x1="8" y1="3" x2="8" y2="7"/>
-                    <line x1="3" y1="11" x2="21" y2="11"/>
-                </svg>
-              </div>
-              <strong>{{ dashboard.dueNow }}</strong>
-              <span>Today</span>
             </div>
 
-            <div class="review-stat stat-purple">
-              <div class="stat-icon purple">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="5" width="18" height="16" rx="2"/>
-                    <line x1="16" y1="3" x2="16" y2="7"/>
-                    <line x1="8" y1="3" x2="8" y2="7"/>
-                    <line x1="3" y1="11" x2="21" y2="11"/>
-                </svg>
+            <div v-if="dashboard && dashboard.weakKnowledgeAreas && dashboard.weakKnowledgeAreas.length"
+              class="knowledge-card weak">
+              <div class="knowledge-header">
+                <h3>Weak</h3>
               </div>
-              <strong>{{ dashboard.dueTomorrow }}</strong>
-              <span>Tomorrow</span>
-            </div>
 
-            <div class="review-stat stat-blue">
-              <div class="stat-icon blue">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="5" width="18" height="16" rx="2"/>
-                    <line x1="16" y1="3" x2="16" y2="7"/>
-                    <line x1="8" y1="3" x2="8" y2="7"/>
-                    <line x1="3" y1="11" x2="21" y2="11"/>
-                </svg>
-              </div>
-              <strong>{{ dashboard.dueThisWeek }}</strong>
-              <span>This week</span>
-            </div>
-
-            <div class="review-stat stat-green total-stat">
-              <div class="stat-icon green">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 3 3 8l9 5 9-5-9-5z"/>
-                    <path d="M3 12l9 5 9-5"/>
-                    <path d="M3 16l9 5 9-5"/>
-                </svg>
-              </div>
-              <strong>{{ dashboard.totalTopics }}</strong>
-              <span>Total</span>              
-            </div>
-          </div>
-        </div>
-
-        <div
-          v-if="dashboard && dashboard.weakAreas && dashboard.weakAreas.length"
-          class="dashboard-card">
-
-          <div
-            v-for="area in dashboard.weakAreas"
-            :key="area.environment + area.category + area.subcategory"
-            class="attention-row">
-            <span class="attention-icon">⚠</span>
-            <span>{{ area.subcategory }}</span>
-            <span class="attention-due">{{ area.dueCount }} due</span>
-          </div>
-        </div>
-
-        <div
-          v-if="dashboard && dashboard.showKnowledgeInsights"
-          class="knowledge-grid">
-          <div
-            v-if="dashboard && dashboard.strongAreas && dashboard.strongAreas.length"
-            class="knowledge-card strong">
-            <div class="knowledge-header">
-              <h3>Strong</h3>
-            </div>
-
-            <div class="knowledge-list">
-              <div
-                v-for="area in dashboard.strongAreas"
-                :key="'strong-' + area.title"
-                class="knowledge-item">
-                <span class="dot green"></span>
-                <span>{{ area.title }}</span>
+              <div class="knowledge-list">
+                <div v-for="area in dashboard.weakKnowledgeAreas" :key="'weak-' + area.title" class="knowledge-item">
+                  <span class="dot red"></span>
+                  <span>{{ area.title }}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div
-            v-if="dashboard && dashboard.weakKnowledgeAreas && dashboard.weakKnowledgeAreas.length"
-            class="knowledge-card weak">
-            <div class="knowledge-header">
-              <h3>Weak</h3>
-            </div>
-
-            <div class="knowledge-list">
-              <div
-                v-for="area in dashboard.weakKnowledgeAreas"
-                :key="'weak-' + area.title"
-                class="knowledge-item">
-                <span class="dot red"></span>
-                <span>{{ area.title }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          v-else
-            class="knowledge-card">
+          <div v-else class="knowledge-card">
             <h3>Knowledge Insights</h3>
             <p>
-                Complete a few reviews to identify your strongest and weakest areas.
+              Complete a few reviews to identify your strongest and weakest areas.
             </p>
-        </div>
+          </div>
 
-        <div v-if="dashboard && dashboard.reward" class="reward-card">
-          <div class="reward-top">
-            <!-- <div>XP: {{ dashboard.reward.xpInLevel }} / {{ dashboard.reward.xpForNextLevel }}</div>
-            <div class="reward-level">Level {{ dashboard.reward.level }} — {{ dashboard.reward.title }}</div> -->
+          <div v-if="dashboard && dashboard.reward" class="reward-card">
+            <div class="reward-top">
 
-            <span
-              class="reward-label"
-              title="Topics with a memory score of at least 0.7 and a next review scheduled at least 7 days from now.">
-              {{ dashboard.reward.masteryScope }} Mastery: {{ dashboard.reward.masteryPercent }}%
-          </span>
+              <span class="reward-label"
+                title="Topics with a memory score of at least 0.7 and a next review scheduled at least 7 days from now.">
+                {{ categoryOptions.length > 0 ? dashboard.reward.masteryScope + " Mastery" : "Mastery" }}: {{ dashboard.reward.masteryPercent }}%
+              </span>
 
-            <span>
+              <span>
                 {{ dashboard.reward.masteredTopics }}
                 /
                 {{ dashboard.reward.totalTopicsInScope }}
                 topics
-            </span>
-          </div>
-
-          <div class="reward-bar">
-            <div
-              class="reward-bar-fill"
-              :style="{ width: rewardProgress + '%' }">
+              </span>
             </div>
+
+            <div class="reward-bar">
+              <div class="reward-bar-fill" :style="{ width: rewardProgress + '%' }">
+              </div>
+            </div>
+
+            <div class="reward-streak">
+              🔥 Streak: {{ dashboard.reward.streakDays }} day<span v-if="dashboard.reward.streakDays !== 1">s</span>
+            </div>
+
           </div>
 
-          <div class="reward-streak">
-            🔥 Streak: {{ dashboard.reward.streakDays }} day<span v-if="dashboard.reward.streakDays !== 1">s</span>
-          </div>
+          <div class="actions-row">
+            <button class="review-btn" @click="startReview" :disabled="loading || !dashboard || dashboard.dueNow === 0">
+              <span class="btn-icon">►</span>
+              {{ loading ? "Loading..." : "Start Review" }}
+            </button>
 
-          <!-- <div class="reward-secondary">
-              Level {{ dashboard.reward.level }} — {{ dashboard.reward.title }}
-              · XP {{ dashboard.reward.xpInLevel }} / {{ dashboard.reward.xpForNextLevel }}
-          </div> -->
-        </div>
+            <label class="upload-btn">
+              <span class="btn-icon">→</span>
+              Upload Markdown
+              <input hidden type="file" accept=".md,.markdown,text/plain" @change="uploadMarkdown" />
+            </label>
 
-        <div class="actions-row">
-          <button
-            class="review-btn"
-            @click="startReview"
-            :disabled="loading || !dashboard || dashboard.dueNow === 0">
-            <span class="btn-icon">►</span>
-            {{ loading ? "Loading..." : "Start Review" }}
-          </button>
-
-          <label class="upload-btn">
-            <span class="btn-icon">→</span>
-            Upload Markdown
-            <input
-              hidden
-              type="file"
-              accept=".md,.markdown,text/plain"
-              @change="uploadMarkdown"
-            />
-          </label>
-
-          <!-- <button
+            <!-- <button
             class="markdowns-btn"
             @click="showMarkdownSummaries">
             Markdowns
           </button> -->
+          </div>
         </div>
-      </div>
 
-      <div v-if="result" class="feedback">
-        <p><strong>Score:</strong> {{ result.score }}</p>
-        <p><strong>Feedback:</strong> {{ result.feedback }}</p>
-        <p><strong>Updated memory score:</strong> {{ formatScore(result.updateMemoryScore) }}</p>
-        <p><strong>Next review:</strong> {{ formatDate(result.nextReviewAt) }}</p>
-      </div>
+        <div v-if="result" class="feedback">
+          <p><strong>Score:</strong> {{ result.score }}</p>
+          <p><strong>Feedback:</strong> {{ result.feedback }}</p>
+          <p><strong>Updated memory score:</strong> {{ formatScore(result.updateMemoryScore) }}</p>
+          <p><strong>Next review:</strong> {{ formatDate(result.nextReviewAt) }}</p>
+        </div>
 
-      <div v-if="error" class="error">
-        {{ error }}
-      </div>
-    </section>
+        <div v-if="error" class="error">
+          {{ error }}
+        </div>
+      </section>
+    </div>
+
   </div>
 
-</div>
-
-<script src="js/api.js"></script>
-<script src="js/markdown.js"></script>
-<script src="js/app.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/markdown.js"></script>
+  <script src="js/app.js"></script>
 </body>
+
 </html>

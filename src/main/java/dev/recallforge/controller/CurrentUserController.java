@@ -7,6 +7,9 @@ import dev.recallforge.security.CurrentUserService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
+
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api")
@@ -30,5 +33,11 @@ public class CurrentUserController {
             user.getRole().name(),
             user.getAvatarUrl()
         );
+    }
+
+    @DeleteMapping("/me/learning-data")
+    public ResponseEntity<Void> resetLearningData() {
+        currentUserService.resetCurrentUserLearningData();
+        return ResponseEntity.noContent().build();
     }
 }

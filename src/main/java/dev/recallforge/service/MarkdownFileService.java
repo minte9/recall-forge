@@ -59,10 +59,19 @@ public class MarkdownFileService {
 
         String content = new String(file.getBytes(), StandardCharsets.UTF_8);
 
+        return importMarkdown(content, sanitizeFilename(filename));
+    }
+
+    @Transactional
+    public MarkdownUploadResponse importMarkdown(String content) throws Exception {
+        return importMarkdown(content, null);
+    }
+
+    private MarkdownUploadResponse importMarkdown(String content, String filename) throws Exception {
         if (content.length() > MAX_CONTENT_LENGTH) {
             throw new IllegalArgumentException("Markdown content is too large.");
         }
-        
+
         String contentHash = sha256(content);
 
         Long userId = currentUserService.currentUserId();
@@ -75,10 +84,6 @@ public class MarkdownFileService {
             throw new IllegalArgumentException("Markdown file does not contain any topics.");
         }
 
-        if (parsedTopics.isEmpty()) {
-            throw new IllegalArgumentException("Invalid markdown format.");
-        }
-
         if (parsedTopics.size() > MAX_TOPICS_PER_FILE) {
             throw new IllegalArgumentException("Too many topics in one markdown file.");
         }
@@ -86,7 +91,7 @@ public class MarkdownFileService {
         MarkdownTopicImporter.ParsedTopic firstTopic = parsedTopics.get(0);
 
         Optional<MarkdownFile> existingFile = findExistingMarkdownFile(firstTopic, userId);
-                   
+
         MarkdownFile markdownFile;
 
         if (existingFile.isPresent()) {
@@ -99,12 +104,12 @@ public class MarkdownFileService {
                     firstTopic.subcategory(),
                     firstTopic.fileTitle()
             );
-            
+
             markdownFileRepository.save(markdownFile);
 
         } else {
             markdownFile = new MarkdownFile(
-                    sanitizeFilename(filename),
+                    filename != null ? filename : sanitizeFilename(firstTopic.fileTitle() + ".md"),
                     content,
                     contentHash,
                     firstTopic.environment(),

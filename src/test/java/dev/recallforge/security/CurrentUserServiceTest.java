@@ -18,7 +18,11 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import dev.recallforge.domain.UserAccount;
+import dev.recallforge.repository.MarkdownFileRepository;
+import dev.recallforge.repository.ReviewRepository;
+import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserAccountRepository;
+import dev.recallforge.repository.UserRewardRepository;
 
 @ExtendWith(MockitoExtension.class)
 class CurrentUserServiceTest {
@@ -27,12 +31,30 @@ class CurrentUserServiceTest {
     private UserAccountRepository userAccountRepository;
 
     @Mock
+    private ReviewRepository reviewRepository;
+
+    @Mock
+    private TopicRepository topicRepository;
+
+    @Mock
+    private MarkdownFileRepository markdownFileRepository;
+
+    @Mock
+    private UserRewardRepository userRewardRepository;
+
+    @Mock
     private OAuth2User oauthUser;
 
     private CurrentUserService currentUserService;
 
     private void setUp() {
-        currentUserService = new CurrentUserService(userAccountRepository);
+        currentUserService = new CurrentUserService(
+            userAccountRepository,
+            reviewRepository,
+            topicRepository,
+            markdownFileRepository,
+            userRewardRepository
+        );
     }
 
     @AfterEach

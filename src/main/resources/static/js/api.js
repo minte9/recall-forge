@@ -134,5 +134,32 @@ const Api = {
     }
 
     return await response.json();
-  }
+  },
+
+  async resetLearningData() {
+    const response = await fetch("/api/me/learning-data", {
+      method: "DELETE",
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not reset learning data.");
+    }
+  },
+
+  async importStarterPack(category) {
+    const response = await fetch(
+      "/api/starter-packs/" + encodeURIComponent(category) + "/import",
+      {
+        method: "POST",
+        credentials: "same-origin"
+      }
+    );
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not import starter pack.");
+    }
+  },
 };

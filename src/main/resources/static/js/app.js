@@ -6,7 +6,7 @@ createApp({
       loading: false,
       error: null,
       currentMarkdownFileId: null,
-      currentCategory: "Java",
+      currentCategory: null,
       showMetadataHelp: false,
       markdown: null,
       review: null,
@@ -29,10 +29,11 @@ createApp({
       feedbackHistoryVisible: false,
       feedbackHistoryLoading: false,
       feedbackHistoryLoadedForTopicId: null,
-      selectedEnvironment: "Java",
+      selectedEnvironment: null,
       environmentMenuOpen: false,
       adminUsers: [],
       categoryOptions: [],
+      showDangerZone: false,
 
       initialMarkdown: `
 <h3>Markdown File</h3>
@@ -46,14 +47,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
   computed: {
     rewardProgress() {
-        if (!this.dashboard || !this.dashboard.reward) {
-            return 0;
-        }
+      if (!this.dashboard || !this.dashboard.reward) {
+        return 0;
+      }
 
-        return Math.max(
-            0,
-            Math.min(100, this.dashboard.reward.masteryPercent || 0)
-        );
+      return Math.max(
+        0,
+        Math.min(100, this.dashboard.reward.masteryPercent || 0)
+      );
     },
 
     isDesktop() {
@@ -113,6 +114,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     await this.loadDashboard();
     await this.loadCurrentUser();
     await this.loadMarkdownSummaries(true);
+
+    this.autoOpenSingleMarkdownGroup();
   },
 
   beforeUnmount() {
@@ -183,6 +186,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       await this.loadDashboard();
       await this.loadMarkdownSummaries(false);
 
+      this.autoOpenSingleMarkdownGroup();
+    },
+
+    autoOpenSingleMarkdownGroup() {
       const groupNames = Object.keys(this.filteredMarkdownGroups);
 
       if (groupNames.length === 1) {
@@ -534,6 +541,78 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     async loadAdminUsers() {
       this.adminUsers = await Api.loadAdminUsers();
+    },
+
+    showDangerZonePage() {
+      this.leftPanel = "danger-zone";
+      this.leftExpanded = false;
+      this.menuOpen = false;
+      this.mobileMenuOpen = false;
+      this.mobileView = "markdown";
+    },
+
+    async resetLearningData() {
+      const confirmed = confirm(
+        "Delete all your learning data? This cannot be undone."
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        this.loading = true;
+        await Api.resetLearningData();
+        this.showDangerZone = false;
+
+        this.review = null;
+        this.result = null;
+        this.markdown = "";
+        this.selectedMarkdownFileId = null;
+
+        this.markdownSummaries = [];
+        this.categoryOptions = [];
+        this.currentCategory = null;
+        this.selectedEnvironment = null;
+        this.openMarkdownGroup = null;
+        this.environmentMenuOpen = false;
+
+        this.markdown = this.initialMarkdown;
+        this.leftPanel = "markdowns";
+        this.mobileView = "markdown";
+
+        await this.loadCategoryOptions();
+        await this.loadDashboard();
+
+      } catch (e) {
+        this.error = e.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async importStarterPack(category) {
+      try {
+        this.loading = true;
+        this.error = null;
+
+        await Api.importStarterPack(category);
+
+        await this.loadCategoryOptions();
+
+        this.currentCategory = category;
+        this.selectedEnvironment = category;
+
+        await this.loadDashboard();
+        await this.loadMarkdownSummaries(true);
+
+        this.autoOpenSingleMarkdownGroup();
+
+      } catch (e) {
+        this.error = e.message;
+      } finally {
+        this.loading = false;
+      }
     },
 
     showMarkdownExample() {

@@ -4,6 +4,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import dev.recallforge.domain.Review;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findByTopicIdAndTopicUserIdOrderByReviewedAtDesc(
@@ -15,4 +19,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         Long topicId,
         Long userId
     );
+
+    @Modifying
+    @Query("delete from Review r where r.user.id = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 }
