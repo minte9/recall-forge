@@ -404,16 +404,6 @@
             Submit Answer
           </button>
 
-          <!-- <button
-              class="feedback-history-toggle"
-              @click="toggleFeedbackHistory">
-              <span>🕘 Feedbacks</span>
-          </button> -->
-
-          <!-- <p v-if="dashboard && currentMarkdownFileId" class="category-status">
-            Reviews available: {{ dashboard.dueNow }}
-          </p> -->
-
         </div>
 
 
@@ -476,7 +466,7 @@
       <div v-if="!review" class="review-home">
         <div v-if="dashboard" class="dashboard-card reviews-card">
           <div class="card-title-row">
-            <h3>Reviews available</h3>
+            <h3>{{ currentCategory }} Reviews</h3>
           </div>
 
           <div class="review-stats-grid">
@@ -542,13 +532,14 @@
             :key="area.environment + area.category + area.subcategory"
             class="attention-row">
             <span class="attention-icon">⚠</span>
-            <span>{{ area.category }}, {{ area.subcategory }}</span>
+            <span>{{ area.subcategory }}</span>
             <span class="attention-due">{{ area.dueCount }} due</span>
-            <!-- <span class="chevron">›</span> -->
           </div>
         </div>
 
-        <div class="knowledge-grid">
+        <div
+          v-if="dashboard && dashboard.showKnowledgeInsights"
+          class="knowledge-grid">
           <div
             v-if="dashboard && dashboard.strongAreas && dashboard.strongAreas.length"
             class="knowledge-card strong">
@@ -584,6 +575,15 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <div
+          v-else
+            class="knowledge-card">
+            <h3>Knowledge Insights</h3>
+            <p>
+                Complete a few reviews to identify your strongest and weakest areas.
+            </p>
         </div>
 
         <div v-if="dashboard && dashboard.reward" class="reward-card">

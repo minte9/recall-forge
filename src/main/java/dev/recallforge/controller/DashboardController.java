@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.recallforge.dto.DashboardResponse;
@@ -21,13 +22,15 @@ public class DashboardController {
     }
 
     @GetMapping
-    public DashboardResponse getDashboard() {
-        return dashboardService.getDashboard();
+    public DashboardResponse getDashboard(
+            @RequestParam(required = false, defaultValue = "Java") String category) {
+        return dashboardService.getDashboard(category);
     }
 
     @GetMapping("/markdowns")
-    public List<MarkdownSummaryDto> markdownSummary() {
-        return dashboardService.getMarkdownSummaries();
+    public List<MarkdownSummaryDto> markdownSummary(
+            @RequestParam(required = false, defaultValue = "Java") String category) {
+        return dashboardService.getMarkdownSummaries(category);
     }
     
 }

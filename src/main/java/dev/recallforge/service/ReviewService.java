@@ -132,7 +132,7 @@ public class ReviewService {
         topic.updateMemory(updatedMemoryScore, nextReviewAt);
         topicService.save(topic);
 
-        RewardResponse reward = rewardService.rewardDefaultUser(evaluation.score());
+        RewardResponse reward = rewardService.rewardDefaultUser(evaluation.score(), topic.getCategory());
 
         return new AnswerResponse(
             topic.getId(), 

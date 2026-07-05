@@ -6,6 +6,7 @@ createApp({
       loading: false,
       error: null,
       currentMarkdownFileId: null,
+      currentCategory: "Java",
       showMetadataHelp: false,
       markdown: null,
       review: null,
@@ -43,15 +44,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
   },
 
   computed: {
-    // rewardProgress() {
-    //   if (!this.dashboard || !this.dashboard.reward || !this.dashboard.reward.xpForNextLevel) {
-    //     return 0;
-    //   }
-
-    //   const value = (this.dashboard.reward.xpInLevel / this.dashboard.reward.xpForNextLevel) * 100;
-    //   return Math.max(0, Math.min(100, value));
-    // },
-
     rewardProgress() {
         if (!this.dashboard || !this.dashboard.reward) {
             return 0;
@@ -173,10 +165,20 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return Markdown.render(md);
     },
 
-    selectEnvironment(environment) {
+    async selectEnvironment(environment) {
       this.selectedEnvironment = environment;
+      this.currentCategory = environment;
       this.environmentMenuOpen = false;
       this.openMarkdownGroup = null;
+
+      await this.loadDashboard();
+      await this.loadMarkdownSummaries(false);
+
+      const groupNames = Object.keys(this.filteredMarkdownGroups);
+
+      if (groupNames.length === 1) {
+        this.openMarkdownGroup = groupNames[0];
+      }
     },
 
     toggleEnvironmentMenu() {
@@ -305,7 +307,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     async loadDashboard() {
       try {
-        const data = await Api.loadDashboard();
+        const data = await Api.loadDashboard(this.currentCategory);
 
         if (data) {
           this.dashboard = data;
@@ -318,7 +320,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     async loadMarkdownSummaries(autoShow = true) {
       try {
-        const data = await Api.loadMarkdownSummaries();
+        const data = await Api.loadMarkdownSummaries(this.currentCategory);
 
         if (!data) {
           return;

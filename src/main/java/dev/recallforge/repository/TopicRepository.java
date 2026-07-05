@@ -79,11 +79,13 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     @Query("""
         select count(t)
         from Topic t
-        where t.markdownFile.user.id = :userId
-        and t.nextReviewAt <= :now
+        where t.markdownFile.user.id = :userId 
+        and lower(t.category) = lower(:category) 
+        and t.nextReviewAt <= :now         
     """)
     long countDueNowByUser(
         @Param("userId") Long userId,
+        @Param("category") String category,
         @Param("now") LocalDateTime now
     );
 
@@ -98,11 +100,13 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         select count(t)
         from Topic t
         where t.markdownFile.user.id = :userId
+        and lower(t.category) = lower(:category)
         and t.nextReviewAt >= :start
         and t.nextReviewAt < :end
     """)
     long countDueBetweenByUser(
         @Param("userId") Long userId,
+        @Param("category") String category,
         @Param("start") LocalDateTime start,
         @Param("end") LocalDateTime end
     );
@@ -111,8 +115,12 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         select count(t)
         from Topic t
         where t.markdownFile.user.id = :userId
+        and lower(t.category) = lower(:category)
     """)
-    long countByUser(@Param("userId") Long userId);
+    long countByUser(
+        @Param("userId") Long userId,
+        @Param("category") String category
+    );
 
     @Query("""
         select
@@ -124,38 +132,44 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         from Topic t
         where t.nextReviewAt <= :now
             and t.markdownFile.user.id = :userId
+            and lower(t.category) = lower(:category)
         group by t.environment, t.category, t.subcategory
         order by count(t) desc, avg(t.memoryScore) asc
     """)
     List<WeakAreaProjection> findWeakAreas(
-        @Param("userId") Long userId, 
+        @Param("userId") Long userId,
+        @Param("category") String category,
         @Param("now") LocalDateTime now);
 
     @Query("""
-        select 
-            concat(t.category, ', ', t.subcategory) as title, 
+        select
+            t.subcategory as title,
             avg(t.memoryScore) as averageMemoryScore
         from Topic t
-        where t.markdownFile.user.id = :userId 
+        where t.markdownFile.user.id = :userId
+        and lower(t.category) = lower(:category)
         group by t.category, t.subcategory
         order by avg(t.memoryScore) desc
     """)
     List<KnowledgeAreaProjection> findStrongKnowledgeAreas(
-        @Param("userId") Long userId
+        @Param("userId") Long userId,
+        @Param("category") String category
     );
 
 
     @Query("""
-       select 
-            concat(t.category, ', ', t.subcategory) as title, 
+       select
+            t.subcategory as title,
             avg(t.memoryScore) as averageMemoryScore
-        from Topic t 
-        where t.markdownFile.user.id = :userId 
+        from Topic t
+        where t.markdownFile.user.id = :userId
+        and lower(t.category) = lower(:category)
         group by t.category, t.subcategory
-        order by avg(t.memoryScore) asc 
+        order by avg(t.memoryScore) asc
     """)
     List<KnowledgeAreaProjection> findWeakKnowledgeAreas(
-        @Param("userId") Long userId
+        @Param("userId") Long userId,
+        @Param("category") String category
     );
 
     @Query("""
@@ -171,11 +185,13 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         )
         from Topic t
         where t.user.id = :userId
+        and lower(t.category) = lower(:category)
         group by t.markdownFile.id, t.environment, t.category, t.subcategory, t.fileTitle
         order by t.environment, t.category, t.subcategory, t.markdownFile.id
     """)
     List<MarkdownSummaryDto> findMarkdownSummaries(
         @Param("userId") Long userId,
+        @Param("category") String category,
         @Param("now") LocalDateTime now
     );
 
@@ -224,7 +240,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         select count(t)
         from Topic t
         where t.user.id = :userId
-        and t.category = :category
+        and lower(t.category) = lower(:category)
     """)
     long countByUserIdAndCategory(
         @Param("userId") Long userId,
@@ -235,7 +251,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         select count(t)
         from Topic t
         where t.user.id = :userId
-        and t.category = :category
+        and lower(t.category) = lower(:category)
         and t.memoryScore >= :memoryScore
         and t.nextReviewAt >= :reviewDate
     """)

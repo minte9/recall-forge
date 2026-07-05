@@ -147,7 +147,7 @@ class ReviewServiceTest {
         when(currentUserService.currentUser()).thenReturn(new UserAccount());
         when(repetitionService.calculateUpdateMemoryScore(0.5, 0.8)).thenReturn(0.65);
         when(repetitionService.calculateNextReviewAt(0.8)).thenReturn(nextReviewAt);
-        when(rewardService.rewardDefaultUser(0.8)).thenReturn(reward);
+        when(rewardService.rewardDefaultUser(0.8, "Uncategorized")).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         AnswerResponse response = reviewService.saveAnswer(7L, "Q?", "My answer", evaluation);

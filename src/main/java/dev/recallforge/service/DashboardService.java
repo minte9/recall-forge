@@ -30,7 +30,7 @@ public class DashboardService {
         this.currentUserService = currentUserService;
     }
     
-    public DashboardResponse getDashboard() {
+    public DashboardResponse getDashboard(String category) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime tomorrowStart = LocalDate.now().plusDays(1).atStartOfDay();
         LocalDateTime tomorrowEnd = tomorrowStart.plusDays(1);
@@ -38,13 +38,13 @@ public class DashboardService {
 
         Long userId = currentUserService.currentUserId();
 
-        long dueNow = topicRepository.countDueNowByUser(userId, now);
-        long dueTomorrow = topicRepository.countDueBetweenByUser(userId, tomorrowStart, tomorrowEnd);
-        long dueThisWeek = topicRepository.countDueBetweenByUser(userId, tomorrowStart, weekEnd);
-        long totalTopics = topicRepository.countByUser(userId);
+        long dueNow = topicRepository.countDueNowByUser(userId, category, now);
+        long dueTomorrow = topicRepository.countDueBetweenByUser(userId, category, tomorrowStart, tomorrowEnd);
+        long dueThisWeek = topicRepository.countDueBetweenByUser(userId, category, tomorrowStart, weekEnd);
+        long totalTopics = topicRepository.countByUser(userId, category);
 
 
-        List<WeakAreaResponse> weakAreas = topicRepository.findWeakAreas(userId, now)
+        List<WeakAreaResponse> weakAreas = topicRepository.findWeakAreas(userId, category, now)
             .stream()
             .limit(3)
             .map(area -> new WeakAreaResponse(
@@ -56,39 +56,45 @@ public class DashboardService {
             ))
             .toList();
 
-        List<KnowledgeAreaResponse> strongKnowledgeAreas = topicRepository.findStrongKnowledgeAreas(userId)
+        List<KnowledgeAreaResponse> strongKnowledgeAreas = topicRepository.findStrongKnowledgeAreas(userId, category)
             .stream()
             .limit(2)
             .map(area -> new KnowledgeAreaResponse(
-                area.getTitle(), 
+                area.getTitle(),
                 area.getAverageMemoryScore()
             ))
             .toList();
 
-        List<KnowledgeAreaResponse> weakKnowledgeAreas = topicRepository.findWeakKnowledgeAreas(userId)
+        List<KnowledgeAreaResponse> weakKnowledgeAreas = topicRepository.findWeakKnowledgeAreas(userId, category)
             .stream()
             .limit(2)
             .map(area -> new KnowledgeAreaResponse(
-                area.getTitle(), 
+                area.getTitle(),
                 area.getAverageMemoryScore()
             ))
             .toList();
+
+        boolean showKnowledgeInsights =
+            !strongKnowledgeAreas.isEmpty()
+            && !weakKnowledgeAreas.isEmpty()
+            && !strongKnowledgeAreas.get(0).title().equals(weakKnowledgeAreas.get(0).title());
 
         return new DashboardResponse(
             dueNow,
-            dueTomorrow, 
+            dueTomorrow,
             dueThisWeek,
             totalTopics,
             weakAreas,
             strongKnowledgeAreas,
             weakKnowledgeAreas,
-            rewardService.getCurrentUserReward()
+            rewardService.getCurrentUserReward(category),
+            showKnowledgeInsights
         );
     }
 
-    public List<MarkdownSummaryDto> getMarkdownSummaries() {
+    public List<MarkdownSummaryDto> getMarkdownSummaries(String category) {
         Long userId = currentUserService.currentUserId();
-        
-        return topicRepository.findMarkdownSummaries(userId, LocalDateTime.now());
+
+        return topicRepository.findMarkdownSummaries(userId, category, LocalDateTime.now());
     }
 }

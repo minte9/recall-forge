@@ -69,13 +69,13 @@ class DashboardServiceTest {
             weakArea("Math", "Algebra", "Basics", 3L, 0.5),
             mock(WeakAreaProjection.class) // beyond the top-3 limit; its fields are never read
         );
-        when(topicRepository.findWeakAreas(eq(1L), any())).thenReturn(weakAreas);
-        when(topicRepository.findStrongKnowledgeAreas(1L)).thenReturn(List.of());
-        when(topicRepository.findWeakKnowledgeAreas(1L)).thenReturn(List.of());
-        when(rewardService.getCurrentUserReward())
+        when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(weakAreas);
+        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
+        when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
+        when(rewardService.getCurrentUserReward("java"))
             .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
 
-        DashboardResponse dashboard = dashboardService.getDashboard();
+        DashboardResponse dashboard = dashboardService.getDashboard("java");
 
         assertThat(dashboard.weakAreas()).hasSize(3);
         assertThat(dashboard.weakAreas().get(0))
@@ -87,18 +87,18 @@ class DashboardServiceTest {
     @Test
     void getDashboard_limitsStrongKnowledgeAreasToTopTwo() {
         setUp();
-        when(topicRepository.findWeakAreas(eq(1L), any())).thenReturn(List.of());
+        when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
         List<KnowledgeAreaProjection> strongAreas = List.of(
             knowledgeArea("Java, Core", 0.9),
             knowledgeArea("Python, Core", 0.85),
             mock(KnowledgeAreaProjection.class) // beyond the top-2 limit; its fields are never read
         );
-        when(topicRepository.findStrongKnowledgeAreas(1L)).thenReturn(strongAreas);
-        when(topicRepository.findWeakKnowledgeAreas(1L)).thenReturn(List.of());
-        when(rewardService.getCurrentUserReward())
+        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(strongAreas);
+        when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
+        when(rewardService.getCurrentUserReward("java"))
             .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
 
-        DashboardResponse dashboard = dashboardService.getDashboard();
+        DashboardResponse dashboard = dashboardService.getDashboard("java");
 
         assertThat(dashboard.strongAreas()).containsExactly(
             new KnowledgeAreaResponse("Java, Core", 0.9),
@@ -109,18 +109,18 @@ class DashboardServiceTest {
     @Test
     void getDashboard_limitsWeakKnowledgeAreasToTopTwo() {
         setUp();
-        when(topicRepository.findWeakAreas(eq(1L), any())).thenReturn(List.of());
-        when(topicRepository.findStrongKnowledgeAreas(1L)).thenReturn(List.of());
+        when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
+        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
         List<KnowledgeAreaProjection> weakKnowledgeAreas = List.of(
             knowledgeArea("Math, Basics", 0.2),
             knowledgeArea("Java, Core", 0.3),
             mock(KnowledgeAreaProjection.class) // beyond the top-2 limit; its fields are never read
         );
-        when(topicRepository.findWeakKnowledgeAreas(1L)).thenReturn(weakKnowledgeAreas);
-        when(rewardService.getCurrentUserReward())
+        when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(weakKnowledgeAreas);
+        when(rewardService.getCurrentUserReward("java"))
             .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
 
-        DashboardResponse dashboard = dashboardService.getDashboard();
+        DashboardResponse dashboard = dashboardService.getDashboard("java");
 
         assertThat(dashboard.weakKnowledgeAreas()).containsExactly(
             new KnowledgeAreaResponse("Math, Basics", 0.2),
@@ -131,16 +131,16 @@ class DashboardServiceTest {
     @Test
     void getDashboard_passesThroughCountsAndRewardUnchanged() {
         setUp();
-        when(topicRepository.countDueNowByUser(eq(1L), any())).thenReturn(10L);
-        when(topicRepository.countDueBetweenByUser(eq(1L), any(), any())).thenReturn(5L, 8L);
-        when(topicRepository.countByUser(1L)).thenReturn(42L);
-        when(topicRepository.findWeakAreas(eq(1L), any())).thenReturn(List.of());
-        when(topicRepository.findStrongKnowledgeAreas(1L)).thenReturn(List.of());
-        when(topicRepository.findWeakKnowledgeAreas(1L)).thenReturn(List.of());
+        when(topicRepository.countDueNowByUser(eq(1L), eq("java"), any())).thenReturn(10L);
+        when(topicRepository.countDueBetweenByUser(eq(1L), eq("java"), any(), any())).thenReturn(5L, 8L);
+        when(topicRepository.countByUser(1L, "java")).thenReturn(42L);
+        when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
+        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
+        when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
         RewardResponse reward = new RewardResponse(250, 3, "Apprentice", 50, 100, 4, 0, "Java", 5L, 10L, 50);
-        when(rewardService.getCurrentUserReward()).thenReturn(reward);
+        when(rewardService.getCurrentUserReward("java")).thenReturn(reward);
 
-        DashboardResponse dashboard = dashboardService.getDashboard();
+        DashboardResponse dashboard = dashboardService.getDashboard("java");
 
         assertThat(dashboard.dueNow()).isEqualTo(10L);
         assertThat(dashboard.dueTomorrow()).isEqualTo(5L);
@@ -152,13 +152,13 @@ class DashboardServiceTest {
     @Test
     void getDashboard_emptyRepositoryResults_produceEmptyListsNotErrors() {
         setUp();
-        when(topicRepository.findWeakAreas(eq(1L), any())).thenReturn(List.of());
-        when(topicRepository.findStrongKnowledgeAreas(1L)).thenReturn(List.of());
-        when(topicRepository.findWeakKnowledgeAreas(1L)).thenReturn(List.of());
-        when(rewardService.getCurrentUserReward())
+        when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
+        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
+        when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
+        when(rewardService.getCurrentUserReward("java"))
             .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
 
-        DashboardResponse dashboard = dashboardService.getDashboard();
+        DashboardResponse dashboard = dashboardService.getDashboard("java");
 
         assertThat(dashboard.weakAreas()).isEmpty();
         assertThat(dashboard.strongAreas()).isEmpty();
@@ -171,9 +171,9 @@ class DashboardServiceTest {
         List<MarkdownSummaryDto> summaries = List.of(
             new MarkdownSummaryDto(1L, "Programming", "Java", "Core", "Basics", 5L, 2L, 0.6)
         );
-        when(topicRepository.findMarkdownSummaries(eq(1L), any())).thenReturn(summaries);
+        when(topicRepository.findMarkdownSummaries(eq(1L), eq("java"), any())).thenReturn(summaries);
 
-        List<MarkdownSummaryDto> result = dashboardService.getMarkdownSummaries();
+        List<MarkdownSummaryDto> result = dashboardService.getMarkdownSummaries("java");
 
         assertThat(result).isEqualTo(summaries);
     }

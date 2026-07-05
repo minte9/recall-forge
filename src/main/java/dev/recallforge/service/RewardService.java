@@ -33,7 +33,7 @@ public class RewardService {
     }
 
     @Transactional
-    public RewardResponse rewardDefaultUser(double score) {
+    public RewardResponse rewardDefaultUser(double score, String category) {
         Long userId = currentUserService.currentUserId();
 
         UserReward reward = userRewardRepository.findByUserId(userId)
@@ -47,19 +47,17 @@ public class RewardService {
         reward.addReviewReward(gainedXp, perfect, LocalDate.now());
         userRewardRepository.save(reward);
 
-        // return toResponse(reward, gainedXp);
-        return toResponse(reward, gainedXp, "Java");
+        return toResponse(reward, gainedXp, category);
     }
 
     @Transactional
-    public RewardResponse getCurrentUserReward() {
+    public RewardResponse getCurrentUserReward(String category) {
         Long userId = currentUserService.currentUserId();
 
         UserReward reward = userRewardRepository.findByUserId(userId)
             .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
 
-        // return toResponse(reward, 0);
-        return toResponse(reward, 0, "Java");
+        return toResponse(reward, 0, category);
     }
 
     private int xpForScore(double score) {

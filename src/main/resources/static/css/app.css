@@ -89,7 +89,7 @@
   .menu-dropdown {
     position: absolute;
     right: 0;
-    top: 32px;
+    top: 30px;
     width: 190px;
     background: white;
     border: 1px solid var(--line);

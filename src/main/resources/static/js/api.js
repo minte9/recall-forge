@@ -60,8 +60,10 @@ const Api = {
     return await response.json();
   },
 
-  async loadDashboard() {
-    const response = await fetch("/api/dashboard", {
+  async loadDashboard(category) {
+    const url = "/api/dashboard?category=" + encodeURIComponent(category || "Java");
+
+    const response = await fetch(url, {
       credentials: "same-origin"
     });
 
@@ -72,8 +74,10 @@ const Api = {
     return await response.json();
   },
 
-  async loadMarkdownSummaries() {
-    const response = await fetch("/api/dashboard/markdowns", {
+  async loadMarkdownSummaries(category) {
+    const url = "/api/dashboard/markdowns?category=" + encodeURIComponent(category || "Java");
+
+    const response = await fetch(url, {
       credentials: "same-origin"
     });
 

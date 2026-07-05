@@ -47,7 +47,7 @@ class RewardServiceTest {
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.empty());
         when(userRewardRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        RewardResponse response = rewardService.rewardDefaultUser(0.2);
+        RewardResponse response = rewardService.rewardDefaultUser(0.2, "java");
 
         assertThat(response.gainedXp()).isEqualTo(1);
         assertThat(response.totalXp()).isEqualTo(1);
@@ -63,7 +63,7 @@ class RewardServiceTest {
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.empty());
         when(userRewardRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        RewardResponse response = rewardService.rewardDefaultUser(0.95);
+        RewardResponse response = rewardService.rewardDefaultUser(0.95, "java");
 
         assertThat(response.gainedXp()).isEqualTo(15);
         assertThat(response.totalXp()).isEqualTo(15);
@@ -84,7 +84,7 @@ class RewardServiceTest {
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.empty());
         when(userRewardRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        RewardResponse response = rewardService.rewardDefaultUser(score);
+        RewardResponse response = rewardService.rewardDefaultUser(score, "java");
 
         assertThat(response.gainedXp()).isEqualTo(expectedXp);
     }
@@ -105,7 +105,7 @@ class RewardServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
 
-        RewardResponse response = rewardService.getCurrentUserReward();
+        RewardResponse response = rewardService.getCurrentUserReward("java");
 
         assertThat(response.level()).isEqualTo(expectedLevel);
         assertThat(response.title()).isEqualTo(expectedTitle);
@@ -121,7 +121,7 @@ class RewardServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
 
-        rewardService.getCurrentUserReward();
+        rewardService.getCurrentUserReward("java");
 
         verify(userRewardRepository, never()).save(any());
     }
@@ -135,7 +135,7 @@ class RewardServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
 
-        RewardResponse response = rewardService.getCurrentUserReward();
+        RewardResponse response = rewardService.getCurrentUserReward("java");
 
         assertThat(response.streakDays()).isZero();
     }
@@ -149,7 +149,7 @@ class RewardServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
 
-        RewardResponse response = rewardService.getCurrentUserReward();
+        RewardResponse response = rewardService.getCurrentUserReward("java");
 
         assertThat(response.streakDays()).isEqualTo(1);
     }
