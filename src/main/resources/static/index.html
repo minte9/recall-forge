@@ -588,8 +588,21 @@
 
         <div v-if="dashboard && dashboard.reward" class="reward-card">
           <div class="reward-top">
-            <div>XP: {{ dashboard.reward.xpInLevel }} / {{ dashboard.reward.xpForNextLevel }}</div>
-            <div class="reward-level">Level {{ dashboard.reward.level }} — {{ dashboard.reward.title }}</div>
+            <!-- <div>XP: {{ dashboard.reward.xpInLevel }} / {{ dashboard.reward.xpForNextLevel }}</div>
+            <div class="reward-level">Level {{ dashboard.reward.level }} — {{ dashboard.reward.title }}</div> -->
+
+            <span
+              class="reward-label"
+              title="Topics with a memory score of at least 0.7 and a next review scheduled at least 7 days from now.">
+              {{ dashboard.reward.masteryScope }} Mastery: {{ dashboard.reward.masteryPercent }}%
+          </span>
+
+            <span>
+                {{ dashboard.reward.masteredTopics }}
+                /
+                {{ dashboard.reward.totalTopicsInScope }}
+                topics
+            </span>
           </div>
 
           <div class="reward-bar">
@@ -602,6 +615,11 @@
           <div class="reward-streak">
             🔥 Streak: {{ dashboard.reward.streakDays }} day<span v-if="dashboard.reward.streakDays !== 1">s</span>
           </div>
+
+          <!-- <div class="reward-secondary">
+              Level {{ dashboard.reward.level }} — {{ dashboard.reward.title }}
+              · XP {{ dashboard.reward.xpInLevel }} / {{ dashboard.reward.xpForNextLevel }}
+          </div> -->
         </div>
 
         <div class="actions-row">

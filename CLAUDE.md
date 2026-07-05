@@ -6,11 +6,15 @@ General rules:
 - Prefer small, focused changes.
 
 Task guides:
-- For unit tests, read `docs/ai/unit-testing.md`.
-- For debugging, read `docs/ai/debugging.md`.
-- For frontend work, read `docs/ai/frontend.md`.
+- For unit tests, read `.claude/unit-testing.md`.
+- For integration tests, read `.claude/integration-testing.md`.
+- For debugging, read `.claude/debugging.md`.
+- For frontend work, read `.claude/frontend.md`.
 
 Read only the guides relevant to the current task.
+
+If no suitable guide exists,
+ask whether a new guide should be created before inventing new conventions.
 
 ## Safety
 

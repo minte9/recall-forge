@@ -104,5 +104,15 @@ const Api = {
     }
 
     return await response.json();
+  },
+
+  async loadAdminUsers() {
+    const response = await fetch("/api/admin/users");
+
+    if (!response.ok) {
+      throw new Error("Failed to load admin users");
+    }
+
+    return await response.json();
   }
 };

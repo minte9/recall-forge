@@ -43,13 +43,24 @@ When you click <strong>Start Review</strong>, this panel will be updated.
   },
 
   computed: {
-    rewardProgress() {
-      if (!this.dashboard || !this.dashboard.reward || !this.dashboard.reward.xpForNextLevel) {
-        return 0;
-      }
+    // rewardProgress() {
+    //   if (!this.dashboard || !this.dashboard.reward || !this.dashboard.reward.xpForNextLevel) {
+    //     return 0;
+    //   }
 
-      const value = (this.dashboard.reward.xpInLevel / this.dashboard.reward.xpForNextLevel) * 100;
-      return Math.max(0, Math.min(100, value));
+    //   const value = (this.dashboard.reward.xpInLevel / this.dashboard.reward.xpForNextLevel) * 100;
+    //   return Math.max(0, Math.min(100, value));
+    // },
+
+    rewardProgress() {
+        if (!this.dashboard || !this.dashboard.reward) {
+            return 0;
+        }
+
+        return Math.max(
+            0,
+            Math.min(100, this.dashboard.reward.masteryPercent || 0)
+        );
     },
 
     isDesktop() {
@@ -489,13 +500,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async loadAdminUsers() {
-      const response = await fetch("/api/admin/users");
-
-      if (!response.ok) {
-        throw new Error("Failed to load admin users");
-      }
-
-      this.adminUsers = await response.json();
+      this.adminUsers = await Api.loadAdminUsers();
     },
 
     showMarkdownExample() {

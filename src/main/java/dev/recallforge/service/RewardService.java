@@ -1,26 +1,35 @@
 package dev.recallforge.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
 import dev.recallforge.security.CurrentUserService;
-import dev.recallforge.domain.UserReward;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RewardService {
+
+    private static final double MASTERY_MEMORY_SCORE = 0.7;
+    private static final int MASTERY_DAYS = 7;
     
     private final UserRewardRepository userRewardRepository;
     private final CurrentUserService currentUserService;
+    private final TopicRepository topicRepository;
 
     public RewardService(
         UserRewardRepository userRewardRepository,
-        CurrentUserService currentUserService
+        CurrentUserService currentUserService,
+        TopicRepository topicRepository
     ) {
         this.userRewardRepository = userRewardRepository;
         this.currentUserService = currentUserService;
+        this.topicRepository = topicRepository;
     }
 
     @Transactional
@@ -38,7 +47,8 @@ public class RewardService {
         reward.addReviewReward(gainedXp, perfect, LocalDate.now());
         userRewardRepository.save(reward);
 
-        return toResponse(reward, gainedXp);
+        // return toResponse(reward, gainedXp);
+        return toResponse(reward, gainedXp, "Java");
     }
 
     @Transactional
@@ -48,7 +58,8 @@ public class RewardService {
         UserReward reward = userRewardRepository.findByUserId(userId)
             .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
 
-        return toResponse(reward, 0);
+        // return toResponse(reward, 0);
+        return toResponse(reward, 0, "Java");
     }
 
     private int xpForScore(double score) {
@@ -58,9 +69,49 @@ public class RewardService {
         return 10;                      // Easy
     }
 
-    private RewardResponse toResponse(UserReward reward, int gainedXp) {
+    // private RewardResponse toResponse(UserReward reward, int gainedXp) {
+    //     int level = reward.getTotalXp() / 100 + 1;
+    //     int xpInLevel = reward.getTotalXp() % 100;
+
+    //     return new RewardResponse(
+    //         reward.getTotalXp(),
+    //         level,
+    //         titleForLevel(level),
+    //         xpInLevel,
+    //         100,
+    //         reward.currentStreakDays(LocalDate.now()),
+    //         gainedXp
+    //     );
+    // }
+
+    private RewardResponse toResponse(
+        UserReward reward,
+        int gainedXp,
+        String category
+    ) {
         int level = reward.getTotalXp() / 100 + 1;
         int xpInLevel = reward.getTotalXp() % 100;
+
+        Long userId = reward.getUserId();
+
+        long totalTopics = topicRepository.countByUserIdAndCategory(
+            userId,
+            category
+        );
+
+        LocalDateTime masteryDate = LocalDateTime.now().plusDays(MASTERY_DAYS);
+        
+        long masteredTopics =
+            topicRepository.countMasteredByUserIdAndCategory(
+                userId,
+                category,
+                MASTERY_MEMORY_SCORE,
+                masteryDate
+            );
+
+        int masteryPercent = totalTopics == 0
+            ? 0
+            : (int) Math.round(masteredTopics * 100.0 / totalTopics);
 
         return new RewardResponse(
             reward.getTotalXp(),
@@ -69,7 +120,12 @@ public class RewardService {
             xpInLevel,
             100,
             reward.currentStreakDays(LocalDate.now()),
-            gainedXp
+            gainedXp,
+
+            category,
+            masteredTopics,
+            totalTopics,
+            masteryPercent
         );
     }
 

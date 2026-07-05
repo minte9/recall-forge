@@ -73,7 +73,7 @@ class DashboardServiceTest {
         when(topicRepository.findStrongKnowledgeAreas(1L)).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L)).thenReturn(List.of());
         when(rewardService.getCurrentUserReward())
-            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0));
+            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard();
 
@@ -96,7 +96,7 @@ class DashboardServiceTest {
         when(topicRepository.findStrongKnowledgeAreas(1L)).thenReturn(strongAreas);
         when(topicRepository.findWeakKnowledgeAreas(1L)).thenReturn(List.of());
         when(rewardService.getCurrentUserReward())
-            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0));
+            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard();
 
@@ -118,7 +118,7 @@ class DashboardServiceTest {
         );
         when(topicRepository.findWeakKnowledgeAreas(1L)).thenReturn(weakKnowledgeAreas);
         when(rewardService.getCurrentUserReward())
-            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0));
+            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard();
 
@@ -137,7 +137,7 @@ class DashboardServiceTest {
         when(topicRepository.findWeakAreas(eq(1L), any())).thenReturn(List.of());
         when(topicRepository.findStrongKnowledgeAreas(1L)).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L)).thenReturn(List.of());
-        RewardResponse reward = new RewardResponse(250, 3, "Apprentice", 50, 100, 4, 0);
+        RewardResponse reward = new RewardResponse(250, 3, "Apprentice", 50, 100, 4, 0, "Java", 5L, 10L, 50);
         when(rewardService.getCurrentUserReward()).thenReturn(reward);
 
         DashboardResponse dashboard = dashboardService.getDashboard();
@@ -156,7 +156,7 @@ class DashboardServiceTest {
         when(topicRepository.findStrongKnowledgeAreas(1L)).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L)).thenReturn(List.of());
         when(rewardService.getCurrentUserReward())
-            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0));
+            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard();
 

@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
 import dev.recallforge.security.CurrentUserService;
 
@@ -30,10 +31,13 @@ class RewardServiceTest {
     @Mock
     private CurrentUserService currentUserService;
 
+    @Mock
+    private TopicRepository topicRepository;
+
     private RewardService rewardService;
 
     private void setUp() {
-        rewardService = new RewardService(userRewardRepository, currentUserService);
+        rewardService = new RewardService(userRewardRepository, currentUserService, topicRepository);
     }
 
     @Test

@@ -7,5 +7,10 @@ public record RewardResponse(
     int xpInLevel, 
     int xpForNextLevel,
     int streakDays,
-    int gainedXp
+    int gainedXp,
+
+    String masteryScope,
+    long masteredTopics,
+    long totalTopicsInScope,
+    int masteryPercent
 ) {}

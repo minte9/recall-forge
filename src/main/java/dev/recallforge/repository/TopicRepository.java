@@ -43,21 +43,6 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     """)
     List<Topic> findDueTopics(Long userId, LocalDateTime now);
 
-    // @Query("""
-    //     select t
-    //     from Topic t
-    //     where 
-    //         t.markdownFile.id = :markdownFileId 
-    //         and t.markdownFile.user.id = :userId
-    //         and t.nextReviewAt <= :now
-    //     order by t.memoryScore asc, t.nextReviewAt asc
-    // """)
-    // List<Topic> findDueTopicsByMarkdownFileId(
-    //     @Param("markdownFileId") Long markdownFileId,
-    //     @Param("userId") Long userId,
-    //     @Param("now") LocalDateTime now
-    // );
-
     @Query("""
         select t from Topic t
         where t.user.id = :userId
@@ -83,13 +68,6 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         t.nextReviewAt asc
     """)
     List<Topic> findTopicsByMarkdownFileId(Long markdownFileId, Long userId);
-
-    // @Query("""
-    //     select count(t) 
-    //     from Topic t
-    //     where t.nextReviewAt <= :now
-    // """)
-    // long countDue(@Param("now") LocalDateTime now);
 
     @Query("""
         select count(t) from Topic t
@@ -240,5 +218,31 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         Long userId,
         LocalDateTime now,
         Pageable pageable
+    );
+
+    @Query("""
+        select count(t)
+        from Topic t
+        where t.user.id = :userId
+        and t.category = :category
+    """)
+    long countByUserIdAndCategory(
+        @Param("userId") Long userId,
+        @Param("category") String category
+    );
+
+    @Query("""
+        select count(t)
+        from Topic t
+        where t.user.id = :userId
+        and t.category = :category
+        and t.memoryScore >= :memoryScore
+        and t.nextReviewAt >= :reviewDate
+    """)
+    long countMasteredByUserIdAndCategory(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("memoryScore") double memoryScore,
+        @Param("reviewDate") LocalDateTime reviewDate
     );
 }

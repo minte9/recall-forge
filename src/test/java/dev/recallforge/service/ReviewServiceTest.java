@@ -140,7 +140,7 @@ class ReviewServiceTest {
         Topic topic = topicWithId(7L, null);
         EvaluationResult evaluation = new EvaluationResult(0.8, "Good job");
         LocalDateTime nextReviewAt = LocalDateTime.now().plusDays(7);
-        RewardResponse reward = new RewardResponse(100, 2, "Student", 0, 100, 3, 6);
+        RewardResponse reward = new RewardResponse(100, 2, "Student", 0, 100, 3, 6, "Java", 4L, 8L, 50);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(7L, 1L)).thenReturn(topic);
