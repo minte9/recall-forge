@@ -2,16 +2,22 @@ package dev.recallforge.service;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestClient;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
+
+import dev.recallforge.dto.AiResponse;
 
 @Service
 public class OpenAiService {
     
     private final RestClient openAiRestClient;
     private final String model;
+
+    private static final Logger log = LoggerFactory.getLogger(OpenAiService.class);
 
     public OpenAiService(RestClient openAiRestClient, @Value("${openai.model}") String model) {
         this.openAiRestClient = openAiRestClient;
@@ -33,9 +39,10 @@ public class OpenAiService {
         - Keep it short.
         - Do not include the answer.
         """;
-        prompt = prompt.formatted(topicTitle, topicContent);
+        prompt = prompt.formatted(topicTitle, trimTopicContent(topicContent));
 
-        return ask(prompt);
+        AiResponse response = ask(prompt, 40);  // question generation
+        return response.content();
     }
 
     public EvaluationResult evaluateAnswer(String topicTitle, String topicContent, String question, String userAnswer) {
@@ -66,14 +73,13 @@ public class OpenAiService {
         score: <number>
         feedback: <short explanation>
         """;
-        prompt = prompt.formatted(topicTitle, topicContent, question, userAnswer);
+        prompt = prompt.formatted(topicTitle, topicContent, question, trimUserAnswer(userAnswer));
 
-        String rawResponse = ask(prompt);
-        
-        return parseEvaluation(rawResponse);
+        AiResponse response = ask(prompt, 80);  // answer evaluation
+        return parseEvaluation(response.content());
     }
 
-    private String ask(String prompt) {
+    private AiResponse ask(String prompt, int maxTokens) {
         Map<String, Object> requestBody = Map.of(
             "model", model,
             "messages", new Object[]{
@@ -81,7 +87,8 @@ public class OpenAiService {
                     "role", "user", "content", prompt
                 )
             },
-            "temperature", 0.3
+            "temperature", 0.3,
+            "max_tokens", maxTokens  // 100 tokens ≈ 75 words / gpt-4o-mini ~ 66,666 = $0.01
         );
 
         JsonNode response = openAiRestClient
@@ -105,7 +112,26 @@ public class OpenAiService {
             throw new IllegalStateException("Could not read OpenAI response: " + response);
         }
 
-        return contentNode.asString().trim();
+        JsonNode usage = response.path("usage");
+        int promptTokens = usage.path("prompt_tokens").asInt();
+        int completionTokens = usage.path("completion_tokens").asInt();
+        int totalTokens = usage.path("total_tokens").asInt();
+
+        String content = contentNode.asText().trim();
+        
+        log.info(
+            "OpenAI tokens: prompt={}, completion={}, total={}",  // docker compose logs -f app | grep "OpenAI tokens"
+            promptTokens,
+            completionTokens,
+            totalTokens
+        );  
+
+        return new AiResponse(
+            content,
+            promptTokens,
+            completionTokens,
+            totalTokens
+        );
     }
 
     private EvaluationResult parseEvaluation(String text) {
@@ -135,5 +161,35 @@ public class OpenAiService {
         score = Math.max(0.0, Math.min(1.0, score));
 
         return new EvaluationResult(score, feedback);
+    }
+
+    private String trimTopicContent(String content) {
+        int maxChars = 3000;
+
+        if (content == null) {
+            return "";
+        }
+
+        String trimmed = content.trim();
+        if (trimmed.length() <= maxChars) {
+            return trimmed;
+        }
+
+        return trimmed.substring(0, maxChars) + "\n...[truncated]";
+    }
+
+    private String trimUserAnswer(String answer) {
+        int maxChars = 1000;
+
+        if (answer == null) {
+            return "";
+        }
+
+        String trimmed = answer.trim();
+        if (trimmed.length() <= maxChars) {
+            return trimmed;
+        }
+
+        return trimmed.substring(0, maxChars);
     }
 }
