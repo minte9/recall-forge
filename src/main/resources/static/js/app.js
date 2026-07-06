@@ -625,7 +625,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.showAccount = false;
       this.mobileView = "markdown";
       this.markdown = `
-<h3>Pattern</h3>
+<h3>File Example Pattern</h3>
 
 <pre>## Environment / Category / Subcategory / File Title
 
@@ -635,7 +635,7 @@ Content...
 ### 2. Topic
 Content...</pre>
 
-<h3>Example</h3>
+<h3>Example: threads_theory.md</h3>
 
 <pre>## JVM / Java / Threads / Theory
 
