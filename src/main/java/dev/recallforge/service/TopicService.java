@@ -44,14 +44,6 @@ public class TopicService {
             .findFirst();
     }
 
-    // public Optional<Topic> selectNextTopicByMarkdownFileId(Long markdownFileId, Long userId) {
-    //     return topicRepository
-    //         .findDueTopicsByMarkdownFileId(
-    //             markdownFileId, userId, LocalDateTime.now())
-    //         .stream()
-    //         .findFirst();
-    // }
-
     public Optional<Topic> selectNextTopicByMarkdownFileId(Long markdownFileId, Long userId) {
         return topicRepository.findDueTopicsByMarkdownFileId(
                 markdownFileId,
