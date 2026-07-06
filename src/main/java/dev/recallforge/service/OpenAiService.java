@@ -88,7 +88,7 @@ public class OpenAiService {
                 )
             },
             "temperature", 0.3,
-            "max_tokens", maxTokens  // 100 tokens ≈ 75 words / gpt-4o-mini ~ 66,666 = $0.01
+            "max_tokens", maxTokens  // 100 tokens ≈ 75 words / gpt-4o-mini ~ 66k = $0.01
         );
 
         JsonNode response = openAiRestClient

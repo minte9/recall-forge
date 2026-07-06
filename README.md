@@ -80,6 +80,7 @@ v1.0.5
 - 7.2 Category aware (dashboard)
 - 7.3 Danger zone (reset learning)
 - 7.4 Starter pack
+- 7.5 Tokens limits (logs)
 
 ## Architecture
 
