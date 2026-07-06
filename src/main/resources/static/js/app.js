@@ -157,6 +157,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       });
     },
 
+    formatSubcategory(name) {
+      if (!name) return "";
+
+      return name
+        .toLowerCase()
+        .replace(/\b\w/g, c => c.toUpperCase());
+    },
+
     handleBodyClick(event) {
       if (!this.mobileMenuOpen) {
         return;
@@ -509,8 +517,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     environmentColor(index) {
       const palette = [
-        "#f45b00", // orange
-        "#8b5cf6", // purple
+        //"#f45b00", // orange
+        //"#8b5cf6", // purple
         "#3b82f6"  // blue
       ];
 

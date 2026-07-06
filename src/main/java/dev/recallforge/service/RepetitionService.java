@@ -11,10 +11,12 @@ public class RepetitionService {
      * Memory score update:
      * 
      * We blend old memory score with the new review score. 
-     * This avoids one bad answer destroying the full memory state.
+     * This avoids one bad answer destroying the full memory state. 
+     * But the recent performance should matter more (good for dashboard mastery).
      */
     public double calculateUpdateMemoryScore(double oldScore, double newScore) {
-        return oldScore * 0.7 + newScore * 0.3;
+        //return oldScore * 0.7 + newScore * 0.3;
+        return oldScore * 0.3 + newScore * 0.7;
     }
 
     /**

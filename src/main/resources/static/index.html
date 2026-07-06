@@ -226,7 +226,7 @@
                 </div>
 
                 <div class="group-title">
-                  {{ groupName }}
+                  {{ formatSubcategory(groupName) }}
                 </div>
               </div>
 
@@ -246,9 +246,7 @@
               @click="startReviewForFile(file.markdownFileId)">
 
               <div class="row-left">
-
                 <div>
-
                   <div class="row-title">
                     {{ file.fileTitle }}
                   </div>
@@ -266,19 +264,13 @@
                     avg {{ formatScore(file.averageMemoryScore) }}
 
                   </div>
-
                 </div>
-
               </div>
-
 
               <div class="row-right">
                 <span class="due-badge" v-if="file.dueCount>0">
                   {{ file.dueCount }}
                 </span>
-                <!-- <span class="row-arrow">
-                      ›
-                  </span> -->
               </div>
 
             </div>
@@ -533,7 +525,7 @@
             <div v-for="area in dashboard.weakAreas" :key="area.environment + area.category + area.subcategory"
               class="attention-row">
               <span class="attention-icon">⚠</span>
-              <span>{{ area.subcategory }}</span>
+              <span>{{ formatSubcategory(area.subcategory) }}</span>
               <span class="attention-due">{{ area.dueCount }} due</span>
             </div>
           </div>
@@ -548,7 +540,7 @@
               <div class="knowledge-list">
                 <div v-for="area in dashboard.strongAreas" :key="'strong-' + area.title" class="knowledge-item">
                   <span class="dot green"></span>
-                  <span>{{ area.title }}</span>
+                  <span>{{ formatSubcategory(area.title) }}</span>
                 </div>
               </div>
             </div>
@@ -562,7 +554,7 @@
               <div class="knowledge-list">
                 <div v-for="area in dashboard.weakKnowledgeAreas" :key="'weak-' + area.title" class="knowledge-item">
                   <span class="dot red"></span>
-                  <span>{{ area.title }}</span>
+                  <span>{{ formatSubcategory(area.title) }}</span>
                 </div>
               </div>
             </div>
