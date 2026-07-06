@@ -121,4 +121,10 @@ public class Topic {
         this.content = content;
         this.markdownFile = markdownFile;
     }
+
+    public void resetProgress() {
+        this.memoryScore = 0;
+        this.nextReviewAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
 }

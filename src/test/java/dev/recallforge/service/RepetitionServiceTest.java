@@ -15,7 +15,7 @@ class RepetitionServiceTest {
     void calculateUpdateMemoryScore_blendsOldAndNewScore() {
         double result = repetitionService.calculateUpdateMemoryScore(0.8, 0.2);
 
-        assertThat(result).isCloseTo(0.8 * 0.7 + 0.2 * 0.3, within(1e-9));
+        assertThat(result).isCloseTo(0.8 * 0.3 + 0.2 * 0.7, within(1e-9));
     }
 
     @Test

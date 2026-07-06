@@ -603,6 +603,46 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
+    async resetReviewsData() {
+      const confirmed = confirm(
+        "Delete all your reviews data? This cannot be undone."
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        this.loading = true;
+        await Api.resetReviewsData();
+        this.showDangerZone = false;
+
+        this.review = null;
+        this.result = null;
+        this.markdown = "";
+        this.selectedMarkdownFileId = null;
+
+        this.markdownSummaries = [];
+        this.categoryOptions = [];
+        this.currentCategory = null;
+        this.selectedEnvironment = null;
+        this.openMarkdownGroup = null;
+        this.environmentMenuOpen = false;
+
+        this.markdown = this.initialMarkdown;
+        this.leftPanel = "markdowns";
+        this.mobileView = "markdown";
+
+        await this.loadCategoryOptions();
+        await this.loadDashboard();
+
+      } catch (e) {
+        this.error = e.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async importStarterPack(category) {
       try {
         this.loading = true;

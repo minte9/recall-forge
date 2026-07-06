@@ -1,5 +1,7 @@
 package dev.recallforge.security;
 
+import java.util.List;
+
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,6 +10,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.repository.ReviewRepository;
@@ -90,5 +93,18 @@ public class CurrentUserService {
         topicRepository.deleteByUserId(userId);
         markdownFileRepository.deleteByUserId(userId);
         userRewardRepository.deleteByUserId(userId);
+    }
+
+    @Transactional
+    public void resetCurrentUserReviews() {
+        UserAccount user = currentUser();
+        Long userId = user.getId();
+
+        reviewRepository.deleteByUserId(userId);
+        userRewardRepository.deleteByUserId(userId);
+
+        List<Topic> topics = topicRepository.findByUserId(userId);
+        topics.forEach(Topic::resetProgress);
+        topicRepository.saveAll(topics);
     }
 }

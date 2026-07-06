@@ -148,6 +148,18 @@ const Api = {
     }
   },
 
+  async resetReviewsData() {
+    const response = await fetch("/api/me/reviews-data", {
+      method: "DELETE",
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not reset learning data.");
+    }
+  },
+
   async importStarterPack(category) {
     const response = await fetch(
       "/api/starter-packs/" + encodeURIComponent(category) + "/import",

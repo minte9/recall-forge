@@ -342,18 +342,32 @@
           <div v-if="leftPanel === 'danger-zone'" class="account-panel">
             <h3>Danger Zone</h3>
 
+            <h4>Reviews Data</h4>
+
+            <p class="muted">
+              Reset your reviews data. <br>
+              This deletes reviews, mastery, and reward progress.
+            </p>
+
+            <button class="danger-button" @click="resetReviewsData">
+              Reset Reviews
+            </button>
+
+            <h4>Learning Data</h4>
+
             <p class="muted">
               Reset your learning data. <br>
               This deletes uploaded markdown files, topics, reviews, mastery, and reward progress.
             </p>
 
+            <button class="danger-button" @click="resetLearningData">
+              Reset Learnings
+            </button>
+
+
             <p class="muted">
               Your account and login will remain active.
             </p>
-
-            <button class="danger-button" @click="resetLearningData">
-              Reset learning data
-            </button>
           </div>
 
         </div>

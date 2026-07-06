@@ -40,4 +40,10 @@ public class CurrentUserController {
         currentUserService.resetCurrentUserLearningData();
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/me/reviews-data")
+    public ResponseEntity<Void> resetReviewsData() {
+        currentUserService.resetCurrentUserReviews();
+        return ResponseEntity.noContent().build();
+    }
 }
