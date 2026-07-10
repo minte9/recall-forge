@@ -207,6 +207,40 @@
     margin-top: 0;
   }
 
+  .markdown-editor-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .markdown-editor {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    resize: none;
+    border: none;
+    outline: none;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    box-sizing: border-box;
+  }
+
+  .markdown-editor-submit {
+    align-self: flex-end;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 10px;
+    background: var(--orange-dark);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .markdown-editor-submit:hover {
+    opacity: .9;
+  }
+
   .markdown> :last-child {
     margin-bottom: 0;
   }

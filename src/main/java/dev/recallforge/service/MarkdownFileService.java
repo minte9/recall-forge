@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.dto.MarkdownUploadResponse;
+import dev.recallforge.exception.MarkdownAlreadyImportedException;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.security.CurrentUserService;
@@ -65,6 +66,51 @@ public class MarkdownFileService {
     @Transactional
     public MarkdownUploadResponse importMarkdown(String content) throws Exception {
         return importMarkdown(content, null);
+    }
+
+    @Transactional
+    public MarkdownUploadResponse update(Long markdownFileId, String content) throws Exception {
+        if (content.length() > MAX_CONTENT_LENGTH) {
+            throw new IllegalArgumentException("Markdown content is too large.");
+        }
+
+        Long userId = currentUserService.currentUserId();
+        UserAccount user = currentUserService.currentUser();
+
+        MarkdownFile markdownFile = markdownFileRepository.findByIdAndUserId(markdownFileId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Markdown file not found: " + markdownFileId));
+
+        List<MarkdownTopicImporter.ParsedTopic> parsedTopics =
+                markdownTopicImporter.parseMarkdown(content);
+
+        if (parsedTopics.isEmpty()) {
+            throw new IllegalArgumentException("Markdown file does not contain any topics.");
+        }
+
+        if (parsedTopics.size() > MAX_TOPICS_PER_FILE) {
+            throw new IllegalArgumentException("Too many topics in one markdown file.");
+        }
+
+        String contentHash = sha256(content);
+
+        if (!contentHash.equals(markdownFile.getContentHash())) {
+            Optional<MarkdownFile> duplicate = markdownFileRepository.findByContentHash(contentHash);
+
+            if (duplicate.isPresent() && !markdownFileId.equals(duplicate.get().getId())) {
+                throw new MarkdownAlreadyImportedException("This content already exists in another markdown file.");
+            }
+        }
+
+        markdownFile.updateContent(content, contentHash);
+        markdownFileRepository.save(markdownFile);
+
+        syncTopicsFromMarkdown(markdownFile, parsedTopics, userId, user);
+
+        return new MarkdownUploadResponse(
+                markdownFile.getId(),
+                markdownFile.getFilename(),
+                markdownFile.getContent()
+        );
     }
 
     private MarkdownUploadResponse importMarkdown(String content, String filename) throws Exception {

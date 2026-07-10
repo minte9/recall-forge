@@ -46,6 +46,24 @@ const Api = {
     return await response.json();
   },
 
+  async updateMarkdown(markdownFileId, content) {
+    const response = await fetch("/api/markdown/" + encodeURIComponent(markdownFileId), {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ content })
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not save markdown file.");
+    }
+
+    return await response.json();
+  },
+
   async submitAnswer(payload) {
     const response = await fetch("/api/reviews/answer", {
       method: "POST",

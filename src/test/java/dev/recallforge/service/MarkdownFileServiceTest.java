@@ -256,4 +256,156 @@ class MarkdownFileServiceTest {
         assertThat(existingTopic.getContent()).isEqualTo("Updated content.");
         verify(topicRepository).save(existingTopic);
     }
+
+    @Test
+    void update_contentLongerThan200000Chars_throwsIllegalArgumentException() {
+        setUp();
+        String oversizedContent = "a".repeat(200_001);
+
+        assertThatThrownBy(() -> markdownFileService.update(1L, oversizedContent))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Markdown content is too large.");
+    }
+
+    @Test
+    void update_fileNotFoundOrNotOwned_throwsIllegalArgumentException() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(5L, 1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> markdownFileService.update(5L, "### Topic\ncontent"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Markdown file not found: 5");
+    }
+
+    @Test
+    void update_noParsedTopics_throwsIllegalArgumentException() throws Exception {
+        setUp();
+        String content = "not really markdown";
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of());
+
+        assertThatThrownBy(() -> markdownFileService.update(1L, content))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Markdown file does not contain any topics.");
+    }
+
+    @Test
+    void update_moreThan100ParsedTopics_throwsIllegalArgumentException() throws Exception {
+        setUp();
+        String content = "content";
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        List<MarkdownTopicImporter.ParsedTopic> tooManyTopics = java.util.stream.IntStream.range(0, 101)
+            .mapToObj(i -> new MarkdownTopicImporter.ParsedTopic(
+                "General", "Uncategorized", "Uncategorized", "File", "Topic " + i, "Content " + i))
+            .toList();
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(tooManyTopics);
+
+        assertThatThrownBy(() -> markdownFileService.update(1L, content))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Too many topics in one markdown file.");
+    }
+
+    @Test
+    void update_duplicateContentInDifferentFile_throwsMarkdownAlreadyImportedException() throws Exception {
+        setUp();
+        String newContent = "### Java Basics\nDuplicate content.";
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        MarkdownFile otherMarkdownFile = new MarkdownFile(
+            "other.md", newContent, sha256(newContent), "Programming", "Java", "Core", "Other Topic", user
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Java Basics", "Duplicate content."
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownTopicImporter.parseMarkdown(newContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByContentHash(sha256(newContent))).thenReturn(Optional.of(otherMarkdownFile));
+
+        assertThatThrownBy(() -> markdownFileService.update(1L, newContent))
+            .isInstanceOf(dev.recallforge.exception.MarkdownAlreadyImportedException.class)
+            .hasMessage("This content already exists in another markdown file.");
+    }
+
+    @Test
+    void update_happyPath_updatesContentHashAndSyncsExistingTopic() throws Exception {
+        setUp();
+        String newContent = "### Java Basics\nUpdated content.";
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Java Basics", "Updated content."
+        );
+        Topic existingTopic = new Topic(
+            "Programming", "Java", "Core", "Java Basics",
+            "Java Basics", "old topic content", existingMarkdownFile, user
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownTopicImporter.parseMarkdown(newContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByContentHash(sha256(newContent))).thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(
+                eq(existingMarkdownFile), eq("Java Basics"), eq(1L)))
+            .thenReturn(Optional.of(existingTopic));
+
+        MarkdownUploadResponse response = markdownFileService.update(1L, newContent);
+
+        assertThat(response.markdownFileId()).isEqualTo(existingMarkdownFile.getId());
+        assertThat(response.content()).isEqualTo(newContent);
+        assertThat(existingMarkdownFile.getContent()).isEqualTo(newContent);
+        assertThat(existingMarkdownFile.getContentHash()).isEqualTo(sha256(newContent));
+        verify(markdownFileRepository).save(existingMarkdownFile);
+        assertThat(existingTopic.getContent()).isEqualTo("Updated content.");
+        verify(topicRepository).save(existingTopic);
+    }
+
+    @Test
+    void update_contentUnchanged_skipsDuplicateHashLookup() throws Exception {
+        setUp();
+        String content = "### Java Basics\nSame content.";
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", content, sha256(content), "Programming", "Java", "Core", "Java Basics", user
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Java Basics", "Same content."
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(
+                eq(existingMarkdownFile), eq("Java Basics"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        markdownFileService.update(1L, content);
+
+        verify(markdownFileRepository, org.mockito.Mockito.never()).findByContentHash(any());
+    }
 }

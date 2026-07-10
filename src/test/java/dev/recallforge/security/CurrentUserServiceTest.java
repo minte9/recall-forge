@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import dev.recallforge.domain.UserAccount;
+import dev.recallforge.exception.TemplateUserOperationException;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
@@ -150,7 +151,7 @@ class CurrentUserServiceTest {
     }
 
     @Test
-    void resetCurrentUserLearningData_templateUser_throwsIllegalStateException() {
+    void resetCurrentUserLearningData_templateUser_throwsTemplateUserOperationException() {
         setUp();
         when(oauthUser.getAttribute("sub")).thenReturn("google-1");
         authenticateWith(oauthUser, "google");
@@ -160,7 +161,7 @@ class CurrentUserServiceTest {
             .thenReturn(Optional.of(templateUser));
 
         assertThatThrownBy(() -> currentUserService.resetCurrentUserLearningData())
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Template user cannot reset learning data.");
+            .isInstanceOf(TemplateUserOperationException.class)
+            .hasMessageContaining("Template user (1) cannot reset learning data.");
     }
 }

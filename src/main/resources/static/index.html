@@ -23,7 +23,7 @@
 
         <button @click.stop="mobileMenuOpen = !mobileMenuOpen" title="Menu">☰</button>
 
-        <div v-if="mobileMenuOpen" class="mobile-menu-dropdown">
+        <div v-if="mobileMenuOpen" class="mobile-menu-dropdown" @click="success = null; error = null">
           <div class="menu-group-title">Reviews</div>
 
           <button @click="showDashboard(); mobileMenuOpen = false">
@@ -36,6 +36,11 @@
 
           <button @click="showMarkdownExample(); mobileMenuOpen = false">
             File Example
+          </button>
+
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && !markdownEditing && currentMarkdownFileId"
+            @click="editMarkdown(); mobileMenuOpen = false">
+            Edit Markdown
           </button>
 
           <!-- <template v-if="review">
@@ -94,7 +99,7 @@
 
             <button class="menu-btn">☰</button>
 
-            <div v-if="menuOpen" class="menu-dropdown">
+            <div v-if="menuOpen" class="menu-dropdown" @click="success = null; error = null">
               <div class="menu-group-title">Reviews</div>
               <button @click="showDashboard(); mobileMenuOpen = false">
                 Dashboard
@@ -103,13 +108,18 @@
                 File Example
               </button>
 
-              <template v-if="review">
+              <button v-if="leftPanel === 'markdown' && !markdownLoading && !markdownEditing && currentMarkdownFileId"
+                @click="editMarkdown(); menuOpen = false">
+                Edit Markdown
+              </button>
+
+              <!-- <template v-if="review">
                 <div class="menu-divider"></div>
                 <div class="menu-group-title">Answers</div>
                 <button @click="toggleFeedbackHistory(); menuOpen = false">
                   Feedbacks
                 </button>
-              </template>
+              </template> -->
 
               <div class="menu-divider"></div>
 
@@ -283,6 +293,16 @@
           <div v-if="markdownLoading" class="markdown-loading">
             Loading...
           </div>
+
+          <div v-else-if="markdownEditing" class="markdown-editor-wrap">
+            <textarea ref="markdownEditor" class="markdown markdown-editor" v-model="markdown"
+              @input="resizeMarkdownEditor"></textarea>
+
+            <button class="markdown-editor-submit" @click="submitMarkdownEdit">
+              Submit
+            </button>
+          </div>
+
           <div v-else class="markdown" v-html="renderMarkdown(markdown)">
           </div>
         </div>

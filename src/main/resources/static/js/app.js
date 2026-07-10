@@ -26,6 +26,7 @@ createApp({
       openMarkdownGroup: null,
       mobilePageTitle: "Dashboard",
       markdownLoading: false,
+      markdownEditing: false,
       feedbackHistory: [],
       feedbackHistoryVisible: false,
       feedbackHistoryLoading: false,
@@ -190,6 +191,51 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return Markdown.render(md);
     },
 
+    editMarkdown() {
+      this.leftPanel = "markdown";
+      this.markdownEditing = true;
+
+      this.$nextTick(() => {
+        this.resizeMarkdownEditor();
+        this.$refs.markdownEditor?.focus({ preventScroll: true });
+      });
+    },
+
+    resizeMarkdownEditor() {
+      const el = this.$refs.markdownEditor;
+
+      if (!el) {
+        return;
+      }
+
+      el.style.height = "auto";
+      el.style.height = el.scrollHeight + "px";
+    },
+
+    async submitMarkdownEdit() {
+      if (!this.currentMarkdownFileId) {
+        this.error = "This file can't be saved yet — upload or open a saved markdown file first.";
+        return;
+      }
+
+      this.loading = true;
+      this.error = null;
+      this.success = null;
+
+      try {
+        const updated = await Api.updateMarkdown(this.currentMarkdownFileId, this.markdown);
+
+        this.markdown = updated.content;
+        this.success = "Markdown saved.";
+        this.markdownEditing = false;
+
+      } catch (err) {
+        this.error = err.message || "Could not save markdown file.";
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async selectEnvironment(environment) {
       this.selectedEnvironment = environment;
       this.currentCategory = environment;
@@ -217,6 +263,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     async startReview() {
       this.loading = true;
       this.markdownLoading = true;
+      this.markdownEditing = false;
       this.mobilePageTitle = "Review";
       this.error = null;
       this.success = null;
@@ -443,6 +490,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.mobilePageTitle = "Markdowns";
       this.leftPanel = "markdowns";
       this.mobileView = "markdown";
+      this.markdownEditing = false;
     },
 
     renderTextTable(files) {
@@ -483,6 +531,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.mobilePageTitle = "Account Details";
       this.leftPanel = "account";
       this.mobileView = "markdown";
+      this.markdownEditing = false;
     },
 
     async showDashboard() {
@@ -493,6 +542,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.mobileView = "dashboard";
       this.leftExpanded = false;
       this.mobilePageTitle = "Dashboard";
+      this.markdownEditing = false;
 
       await this.loadDashboard();
 
@@ -552,6 +602,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.leftPanel = "admin-users";
       this.mobilePageTitle = "Admin Users";
       this.mobileView = "markdown";
+      this.markdownEditing = false;
       this.loadAdminUsers();
     },
 
@@ -565,6 +616,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.menuOpen = false;
       this.mobileMenuOpen = false;
       this.mobileView = "markdown";
+      this.markdownEditing = false;
     },
 
     async resetLearningData() {
@@ -687,6 +739,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.leftPanel = "markdown";
       this.showAccount = false;
       this.mobileView = "markdown";
+      this.currentMarkdownFileId = null;
+      this.markdownEditing = false;
       this.markdown = `
 <h3>File Example Pattern</h3>
 
