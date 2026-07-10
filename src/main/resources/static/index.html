@@ -38,6 +38,10 @@
             File Example
           </button>
 
+          <button @click="showStarterPack(); mobileMenuOpen = false">
+            Starter Pack
+          </button>
+
           <button v-if="leftPanel === 'markdown' && !markdownLoading && !markdownEditing && currentMarkdownFileId"
             @click="editMarkdown(); mobileMenuOpen = false">
             Edit Markdown
@@ -106,6 +110,10 @@
               </button>
               <button @click="showMarkdownExample(); menuOpen = false">
                 File Example
+              </button>
+
+              <button @click="showStarterPack(); menuOpen = false">
+                Starter Pack
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && !markdownEditing && currentMarkdownFileId"
@@ -201,10 +209,6 @@
               <button class="starter-pack-btn" @click="importStarterPack('Java')">
                 Java
               </button>
-
-              <!-- <button class="starter-pack-btn" @click="importStarterPack('Spring')">
-                Spring
-              </button> -->
 
               <button class="starter-pack-btn" @click="importStarterPack('Python')">
                 Python
@@ -388,6 +392,35 @@
             <p class="muted">
               Your account and login will remain active.
             </p>
+          </div>
+
+          <div v-if="leftPanel === 'starter-pack'" class="markdown-page">
+            <div class="markdown empty-markdown">
+
+              <h3>Welcome to RecallForge</h3>
+
+              Upload a markdown file to start.
+              The uploaded markdown will be saved in the database.
+              When you click <strong>Start Review</strong>, this panel will be updated.
+
+              <h3>Starter Pack</h3>
+
+              <p>Choose a starter pack or <strong>Upload</strong> your own notes.</p>
+
+              <div class="starter-pack-list">
+                <button class="starter-pack-btn"
+                  :disabled="categoryOptions.some(o => o.category === 'Java')"
+                  @click="importStarterPack('Java')">
+                  Java
+                </button>
+
+                <button class="starter-pack-btn"
+                  :disabled="categoryOptions.some(o => o.category === 'Python')"
+                  @click="importStarterPack('Python')">
+                  Python
+                </button>
+              </div>
+            </div>
           </div>
 
         </div>

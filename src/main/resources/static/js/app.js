@@ -534,6 +534,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.markdownEditing = false;
     },
 
+    showStarterPack() {
+      this.mobilePageTitle = "Starter Pack";
+      this.leftPanel = "starter-pack";
+      this.mobileView = "markdown";
+      this.markdownEditing = false;
+    },
+
     async showDashboard() {
       this.review = null;
       this.result = null;
