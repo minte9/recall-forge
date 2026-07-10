@@ -5,6 +5,7 @@ createApp({
     return {
       loading: false,
       error: null,
+      success: null,
       currentMarkdownFileId: null,
       currentCategory: null,
       showMetadataHelp: false,
@@ -218,6 +219,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.markdownLoading = true;
       this.mobilePageTitle = "Review";
       this.error = null;
+      this.success = null;
       this.result = null;
       this.userAnswer = "";
       this.answerSubmitted = false;
@@ -279,6 +281,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.mobileView = "dashboard";
       this.loading = true;
       this.error = null;
+      this.success = null;
       this.result = null;
 
       try {
@@ -312,6 +315,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.answerSubmitted = true;
       this.loading = true;
       this.error = null;
+      this.success = null;
 
       try {
         this.result = await Api.submitAnswer({
@@ -574,6 +578,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       try {
         this.loading = true;
+        this.error = null;
+        this.success = null;
         await Api.resetLearningData();
         this.showDangerZone = false;
 
@@ -596,8 +602,11 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         await this.loadCategoryOptions();
         await this.loadDashboard();
 
+        this.success = "Learning data reset successfully.";
+
       } catch (e) {
         this.error = e.message;
+        this.success = null;
       } finally {
         this.loading = false;
       }
@@ -614,6 +623,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       try {
         this.loading = true;
+        this.error = null;
+        this.success = null;
         await Api.resetReviewsData();
         this.showDangerZone = false;
 
@@ -636,8 +647,11 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         await this.loadCategoryOptions();
         await this.loadDashboard();
 
+        this.success = "Reviews reset successfully.";
+
       } catch (e) {
         this.error = e.message;
+        this.success = null;
       } finally {
         this.loading = false;
       }
@@ -647,6 +661,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       try {
         this.loading = true;
         this.error = null;
+        this.success = null;
 
         await Api.importStarterPack(category);
 

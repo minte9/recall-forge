@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
+import dev.recallforge.exception.TemplateUserOperationException;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
@@ -20,6 +21,8 @@ import dev.recallforge.repository.UserRewardRepository;
 
 @Service
 public class CurrentUserService {
+
+    private static final Long TEMPLATE_USER_ID = 1L;
 
     private final UserAccountRepository userAccountRepository;
     private final ReviewRepository reviewRepository;
@@ -54,8 +57,8 @@ public class CurrentUserService {
         String providerUserId = extractProviderUserId(oauthUser);
 
         return userAccountRepository
-                .findByProviderAndProviderUserId(provider, providerUserId)
-                .orElseThrow(() -> new IllegalStateException("User not found in database"));
+            .findByProviderAndProviderUserId(provider, providerUserId)
+            .orElseThrow(() -> new IllegalStateException("User not found in database"));
     }
 
     public Long currentUserId() {
@@ -88,6 +91,10 @@ public class CurrentUserService {
     public void resetCurrentUserLearningData() {
         UserAccount user = currentUser();
         Long userId = user.getId();
+
+        if (TEMPLATE_USER_ID.equals(userId)) {
+            throw new TemplateUserOperationException("Template user (1) cannot reset learning data.");
+        }
 
         reviewRepository.deleteByUserId(userId);
         topicRepository.deleteByUserId(userId);

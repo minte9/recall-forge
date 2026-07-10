@@ -31,6 +31,7 @@ public class StarterPackService {
     public void importStarterPack(String category) throws Exception {
         Long currentUserId = currentUserService.currentUserId();
 
+        // Guard rule (template user cannot reset and reimport template markdowns)
         if (TEMPLATE_USER_ID.equals(currentUserId)) {
             throw new IllegalStateException("Template user cannot import starter packs.");
         }

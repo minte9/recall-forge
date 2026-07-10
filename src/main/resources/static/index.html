@@ -38,7 +38,7 @@
             File Example
           </button>
 
-          <template v-if="review">
+          <!-- <template v-if="review">
             <div class="menu-divider"></div>
             <div class="menu-group-title">Answers</div>
             <button @click="toggleFeedbackHistory(); mobileMenuOpen = false">
@@ -46,7 +46,7 @@
             </button>
           </template>
 
-          <div class="menu-divider"></div>
+          <div class="menu-divider"></div> -->
 
           <div class="menu-group-title">Account</div>
           <button @click="showAccountDetails(); mobileMenuOpen = false">
@@ -349,7 +349,7 @@
               This deletes reviews, mastery, and reward progress.
             </p>
 
-            <button class="danger-button" @click="resetReviewsData">
+            <button class="warning-button" @click="resetReviewsData">
               Reset Reviews
             </button>
 
@@ -628,6 +628,10 @@
           <p><strong>Feedback:</strong> {{ result.feedback }}</p>
           <p><strong>Updated memory score:</strong> {{ formatScore(result.updateMemoryScore) }}</p>
           <p><strong>Next review:</strong> {{ formatDate(result.nextReviewAt) }}</p>
+        </div>
+
+        <div v-if="success" class="success">
+          {{ success }}
         </div>
 
         <div v-if="error" class="error">

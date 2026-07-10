@@ -148,4 +148,19 @@ class CurrentUserServiceTest {
 
         assertThat(id).isEqualTo(7L);
     }
+
+    @Test
+    void resetCurrentUserLearningData_templateUser_throwsIllegalStateException() {
+        setUp();
+        when(oauthUser.getAttribute("sub")).thenReturn("google-1");
+        authenticateWith(oauthUser, "google");
+        UserAccount templateUser = new UserAccount();
+        templateUser.setId(1L);
+        when(userAccountRepository.findByProviderAndProviderUserId("google", "google-1"))
+            .thenReturn(Optional.of(templateUser));
+
+        assertThatThrownBy(() -> currentUserService.resetCurrentUserLearningData())
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Template user cannot reset learning data.");
+    }
 }
