@@ -5,6 +5,17 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+/**
+ * Parses raw markdown text into a list of {@link ParsedTopic} records.
+ *
+ * This is a stateless parser with no persistence or per-user logic; it does
+ * not read or write any files itself. It is used by
+ * {@link MarkdownFileService} to turn uploaded/imported markdown content
+ * into topics before they are saved for the current user. {@code ##}
+ * headings set the environment/category/subcategory/file title path, and
+ * each {@code ###} heading starts a new topic whose content runs until the
+ * next heading.
+ */
 @Service
 public class MarkdownTopicImporter {
 
@@ -13,12 +24,6 @@ public class MarkdownTopicImporter {
     private static final String DEFAULT_SUBCATEGORY = "Uncategorized";
     private static final String DEFAULT_FILETITLE = "Untitled";
 
-    /**
-     * Parse markdown into topics.
-     * Every markdown heading starts a new topic:
-     * - supports headings from # to ######
-     * - everything until the next heading becomes content
-     */
     public List<ParsedTopic> parseMarkdown(String markdown) {
         List<ParsedTopic> topics = new ArrayList<>();
 

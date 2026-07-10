@@ -8,6 +8,15 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Imports predefined "starter pack" markdown files into a user's account.
+ *
+ * Starter packs are stored as {@link MarkdownFile} records owned by a fixed
+ * template user (id {@value #TEMPLATE_USER_ID}), grouped by category. When a
+ * regular user imports a pack, each template file's content is cloned into
+ * the current user's own markdown files via {@link MarkdownFileService}. The
+ * template user itself is not allowed to import starter packs.
+ */
 @Service
 public class StarterPackService {
 

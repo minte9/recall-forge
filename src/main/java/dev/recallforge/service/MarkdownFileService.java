@@ -18,6 +18,17 @@ import dev.recallforge.security.CurrentUserService;
 import dev.recallforge.domain.UserAccount;
 import jakarta.transaction.Transactional;
 
+/**
+ * Imports and manages markdown files for the current user.
+ *
+ * Accepts uploaded {@code .md} files (or raw markdown content, e.g. from
+ * {@link StarterPackService}), parses their topics via
+ * {@link MarkdownTopicImporter}, and persists them as {@link MarkdownFile}
+ * and {@link Topic} records scoped to {@link CurrentUserService#currentUser()}.
+ * Files are matched against existing records by content hash or by
+ * environment/category/subcategory/title metadata so re-imports update the
+ * existing file and its topics instead of creating duplicates.
+ */
 @Service
 public class MarkdownFileService {
 
