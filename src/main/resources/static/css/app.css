@@ -284,7 +284,6 @@
   .markdown pre {
     margin: 0;
     padding: 12px;
-    background: #f8fafc;
     color: #1f2937;
     overflow-x: auto;
     line-height: 1.45;
@@ -300,7 +299,6 @@
     margin: 10px 0;
     border: 1px solid #ececec;
     border-radius: 10px;
-    background: #fafafa;
     overflow: hidden;
   }
 
