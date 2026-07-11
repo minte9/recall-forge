@@ -191,6 +191,16 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return Markdown.render(md);
     },
 
+    onMarkdownClick(event) {
+      if (event.target.closest(".code-block")) {
+        return;
+      }
+
+      if (this.currentMarkdownFileId) {
+        this.editMarkdown();
+      }
+    },
+
     editMarkdown() {
       const scrollY = window.scrollY;
 
