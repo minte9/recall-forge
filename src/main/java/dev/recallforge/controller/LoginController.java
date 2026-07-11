@@ -16,4 +16,9 @@ public class LoginController {
     public String terms() {
         return "forward:/terms.html";
     }
+
+    @GetMapping("/privacy")
+    public String privacy() {
+        return "forward:/privacy.html";
+    }
 }

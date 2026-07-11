@@ -52,6 +52,8 @@ public class SecurityConfig {
                     "/login.html",
                     "/terms",
                     "/terms.html",
+                    "/privacy",
+                    "/privacy.html",
                     "/oauth2/**",
                     "/login/oauth2/**",
                     "/recall-forge.png", // icon
