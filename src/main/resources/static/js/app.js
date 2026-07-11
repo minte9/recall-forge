@@ -201,6 +201,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       });
     },
 
+    showMarkdown() {
+      this.markdownEditing = false;
+    },
+
     resizeMarkdownEditor() {
       const el = this.$refs.markdownEditor;
 

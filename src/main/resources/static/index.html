@@ -42,9 +42,9 @@
             Starter Pack
           </button>
 
-          <button v-if="leftPanel === 'markdown' && !markdownLoading && !markdownEditing && currentMarkdownFileId"
-            @click="editMarkdown(); mobileMenuOpen = false">
-            Edit Markdown
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
+            @click="markdownEditing ? showMarkdown() : editMarkdown(); mobileMenuOpen = false">
+            {{ markdownEditing ? "Show Markdown" : "Edit Markdown" }}
           </button>
 
           <!-- <template v-if="review">
@@ -116,9 +116,9 @@
                 Starter Pack
               </button>
 
-              <button v-if="leftPanel === 'markdown' && !markdownLoading && !markdownEditing && currentMarkdownFileId"
-                @click="editMarkdown(); menuOpen = false">
-                Edit Markdown
+              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
+                @click="markdownEditing ? showMarkdown() : editMarkdown(); menuOpen = false">
+                {{ markdownEditing ? "Show Markdown" : "Edit Markdown" }}
               </button>
 
               <!-- <template v-if="review">
@@ -300,14 +300,15 @@
 
           <div v-else-if="markdownEditing" class="markdown-editor-wrap">
             <textarea ref="markdownEditor" class="markdown markdown-editor" v-model="markdown"
-              @input="resizeMarkdownEditor"></textarea>
+              @input="resizeMarkdownEditor" @keydown.esc="showMarkdown()"></textarea>
 
             <button class="markdown-editor-submit" @click="submitMarkdownEdit">
               Submit
             </button>
           </div>
 
-          <div v-else class="markdown" v-html="renderMarkdown(markdown)">
+          <div v-else class="markdown" v-html="renderMarkdown(markdown)"
+            @click="currentMarkdownFileId && editMarkdown()">
           </div>
         </div>
 
