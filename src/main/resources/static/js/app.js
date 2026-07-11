@@ -192,17 +192,26 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     editMarkdown() {
+      const scrollY = window.scrollY;
+
       this.leftPanel = "markdown";
       this.markdownEditing = true;
 
       this.$nextTick(() => {
         this.resizeMarkdownEditor();
         this.$refs.markdownEditor?.focus({ preventScroll: true });
+        window.scrollTo(0, scrollY);
       });
     },
 
     showMarkdown() {
+      const scrollY = window.scrollY;
+
       this.markdownEditing = false;
+
+      this.$nextTick(() => {
+        window.scrollTo(0, scrollY);
+      });
     },
 
     resizeMarkdownEditor() {
@@ -212,8 +221,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return;
       }
 
+      const scrollY = window.scrollY;
       el.style.height = "auto";
       el.style.height = el.scrollHeight + "px";
+      window.scrollTo(0, scrollY);
     },
 
     async submitMarkdownEdit() {
@@ -221,6 +232,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.error = "This file can't be saved yet — upload or open a saved markdown file first.";
         return;
       }
+
+      const scrollY = window.scrollY;
 
       this.loading = true;
       this.error = null;
@@ -232,6 +245,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.markdown = updated.content;
         this.success = "Markdown saved.";
         this.markdownEditing = false;
+
+        this.$nextTick(() => {
+          window.scrollTo(0, scrollY);
+        });
 
       } catch (err) {
         this.error = err.message || "Could not save markdown file.";
