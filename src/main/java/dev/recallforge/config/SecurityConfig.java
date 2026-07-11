@@ -50,6 +50,8 @@ public class SecurityConfig {
                     "/",
                     "/login",
                     "/login.html",
+                    "/terms",
+                    "/terms.html",
                     "/oauth2/**",
                     "/login/oauth2/**",
                     "/recall-forge.png", // icon
