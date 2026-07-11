@@ -37,6 +37,9 @@ public class SecurityConfig {
             AppSecurityProperties props
     ) throws Exception {
 
+        // CSRF tokens are unnecessary here: the session cookie (see application.yml)
+        // is SameSite=Lax, so browsers withhold it on cross-site POST/PUT/DELETE
+        // requests, which already blocks the classic CSRF attack on our mutating endpoints.
         http.csrf(csrf -> csrf.disable());
 
         if (!props.enabled()) {
@@ -62,9 +65,6 @@ public class SecurityConfig {
                 ).permitAll()
                 .anyRequest().authenticated()
             )
-            // .formLogin(form -> form
-            //     .defaultSuccessUrl("/", true)
-            // )
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())
 
