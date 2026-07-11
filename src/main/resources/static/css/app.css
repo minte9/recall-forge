@@ -549,7 +549,8 @@
   }
 
   .review-btn {
-    background: linear-gradient(135deg, #ffc542, #ff9f1c);
+    /* background: linear-gradient(135deg, #ffc542, #ff9f1c); */
+    background: #ff9f1c;
   }
 
   .upload-btn,
