@@ -26,7 +26,7 @@ public class OpenAiService {
 
     public String generateQuestion(String topicTitle, String topicContent) {
         String prompt = """
-        Create one simple question to test this topic.
+        Create one simple question to test understanding of this topic.
 
         Topic title:
         %s
@@ -36,7 +36,11 @@ public class OpenAiService {
 
         Rules:
         - Return only the question.
-        - Keep it short.
+        - Keep it short (one sentence when possible).
+        - Test understanding of the concept, not memorization of code.
+        - Do not include code snippets, code blocks, or inline code.
+        - Do not ask about the output of code.
+        - Prefer conceptual or practical questions that can be answered in a few sentences.
         - Do not include the answer.
         """;
         prompt = prompt.formatted(topicTitle, trimTopicContent(topicContent));
