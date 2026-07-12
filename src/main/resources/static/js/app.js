@@ -7,6 +7,7 @@ createApp({
       error: null,
       success: null,
       currentMarkdownFileId: null,
+      currentMarkdownReviewCount: null,
       currentCategory: null,
       showMetadataHelp: false,
       markdown: null,
@@ -334,6 +335,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         await this.loadDashboard();
 
         await this.loadFeedbackHistory(this.review.topicId);
+        await this.loadMarkdownReviewCount();
 
       } catch (err) {
         this.review = null;
@@ -738,6 +740,106 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         await this.loadDashboard();
 
         this.success = "Reviews reset successfully.";
+
+      } catch (e) {
+        this.error = e.message;
+        this.success = null;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async resetFileReviews() {
+      if (!this.currentMarkdownFileId || this.currentMarkdownReviewCount === 0) {
+        return;
+      }
+
+      const confirmed = confirm(
+        "Delete all reviews and progress for this markdown file? This cannot be undone."
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        this.loading = true;
+        this.error = null;
+        this.success = null;
+
+        await Api.resetMarkdownReviews(this.currentMarkdownFileId);
+
+        this.review = null;
+        this.result = null;
+        this.feedbackHistory = [];
+        this.feedbackHistoryVisible = false;
+        this.feedbackHistoryLoadedForTopicId = null;
+
+        await this.loadMarkdownSummaries(false);
+        await this.loadDashboard();
+        await this.loadMarkdownReviewCount();
+
+        this.success = "Reviews reset for this file.";
+
+      } catch (e) {
+        this.error = e.message;
+        this.success = null;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async loadMarkdownReviewCount() {
+      if (!this.currentMarkdownFileId) {
+        this.currentMarkdownReviewCount = null;
+        return;
+      }
+
+      this.currentMarkdownReviewCount = null;
+
+      try {
+        this.currentMarkdownReviewCount = await Api.getMarkdownReviewCount(this.currentMarkdownFileId);
+      } catch (e) {
+        this.currentMarkdownReviewCount = null;
+      }
+    },
+
+    async deleteMarkdownFile() {
+      if (!this.currentMarkdownFileId || this.currentMarkdownReviewCount !== 0) {
+        return;
+      }
+
+      const confirmed = confirm(
+        "Delete this markdown file and all its topics? This cannot be undone."
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        this.loading = true;
+        this.error = null;
+        this.success = null;
+
+        await Api.deleteMarkdown(this.currentMarkdownFileId);
+
+        this.currentMarkdownFileId = null;
+        this.currentMarkdownReviewCount = null;
+        this.review = null;
+        this.result = null;
+        this.markdown = "";
+        this.feedbackHistory = [];
+        this.feedbackHistoryVisible = false;
+        this.feedbackHistoryLoadedForTopicId = null;
+
+        this.leftPanel = "markdowns";
+        this.mobileView = "markdown";
+
+        await this.loadMarkdownSummaries(false);
+        await this.loadDashboard();
+
+        this.success = "Markdown file deleted.";
 
       } catch (e) {
         this.error = e.message;

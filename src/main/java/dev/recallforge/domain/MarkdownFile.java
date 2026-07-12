@@ -60,6 +60,9 @@ public class MarkdownFile {
     @Column(name = "topic_group")
     private String topicGroup;
 
+    @Column(name = "display_order")
+    private Integer displayOrder;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private UserAccount user;

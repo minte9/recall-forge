@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.dto.CategoryOptionResponse;
 import dev.recallforge.dto.DashboardResponse;
 import dev.recallforge.dto.KnowledgeAreaResponse;
@@ -21,6 +22,7 @@ import dev.recallforge.dto.RewardResponse;
 import dev.recallforge.dto.WeakAreaResponse;
 import dev.recallforge.repository.EnvironmentCategoryProjection;
 import dev.recallforge.repository.KnowledgeAreaProjection;
+import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.WeakAreaProjection;
 import dev.recallforge.security.CurrentUserService;
@@ -37,10 +39,15 @@ class DashboardServiceTest {
     @Mock
     private CurrentUserService currentUserService;
 
+    @Mock
+    private SubcategoryOrderRepository subcategoryOrderRepository;
+
     private DashboardService dashboardService;
 
     private void setUp() {
-        dashboardService = new DashboardService(topicRepository, rewardService, currentUserService);
+        dashboardService = new DashboardService(
+            topicRepository, rewardService, currentUserService, subcategoryOrderRepository
+        );
         when(currentUserService.currentUserId()).thenReturn(1L);
     }
 
@@ -185,6 +192,47 @@ class DashboardServiceTest {
         List<MarkdownSummaryDto> result = dashboardService.getMarkdownSummaries("java");
 
         assertThat(result).isEqualTo(summaries);
+    }
+
+    @Test
+    void getMarkdownSummaries_reordersSubcategoriesByConfiguredDisplayOrder() {
+        setUp();
+        // Repository already returns them alphabetically (Collections, Generics, OOP)
+        MarkdownSummaryDto collectionsFile =
+            new MarkdownSummaryDto(1L, "JVM", "Java", "Collections", "Sets", 3L, 1L, 0.6);
+        MarkdownSummaryDto genericsFile =
+            new MarkdownSummaryDto(2L, "JVM", "Java", "Generics", "Basics", 3L, 1L, 0.6);
+        MarkdownSummaryDto oopFile =
+            new MarkdownSummaryDto(3L, "JVM", "Java", "OOP", "Inheritance", 3L, 1L, 0.6);
+        when(topicRepository.findMarkdownSummaries(eq(1L), eq("java"), any()))
+            .thenReturn(List.of(collectionsFile, genericsFile, oopFile));
+        when(subcategoryOrderRepository.findByCategoryIgnoreCase("java")).thenReturn(List.of(
+            new SubcategoryOrder("Java", "OOP", 1),
+            new SubcategoryOrder("Java", "Generics", 2),
+            new SubcategoryOrder("Java", "Collections", 3)
+        ));
+
+        List<MarkdownSummaryDto> result = dashboardService.getMarkdownSummaries("java");
+
+        assertThat(result).containsExactly(oopFile, genericsFile, collectionsFile);
+    }
+
+    @Test
+    void getMarkdownSummaries_subcategoryWithNoConfiguredOrder_sortsAfterConfiguredOnesKeepingAlphabeticalFallback() {
+        setUp();
+        MarkdownSummaryDto oopFile = new MarkdownSummaryDto(1L, "JVM", "Java", "OOP", "Inheritance", 3L, 1L, 0.6);
+        MarkdownSummaryDto streamsFile = new MarkdownSummaryDto(2L, "JVM", "Java", "Streams", "Creation", 3L, 1L, 0.6);
+        MarkdownSummaryDto versionsFile = new MarkdownSummaryDto(3L, "JVM", "Java", "Versions", "Java 8", 3L, 1L, 0.6);
+        // repository already returns alphabetical order for the unconfigured ones (Streams, Versions)
+        when(topicRepository.findMarkdownSummaries(eq(1L), eq("java"), any()))
+            .thenReturn(List.of(streamsFile, versionsFile, oopFile));
+        when(subcategoryOrderRepository.findByCategoryIgnoreCase("java")).thenReturn(List.of(
+            new SubcategoryOrder("Java", "OOP", 1)
+        ));
+
+        List<MarkdownSummaryDto> result = dashboardService.getMarkdownSummaries("java");
+
+        assertThat(result).containsExactly(oopFile, streamsFile, versionsFile);
     }
 
     @Test

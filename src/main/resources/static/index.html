@@ -310,6 +310,25 @@
           <div v-else class="markdown" v-html="renderMarkdown(markdown)"
             @click="onMarkdownClick">
           </div>
+
+          <div v-if="!markdownLoading && !markdownEditing && currentMarkdownFileId"
+            class="markdown-file-actions">
+            <button
+              class="warning-button reset-file-reviews-button"
+              :disabled="currentMarkdownReviewCount === 0"
+              :title="currentMarkdownReviewCount === 0 ? 'No reviews to reset for this file' : ''"
+              @click="resetFileReviews">
+              Reset Reviews
+            </button>
+
+            <button
+              class="danger-button delete-markdown-button"
+              :disabled="currentMarkdownReviewCount !== 0"
+              :title="currentMarkdownReviewCount !== 0 ? 'Reset reviews for this file first' : ''"
+              @click="deleteMarkdownFile">
+              Delete Markdown
+            </button>
+          </div>
         </div>
 
 

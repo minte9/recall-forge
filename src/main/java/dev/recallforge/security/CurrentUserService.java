@@ -114,4 +114,18 @@ public class CurrentUserService {
         topics.forEach(Topic::resetProgress);
         topicRepository.saveAll(topics);
     }
+
+    @Transactional
+    public void resetCurrentUserReviewsForMarkdownFile(Long markdownFileId) {
+        Long userId = currentUserId();
+
+        markdownFileRepository.findByIdAndUserId(markdownFileId, userId)
+            .orElseThrow(() -> new IllegalArgumentException("Markdown file not found: " + markdownFileId));
+
+        reviewRepository.deleteByTopicMarkdownFileIdAndUserId(markdownFileId, userId);
+
+        List<Topic> topics = topicRepository.findTopicsByMarkdownFileId(markdownFileId, userId);
+        topics.forEach(Topic::resetProgress);
+        topicRepository.saveAll(topics);
+    }
 }

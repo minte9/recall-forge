@@ -82,6 +82,13 @@ v1.0.5
 - 7.4 Starter pack
 - 7.5 Tokens limits (logs)
 
+## 8. Content
+
+- 8.1 Markdown edit
+- 8.2 Markdown reset reviews or delete
+- 8.3 Subcategories and categories order
+- 8.4 Claude content authoring instructions
+
 ## Architecture
 
 ![Screenshot](docs/images/recall-forge_architecture.png)

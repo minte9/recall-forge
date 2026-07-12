@@ -17,6 +17,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 import dev.recallforge.dto.MarkdownUploadResponse;
+import dev.recallforge.exception.MarkdownFileHasReviewsException;
+import dev.recallforge.security.CurrentUserService;
 import dev.recallforge.service.MarkdownFileService;
 
 @WebMvcTest(
@@ -34,6 +36,9 @@ class MarkdownControllerTest {
 
     @MockitoBean
     private MarkdownFileService markdownFileService;
+
+    @MockitoBean
+    private CurrentUserService currentUserService;
 
     @Test
     void uploadMarkdown_delegatesToServiceAndReturnsResponse() throws Exception {
@@ -99,5 +104,49 @@ class MarkdownControllerTest {
             .hasStatus4xxClientError();
 
         verify(markdownFileService, never()).update(any(), any());
+    }
+
+    @Test
+    void resetMarkdownReviews_delegatesToCurrentUserServiceAndReturnsNoContent() throws Exception {
+        mockMvcTester.delete().uri("/api/markdown/1/reviews")
+            .assertThat()
+            .hasStatus(204);
+
+        verify(currentUserService).resetCurrentUserReviewsForMarkdownFile(1L);
+    }
+
+    @Test
+    void getMarkdownReviewCount_delegatesToServiceAndReturnsCount() throws Exception {
+        when(markdownFileService.countReviews(1L)).thenReturn(3L);
+
+        mockMvcTester.get().uri("/api/markdown/1/reviews/count")
+            .assertThat()
+            .hasStatusOk()
+            .bodyJson()
+            .isLenientlyEqualTo("""
+                {
+                  "count": 3
+                }
+                """);
+    }
+
+    @Test
+    void deleteMarkdown_delegatesToServiceAndReturnsNoContent() throws Exception {
+        mockMvcTester.delete().uri("/api/markdown/1")
+            .assertThat()
+            .hasStatus(204);
+
+        verify(markdownFileService).delete(1L);
+    }
+
+    @Test
+    void deleteMarkdown_reviewsStillExist_returnsConflict() throws Exception {
+        org.mockito.Mockito.doThrow(new MarkdownFileHasReviewsException(
+                "Reset reviews for this markdown file before deleting it."))
+            .when(markdownFileService).delete(1L);
+
+        mockMvcTester.delete().uri("/api/markdown/1")
+            .assertThat()
+            .hasStatus(409);
     }
 }

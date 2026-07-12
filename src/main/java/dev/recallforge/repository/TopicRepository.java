@@ -193,8 +193,8 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         from Topic t
         where t.user.id = :userId
         and lower(t.category) = lower(:category)
-        group by t.markdownFile.id, t.environment, t.category, t.subcategory, t.fileTitle
-        order by t.environment, t.category, t.subcategory, t.markdownFile.id
+        group by t.markdownFile.id, t.environment, t.category, t.subcategory, t.fileTitle, t.markdownFile.displayOrder
+        order by t.environment, t.category, t.subcategory, t.markdownFile.displayOrder asc nulls last, t.markdownFile.id
     """)
     List<MarkdownSummaryDto> findMarkdownSummaries(
         @Param("userId") Long userId,
@@ -286,4 +286,11 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     @Modifying
     @Query("delete from Topic t where t.user.id = :userId")
     void deleteByUserId(@Param("userId") Long userId);
+
+    @Modifying
+    @Query("delete from Topic t where t.markdownFile.id = :markdownFileId and t.user.id = :userId")
+    void deleteByMarkdownFileIdAndUserId(
+        @Param("markdownFileId") Long markdownFileId,
+        @Param("userId") Long userId
+    );
 }

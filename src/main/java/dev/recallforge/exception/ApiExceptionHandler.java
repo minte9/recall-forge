@@ -28,4 +28,11 @@ public class ApiExceptionHandler {
             .status(409)
             .body(ex.getMessage());
     }
+
+    @ExceptionHandler(MarkdownFileHasReviewsException.class)
+    public ResponseEntity<String> handleMarkdownFileHasReviews(MarkdownFileHasReviewsException ex) {
+        return ResponseEntity
+            .status(409)
+            .body(ex.getMessage());
+    }
 }

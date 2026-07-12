@@ -2,6 +2,10 @@ package dev.recallforge.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -17,6 +21,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import dev.recallforge.domain.MarkdownFile;
+import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.exception.TemplateUserOperationException;
 import dev.recallforge.repository.MarkdownFileRepository;
@@ -163,5 +169,51 @@ class CurrentUserServiceTest {
         assertThatThrownBy(() -> currentUserService.resetCurrentUserLearningData())
             .isInstanceOf(TemplateUserOperationException.class)
             .hasMessageContaining("Template user (1) cannot reset learning data.");
+    }
+
+    @Test
+    void resetCurrentUserReviewsForMarkdownFile_ownedFile_deletesReviewsAndResetsTopicProgress() {
+        setUp();
+        when(oauthUser.getAttribute("sub")).thenReturn("google-7");
+        authenticateWith(oauthUser, "google");
+        UserAccount user = new UserAccount();
+        user.setId(7L);
+        when(userAccountRepository.findByProviderAndProviderUserId("google", "google-7"))
+            .thenReturn(Optional.of(user));
+
+        MarkdownFile markdownFile = mock(MarkdownFile.class);
+        when(markdownFileRepository.findByIdAndUserId(10L, 7L)).thenReturn(Optional.of(markdownFile));
+
+        Topic topic1 = mock(Topic.class);
+        Topic topic2 = mock(Topic.class);
+        List<Topic> topics = List.of(topic1, topic2);
+        when(topicRepository.findTopicsByMarkdownFileId(10L, 7L)).thenReturn(topics);
+
+        currentUserService.resetCurrentUserReviewsForMarkdownFile(10L);
+
+        verify(reviewRepository).deleteByTopicMarkdownFileIdAndUserId(10L, 7L);
+        verify(topic1).resetProgress();
+        verify(topic2).resetProgress();
+        verify(topicRepository).saveAll(topics);
+    }
+
+    @Test
+    void resetCurrentUserReviewsForMarkdownFile_fileNotOwnedOrMissing_throwsIllegalArgumentException() {
+        setUp();
+        when(oauthUser.getAttribute("sub")).thenReturn("google-7");
+        authenticateWith(oauthUser, "google");
+        UserAccount user = new UserAccount();
+        user.setId(7L);
+        when(userAccountRepository.findByProviderAndProviderUserId("google", "google-7"))
+            .thenReturn(Optional.of(user));
+
+        when(markdownFileRepository.findByIdAndUserId(99L, 7L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> currentUserService.resetCurrentUserReviewsForMarkdownFile(99L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Markdown file not found: 99");
+
+        verify(reviewRepository, never()).deleteByTopicMarkdownFileIdAndUserId(any(), any());
+        verify(topicRepository, never()).saveAll(any());
     }
 }

@@ -23,7 +23,9 @@ import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.dto.MarkdownUploadResponse;
+import dev.recallforge.exception.MarkdownFileHasReviewsException;
 import dev.recallforge.repository.MarkdownFileRepository;
+import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.security.CurrentUserService;
 
@@ -37,6 +39,9 @@ class MarkdownFileServiceTest {
     private TopicRepository topicRepository;
 
     @Mock
+    private ReviewRepository reviewRepository;
+
+    @Mock
     private MarkdownTopicImporter markdownTopicImporter;
 
     @Mock
@@ -46,7 +51,7 @@ class MarkdownFileServiceTest {
 
     private void setUp() {
         markdownFileService = new MarkdownFileService(
-            markdownFileRepository, topicRepository, markdownTopicImporter, currentUserService
+            markdownFileRepository, topicRepository, reviewRepository, markdownTopicImporter, currentUserService
         );
     }
 
@@ -407,5 +412,82 @@ class MarkdownFileServiceTest {
         markdownFileService.update(1L, content);
 
         verify(markdownFileRepository, org.mockito.Mockito.never()).findByContentHash(any());
+    }
+
+    @Test
+    void countReviews_ownedFile_returnsCountFromRepository() {
+        setUp();
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "content", "hash", "Programming", "Java", "Core", "Java Basics", user
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(reviewRepository.countByTopicMarkdownFileIdAndUserId(1L, 1L)).thenReturn(3L);
+
+        long count = markdownFileService.countReviews(1L);
+
+        assertThat(count).isEqualTo(3L);
+    }
+
+    @Test
+    void countReviews_fileNotOwnedOrMissing_throwsIllegalArgumentException() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(5L, 1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> markdownFileService.countReviews(5L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Markdown file not found: 5");
+    }
+
+    @Test
+    void delete_noReviewsRemaining_deletesTopicsThenMarkdownFile() {
+        setUp();
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "content", "hash", "Programming", "Java", "Core", "Java Basics", user
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(reviewRepository.countByTopicMarkdownFileIdAndUserId(1L, 1L)).thenReturn(0L);
+
+        markdownFileService.delete(1L);
+
+        verify(topicRepository).deleteByMarkdownFileIdAndUserId(1L, 1L);
+        verify(markdownFileRepository).delete(existingMarkdownFile);
+    }
+
+    @Test
+    void delete_reviewsStillExist_throwsMarkdownFileHasReviewsExceptionAndDeletesNothing() {
+        setUp();
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "content", "hash", "Programming", "Java", "Core", "Java Basics", user
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(reviewRepository.countByTopicMarkdownFileIdAndUserId(1L, 1L)).thenReturn(2L);
+
+        assertThatThrownBy(() -> markdownFileService.delete(1L))
+            .isInstanceOf(MarkdownFileHasReviewsException.class)
+            .hasMessage("Reset reviews for this markdown file before deleting it.");
+
+        verify(topicRepository, org.mockito.Mockito.never()).deleteByMarkdownFileIdAndUserId(any(), any());
+        verify(markdownFileRepository, org.mockito.Mockito.never()).delete(any());
+    }
+
+    @Test
+    void delete_fileNotOwnedOrMissing_throwsIllegalArgumentException() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(5L, 1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> markdownFileService.delete(5L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Markdown file not found: 5");
     }
 }

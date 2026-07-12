@@ -41,6 +41,7 @@ public class OpenAiService {
         - Do not include code snippets, code blocks, or inline code.
         - Do not ask about the output of code.
         - Prefer conceptual or practical questions that can be answered in a few sentences.
+        - Do not ask question about concepts that are not included in the actual topic content.
         - Do not include the answer.
         """;
         prompt = prompt.formatted(topicTitle, trimTopicContent(topicContent));

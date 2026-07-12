@@ -194,6 +194,34 @@
     transform: translateY(1px);
 }
 
+.markdown-file-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.reset-file-reviews-button {
+    margin: 0;
+}
+
+.delete-markdown-button {
+    margin: 0;
+}
+
+.warning-button:disabled,
+.danger-button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.warning-button:disabled:hover {
+    background: #f59e0b;
+}
+
+.danger-button:disabled:hover {
+    background: var(--orange-dark);
+}
+
   /* Markdown */
   .markdown {
     background: white;

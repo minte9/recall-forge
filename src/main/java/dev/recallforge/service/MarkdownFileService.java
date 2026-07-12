@@ -12,7 +12,9 @@ import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.exception.MarkdownAlreadyImportedException;
+import dev.recallforge.exception.MarkdownFileHasReviewsException;
 import dev.recallforge.repository.MarkdownFileRepository;
+import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.security.CurrentUserService;
 import dev.recallforge.domain.UserAccount;
@@ -34,6 +36,7 @@ public class MarkdownFileService {
 
     private final MarkdownFileRepository markdownFileRepository;
     private final TopicRepository topicRepository;
+    private final ReviewRepository reviewRepository;
     private final MarkdownTopicImporter markdownTopicImporter;
     private final CurrentUserService currentUserService;
 
@@ -44,11 +47,13 @@ public class MarkdownFileService {
     public MarkdownFileService(
             MarkdownFileRepository markdownFileRepository,
             TopicRepository topicRepository,
+            ReviewRepository reviewRepository,
             MarkdownTopicImporter markdownTopicImporter,
             CurrentUserService currentUserService
     ) {
         this.markdownFileRepository = markdownFileRepository;
         this.topicRepository = topicRepository;
+        this.reviewRepository = reviewRepository;
         this.markdownTopicImporter = markdownTopicImporter;
         this.currentUserService = currentUserService;
     }
@@ -186,6 +191,34 @@ public class MarkdownFileService {
                 markdownFile.getFilename(),
                 markdownFile.getContent()
         );
+    }
+
+    @Transactional
+    public long countReviews(Long markdownFileId) {
+        Long userId = currentUserService.currentUserId();
+
+        markdownFileRepository.findByIdAndUserId(markdownFileId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Markdown file not found: " + markdownFileId));
+
+        return reviewRepository.countByTopicMarkdownFileIdAndUserId(markdownFileId, userId);
+    }
+
+    @Transactional
+    public void delete(Long markdownFileId) {
+        Long userId = currentUserService.currentUserId();
+
+        MarkdownFile markdownFile = markdownFileRepository.findByIdAndUserId(markdownFileId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Markdown file not found: " + markdownFileId));
+
+        long reviewCount = reviewRepository.countByTopicMarkdownFileIdAndUserId(markdownFileId, userId);
+
+        if (reviewCount > 0) {
+            throw new MarkdownFileHasReviewsException(
+                    "Reset reviews for this markdown file before deleting it.");
+        }
+
+        topicRepository.deleteByMarkdownFileIdAndUserId(markdownFileId, userId);
+        markdownFileRepository.delete(markdownFile);
     }
 
     private String sanitizeFilename(String filename) {

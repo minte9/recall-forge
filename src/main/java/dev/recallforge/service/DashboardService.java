@@ -2,17 +2,21 @@ package dev.recallforge.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.dto.CategoryOptionResponse;
 import dev.recallforge.dto.DashboardResponse;
 import dev.recallforge.dto.KnowledgeAreaResponse;
 import dev.recallforge.dto.MarkdownSummaryDto;
 import dev.recallforge.dto.WeakAreaResponse;
+import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.security.CurrentUserService;
 
@@ -22,15 +26,18 @@ public class DashboardService {
     private final TopicRepository topicRepository;
     private final RewardService rewardService;
     private final CurrentUserService currentUserService;
+    private final SubcategoryOrderRepository subcategoryOrderRepository;
 
     public DashboardService(
         TopicRepository topicRepository,
         RewardService rewardService,
-        CurrentUserService currentUserService
+        CurrentUserService currentUserService,
+        SubcategoryOrderRepository subcategoryOrderRepository
     ) {
         this.topicRepository = topicRepository;
         this.rewardService = rewardService;
         this.currentUserService = currentUserService;
+        this.subcategoryOrderRepository = subcategoryOrderRepository;
     }
     
     public DashboardResponse getDashboard(String category) {
@@ -112,7 +119,19 @@ public class DashboardService {
     public List<MarkdownSummaryDto> getMarkdownSummaries(String category) {
         Long userId = currentUserService.currentUserId();
 
-        return topicRepository.findMarkdownSummaries(userId, category, LocalDateTime.now());
+        List<MarkdownSummaryDto> summaries =
+            topicRepository.findMarkdownSummaries(userId, category, LocalDateTime.now());
+
+        Map<String, Integer> subcategoryOrder = subcategoryOrderRepository.findByCategoryIgnoreCase(category)
+            .stream()
+            .collect(Collectors.toMap(SubcategoryOrder::getSubcategory, SubcategoryOrder::getDisplayOrder));
+
+        // Stable sort: subcategories with no explicit order fall back to
+        // the alphabetical order the query already returned them in.
+        return summaries.stream()
+            .sorted(Comparator.comparingInt(
+                s -> subcategoryOrder.getOrDefault(s.subcategory(), Integer.MAX_VALUE)))
+            .toList();
     }
 
     public List<CategoryOptionResponse> getCategoryOptions() {

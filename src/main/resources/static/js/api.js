@@ -64,6 +64,44 @@ const Api = {
     return await response.json();
   },
 
+  async resetMarkdownReviews(markdownFileId) {
+    const response = await fetch("/api/markdown/" + encodeURIComponent(markdownFileId) + "/reviews", {
+      method: "DELETE",
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not reset reviews for this markdown file.");
+    }
+  },
+
+  async getMarkdownReviewCount(markdownFileId) {
+    const response = await fetch("/api/markdown/" + encodeURIComponent(markdownFileId) + "/reviews/count", {
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not load review count for this markdown file.");
+    }
+
+    const data = await response.json();
+    return data.count;
+  },
+
+  async deleteMarkdown(markdownFileId) {
+    const response = await fetch("/api/markdown/" + encodeURIComponent(markdownFileId), {
+      method: "DELETE",
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not delete this markdown file.");
+    }
+  },
+
   async submitAnswer(payload) {
     const response = await fetch("/api/reviews/answer", {
       method: "POST",
