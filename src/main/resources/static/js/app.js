@@ -501,6 +501,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async goHome() {
+      this.error = null;
+      this.success = null;
       this.review = null;
       this.result = null;
       this.userAnswer = "";
@@ -520,6 +522,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     showMarkdownSummaries() {
+      this.error = null;
+      this.success = null;
       this.mobilePageTitle = "Markdowns";
       this.leftPanel = "markdowns";
       this.mobileView = "markdown";
@@ -561,6 +565,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     showAccountDetails() {
+      this.error = null;
+      this.success = null;
       this.mobilePageTitle = "Account Details";
       this.leftPanel = "account";
       this.mobileView = "markdown";
@@ -568,6 +574,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     showStarterPack() {
+      this.error = null;
+      this.success = null;
       this.mobilePageTitle = "Starter Pack";
       this.leftPanel = "starter-pack";
       this.mobileView = "markdown";
@@ -575,6 +583,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async showDashboard() {
+      this.error = null;
+      this.success = null;
       this.review = null;
       this.result = null;
       this.userAnswer = "";
@@ -595,6 +605,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     closeLeftPanel() {
+      this.error = null;
+      this.success = null;
       this.showAccount = false;
       this.mobileView = "dashboard";
     },
@@ -881,6 +893,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     showMarkdownExample() {
+      this.error = null;
+      this.success = null;
       this.mobilePageTitle = "Markdown Example";
       this.leftPanel = "markdown";
       this.showAccount = false;
