@@ -51,11 +51,15 @@ Treat that document as the source of truth for:
 
 - project workflow
 - markdown format
-- database import process
-- Docker commands
+- overlap-checking
 - ordering rules
-- editing procedures
-- technical implementation details
+- editing policy (when to update in place vs. delete/reimport)
+
+For tasks that touch the database directly or need a container rebuild
+(direct SQL import, editing content with existing review history, Docker
+commands), also read `.claude/content-authoring.local.md` — it holds the
+operational mechanics and is gitignored (machine/operator-specific, not
+team-wide policy).
 
 ---
 

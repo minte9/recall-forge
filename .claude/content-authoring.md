@@ -79,60 +79,22 @@ How to resolve, depending on context:
 
 **Always check review history before touching topic count.**
 
-```sql
-SELECT t.id, t.title, count(r.id) AS review_count
-FROM topics t
-LEFT JOIN reviews r ON r.topic_id = t.id
-WHERE t.markdown_file_id = <id>
-GROUP BY t.id, t.title;
-```
-
 - **Zero reviews everywhere** → free to delete the `markdown_files`/`topics`
   rows and re-import cleanly. Simplest path, no ID bookkeeping needed.
 - **Any review history** → never delete/recreate. Update `content`/`title` in
   place by topic ID, preserving `memory_score`, `next_review_at`, and the
-  review rows. Recompute `content_hash` (SHA-256 of the full file content) and
-  update `markdown_files.content` too — if you only change the `topics` rows
-  and leave the stale header text in `markdown_files.content`, the next
-  edit-and-save through the app UI will silently revert your change (it
-  re-parses the `##` header from `content` on every save).
+  review rows. The stale-content trap and the exact query to check review
+  counts are in the local companion guide (see §7 below) — read it before
+  touching anything with review history.
 
 ## 5. Direct database import (bypassing the app's upload UI)
 
-The app's REST API only accepts uploads from the currently OAuth2-logged-in
-user — there's no way to import as an arbitrary user via the API. Import
-directly into Postgres instead, mirroring exactly what
-`MarkdownFileService.importMarkdown()` does:
-
-- `user_id = 1` is the template/admin user whose content `StarterPackService`
-  clones for other users by category.
-- One `markdown_files` row per file, one `topics` row per `###` section.
-- `memory_score = 0.6`, `next_review_at`/`created_at`/`updated_at = now()` for
-  new topics (matches the app's own defaults).
-- Use dollar-quoting (`$md$...$md$`) for content in generated SQL to avoid
-  escaping issues with quotes/backslashes in code samples.
-- Pattern for a clean multi-file import:
-  ```sql
-  WITH new_file AS (
-      INSERT INTO markdown_files (filename, content, content_hash, uploaded_at,
-          environment, category, subcategory, topic_group, user_id, visibility)
-      VALUES (...)
-      RETURNING id
-  )
-  INSERT INTO topics (title, content, memory_score, next_review_at, created_at,
-      updated_at, environment, category, subcategory, file_title,
-      markdown_file_id, user_id, visibility)
-  SELECT ... FROM new_file
-  UNION ALL
-  SELECT ... FROM new_file;
-  ```
-- Run it via `docker compose exec -T postgres psql -U recallforge -d recallforge -v ON_ERROR_STOP=1 < file.sql`.
-- **Always verify after import**: re-query row/topic counts, spot-check the
-  header text landed correctly, and (if editing existing content) confirm
-  review history/memory scores are unchanged.
-- A Python script that parses the `##`/`###` structure exactly like
-  `MarkdownTopicImporter` and emits this SQL is the reliable way to do this
-  for more than 1-2 files — don't hand-write the SQL for a batch.
+Content can be imported directly into Postgres, mirroring what
+`MarkdownFileService.importMarkdown()` does, for cases the app's upload UI
+can't cover (e.g. importing as a user other than the one currently logged
+in). The mechanics — SQL patterns, `docker compose exec` commands, which
+user ID content lands under — are operational details, not editorial ones;
+see the local companion guide (§7 below).
 
 ## 6. Ordering
 
@@ -153,16 +115,11 @@ When adding a new subcategory, decide whether it needs an explicit order
 siblings?) — if not, alphabetical is a fine default and was the explicit
 decision for a while before ordering was built.
 
-## 7. Docker mechanics
+## 7. Operational guide (local)
 
-- `data/` is **not** read by the running app at all — it's purely an authoring
-  workspace. The database is the only thing the app actually serves from.
-- Frontend static files (`src/main/resources/static/`) are bind-mounted —
-  edits take effect immediately, no rebuild needed.
-- Backend Java changes (new entity, repository, service logic) need:
-  ```
-  docker compose build app && docker compose up -d app
-  ```
-  Hibernate's `ddl-auto: update` creates/alters tables automatically on
-  startup — no manual migration needed, but check the startup log for errors
-  and confirm the new column/table exists afterward.
+Direct database access (import, editing via SQL) and Docker mechanics
+(rebuild/restart commands, `ddl-auto` behavior) are covered in
+`.claude/content-authoring.local.md`. That file is gitignored — it's
+machine/operator-specific, not team-wide editorial policy. Read it before
+any task that touches the database directly or requires a container
+rebuild.

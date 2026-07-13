@@ -9,3 +9,4 @@ bin/
 sh/
 .rsyncignore
 .dockerignore
+.claude/*.local.*

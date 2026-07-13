@@ -10,7 +10,7 @@ Task guides:
 - For integration tests, read `.claude/integration-testing.md`.
 - For debugging, read `.claude/debugging.md`.
 - For frontend work, read `.claude/frontend.md`.
-- For creating/editing markdown topic content and DB import, read `.claude/content-authoring.md`.
+- For creating/editing markdown topic content, read `.claude/content-authoring.md`. For direct DB import/edits or Docker mechanics, also read `.claude/content-authoring.local.md` (gitignored, operational).
 
 Read only the guides relevant to the current task.
 
