@@ -88,6 +88,7 @@ v1.0.5
 - 8.2 Markdown reset reviews or delete
 - 8.3 Subcategories and categories order
 - 8.4 Claude content authoring instructions
+- 8.5 Content author subagent
 
 ## Architecture
 
