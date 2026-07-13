@@ -43,6 +43,7 @@ After editing:
   branch.
 - Do not amend, rebase, cherry-pick, tag, push, pull, fetch, or modify remotes.
 - At completion, report changed files, tests run, and the current diff.
+- Don't offer any other git suggentions after report.
 
 ## Security
 
