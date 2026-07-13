@@ -28,6 +28,22 @@ After editing:
 - Stop after running the relevant tests.
 - Do not continue with additional refactorings unless requested.
 
+## Git safety
+
+- Before editing, run `git branch --show-current`.
+- If the current branch is `master`, automatically create and switch to a new
+  task branch (`task/<short-slug-of-the-request>`) before making any changes —
+  don't ask first, just do it and state the branch name. Never modify files
+  directly on `master`.
+- Implement the task entirely on the task branch.
+- Do not commit or merge automatically. Wait for explicit user approval.
+- Once approved, run the full sequence as a single combined command (one
+  approval covers the whole thing): commit the changes, switch back to
+  `master`, merge the task branch in (`--no-ff`), then delete the task
+  branch.
+- Do not amend, rebase, cherry-pick, tag, push, pull, fetch, or modify remotes.
+- At completion, report changed files, tests run, and the current diff.
+
 ## Security
 
 Do not read or display secrets unless explicitly requested.
