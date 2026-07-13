@@ -204,10 +204,6 @@
     margin: 0;
 }
 
-.delete-markdown-button {
-    margin: 0;
-}
-
 .warning-button:disabled,
 .danger-button:disabled {
     opacity: .5;

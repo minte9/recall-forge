@@ -805,7 +805,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async deleteMarkdownFile() {
-      if (!this.currentMarkdownFileId || this.currentMarkdownReviewCount !== 0) {
+      if (!this.currentMarkdownFileId) {
+        return;
+      }
+
+      if (this.currentMarkdownReviewCount !== 0) {
+        this.error = "This file has reviews — reset them before deleting it.";
+        this.success = null;
         return;
       }
 
