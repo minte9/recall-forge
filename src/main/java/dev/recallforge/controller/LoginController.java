@@ -4,11 +4,24 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.recallforge.config.AppLoginProperties;
+import dev.recallforge.exception.LoginDisabledException;
+
 @Controller
 public class LoginController {
-    
+
+    private final AppLoginProperties loginProperties;
+
+    public LoginController(AppLoginProperties loginProperties) {
+        this.loginProperties = loginProperties;
+    }
+
     @GetMapping("/login")
     public String login() {
+        if (!loginProperties.enabled()) {
+            throw new LoginDisabledException();
+        }
+
         return "forward:/login.html";
     }
 

@@ -90,6 +90,7 @@ v1.0.5
 - 8.4 Claude content authoring instructions
 - 8.5 Content author subagent
 - 8.6 Agent Git safety
+- 8.7 Login disabled
 
 ## Architecture
 

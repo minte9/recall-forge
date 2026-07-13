@@ -35,4 +35,11 @@ public class ApiExceptionHandler {
             .status(409)
             .body(ex.getMessage());
     }
+
+    @ExceptionHandler(LoginDisabledException.class)
+    public ResponseEntity<String> handleLoginDisabled(LoginDisabledException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ex.getMessage());
+    }
 }
