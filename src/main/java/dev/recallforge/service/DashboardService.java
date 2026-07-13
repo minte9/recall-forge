@@ -100,6 +100,8 @@ public class DashboardService {
             .filter(area -> !strongTitles.contains(area.title()))
             .toList();
 
+        // True only when there's a genuine strong/weak contrast between subcategories.
+        // New users start with uniform default memory scores, so it stays false until enough reviews create real separation.
         boolean showKnowledgeInsights =
             !strongOnly.isEmpty() && !weakOnly.isEmpty();
 
