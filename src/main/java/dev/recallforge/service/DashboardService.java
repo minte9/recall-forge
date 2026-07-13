@@ -10,12 +10,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.dto.CategoryOptionResponse;
 import dev.recallforge.dto.DashboardResponse;
 import dev.recallforge.dto.KnowledgeAreaResponse;
 import dev.recallforge.dto.MarkdownSummaryDto;
 import dev.recallforge.dto.WeakAreaResponse;
+import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.security.CurrentUserService;
@@ -24,20 +26,26 @@ import dev.recallforge.security.CurrentUserService;
 public class DashboardService {
 
     private final TopicRepository topicRepository;
+    private final ReviewRepository reviewRepository;
     private final RewardService rewardService;
     private final CurrentUserService currentUserService;
     private final SubcategoryOrderRepository subcategoryOrderRepository;
+    private final AppReviewLimitProperties reviewLimitProperties;
 
     public DashboardService(
         TopicRepository topicRepository,
+        ReviewRepository reviewRepository,
         RewardService rewardService,
         CurrentUserService currentUserService,
-        SubcategoryOrderRepository subcategoryOrderRepository
+        SubcategoryOrderRepository subcategoryOrderRepository,
+        AppReviewLimitProperties reviewLimitProperties
     ) {
         this.topicRepository = topicRepository;
+        this.reviewRepository = reviewRepository;
         this.rewardService = rewardService;
         this.currentUserService = currentUserService;
         this.subcategoryOrderRepository = subcategoryOrderRepository;
+        this.reviewLimitProperties = reviewLimitProperties;
     }
     
     public DashboardResponse getDashboard(String category) {
@@ -105,6 +113,16 @@ public class DashboardService {
         boolean showKnowledgeInsights =
             !strongOnly.isEmpty() && !weakOnly.isEmpty();
 
+        int dailyReviewLimit = reviewLimitProperties.dailyLimit();
+        long reviewsToday = reviewRepository.countByUserIdAndReviewedAtAfter(userId, LocalDate.now().atStartOfDay());
+
+        // Tomorrow/this week aren't separately enforced — they show what's realistically
+        // reachable given the daily cap. Today's overdue backlog counts too: an overdue
+        // topic stays reviewable indefinitely, so it can still fill tomorrow's (or next
+        // week's) quota even though its nextReviewAt isn't actually inside that window.
+        long tomorrowReviewLimit = Math.min(dailyReviewLimit, dueNow + dueTomorrow);
+        long thisWeekReviewLimit = Math.min((long) dailyReviewLimit * 7, dueNow + dueThisWeek);
+
         return new DashboardResponse(
             dueNow,
             dueTomorrow,
@@ -114,7 +132,11 @@ public class DashboardService {
             strongKnowledgeAreas,
             weakKnowledgeAreas,
             rewardService.getCurrentUserReward(category),
-            showKnowledgeInsights
+            showKnowledgeInsights,
+            dailyReviewLimit,
+            reviewsToday,
+            tomorrowReviewLimit,
+            thisWeekReviewLimit
         );
     }
 

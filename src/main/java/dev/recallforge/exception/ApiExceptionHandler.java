@@ -42,4 +42,11 @@ public class ApiExceptionHandler {
                 .status(HttpStatus.FORBIDDEN)
                 .body(ex.getMessage());
     }
+
+    @ExceptionHandler(DailyReviewLimitExceededException.class)
+    public ResponseEntity<String> handleDailyReviewLimitExceeded(DailyReviewLimitExceededException ex) {
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ex.getMessage());
+    }
 }

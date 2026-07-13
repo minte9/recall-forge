@@ -1,5 +1,6 @@
 package dev.recallforge.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import dev.recallforge.domain.Review;
@@ -32,4 +33,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     );
 
     long countByTopicMarkdownFileIdAndUserId(Long markdownFileId, Long userId);
+
+    long countByUserIdAndReviewedAtAfter(Long userId, LocalDateTime since);
 }
