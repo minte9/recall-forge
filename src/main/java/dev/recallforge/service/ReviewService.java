@@ -1,11 +1,13 @@
 package dev.recallforge.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.dto.FeedbackHistoryResponse;
 import dev.recallforge.domain.Review;
 import dev.recallforge.domain.Topic;
@@ -15,6 +17,7 @@ import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
 import dev.recallforge.dto.ReviewQueueResponse;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.exception.DailyReviewLimitExceededException;
 import dev.recallforge.repository.ReviewRepository;
 import jakarta.transaction.Transactional;
 
@@ -29,11 +32,13 @@ public class ReviewService {
     private final RepetitionService repetitionService;
     private final RewardService rewardService;
     private final CurrentUserService currentUserService;
+    private final AppReviewLimitProperties reviewLimitProperties;
 
     public ReviewService(
             TopicService topicService, ReviewRepository reviewRepository,
             OpenAiService openAiService, RepetitionService repetitionService,
-            RewardService rewardService, CurrentUserService currentUserService) {
+            RewardService rewardService, CurrentUserService currentUserService,
+            AppReviewLimitProperties reviewLimitProperties) {
 
         this.topicService = topicService;
         this.reviewRepository = reviewRepository;
@@ -41,6 +46,7 @@ public class ReviewService {
         this.repetitionService = repetitionService;
         this.rewardService = rewardService;
         this.currentUserService = currentUserService;
+        this.reviewLimitProperties = reviewLimitProperties;
     }
 
     public ReviewQuestionResponse startReview(Long markdownFileId, String category) {
@@ -77,6 +83,15 @@ public class ReviewService {
     }
 
     public AnswerResponse answerQuestion(Long topicId, String question, String userAnswer) {
+        Long userId = currentUserService.currentUserId();
+
+        long reviewsToday = reviewRepository.countByUserIdAndReviewedAtAfter(
+                userId, LocalDate.now().atStartOfDay());
+
+        if (reviewsToday >= reviewLimitProperties.dailyLimit()) {
+            throw new DailyReviewLimitExceededException();
+        }
+
         EvaluationResult evaluation = evaluateAnswer(topicId, question, userAnswer);
         return saveAnswer(topicId, question, userAnswer, evaluation);
     }

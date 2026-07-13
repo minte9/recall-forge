@@ -11,5 +11,9 @@ public record DashboardResponse(
     List<KnowledgeAreaResponse> strongAreas,
     List<KnowledgeAreaResponse> weakKnowledgeAreas,
     RewardResponse reward,
-    boolean showKnowledgeInsights
+    boolean showKnowledgeInsights,
+    int dailyReviewLimit,
+    long reviewsToday,
+    long tomorrowReviewLimit,
+    long thisWeekReviewLimit
 ) {}

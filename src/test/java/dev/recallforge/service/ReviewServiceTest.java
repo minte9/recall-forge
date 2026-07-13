@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Review;
 import dev.recallforge.domain.Topic;
@@ -28,6 +29,7 @@ import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
 import dev.recallforge.dto.ReviewQueueResponse;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.exception.DailyReviewLimitExceededException;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.security.CurrentUserService;
 
@@ -52,12 +54,16 @@ class ReviewServiceTest {
     @Mock
     private CurrentUserService currentUserService;
 
+    @Mock
+    private AppReviewLimitProperties reviewLimitProperties;
+
     private ReviewService reviewService;
 
     private void setUp() {
         reviewService = new ReviewService(
             topicService, reviewRepository, openAiService,
-            repetitionService, rewardService, currentUserService
+            repetitionService, rewardService, currentUserService,
+            reviewLimitProperties
         );
     }
 

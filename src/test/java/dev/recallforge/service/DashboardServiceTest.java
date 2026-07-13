@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.dto.CategoryOptionResponse;
 import dev.recallforge.dto.DashboardResponse;
@@ -22,6 +23,7 @@ import dev.recallforge.dto.RewardResponse;
 import dev.recallforge.dto.WeakAreaResponse;
 import dev.recallforge.repository.EnvironmentCategoryProjection;
 import dev.recallforge.repository.KnowledgeAreaProjection;
+import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.WeakAreaProjection;
@@ -34,6 +36,9 @@ class DashboardServiceTest {
     private TopicRepository topicRepository;
 
     @Mock
+    private ReviewRepository reviewRepository;
+
+    @Mock
     private RewardService rewardService;
 
     @Mock
@@ -42,11 +47,15 @@ class DashboardServiceTest {
     @Mock
     private SubcategoryOrderRepository subcategoryOrderRepository;
 
+    @Mock
+    private AppReviewLimitProperties reviewLimitProperties;
+
     private DashboardService dashboardService;
 
     private void setUp() {
         dashboardService = new DashboardService(
-            topicRepository, rewardService, currentUserService, subcategoryOrderRepository
+            topicRepository, reviewRepository, rewardService, currentUserService,
+            subcategoryOrderRepository, reviewLimitProperties
         );
         when(currentUserService.currentUserId()).thenReturn(1L);
     }

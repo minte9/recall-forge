@@ -60,3 +60,5 @@ app:
     enabled: ${APP_SECURITY_ENABLED:true}
   login:
     enabled: ${APP_LOGIN_ENABLED:true}
+  reviews:
+    daily-limit: ${APP_DAILY_REVIEW_LIMIT:20}
