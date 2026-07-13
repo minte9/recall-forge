@@ -607,7 +607,7 @@
             </div>
           </div>
 
-          <div v-if="dashboard && dashboard.weakAreas && dashboard.weakAreas.length" class="dashboard-card">
+          <div v-if="dashboard && dashboard.showKnowledgeInsights && dashboard.weakAreas && dashboard.weakAreas.length" class="dashboard-card">
 
             <div v-for="area in dashboard.weakAreas" :key="area.environment + area.category + area.subcategory"
               class="attention-row">
