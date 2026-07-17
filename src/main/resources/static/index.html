@@ -462,14 +462,14 @@
               <span :title="review.topicTitle">{{ truncateTitle(review.topicTitle) }}</span>
 
               <span class="topic-select-wrap" @click.stop
-                @mouseenter="isDesktop && (topicDropdownOpen = true)"
-                @mouseleave="isDesktop && (topicDropdownOpen = false)">
+                @mouseenter="isDesktop && openTopicDropdown($event)"
+                @mouseleave="isDesktop && closeTopicDropdown()">
                 <span class="group-arrow topic-select-arrow" :class="{ open: topicDropdownOpen }"
-                  @click="!isDesktop && toggleTopicDropdown()" title="Select a topic from this file">
+                  @click="!isDesktop && toggleTopicDropdown($event)" title="Select a topic from this file">
                   ⌄
                 </span>
 
-                <div v-if="topicDropdownOpen" class="topic-select-dropdown">
+                <div v-if="topicDropdownOpen" class="topic-select-dropdown" :class="{ 'align-right': topicDropdownAlignRight }">
                   <div v-if="topicsInFile.length === 0" class="menu-group-title">
                     No other topics
                   </div>
