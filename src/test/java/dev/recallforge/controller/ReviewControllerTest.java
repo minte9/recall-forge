@@ -202,7 +202,7 @@ class ReviewControllerTest {
                     "question": "What is X?",
                     "userAnswer": "X is Y",
                     "feedback": "Good job",
-                    "createdAt": "2026-07-01T10:00:00",
+                    "createdAt": "2026-07-01T10:00:00Z",
                     "score": 0.8
                   }
                 ]
