@@ -120,6 +120,10 @@ public class DashboardService {
         // reachable given the daily cap. Today's overdue backlog counts too: an overdue
         // topic stays reviewable indefinitely, so it can still fill tomorrow's (or next
         // week's) quota even though its nextReviewAt isn't actually inside that window.
+        // Today's own limit is capped the same way, using what's already been reviewed
+        // today plus what's still due — otherwise a category with fewer topics than the
+        // daily cap would show a denominator it could never actually reach.
+        long todayReviewLimit = Math.min(dailyReviewLimit, dueNow + reviewsToday);
         long tomorrowReviewLimit = Math.min(dailyReviewLimit, dueNow + dueTomorrow);
         long thisWeekReviewLimit = Math.min((long) dailyReviewLimit * 7, dueNow + dueThisWeek);
 
@@ -135,6 +139,7 @@ public class DashboardService {
             showKnowledgeInsights,
             dailyReviewLimit,
             reviewsToday,
+            todayReviewLimit,
             tomorrowReviewLimit,
             thisWeekReviewLimit
         );
