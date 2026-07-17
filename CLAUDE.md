@@ -28,7 +28,7 @@ After editing:
 - Stop after running the relevant tests.
 - Do not continue with additional refactorings unless requested.
 
-## Git safety
+## Git
 
 - Before editing, run `git branch --show-current`.
 - If the current branch is `master`, automatically create and switch to a new
@@ -72,7 +72,7 @@ After editing:
   applicable, the pull request URL.
 - Don't offer any other Git suggestions after the report.
 
-### Local merge (opt-in, must be explicitly requested)
+Local merge (opt-in, must be explicitly requested):
 
 If the user explicitly asks for a local merge instead of a PR for the
 current task (e.g. "merge this locally", "just merge it into master and
