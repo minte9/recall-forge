@@ -72,6 +72,17 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     List<Topic> findTopicsByMarkdownFileId(Long markdownFileId, Long userId);
 
     @Query("""
+        select t from Topic t
+        where t.user.id = :userId
+        and t.markdownFile.id = :markdownFileId
+        order by t.id asc
+    """)
+    List<Topic> findByMarkdownFileIdAndUserIdOrderByIdAsc(
+        @Param("markdownFileId") Long markdownFileId,
+        @Param("userId") Long userId
+    );
+
+    @Query("""
         select count(t) from Topic t
         where t.user.id = :userId
         and lower(t.category) = lower(:category)

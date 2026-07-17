@@ -131,6 +131,50 @@ class TopicControllerTest {
     }
 
     @Test
+    void getTopicsByMarkdownFile_returnsTopicsForCurrentUserAsJson() {
+        when(currentUserService.currentUserId()).thenReturn(7L);
+        when(topicService.getTopicsByMarkdownFileId(3L, 7L)).thenReturn(List.of(
+            topicFixture(1L, "Topic One", 0.75, LocalDateTime.of(2026, 7, 10, 9, 0)),
+            topicFixture(2L, "Topic Two", 0.3, LocalDateTime.of(2026, 7, 5, 8, 30))
+        ));
+
+        mockMvcTester.get().uri("/api/topics/by-markdown-file/3")
+            .assertThat()
+            .hasStatusOk()
+            .bodyJson()
+            .isLenientlyEqualTo("""
+                [
+                  {
+                    "id": 1,
+                    "title": "Topic One",
+                    "memoryScore": 0.75,
+                    "nextReviewAt": "2026-07-10T09:00:00"
+                  },
+                  {
+                    "id": 2,
+                    "title": "Topic Two",
+                    "memoryScore": 0.3,
+                    "nextReviewAt": "2026-07-05T08:30:00"
+                  }
+                ]
+                """);
+
+        verify(topicService).getTopicsByMarkdownFileId(3L, 7L);
+    }
+
+    @Test
+    void getTopicsByMarkdownFile_serviceReturnsEmptyList_returnsEmptyJsonArray() {
+        when(currentUserService.currentUserId()).thenReturn(7L);
+        when(topicService.getTopicsByMarkdownFileId(3L, 7L)).thenReturn(List.of());
+
+        mockMvcTester.get().uri("/api/topics/by-markdown-file/3")
+            .assertThat()
+            .hasStatusOk()
+            .bodyJson()
+            .isLenientlyEqualTo("[]");
+    }
+
+    @Test
     void getReviewHistory_returnsHistoryFromReviewService() {
         when(reviewService.getReviewHistoryForTopic(5L)).thenReturn(List.of(
             new ReviewHistoryResponse(

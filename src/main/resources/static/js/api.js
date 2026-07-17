@@ -1,9 +1,13 @@
 const Api = {
-  async startReview(markdownFileId, category) {
+  async startReview(markdownFileId, category, topicId) {
     const params = new URLSearchParams();
 
     if (markdownFileId) {
       params.set("markdownFileId", markdownFileId);
+    }
+
+    if (topicId) {
+      params.set("topicId", topicId);
     }
 
     params.set("category", category || "Java");
@@ -177,6 +181,18 @@ const Api = {
 
     if (!response.ok) {
       throw new Error("Failed to load feedback history");
+    }
+
+    return await response.json();
+  },
+
+  async loadTopicsByMarkdownFile(markdownFileId) {
+    const response = await fetch(`/api/topics/by-markdown-file/${markdownFileId}`, {
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to load topics for this markdown file");
     }
 
     return await response.json();

@@ -37,6 +37,8 @@ createApp({
       adminUsers: [],
       categoryOptions: [],
       showDangerZone: false,
+      topicsInFile: [],
+      topicDropdownOpen: false,
 
       initialMarkdown: `
 <h3>Markdown File</h3>
@@ -132,6 +134,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
   methods: {
     formatScore(score) {
       return Number(score).toFixed(2);
+    },
+
+    truncateTitle(title, maxLength = 30) {
+      if (!title || title.length <= maxLength) {
+        return title;
+      }
+
+      return title.slice(0, maxLength) + "...";
     },
 
     formatDate(date) {
@@ -292,7 +302,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.environmentMenuOpen = !this.environmentMenuOpen;
     },
 
-    async startReview() {
+    async startReview(topicId = null) {
       this.loading = true;
       this.markdownLoading = true;
       this.markdownEditing = false;
@@ -308,11 +318,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.feedbackHistory = [];
       this.feedbackHistoryVisible = false;
       this.feedbackHistoryLoadedForTopicId = null;
+      this.topicDropdownOpen = false;
 
       try {
-        let data = await Api.startReview(this.currentMarkdownFileId, this.currentCategory);
+        let data = await Api.startReview(this.currentMarkdownFileId, this.currentCategory, topicId);
 
-        if (data.done && this.currentMarkdownFileId) {
+        if (data.done && this.currentMarkdownFileId && !topicId) {
           this.currentMarkdownFileId = null;
           data = await Api.startReview(null, this.currentCategory);
         }
@@ -320,6 +331,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         if (data.done) {
           this.review = null;
           this.reviewMessage = data.message;
+          this.topicsInFile = [];
           await this.loadDashboard();
           return;
         }
@@ -336,6 +348,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         await this.loadFeedbackHistory(this.review.topicId);
         await this.loadMarkdownReviewCount();
+        await this.loadTopicsInFile(this.review.markdownFileId);
 
       } catch (err) {
         this.review = null;
@@ -349,6 +362,33 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     async startReviewForFile(markdownFileId) {
       this.currentMarkdownFileId = markdownFileId;
       await this.startReview();
+    },
+
+    async loadTopicsInFile(markdownFileId) {
+      if (!markdownFileId) {
+        this.topicsInFile = [];
+        return;
+      }
+
+      try {
+        this.topicsInFile = await Api.loadTopicsByMarkdownFile(markdownFileId);
+      } catch (err) {
+        this.topicsInFile = [];
+      }
+    },
+
+    toggleTopicDropdown() {
+      this.topicDropdownOpen = !this.topicDropdownOpen;
+    },
+
+    async selectTopic(topicId) {
+      this.topicDropdownOpen = false;
+
+      if (this.review && topicId === this.review.topicId) {
+        return;
+      }
+
+      await this.startReview(topicId);
     },
 
     async uploadMarkdown(event) {

@@ -31,15 +31,18 @@ public class ReviewController {
 
     /**
      * Starts a review session.
-     * 
+     *
      * The backend selects the weakest / due topic
-     * and asks OpenAI to generate one question.
+     * and asks OpenAI to generate one question, unless a specific
+     * topicId is given, in which case that exact topic is used
+     * regardless of its due status.
      */
     @PostMapping("/start")
     public ReviewQuestionResponse startReview(
             @RequestParam(required = false) Long markdownFileId,
-            @RequestParam(required = false, defaultValue = "Java") String category) {
-        return reviewService.startReview(markdownFileId, category);
+            @RequestParam(required = false, defaultValue = "Java") String category,
+            @RequestParam(required = false) Long topicId) {
+        return reviewService.startReview(markdownFileId, category, topicId);
     }
 
     /**

@@ -58,6 +58,10 @@ public class TopicService {
             );
     }
 
+    public List<Topic> getTopicsByMarkdownFileId(Long markdownFileId, Long userId) {
+        return topicRepository.findByMarkdownFileIdAndUserIdOrderByIdAsc(markdownFileId, userId);
+    }
+
     public long countDueTopics(Long userId, String category, LocalDateTime now) {
         return topicRepository.countDueByUser(userId, category, now);
     }

@@ -62,4 +62,17 @@ public class TopicController {
                 .map(TopicResponse::from)
                 .toList();
     }
+
+    /**
+     * List all topics belonging to a markdown file, in document order, for manual topic selection.
+     */
+    @GetMapping("/by-markdown-file/{markdownFileId}")
+    public List<TopicResponse> getTopicsByMarkdownFile(@PathVariable Long markdownFileId) {
+        Long userId = currentUserService.currentUserId();
+
+        return topicService.getTopicsByMarkdownFileId(markdownFileId, userId)
+                .stream()
+                .map(TopicResponse::from)
+                .toList();
+    }
 }
