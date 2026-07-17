@@ -458,7 +458,30 @@
 
           <h3 class="review-title" @click="toggleFeedbackHistory">
 
-            <span>{{ review.topicTitle }}</span>
+            <span class="review-title-left">
+              <span :title="review.topicTitle">{{ truncateTitle(review.topicTitle) }}</span>
+
+              <span class="topic-select-wrap" @click.stop
+                @mouseenter="isDesktop && (topicDropdownOpen = true)"
+                @mouseleave="isDesktop && (topicDropdownOpen = false)">
+                <span class="group-arrow topic-select-arrow" :class="{ open: topicDropdownOpen }"
+                  @click="!isDesktop && toggleTopicDropdown()" title="Select a topic from this file">
+                  ⌄
+                </span>
+
+                <div v-if="topicDropdownOpen" class="topic-select-dropdown">
+                  <div v-if="topicsInFile.length === 0" class="menu-group-title">
+                    No other topics
+                  </div>
+
+                  <button v-for="topic in topicsInFile" :key="topic.id"
+                    :class="{ active: review && topic.id === review.topicId }"
+                    @click="selectTopic(topic.id)">
+                    {{ topic.title }}
+                  </button>
+                </div>
+              </span>
+            </span>
 
             <span class="review-title-right">
               <span v-if="lastReview" class="last-score-badge" title="Show feedback history">
@@ -475,7 +498,7 @@
 
           <div class="actions-row">
 
-            <button class="review-btn" @click="startReview" :disabled="loading || !answerSubmitted">
+            <button class="review-btn" @click="startReview()" :disabled="loading || !answerSubmitted">
               <span>→</span> Next Review
             </button>
 
@@ -682,7 +705,7 @@
           </div>
 
           <div class="actions-row">
-            <button class="review-btn" @click="startReview" :disabled="loading || !dashboard || dashboard.dueNow === 0">
+            <button class="review-btn" @click="startReview()" :disabled="loading || !dashboard || dashboard.dueNow === 0">
               <span class="btn-icon">►</span>
               {{ loading ? "Loading..." : "Start Review" }}
             </button>

@@ -105,6 +105,17 @@ class TopicServiceTest {
     }
 
     @Test
+    void getTopicsByMarkdownFileId_delegatesToRepositoryOrderedById() {
+        setUp();
+        Topic first = topicWithMemoryScore(0.1);
+        Topic second = topicWithMemoryScore(0.4);
+        when(topicRepository.findByMarkdownFileIdAndUserIdOrderByIdAsc(7L, 1L))
+            .thenReturn(List.of(first, second));
+
+        assertThat(topicService.getTopicsByMarkdownFileId(7L, 1L)).containsExactly(first, second);
+    }
+
+    @Test
     void countDueTopics_delegatesUserAndTimeToRepository() {
         setUp();
         LocalDateTime now = LocalDateTime.now();

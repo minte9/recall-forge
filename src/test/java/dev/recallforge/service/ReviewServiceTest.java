@@ -82,7 +82,7 @@ class ReviewServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.empty());
 
-        ReviewQuestionResponse response = reviewService.startReview(null, "java");
+        ReviewQuestionResponse response = reviewService.startReview(null, "java", null);
 
         assertThat(response.done()).isTrue();
         assertThat(response.message()).isEqualTo("All reviews are done for now. Come back later.");
@@ -98,7 +98,7 @@ class ReviewServiceTest {
         when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
         when(openAiService.generateQuestion("Title", "Content body")).thenReturn("What is X?");
 
-        ReviewQuestionResponse response = reviewService.startReview(null, "java");
+        ReviewQuestionResponse response = reviewService.startReview(null, "java", null);
 
         assertThat(response.topicId()).isEqualTo(10L);
         assertThat(response.question()).isEqualTo("What is X?");
@@ -121,7 +121,7 @@ class ReviewServiceTest {
         when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
         when(openAiService.generateQuestion(any(), any())).thenReturn("Q");
 
-        ReviewQuestionResponse response = reviewService.startReview(null, "java");
+        ReviewQuestionResponse response = reviewService.startReview(null, "java", null);
 
         assertThat(response.markdownContent()).isEqualTo("# File content");
         assertThat(response.markdownFileId()).isEqualTo(99L);
@@ -133,11 +133,28 @@ class ReviewServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.selectNextTopicByMarkdownFileId(5L, 1L)).thenReturn(Optional.empty());
 
-        ReviewQuestionResponse response = reviewService.startReview(5L, "java");
+        ReviewQuestionResponse response = reviewService.startReview(5L, "java", null);
 
         assertThat(response.done()).isTrue();
         verify(topicService).selectNextTopicByMarkdownFileId(5L, 1L);
         verify(topicService, never()).selectNextTopic(any(), any());
+    }
+
+    @Test
+    void startReview_withExplicitTopicId_bypassesSelectionAndUsesThatTopicRegardlessOfDueStatus() {
+        setUp();
+        Topic topic = topicWithId(42L, null);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(42L, 1L)).thenReturn(topic);
+        when(openAiService.generateQuestion("Title", "Content body")).thenReturn("What is X?");
+
+        ReviewQuestionResponse response = reviewService.startReview(5L, "java", 42L);
+
+        assertThat(response.topicId()).isEqualTo(42L);
+        assertThat(response.question()).isEqualTo("What is X?");
+        assertThat(response.done()).isFalse();
+        verify(topicService, never()).selectNextTopic(any(), any());
+        verify(topicService, never()).selectNextTopicByMarkdownFileId(any(), any());
     }
 
     @Test

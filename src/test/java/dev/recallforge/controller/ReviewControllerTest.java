@@ -48,7 +48,7 @@ class ReviewControllerTest {
         ReviewQuestionResponse response = new ReviewQuestionResponse(
             1L, "Topic One", "What is X?", "# markdown content", 7L, false, null
         );
-        when(reviewService.startReview(7L, "Java")).thenReturn(response);
+        when(reviewService.startReview(7L, "Java", null)).thenReturn(response);
 
         mockMvcTester.post().uri("/api/reviews/start?markdownFileId=7")
             .assertThat()
@@ -66,12 +66,12 @@ class ReviewControllerTest {
                 }
                 """);
 
-        verify(reviewService).startReview(7L, "Java");
+        verify(reviewService).startReview(7L, "Java", null);
     }
 
     @Test
     void startReview_withoutMarkdownFileId_passesNullToService() {
-        when(reviewService.startReview(isNull(), eq("Java"))).thenReturn(ReviewQuestionResponse.noReviewsDue());
+        when(reviewService.startReview(isNull(), eq("Java"), isNull())).thenReturn(ReviewQuestionResponse.noReviewsDue());
 
         mockMvcTester.post().uri("/api/reviews/start")
             .assertThat()
@@ -89,7 +89,33 @@ class ReviewControllerTest {
                 }
                 """);
 
-        verify(reviewService).startReview(isNull(), eq("Java"));
+        verify(reviewService).startReview(isNull(), eq("Java"), isNull());
+    }
+
+    @Test
+    void startReview_withTopicId_passesItThroughToService() {
+        ReviewQuestionResponse response = new ReviewQuestionResponse(
+            42L, "Topic Forty-Two", "What is Y?", "# markdown content", 7L, false, null
+        );
+        when(reviewService.startReview(7L, "Java", 42L)).thenReturn(response);
+
+        mockMvcTester.post().uri("/api/reviews/start?markdownFileId=7&topicId=42")
+            .assertThat()
+            .hasStatusOk()
+            .bodyJson()
+            .isLenientlyEqualTo("""
+                {
+                  "topicId": 42,
+                  "topicTitle": "Topic Forty-Two",
+                  "question": "What is Y?",
+                  "markdownContent": "# markdown content",
+                  "markdownFileId": 7,
+                  "done": false,
+                  "message": null
+                }
+                """);
+
+        verify(reviewService).startReview(7L, "Java", 42L);
     }
 
     @Test

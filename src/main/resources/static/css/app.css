@@ -1170,6 +1170,12 @@
     user-select: none;
   }
 
+  .review-title-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .review-title-right {
     display: flex;
     align-items: center;
@@ -1191,6 +1197,54 @@
     color: #cccccc;
     font-size: 12px;
     padding: 0px 5px 0px 0px;
+  }
+
+  .topic-select-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .topic-select-arrow {
+    cursor: pointer;
+  }
+
+  .topic-select-dropdown {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    min-width: 240px;
+    max-height: 320px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .18);
+    padding: 8px;
+    z-index: 999;
+  }
+
+  .topic-select-dropdown button {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    margin: 0;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: normal;
+    color: #334155;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .topic-select-dropdown button:hover {
+    background: #f1f5f9;
+  }
+
+  .topic-select-dropdown button.active {
+    font-weight: 600;
   }
 
   .environment-selector {

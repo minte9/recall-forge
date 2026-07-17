@@ -49,12 +49,14 @@ public class ReviewService {
         this.reviewLimitProperties = reviewLimitProperties;
     }
 
-    public ReviewQuestionResponse startReview(Long markdownFileId, String category) {
+    public ReviewQuestionResponse startReview(Long markdownFileId, String category, Long topicId) {
         Long userId = currentUserService.currentUserId();
 
-        Optional<Topic> topicOptional = markdownFileId == null
-                ? topicService.selectNextTopic(userId, category)
-                : topicService.selectNextTopicByMarkdownFileId(markdownFileId, userId);
+        Optional<Topic> topicOptional = topicId != null
+                ? Optional.of(topicService.getTopic(topicId, userId))
+                : markdownFileId == null
+                    ? topicService.selectNextTopic(userId, category)
+                    : topicService.selectNextTopicByMarkdownFileId(markdownFileId, userId);
 
         if (topicOptional.isEmpty()) {
             return ReviewQuestionResponse.noReviewsDue();
