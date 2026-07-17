@@ -1213,6 +1213,7 @@
     left: 0;
     top: 100%;
     min-width: 240px;
+    max-width: calc(100vw - 32px);
     max-height: 320px;
     overflow-y: auto;
     background: white;
@@ -1221,6 +1222,11 @@
     box-shadow: 0 12px 28px rgba(15, 23, 42, .18);
     padding: 8px;
     z-index: 999;
+  }
+
+  .topic-select-dropdown.align-right {
+    left: auto;
+    right: 0;
   }
 
   .topic-select-dropdown button {

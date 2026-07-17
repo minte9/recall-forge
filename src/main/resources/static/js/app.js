@@ -39,6 +39,7 @@ createApp({
       showDangerZone: false,
       topicsInFile: [],
       topicDropdownOpen: false,
+      topicDropdownAlignRight: false,
 
       initialMarkdown: `
 <h3>Markdown File</h3>
@@ -377,8 +378,25 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
-    toggleTopicDropdown() {
-      this.topicDropdownOpen = !this.topicDropdownOpen;
+    openTopicDropdown(event) {
+      const iconRect = event.currentTarget.getBoundingClientRect();
+      const dropdownWidth = 240; // matches .topic-select-dropdown min-width
+      const margin = 16;
+
+      this.topicDropdownAlignRight = iconRect.left + dropdownWidth + margin > window.innerWidth;
+      this.topicDropdownOpen = true;
+    },
+
+    closeTopicDropdown() {
+      this.topicDropdownOpen = false;
+    },
+
+    toggleTopicDropdown(event) {
+      if (this.topicDropdownOpen) {
+        this.closeTopicDropdown();
+      } else {
+        this.openTopicDropdown(event);
+      }
     },
 
     async selectTopic(topicId) {
