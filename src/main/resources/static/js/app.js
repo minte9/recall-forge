@@ -485,7 +485,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.feedbackHistoryVisible = false;
 
         await this.loadDashboard();
-        await this.loadMarkdownSummaries();
+        await this.loadMarkdownSummaries(false);
 
         if (!this.review) {
           this.showMarkdownSummaries();
