@@ -14,6 +14,7 @@ public record DashboardResponse(
     boolean showKnowledgeInsights,
     int dailyReviewLimit,
     long reviewsToday,
+    long todayReviewLimit,
     long tomorrowReviewLimit,
     long thisWeekReviewLimit
 ) {}
