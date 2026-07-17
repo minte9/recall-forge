@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -102,6 +103,15 @@ class TopicServiceTest {
             .thenReturn(List.of(first, second));
 
         assertThat(topicService.selectNextTopicByMarkdownFileId(7L, 1L)).contains(first);
+    }
+
+    @Test
+    void selectNextTopicByMarkdownFileId_noneDue_returnsEmptyWithoutFallingBackToAnyTopic() {
+        setUp();
+        when(topicRepository.findDueTopicsByMarkdownFileId(eq(7L), eq(1L), any())).thenReturn(List.of());
+
+        assertThat(topicService.selectNextTopicByMarkdownFileId(7L, 1L)).isEmpty();
+        verify(topicRepository, never()).findTopicsByMarkdownFileId(any(), any());
     }
 
     @Test

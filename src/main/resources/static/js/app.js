@@ -363,6 +363,26 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     async startReviewForFile(markdownFileId) {
       this.currentMarkdownFileId = markdownFileId;
       await this.startReview();
+
+      // Nothing was due in this specific file, so startReview()'s own
+      // fallback already broadened the search (possibly landing on a
+      // different file, or finding nothing at all). Since the user
+      // explicitly chose this file, show them its first topic anyway
+      // instead of silently redirecting away from it.
+      if (!this.review || this.review.markdownFileId !== markdownFileId) {
+        let topics = [];
+
+        try {
+          topics = await Api.loadTopicsByMarkdownFile(markdownFileId);
+        } catch (err) {
+          topics = [];
+        }
+
+        if (topics.length > 0) {
+          this.currentMarkdownFileId = markdownFileId;
+          await this.startReview(topics[0].id);
+        }
+      }
     },
 
     async loadTopicsInFile(markdownFileId) {

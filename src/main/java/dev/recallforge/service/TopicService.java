@@ -51,11 +51,7 @@ public class TopicService {
                 LocalDateTime.now()
             )
             .stream()
-            .findFirst()
-            .or(() -> topicRepository.findTopicsByMarkdownFileId(markdownFileId, userId)
-                .stream()
-                .findFirst()
-            );
+            .findFirst();
     }
 
     public List<Topic> getTopicsByMarkdownFileId(Long markdownFileId, Long userId) {
