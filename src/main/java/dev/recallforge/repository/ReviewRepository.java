@@ -34,5 +34,16 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     long countByTopicMarkdownFileIdAndUserId(Long markdownFileId, Long userId);
 
-    long countByUserIdAndReviewedAtAfter(Long userId, LocalDateTime since);
+    @Query("""
+        select count(r)
+        from Review r
+        where r.user.id = :userId
+        and lower(r.topic.category) = lower(:category)
+        and r.reviewedAt >= :since
+    """)
+    long countByUserIdAndCategoryAndReviewedAtAfter(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("since") LocalDateTime since
+    );
 }
