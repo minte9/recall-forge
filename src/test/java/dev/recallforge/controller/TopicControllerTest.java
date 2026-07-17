@@ -153,7 +153,7 @@ class TopicControllerTest {
                     "userAnswer": "X is Y",
                     "score": 0.9,
                     "feedback": "Great answer",
-                    "reviewedAt": "2026-07-01T12:00:00"
+                    "reviewedAt": "2026-07-01T12:00:00Z"
                   }
                 ]
                 """);
