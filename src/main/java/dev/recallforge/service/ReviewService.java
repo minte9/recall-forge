@@ -84,9 +84,10 @@ public class ReviewService {
 
     public AnswerResponse answerQuestion(Long topicId, String question, String userAnswer) {
         Long userId = currentUserService.currentUserId();
+        Topic topic = topicService.getTopic(topicId, userId);
 
-        long reviewsToday = reviewRepository.countByUserIdAndReviewedAtAfter(
-                userId, LocalDate.now().atStartOfDay());
+        long reviewsToday = reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(
+                userId, topic.getCategory(), LocalDate.now().atStartOfDay());
 
         if (reviewsToday >= reviewLimitProperties.dailyLimit()) {
             throw new DailyReviewLimitExceededException();

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -172,6 +173,30 @@ class DashboardServiceTest {
         assertThat(dashboard.dueThisWeek()).isEqualTo(8L);
         assertThat(dashboard.totalTopics()).isEqualTo(42L);
         assertThat(dashboard.reward()).isEqualTo(reward);
+    }
+
+    @Test
+    void getDashboard_todayReviewLimit_usesCategoryScopedReviewCountNotGlobal() {
+        setUp();
+        when(topicRepository.countDueNowByUser(eq(1L), eq("python"), any())).thenReturn(13L);
+        when(topicRepository.countDueBetweenByUser(eq(1L), eq("python"), any(), any())).thenReturn(0L, 0L);
+        when(topicRepository.countByUser(1L, "python")).thenReturn(14L);
+        when(topicRepository.findWeakAreas(eq(1L), eq("python"), any())).thenReturn(List.of());
+        when(topicRepository.findStrongKnowledgeAreas(1L, "python")).thenReturn(List.of());
+        when(topicRepository.findWeakKnowledgeAreas(1L, "python")).thenReturn(List.of());
+        when(rewardService.getCurrentUserReward("python"))
+            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Python", 0L, 0L, 0));
+        when(reviewLimitProperties.dailyLimit()).thenReturn(20);
+        // Only 1 of the day's reviews was in "python"; a same-day review in another
+        // category (e.g. "java") must not inflate this category's count or limit.
+        when(reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("python"), any()))
+            .thenReturn(1L);
+
+        DashboardResponse dashboard = dashboardService.getDashboard("python");
+
+        assertThat(dashboard.reviewsToday()).isEqualTo(1L);
+        assertThat(dashboard.todayReviewLimit()).isEqualTo(14L);
+        verify(reviewRepository).countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("python"), any());
     }
 
     @Test

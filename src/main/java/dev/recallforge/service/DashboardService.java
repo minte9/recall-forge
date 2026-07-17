@@ -114,7 +114,8 @@ public class DashboardService {
             !strongOnly.isEmpty() && !weakOnly.isEmpty();
 
         int dailyReviewLimit = reviewLimitProperties.dailyLimit();
-        long reviewsToday = reviewRepository.countByUserIdAndReviewedAtAfter(userId, LocalDate.now().atStartOfDay());
+        long reviewsToday = reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(
+            userId, category, LocalDate.now().atStartOfDay());
 
         // Tomorrow/this week aren't separately enforced — they show what's realistically
         // reachable given the daily cap. Today's overdue backlog counts too: an overdue

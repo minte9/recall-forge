@@ -180,6 +180,48 @@ class ReviewServiceTest {
     }
 
     @Test
+    void answerQuestion_categoryDailyLimitReached_throwsAndSkipsEvaluation() {
+        setUp();
+        Topic topic = topicWithId(7L, null);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(7L, 1L)).thenReturn(topic);
+        when(reviewLimitProperties.dailyLimit()).thenReturn(20);
+        when(reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any()))
+            .thenReturn(20L);
+
+        assertThatThrownBy(() -> reviewService.answerQuestion(7L, "Q?", "My answer"))
+            .isInstanceOf(DailyReviewLimitExceededException.class);
+
+        verify(openAiService, never()).evaluateAnswer(any(), any(), any(), any());
+    }
+
+    @Test
+    void answerQuestion_belowCategoryDailyLimit_evaluatesAndSavesUsingTopicsOwnCategoryCount() {
+        setUp();
+        Topic topic = topicWithId(7L, null);
+        EvaluationResult evaluation = new EvaluationResult(0.8, "Good job");
+        RewardResponse reward = new RewardResponse(100, 2, "Student", 0, 100, 3, 6, "Uncategorized", 4L, 8L, 50);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(7L, 1L)).thenReturn(topic);
+        when(reviewLimitProperties.dailyLimit()).thenReturn(20);
+        when(reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any()))
+            .thenReturn(2L);
+        when(openAiService.evaluateAnswer("Title", "Content body", "Q?", "My answer")).thenReturn(evaluation);
+        when(currentUserService.currentUser()).thenReturn(new UserAccount());
+        when(repetitionService.calculateUpdateMemoryScore(0.6, 0.8)).thenReturn(0.65);
+        when(repetitionService.calculateNextReviewAt(0.8)).thenReturn(LocalDateTime.now().plusDays(7));
+        when(rewardService.rewardDefaultUser(0.8, "Uncategorized")).thenReturn(reward);
+        when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AnswerResponse response = reviewService.answerQuestion(7L, "Q?", "My answer");
+
+        assertThat(response.score()).isEqualTo(0.8);
+        verify(reviewRepository).countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any());
+    }
+
+    @Test
     void getReviewHistoryForTopic_throwsWhenTopicNotOwnedByUser_andSkipsRepositoryQuery() {
         setUp();
         when(currentUserService.currentUserId()).thenReturn(1L);
