@@ -263,6 +263,45 @@ class MarkdownFileServiceTest {
     }
 
     @Test
+    void upload_topicRenamed_deletesOldTopicAndItsReviews() throws Exception {
+        setUp();
+        String content = "### New Title\nUpdated content.";
+        MockMultipartFile file = new MockMultipartFile(
+            "file", "notes.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "New Title", "Updated content."
+        );
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        Topic oldTopic = new Topic(
+            "Programming", "Java", "Core", "Java Basics",
+            "Old Title", "old topic content", existingMarkdownFile, user
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Programming", "Java", "Core", "Java Basics", 1L))
+            .thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(
+                eq(existingMarkdownFile), eq("New Title"), eq(1L)))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByMarkdownFileAndUserIdAndTitleNotIn(
+                eq(existingMarkdownFile), eq(1L), eq(List.of("New Title"))))
+            .thenReturn(List.of(oldTopic));
+
+        markdownFileService.upload(file);
+
+        verify(reviewRepository).deleteByTopicIdInAndUserId(any(), eq(1L));
+        verify(topicRepository).deleteAll(List.of(oldTopic));
+    }
+
+    @Test
     void update_contentLongerThan200000Chars_throwsIllegalArgumentException() {
         setUp();
         String oversizedContent = "a".repeat(200_001);
