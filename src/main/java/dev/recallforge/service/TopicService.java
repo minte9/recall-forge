@@ -53,6 +53,18 @@ public class TopicService {
                 LocalDateTime.now()
             )
             .stream()
+            .sorted(
+                // Never-reviewed topics still go first, same as the repository
+                // query's own ordering; within each group, prefer the topic
+                // that comes first in the file ("1." before "2.") instead of
+                // whichever happens to have the lower memory score, so a
+                // weaker later topic doesn't jump the queue ahead of an
+                // earlier one that's also due.
+                Comparator.<Topic, Boolean>comparing(topic -> topic.getNextReviewAt() != null)
+                    .thenComparingLong(topic -> leadingTitleNumber(topic.getTitle()))
+                    .thenComparing(Topic::getMemoryScore)
+                    .thenComparing(Topic::getNextReviewAt, Comparator.nullsFirst(Comparator.naturalOrder()))
+            )
             .findFirst();
     }
 
