@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
+import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,10 +30,13 @@ class TopicServiceTest {
     @Mock
     private TopicRepository topicRepository;
 
+    @Mock
+    private SubcategoryOrderRepository subcategoryOrderRepository;
+
     private TopicService topicService;
 
     private void setUp() {
-        topicService = new TopicService(topicRepository);
+        topicService = new TopicService(topicRepository, subcategoryOrderRepository);
     }
 
     private Topic topicWithMemoryScore(double memoryScore) {
@@ -47,6 +51,13 @@ class TopicServiceTest {
     private Topic topicWithTitle(String title) {
         return new Topic(
             "General", "Uncategorized", "Uncategorized", "File",
+            title, "Content", null, new UserAccount()
+        );
+    }
+
+    private Topic topicWithSubcategoryAndTitle(String subcategory, String title) {
+        return new Topic(
+            "General", "Uncategorized", subcategory, "File",
             title, "Content", null, new UserAccount()
         );
     }
@@ -111,6 +122,43 @@ class TopicServiceTest {
             .thenReturn(List.of(second, first));
 
         assertThat(topicService.selectNextTopic(1L, "java")).contains(first);
+    }
+
+    @Test
+    void selectNextTopic_tiedMemoryScoreNoExplicitOrder_prefersSubcategoryAlphabetically() {
+        setUp();
+        // No subcategory_order rows configured for this category, so the
+        // markdown list falls back to alphabetical - Basics before Generics.
+        // The repository happens to return Generics first, but Basics should
+        // still win the tie.
+        Topic generics = topicWithSubcategoryAndTitle("Generics", "1. Declaring a Generic Class");
+        Topic basics = topicWithSubcategoryAndTitle("Basics", "1. The 8 Primitive Types");
+        generics.updateMemory(0.0, LocalDateTime.now());
+        basics.updateMemory(0.0, LocalDateTime.now());
+        when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any()))
+            .thenReturn(List.of(generics, basics));
+        when(subcategoryOrderRepository.findByCategoryIgnoreCase("java")).thenReturn(List.of());
+
+        assertThat(topicService.selectNextTopic(1L, "java")).contains(basics);
+    }
+
+    @Test
+    void selectNextTopic_tiedMemoryScoreWithExplicitOrder_honorsSubcategoryOrderTable() {
+        setUp();
+        // An explicit subcategory_order row overrides the alphabetical
+        // fallback, same as DashboardService.getMarkdownSummaries.
+        Topic generics = topicWithSubcategoryAndTitle("Generics", "1. Declaring a Generic Class");
+        Topic basics = topicWithSubcategoryAndTitle("Basics", "1. The 8 Primitive Types");
+        generics.updateMemory(0.0, LocalDateTime.now());
+        basics.updateMemory(0.0, LocalDateTime.now());
+        when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any()))
+            .thenReturn(List.of(basics, generics));
+        when(subcategoryOrderRepository.findByCategoryIgnoreCase("java")).thenReturn(List.of(
+            new dev.recallforge.domain.SubcategoryOrder("java", "Generics", 0),
+            new dev.recallforge.domain.SubcategoryOrder("java", "Basics", 1)
+        ));
+
+        assertThat(topicService.selectNextTopic(1L, "java")).contains(generics);
     }
 
     @Test
