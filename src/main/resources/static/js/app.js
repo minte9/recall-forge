@@ -268,6 +268,20 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.success = "Markdown saved.";
         this.markdownEditing = false;
 
+        await this.loadTopicsInFile(this.currentMarkdownFileId);
+
+        // A renamed topic is deleted and recreated with a new id server-side,
+        // so the review panel may still be pointing at a topic that no
+        // longer exists — reload it onto a valid topic in that case.
+        const reviewedTopicGone =
+          this.review &&
+          this.review.markdownFileId === this.currentMarkdownFileId &&
+          !this.topicsInFile.some(topic => topic.id === this.review.topicId);
+
+        if (reviewedTopicGone) {
+          await this.startReview();
+        }
+
         this.$nextTick(() => {
           window.scrollTo(0, scrollY);
         });
