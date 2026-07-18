@@ -31,17 +31,22 @@ public class OpenAiService {
         Topic title:
         %s
 
-        Topic content:
+        Topic content (a short paragraph, plus a code example whose comments
+        are part of the explanation, not just syntax):
         %s
 
         Rules:
         - Return only the question.
         - Keep it short (one sentence when possible).
-        - Test understanding of the concept, not memorization of code.
-        - Do not include code snippets, code blocks, or inline code.
+        - Test understanding of the concept, not memorization of code syntax.
+        - Do not include code snippets, code blocks, or inline code in the question itself.
         - Do not ask about the output of code.
         - Prefer conceptual or practical questions that can be answered in a few sentences.
-        - Do not ask question about concepts that are not included in the actual topic content.
+        - The question must be answerable using only facts, reasoning, or explanations
+          that are explicitly stated above, in either the paragraph or the code's comments.
+          Do not require outside knowledge or reasoning that isn't spelled out there.
+        - Before asking "why" or "how", confirm the content above actually explains that
+          reason or mechanism. If it doesn't, ask a "what" or "when" question instead.
         - Do not include the answer.
         """;
         prompt = prompt.formatted(topicTitle, trimTopicContent(topicContent));
@@ -72,6 +77,10 @@ public class OpenAiService {
         - 0.4 to 0.6 = partially correct
         - 0.1 to 0.3 = mostly incorrect but relevant
         - 0.0 = completely incorrect
+
+        Ignore minor grammatical, spelling, or phrasing errors in the user's
+        answer - grade and give feedback based on the correctness of the
+        underlying understanding, not writing quality.
 
         Return exactly this format:
 
