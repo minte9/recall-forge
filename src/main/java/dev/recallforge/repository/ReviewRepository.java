@@ -32,6 +32,13 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Param("userId") Long userId
     );
 
+    @Modifying
+    @Query("delete from Review r where r.topic.id in :topicIds and r.user.id = :userId")
+    void deleteByTopicIdInAndUserId(
+        @Param("topicIds") List<Long> topicIds,
+        @Param("userId") Long userId
+    );
+
     long countByTopicMarkdownFileIdAndUserId(Long markdownFileId, Long userId);
 
     @Query("""

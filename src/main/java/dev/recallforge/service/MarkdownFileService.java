@@ -296,6 +296,40 @@ public class MarkdownFileService {
 
             topicRepository.save(topic);
         }
+
+        deleteStaleTopics(markdownFile, parsedTopics, userId);
+    }
+
+    /**
+     * Removes topics that no longer have a matching heading in this markdown
+     * file (e.g. the heading was renamed on re-import), along with their
+     * reviews. Renaming a topic's title is treated the same as deleting it
+     * and creating a new one, so its review history is intentionally not
+     * preserved.
+     */
+    private void deleteStaleTopics(
+        MarkdownFile markdownFile,
+        List<MarkdownTopicImporter.ParsedTopic> parsedTopics,
+        Long userId
+    ) {
+        List<String> currentTitles = parsedTopics.stream()
+                .map(MarkdownTopicImporter.ParsedTopic::title)
+                .toList();
+
+        List<Topic> staleTopics = topicRepository.findByMarkdownFileAndUserIdAndTitleNotIn(
+                markdownFile,
+                userId,
+                currentTitles
+        );
+
+        if (staleTopics.isEmpty()) {
+            return;
+        }
+
+        List<Long> staleTopicIds = staleTopics.stream().map(Topic::getId).toList();
+
+        reviewRepository.deleteByTopicIdInAndUserId(staleTopicIds, userId);
+        topicRepository.deleteAll(staleTopics);
     }
 
     private String sha256(String content) throws Exception {

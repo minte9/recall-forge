@@ -1,6 +1,7 @@
 package dev.recallforge.repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +28,12 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         MarkdownFile markdownFile,
         String title,
         Long userId
+    );
+
+    List<Topic> findByMarkdownFileAndUserIdAndTitleNotIn(
+        MarkdownFile markdownFile,
+        Long userId,
+        Collection<String> titles
     );
 
     List<Topic> findByUserId(Long userId);
