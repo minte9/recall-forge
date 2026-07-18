@@ -51,6 +51,12 @@ class TopicServiceTest {
         );
     }
 
+    private Topic topicWithTitleAndMemoryScore(String title, double memoryScore) {
+        Topic topic = topicWithTitle(title);
+        topic.updateMemory(memoryScore, LocalDateTime.now());
+        return topic;
+    }
+
     @Test
     void getAllTopics_sortsResultsByMemoryScoreAscending() {
         setUp();
@@ -110,6 +116,19 @@ class TopicServiceTest {
             .thenReturn(List.of(first, second));
 
         assertThat(topicService.selectNextTopicByMarkdownFileId(7L, 1L)).contains(first);
+    }
+
+    @Test
+    void selectNextTopicByMarkdownFileId_multipleDueTopics_prefersLowerTitleNumberOverMemoryScore() {
+        setUp();
+        // Weaker memory score would win under plain memory-score ordering,
+        // but "1." should still be reviewed before "2." when both are due.
+        Topic weakerSecond = topicWithTitleAndMemoryScore("2. Wrapper Classes", 0.1);
+        Topic strongerFirst = topicWithTitleAndMemoryScore("1. Primitive Types", 0.6);
+        when(topicRepository.findDueTopicsByMarkdownFileId(eq(7L), eq(1L), any()))
+            .thenReturn(List.of(weakerSecond, strongerFirst));
+
+        assertThat(topicService.selectNextTopicByMarkdownFileId(7L, 1L)).contains(strongerFirst);
     }
 
     @Test
