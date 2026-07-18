@@ -43,6 +43,17 @@ public class TopicService {
     public Optional<Topic> selectNextTopic(Long userId, String category) {
         return topicRepository.findDueTopicsByCategory(userId, category, LocalDateTime.now())
             .stream()
+            .sorted(
+                // Topics tied on memory score (e.g. freshly imported, never
+                // reviewed) would otherwise fall back to nextReviewAt, which
+                // for bulk-imported content is an arbitrary microsecond
+                // difference rather than a meaningful signal. Prefer the
+                // topic that comes first in its file ("1." before "2.") for
+                // those ties.
+                Comparator.comparing(Topic::getMemoryScore)
+                    .thenComparingLong(topic -> leadingTitleNumber(topic.getTitle()))
+                    .thenComparing(Topic::getNextReviewAt, Comparator.nullsFirst(Comparator.naturalOrder()))
+            )
             .findFirst();
     }
 

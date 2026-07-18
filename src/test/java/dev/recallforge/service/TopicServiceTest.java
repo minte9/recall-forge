@@ -100,6 +100,20 @@ class TopicServiceTest {
     }
 
     @Test
+    void selectNextTopic_tiedMemoryScore_prefersLowerTitleNumberOverArbitraryOrder() {
+        setUp();
+        // Freshly imported, never-reviewed topics tie on memory score; the
+        // repository happens to return "2." first (e.g. bulk-insert timing),
+        // but "1." should still win the tie.
+        Topic second = topicWithTitleAndMemoryScore("2. Overriding equals() and hashCode()", 0.0);
+        Topic first = topicWithTitleAndMemoryScore("1. == for Primitives vs References", 0.0);
+        when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any()))
+            .thenReturn(List.of(second, first));
+
+        assertThat(topicService.selectNextTopic(1L, "java")).contains(first);
+    }
+
+    @Test
     void selectNextTopic_returnsEmptyWhenNoTopicsAreDue() {
         setUp();
         when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any())).thenReturn(List.of());
