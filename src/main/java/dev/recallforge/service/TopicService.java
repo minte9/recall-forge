@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -54,8 +56,36 @@ public class TopicService {
             .findFirst();
     }
 
+    private static final Pattern LEADING_NUMBER = Pattern.compile("^\\s*(\\d+)");
+
     public List<Topic> getTopicsByMarkdownFileId(Long markdownFileId, Long userId) {
-        return topicRepository.findByMarkdownFileIdAndUserIdOrderByIdAsc(markdownFileId, userId);
+        return topicRepository.findByMarkdownFileIdAndUserIdOrderByIdAsc(markdownFileId, userId)
+            .stream()
+            .sorted(Comparator.comparingLong(topic -> leadingTitleNumber(topic.getTitle())))
+            .toList();
+    }
+
+    // Renamed topics are deleted and recreated with a new id, which would
+    // otherwise push them to the end of an id-ordered list. Sorting by the
+    // "1. Title" numbering convention keeps the dropdown in document order
+    // regardless of id, falling back to id order (via stable sort) for
+    // topics without a leading number.
+    private static long leadingTitleNumber(String title) {
+        if (title == null) {
+            return Long.MAX_VALUE;
+        }
+
+        Matcher matcher = LEADING_NUMBER.matcher(title);
+
+        if (!matcher.find()) {
+            return Long.MAX_VALUE;
+        }
+
+        try {
+            return Long.parseLong(matcher.group(1));
+        } catch (NumberFormatException e) {
+            return Long.MAX_VALUE;
+        }
     }
 
     public long countDueTopics(Long userId, String category, LocalDateTime now) {

@@ -44,6 +44,13 @@ class TopicServiceTest {
         return topic;
     }
 
+    private Topic topicWithTitle(String title) {
+        return new Topic(
+            "General", "Uncategorized", "Uncategorized", "File",
+            title, "Content", null, new UserAccount()
+        );
+    }
+
     @Test
     void getAllTopics_sortsResultsByMemoryScoreAscending() {
         setUp();
@@ -115,7 +122,7 @@ class TopicServiceTest {
     }
 
     @Test
-    void getTopicsByMarkdownFileId_delegatesToRepositoryOrderedById() {
+    void getTopicsByMarkdownFileId_noLeadingNumbers_fallsBackToRepositoryOrder() {
         setUp();
         Topic first = topicWithMemoryScore(0.1);
         Topic second = topicWithMemoryScore(0.4);
@@ -123,6 +130,22 @@ class TopicServiceTest {
             .thenReturn(List.of(first, second));
 
         assertThat(topicService.getTopicsByMarkdownFileId(7L, 1L)).containsExactly(first, second);
+    }
+
+    @Test
+    void getTopicsByMarkdownFileId_sortsByLeadingNumberInTitle() {
+        setUp();
+        Topic third = topicWithTitle("3. Streams");
+        Topic renamedFirst = topicWithTitle("1. Primitive Types (renamed)");
+        Topic second = topicWithTitle("2. Wrapper Classes");
+
+        // Repository returns id order: the renamed topic was recreated with
+        // a new (highest) id, so it comes back last even though it's "1.".
+        when(topicRepository.findByMarkdownFileIdAndUserIdOrderByIdAsc(7L, 1L))
+            .thenReturn(List.of(third, second, renamedFirst));
+
+        assertThat(topicService.getTopicsByMarkdownFileId(7L, 1L))
+            .containsExactly(renamedFirst, second, third);
     }
 
     @Test
