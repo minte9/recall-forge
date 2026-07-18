@@ -3,23 +3,29 @@ package dev.recallforge.service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.domain.Topic;
+import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
 
 @Service
 public class TopicService {
-    
-    private final TopicRepository topicRepository;
 
-    public TopicService (TopicRepository topicRepository) {
+    private final TopicRepository topicRepository;
+    private final SubcategoryOrderRepository subcategoryOrderRepository;
+
+    public TopicService(TopicRepository topicRepository, SubcategoryOrderRepository subcategoryOrderRepository) {
         this.topicRepository = topicRepository;
+        this.subcategoryOrderRepository = subcategoryOrderRepository;
     }
 
     public List<Topic> getAllTopics(Long userId) {
@@ -41,6 +47,10 @@ public class TopicService {
     }
 
     public Optional<Topic> selectNextTopic(Long userId, String category) {
+        Map<String, Integer> subcategoryOrder = subcategoryOrderRepository.findByCategoryIgnoreCase(category)
+            .stream()
+            .collect(Collectors.toMap(SubcategoryOrder::getSubcategory, SubcategoryOrder::getDisplayOrder));
+
         return topicRepository.findDueTopicsByCategory(userId, category, LocalDateTime.now())
             .stream()
             .sorted(
@@ -48,13 +58,21 @@ public class TopicService {
                 // reviewed) would otherwise fall back to nextReviewAt, which
                 // for bulk-imported content is an arbitrary microsecond
                 // difference rather than a meaningful signal. Prefer the
-                // topic that comes first in its file ("1." before "2.") for
-                // those ties.
+                // subcategory order shown in the markdown list (same
+                // subcategory_order table/alphabetical fallback as
+                // DashboardService.getMarkdownSummaries), then the topic
+                // that comes first in its file ("1." before "2.").
                 Comparator.comparing(Topic::getMemoryScore)
+                    .thenComparing(topic -> subcategoryDisplayOrder(topic, subcategoryOrder))
+                    .thenComparing(Topic::getSubcategory, String.CASE_INSENSITIVE_ORDER)
                     .thenComparingLong(topic -> leadingTitleNumber(topic.getTitle()))
                     .thenComparing(Topic::getNextReviewAt, Comparator.nullsFirst(Comparator.naturalOrder()))
             )
             .findFirst();
+    }
+
+    private static int subcategoryDisplayOrder(Topic topic, Map<String, Integer> subcategoryOrder) {
+        return subcategoryOrder.getOrDefault(topic.getSubcategory(), Integer.MAX_VALUE);
     }
 
     public Optional<Topic> selectNextTopicByMarkdownFileId(Long markdownFileId, Long userId) {
