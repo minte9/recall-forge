@@ -137,6 +137,16 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return Number(score).toFixed(2);
     },
 
+    formatTokenCount(value) {
+      const tokens = Number(value) || 0;
+
+      if (tokens < 1000) {
+        return String(tokens);
+      }
+
+      return (tokens / 1000).toFixed(1).replace(/\.0$/, "") + "k";
+    },
+
     truncateTitle(title, maxLength = 30) {
       if (!title || title.length <= maxLength) {
         return title;

@@ -130,7 +130,8 @@ public class ReviewService {
                 question,
                 userAnswer,
                 evaluation.score(),
-                evaluation.feedback());
+                evaluation.feedback(),
+                evaluation.totalTokens());
 
         reviewRepository.save(review);
 

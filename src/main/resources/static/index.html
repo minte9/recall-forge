@@ -343,7 +343,7 @@
                 <th>Name</th>
                 <th>Topics</th>
                 <th>Reviews</th>
-                <!-- <th>Tokens</th> -->
+                <th>Tokens</th>
               </tr>
             </thead>
 
@@ -352,7 +352,7 @@
                 <td>{{ user.displayName ?? user.email }}</td>
                 <td>{{ user.totalTopics }}</td>
                 <td>{{ user.totalReviews }}</td>
-                <!-- <td>{{ user.totalTokensSpent ?? "-" }}</td> -->
+                <td>{{ user.totalTokenSpent != null ? formatTokenCount(user.totalTokenSpent) : "-" }}</td>
               </tr>
             </tbody>
           </table>
