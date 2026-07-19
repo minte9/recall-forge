@@ -42,6 +42,9 @@ public class Review {
     private String feedback;
 
     @Column(nullable = false)
+    private int totalTokens;
+
+    @Column(nullable = false)
     private LocalDateTime reviewedAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -53,12 +56,13 @@ public class Review {
     private Visibility visibility = Visibility.PRIVATE;
     
     public Review(
-        Topic topic, 
+        Topic topic,
         UserAccount user,
-        String question, 
-        String userAnswer, 
-        double score, 
-        String feedback
+        String question,
+        String userAnswer,
+        double score,
+        String feedback,
+        int totalTokens
     ) {
         this.topic = topic;
         this.user = user;
@@ -66,7 +70,8 @@ public class Review {
         this.userAnswer = userAnswer;
         this.score = score;
         this.feedback = feedback;
-        
+        this.totalTokens = totalTokens;
+
         this.reviewedAt = LocalDateTime.now();
     }
 }

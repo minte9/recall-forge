@@ -82,6 +82,16 @@ resulting data is indistinguishable from a real review.
   believable when the user checks it in the UI.
 - `reviews.visibility` defaults to `PRIVATE` at the entity level in Java,
   but raw SQL must set it explicitly — there's no DB-level default.
+- **Token usage** (`reviews.total_tokens`): every real review has a non-zero
+  count, captured from the OpenAI evaluation call in `OpenAiService.ask()`
+  (never actually called by this agent — see "Known Gaps"). Leaving it `0`
+  makes simulated rows stick out next to real ones in the admin Tokens
+  column, so estimate it instead of defaulting to `0`: roughly 4 characters
+  per token, applied to the evaluation prompt's real inputs (topic content +
+  question + user answer, the same text you're already writing into the
+  row) plus a completion-token estimate capped at 80 (the `max_tokens` used
+  for evaluation calls). This is a stated estimate, not a real count —
+  don't present it as if OpenAI was actually called.
 
 ---
 
@@ -111,7 +121,8 @@ resulting data is indistinguishable from a real review.
   reward-tier UI. Flag this if the task depends on those.
 - **No real grading happens.** Scores and feedback are authored directly
   rather than produced by `OpenAiService.evaluateAnswer` — they're
-  plausible, not AI-generated.
+  plausible, not AI-generated. `total_tokens` is likewise an estimate (see
+  above), not a real count from an actual API call.
 - If a task genuinely needs either of those to be accurate, say so instead
   of silently treating DB simulation as sufficient.
 
@@ -144,6 +155,8 @@ Before considering the work complete, verify that:
 - All SQL ran inside `BEGIN`/`COMMIT`, with text fields dollar-quoted.
 - `memory_score`/`next_review_at` were computed from each topic's real
   prior state using the exact formulas above, not approximated.
+- `total_tokens` was set to a plausible estimate (not left `0`) for every
+  inserted review row.
 - The result was confirmed with a `SELECT` (not assumed) before reporting done.
 - `user_id = 1` (the template user) was untouched.
 - No git branch, commit, or PR was created for this work.

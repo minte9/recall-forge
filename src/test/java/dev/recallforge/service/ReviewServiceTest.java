@@ -161,7 +161,7 @@ class ReviewServiceTest {
     void saveAnswer_updatesTopicMemoryAwardsRewardAndReturnsResponse() {
         setUp();
         Topic topic = topicWithId(7L, null);
-        EvaluationResult evaluation = new EvaluationResult(0.8, "Good job");
+        EvaluationResult evaluation = new EvaluationResult(0.8, "Good job", 120);
         LocalDateTime nextReviewAt = LocalDateTime.now().plusDays(7);
         RewardResponse reward = new RewardResponse(100, 2, "Student", 0, 100, 3, 6, "Java", 4L, 8L, 50);
 
@@ -194,6 +194,7 @@ class ReviewServiceTest {
         assertThat(savedReview.getUserAnswer()).isEqualTo("My answer");
         assertThat(savedReview.getScore()).isEqualTo(0.8);
         assertThat(savedReview.getFeedback()).isEqualTo("Good job");
+        assertThat(savedReview.getTotalTokens()).isEqualTo(120);
     }
 
     @Test
@@ -217,7 +218,7 @@ class ReviewServiceTest {
     void answerQuestion_belowCategoryDailyLimit_evaluatesAndSavesUsingTopicsOwnCategoryCount() {
         setUp();
         Topic topic = topicWithId(7L, null);
-        EvaluationResult evaluation = new EvaluationResult(0.8, "Good job");
+        EvaluationResult evaluation = new EvaluationResult(0.8, "Good job", 120);
         RewardResponse reward = new RewardResponse(100, 2, "Student", 0, 100, 3, 6, "Uncategorized", 4L, 8L, 50);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
@@ -256,7 +257,7 @@ class ReviewServiceTest {
     void getReviewHistoryForTopic_returnsHistoryMappedFromRepository() {
         setUp();
         Topic topic = topicWithId(3L, null);
-        Review review = new Review(topic, new UserAccount(), "Q1", "A1", 0.9, "fb1");
+        Review review = new Review(topic, new UserAccount(), "Q1", "A1", 0.9, "fb1", 100);
         ReflectionTestUtils.setField(review, "id", 1L);
 
         when(currentUserService.currentUserId()).thenReturn(1L);

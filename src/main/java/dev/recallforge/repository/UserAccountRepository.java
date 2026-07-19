@@ -23,7 +23,7 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, Long> 
             (u.role = dev.recallforge.domain.Role.ADMIN),
             count(distinct t.id),
             count(distinct r.id),
-            null
+            coalesce(sum(r.totalTokens), 0)
         )
         from UserAccount u
         left join MarkdownFile mf on mf.user.id = u.id

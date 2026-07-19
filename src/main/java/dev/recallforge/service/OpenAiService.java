@@ -90,7 +90,7 @@ public class OpenAiService {
         prompt = prompt.formatted(topicTitle, topicContent, question, trimUserAnswer(userAnswer));
 
         AiResponse response = ask(prompt, 80);  // answer evaluation
-        return parseEvaluation(response.content());
+        return parseEvaluation(response.content(), response.totalTokens());
     }
 
     private AiResponse ask(String prompt, int maxTokens) {
@@ -148,7 +148,7 @@ public class OpenAiService {
         );
     }
 
-    private EvaluationResult parseEvaluation(String text) {
+    private EvaluationResult parseEvaluation(String text, int totalTokens) {
         double score = 0.5;
         String feedback = text;
 
@@ -174,7 +174,7 @@ public class OpenAiService {
 
         score = Math.max(0.0, Math.min(1.0, score));
 
-        return new EvaluationResult(score, feedback);
+        return new EvaluationResult(score, feedback, totalTokens);
     }
 
     private String trimTopicContent(String content) {
