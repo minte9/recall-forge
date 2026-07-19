@@ -77,14 +77,11 @@ public class DashboardService {
                 SubcategoryReviewCountProjection::getReviewCount
             ));
 
-        // A subcategory whose topics are all still at their creation-time
-        // nextReviewAt looks "due" from day one, before it's ever been
-        // reviewed. Only surface subcategories with real review history here
-        // — otherwise a large, untouched subcategory reads as the biggest
-        // "weak area" purely for being unstarted, not for being weak.
+        // findWeakAreas itself only considers topics that have been reviewed
+        // before (see the query) — a topic due for the very first time isn't
+        // a "weak area," it's just unstarted.
         List<WeakAreaResponse> weakAreas = topicRepository.findWeakAreas(userId, category, now)
             .stream()
-            .filter(area -> reviewCountBySubcategory.getOrDefault(area.getSubcategory(), 0L) > 0)
             .limit(3)
             .map(area -> new WeakAreaResponse(
                 area.getEnvironment(),

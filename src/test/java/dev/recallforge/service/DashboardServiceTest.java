@@ -73,14 +73,6 @@ class DashboardServiceTest {
         return projection;
     }
 
-    // Stubs only getSubcategory(): used where the item is expected to be
-    // filtered out before its other fields would ever be read.
-    private WeakAreaProjection weakAreaSubcategoryOnly(String subcategory) {
-        WeakAreaProjection projection = mock(WeakAreaProjection.class);
-        when(projection.getSubcategory()).thenReturn(subcategory);
-        return projection;
-    }
-
     private KnowledgeAreaProjection knowledgeArea(String title, double averageMemoryScore) {
         KnowledgeAreaProjection projection = mock(KnowledgeAreaProjection.class);
         when(projection.getTitle()).thenReturn(title);
@@ -118,16 +110,11 @@ class DashboardServiceTest {
             weakArea("Programming", "Java", "Core", 5L, 0.3),
             weakArea("Programming", "Python", "Core", 4L, 0.4),
             weakArea("Math", "Algebra", "Basics", 3L, 0.5),
-            mock(WeakAreaProjection.class) // beyond the top-3 limit; unstubbed getSubcategory() -> excluded by the review-count filter too
+            mock(WeakAreaProjection.class) // beyond the top-3 limit; its fields are never read
         );
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(weakAreas);
         when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
-        List<SubcategoryReviewCountProjection> reviewCounts = List.of(
-            reviewCount("Core", 5L),
-            reviewCount("Basics", 5L)
-        );
-        when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
         when(rewardService.getCurrentUserReward("java"))
             .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
 
@@ -138,32 +125,6 @@ class DashboardServiceTest {
             .isEqualTo(new WeakAreaResponse("Programming", "Java", "Core", 5L, 0.3));
         assertThat(dashboard.weakAreas().get(2))
             .isEqualTo(new WeakAreaResponse("Math", "Algebra", "Basics", 3L, 0.5));
-    }
-
-    @Test
-    void getDashboard_subcategoryNeverReviewed_excludedFromWeakAreasDespiteBeingDue() {
-        setUp();
-        // Every topic gets nextReviewAt = now() at creation, so a subcategory
-        // nobody has touched yet is "due" from day one and would otherwise
-        // dominate the weak-areas ranking (e.g. by simply having the most
-        // topics) despite never having been attempted.
-        List<WeakAreaProjection> weakAreas = List.of(
-            weakAreaSubcategoryOnly("Versions"),               // never reviewed - filtered out
-            weakArea("JVM", "Java", "Basics", 5L, 0.4)          // actually reviewed
-        );
-        when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(weakAreas);
-        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
-        when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
-        List<SubcategoryReviewCountProjection> reviewCounts = List.of(reviewCount("Basics", 3L));
-        when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
-        when(rewardService.getCurrentUserReward("java"))
-            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
-
-        DashboardResponse dashboard = dashboardService.getDashboard("java");
-
-        assertThat(dashboard.weakAreas()).containsExactly(
-            new WeakAreaResponse("JVM", "Java", "Basics", 5L, 0.4)
-        );
     }
 
     @Test
