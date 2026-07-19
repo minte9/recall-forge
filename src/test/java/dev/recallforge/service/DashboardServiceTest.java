@@ -26,6 +26,7 @@ import dev.recallforge.repository.EnvironmentCategoryProjection;
 import dev.recallforge.repository.KnowledgeAreaProjection;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
+import dev.recallforge.repository.SubcategoryReviewCountProjection;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.WeakAreaProjection;
 import dev.recallforge.security.CurrentUserService;
@@ -79,6 +80,22 @@ class DashboardServiceTest {
         return projection;
     }
 
+    // Stubs only getTitle(): used where the item is expected to be filtered
+    // out before getAverageMemoryScore() would ever be read, to avoid
+    // Mockito's unnecessary-stubbing check flagging an unused stub.
+    private KnowledgeAreaProjection knowledgeAreaTitleOnly(String title) {
+        KnowledgeAreaProjection projection = mock(KnowledgeAreaProjection.class);
+        when(projection.getTitle()).thenReturn(title);
+        return projection;
+    }
+
+    private SubcategoryReviewCountProjection reviewCount(String subcategory, long reviewCount) {
+        SubcategoryReviewCountProjection projection = mock(SubcategoryReviewCountProjection.class);
+        when(projection.getSubcategory()).thenReturn(subcategory);
+        when(projection.getReviewCount()).thenReturn(reviewCount);
+        return projection;
+    }
+
     private EnvironmentCategoryProjection environmentCategory(String environment, String category) {
         EnvironmentCategoryProjection projection = mock(EnvironmentCategoryProjection.class);
         when(projection.getEnvironment()).thenReturn(environment);
@@ -121,6 +138,11 @@ class DashboardServiceTest {
         );
         when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(strongAreas);
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
+        List<SubcategoryReviewCountProjection> reviewCounts = List.of(
+            reviewCount("Java, Core", 5L),
+            reviewCount("Python, Core", 5L)
+        );
+        when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
         when(rewardService.getCurrentUserReward("java"))
             .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
 
@@ -143,6 +165,11 @@ class DashboardServiceTest {
             mock(KnowledgeAreaProjection.class) // beyond the top-2 limit; its fields are never read
         );
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(weakKnowledgeAreas);
+        List<SubcategoryReviewCountProjection> reviewCounts = List.of(
+            reviewCount("Math, Basics", 5L),
+            reviewCount("Java, Core", 5L)
+        );
+        when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
         when(rewardService.getCurrentUserReward("java"))
             .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
 
@@ -152,6 +179,54 @@ class DashboardServiceTest {
             new KnowledgeAreaResponse("Math, Basics", 0.2),
             new KnowledgeAreaResponse("Java, Core", 0.3)
         );
+    }
+
+    @Test
+    void getDashboard_subcategoryBelowMinReviews_excludedFromKnowledgeAreasAndInsightsStayHidden() {
+        setUp();
+        // Every topic starts at the same default memory score, so a single
+        // review to an otherwise-untouched subcategory is enough to make it
+        // rank as the top strong/weak subcategory purely by having moved off
+        // the shared baseline - it shouldn't be trusted yet.
+        when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
+        List<KnowledgeAreaProjection> strongAreas = List.of(knowledgeAreaTitleOnly("Collections"));
+        List<KnowledgeAreaProjection> weakAreas = List.of(knowledgeAreaTitleOnly("Generics"));
+        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(strongAreas);
+        when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(weakAreas);
+        // "Generics" has zero reviews - absent from the map entirely.
+        List<SubcategoryReviewCountProjection> reviewCounts = List.of(reviewCount("Collections", 1L));
+        when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
+        when(rewardService.getCurrentUserReward("java"))
+            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
+
+        DashboardResponse dashboard = dashboardService.getDashboard("java");
+
+        assertThat(dashboard.strongAreas()).isEmpty();
+        assertThat(dashboard.weakKnowledgeAreas()).isEmpty();
+        assertThat(dashboard.showKnowledgeInsights()).isFalse();
+    }
+
+    @Test
+    void getDashboard_distinctSubcategoriesEachClearingMinReviews_showKnowledgeInsightsBecomesTrue() {
+        setUp();
+        when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
+        List<KnowledgeAreaProjection> strongAreas = List.of(knowledgeArea("Collections", 0.9));
+        List<KnowledgeAreaProjection> weakAreas = List.of(knowledgeArea("Generics", 0.3));
+        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(strongAreas);
+        when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(weakAreas);
+        List<SubcategoryReviewCountProjection> reviewCounts = List.of(
+            reviewCount("Collections", 3L),
+            reviewCount("Generics", 3L)
+        );
+        when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
+        when(rewardService.getCurrentUserReward("java"))
+            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
+
+        DashboardResponse dashboard = dashboardService.getDashboard("java");
+
+        assertThat(dashboard.strongAreas()).containsExactly(new KnowledgeAreaResponse("Collections", 0.9));
+        assertThat(dashboard.weakKnowledgeAreas()).containsExactly(new KnowledgeAreaResponse("Generics", 0.3));
+        assertThat(dashboard.showKnowledgeInsights()).isTrue();
     }
 
     @Test

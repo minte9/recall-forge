@@ -17,13 +17,21 @@ import dev.recallforge.dto.DashboardResponse;
 import dev.recallforge.dto.KnowledgeAreaResponse;
 import dev.recallforge.dto.MarkdownSummaryDto;
 import dev.recallforge.dto.WeakAreaResponse;
+import dev.recallforge.repository.KnowledgeAreaProjection;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
+import dev.recallforge.repository.SubcategoryReviewCountProjection;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.security.CurrentUserService;
 
 @Service
 public class DashboardService {
+
+    // A subcategory needs at least this many reviews before its average
+    // memory score is trusted enough to call it "strong" or "weak" —
+    // otherwise a single review is enough to move it off the shared
+    // default score and make it look like a meaningful outlier.
+    private static final long MIN_REVIEWS_FOR_KNOWLEDGE_INSIGHTS = 3;
 
     private final TopicRepository topicRepository;
     private final ReviewRepository reviewRepository;
@@ -74,8 +82,16 @@ public class DashboardService {
             ))
             .toList();
 
+        Map<String, Long> reviewCountBySubcategory = reviewRepository.countReviewsBySubcategory(userId, category)
+            .stream()
+            .collect(Collectors.toMap(
+                SubcategoryReviewCountProjection::getSubcategory,
+                SubcategoryReviewCountProjection::getReviewCount
+            ));
+
         List<KnowledgeAreaResponse> strongKnowledgeAreas = topicRepository.findStrongKnowledgeAreas(userId, category)
             .stream()
+            .filter(area -> hasEnoughReviewsForInsights(area, reviewCountBySubcategory))
             .limit(2)
             .map(area -> new KnowledgeAreaResponse(
                 area.getTitle(),
@@ -85,6 +101,7 @@ public class DashboardService {
 
         List<KnowledgeAreaResponse> weakKnowledgeAreas = topicRepository.findWeakKnowledgeAreas(userId, category)
             .stream()
+            .filter(area -> hasEnoughReviewsForInsights(area, reviewCountBySubcategory))
             .limit(2)
             .map(area -> new KnowledgeAreaResponse(
                 area.getTitle(),
@@ -108,8 +125,11 @@ public class DashboardService {
             .filter(area -> !strongTitles.contains(area.title()))
             .toList();
 
-        // True only when there's a genuine strong/weak contrast between subcategories.
-        // New users start with uniform default memory scores, so it stays false until enough reviews create real separation.
+        // True only when there's a genuine strong/weak contrast between subcategories
+        // that have each individually cleared MIN_REVIEWS_FOR_KNOWLEDGE_INSIGHTS —
+        // strongKnowledgeAreas/weakKnowledgeAreas above are already filtered down to
+        // those, so a single review to one otherwise-untouched subcategory can no
+        // longer masquerade as a meaningful outlier.
         boolean showKnowledgeInsights =
             !strongOnly.isEmpty() && !weakOnly.isEmpty();
 
@@ -144,6 +164,13 @@ public class DashboardService {
             tomorrowReviewLimit,
             thisWeekReviewLimit
         );
+    }
+
+    private static boolean hasEnoughReviewsForInsights(
+        KnowledgeAreaProjection area,
+        Map<String, Long> reviewCountBySubcategory
+    ) {
+        return reviewCountBySubcategory.getOrDefault(area.getTitle(), 0L) >= MIN_REVIEWS_FOR_KNOWLEDGE_INSIGHTS;
     }
 
     public List<MarkdownSummaryDto> getMarkdownSummaries(String category) {
