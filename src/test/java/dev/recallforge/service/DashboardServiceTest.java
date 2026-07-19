@@ -230,6 +230,40 @@ class DashboardServiceTest {
     }
 
     @Test
+    void getDashboard_subcategoryInBothTopTwoLists_excludedFromBothStrongAndWeak() {
+        setUp();
+        // With exactly 3 qualifying subcategories, the middle one (Exceptions)
+        // is both the 2nd-highest and 2nd-lowest average, so it lands in both
+        // top-2 lists. It's ambiguous, not distinctly strong or weak, so it
+        // should be dropped from both rather than shown as both simultaneously.
+        when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
+        List<KnowledgeAreaProjection> strongAreas = List.of(
+            knowledgeArea("Collections", 0.9),
+            knowledgeArea("Exceptions", 0.7)
+        );
+        List<KnowledgeAreaProjection> weakAreas = List.of(
+            knowledgeArea("Basics", 0.3),
+            knowledgeArea("Exceptions", 0.7)
+        );
+        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(strongAreas);
+        when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(weakAreas);
+        List<SubcategoryReviewCountProjection> reviewCounts = List.of(
+            reviewCount("Collections", 3L),
+            reviewCount("Exceptions", 3L),
+            reviewCount("Basics", 3L)
+        );
+        when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
+        when(rewardService.getCurrentUserReward("java"))
+            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
+
+        DashboardResponse dashboard = dashboardService.getDashboard("java");
+
+        assertThat(dashboard.strongAreas()).containsExactly(new KnowledgeAreaResponse("Collections", 0.9));
+        assertThat(dashboard.weakKnowledgeAreas()).containsExactly(new KnowledgeAreaResponse("Basics", 0.3));
+        assertThat(dashboard.showKnowledgeInsights()).isTrue();
+    }
+
+    @Test
     void getDashboard_passesThroughCountsAndRewardUnchanged() {
         setUp();
         when(topicRepository.countDueNowByUser(eq(1L), eq("java"), any())).thenReturn(10L);
