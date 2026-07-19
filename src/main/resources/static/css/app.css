@@ -1176,12 +1176,6 @@
     gap: 6px;
   }
 
-  .review-title-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
   .last-score-badge {
     padding: 4px 20px;
     border-radius: 999px;
@@ -1191,6 +1185,13 @@
     font-size: 14px;
     font-weight: normal;
     margin-left: 10px;
+  }
+
+  /* Desktop: badge sits on the actions row, right-aligned. Mobile overrides
+     this below to its own right-aligned row under the buttons instead. */
+  .actions-row .last-score-badge--actions {
+    margin-left: auto;
+    cursor: pointer;
   }
 
   .history-arrow {
@@ -1566,6 +1567,12 @@
       height: 44px;
       border-radius: 12px;
       font-size: 13px;
+    }
+
+    .actions-row .last-score-badge--actions {
+      grid-column: 1 / -1;
+      justify-self: end;
+      margin-left: 0;
     }
 
     .markdown {
