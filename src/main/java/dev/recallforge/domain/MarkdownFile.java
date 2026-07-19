@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,7 +28,10 @@ import lombok.NoArgsConstructor;
  */
 
 @Entity
-@Table(name = "markdown_files")
+@Table(
+    name = "markdown_files",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "content_hash"})
+)
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 public class MarkdownFile {
@@ -42,7 +46,7 @@ public class MarkdownFile {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String contentHash;
 
     @Column(nullable = false)

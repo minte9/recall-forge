@@ -452,7 +452,7 @@ class MarkdownFileServiceTest {
         when(currentUserService.currentUser()).thenReturn(user);
         when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
         when(markdownTopicImporter.parseMarkdown(newContent)).thenReturn(List.of(parsedTopic));
-        when(markdownFileRepository.findByContentHash(sha256(newContent))).thenReturn(Optional.of(otherMarkdownFile));
+        when(markdownFileRepository.findByContentHashAndUserId(sha256(newContent), 1L)).thenReturn(Optional.of(otherMarkdownFile));
 
         assertThatThrownBy(() -> markdownFileService.update(1L, newContent))
             .isInstanceOf(dev.recallforge.exception.MarkdownAlreadyImportedException.class)
@@ -479,7 +479,7 @@ class MarkdownFileServiceTest {
         when(currentUserService.currentUser()).thenReturn(user);
         when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
         when(markdownTopicImporter.parseMarkdown(newContent)).thenReturn(List.of(parsedTopic));
-        when(markdownFileRepository.findByContentHash(sha256(newContent))).thenReturn(Optional.empty());
+        when(markdownFileRepository.findByContentHashAndUserId(sha256(newContent), 1L)).thenReturn(Optional.empty());
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(topicRepository.findByMarkdownFileAndTitleAndUserId(
                 eq(existingMarkdownFile), eq("Java Basics"), eq(1L)))
@@ -519,7 +519,7 @@ class MarkdownFileServiceTest {
 
         markdownFileService.update(1L, content);
 
-        verify(markdownFileRepository, org.mockito.Mockito.never()).findByContentHash(any());
+        verify(markdownFileRepository, org.mockito.Mockito.never()).findByContentHashAndUserId(any(), any());
     }
 
     @Test

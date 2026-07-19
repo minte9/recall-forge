@@ -115,7 +115,7 @@ public class MarkdownFileService {
         String contentHash = sha256(content);
 
         if (!contentHash.equals(markdownFile.getContentHash())) {
-            Optional<MarkdownFile> duplicate = markdownFileRepository.findByContentHash(contentHash);
+            Optional<MarkdownFile> duplicate = markdownFileRepository.findByContentHashAndUserId(contentHash, userId);
 
             if (duplicate.isPresent() && !markdownFileId.equals(duplicate.get().getId())) {
                 throw new MarkdownAlreadyImportedException("This content already exists in another markdown file.");

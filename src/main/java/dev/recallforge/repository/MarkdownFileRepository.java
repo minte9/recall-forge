@@ -22,7 +22,7 @@ public interface MarkdownFileRepository extends JpaRepository<MarkdownFile, Long
 
     Optional<MarkdownFile> findByIdAndUserId(Long id, Long userId);
 
-    Optional<MarkdownFile> findByContentHash(String contentHash);
+    Optional<MarkdownFile> findByContentHashAndUserId(String contentHash, Long userId);
 
     @Modifying
     @Query("delete from MarkdownFile m where m.user.id = :userId")
