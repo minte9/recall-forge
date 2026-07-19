@@ -605,11 +605,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       await this.loadDashboard();
 
-      if (this.isDesktop && this.markdownSummaries.length > 0) {
+      if (this.isDesktop) {
         this.showMarkdownSummaries();
-      } else {
-        this.markdown = this.initialMarkdown;
-        this.leftPanel = "markdown";
       }
     },
 
@@ -688,11 +685,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       await this.loadDashboard();
 
-      if (this.isDesktop && this.markdownSummaries.length > 0) {
+      if (this.isDesktop) {
         this.showMarkdownSummaries();
-      } else {
-        this.markdown = this.initialMarkdown;
-        this.leftPanel = "markdown";
       }
     },
 
