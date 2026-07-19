@@ -12,6 +12,9 @@ Task guides:
 - For frontend work, read `.claude/frontend.md`.
 - For creating/editing markdown topic content, read `.claude/content-authoring.md`. For direct DB import/edits or Docker mechanics, also read `.claude/content-authoring.local.md` (gitignored, operational).
 
+Agent personas:
+- `.agents/` holds role-based personas (purpose, responsibilities, decision-making, quality checklist) — see `docs/ai/claude-code.md` for the `.claude/` vs `.agents/` convention. Check for a matching persona before starting a task (e.g. `.agents/ui-engineer.md`, `.agents/backend-engineer.md`, `.agents/test-engineer.md`, `.agents/content-author.md`, `.agents/qa-engineer.md`) and adopt it alongside the relevant `.claude/` guide above.
+
 Read only the guides relevant to the current task.
 
 If no suitable guide exists,
