@@ -459,7 +459,7 @@
           <h3 class="review-title" @click="toggleFeedbackHistory">
 
             <span class="review-title-left">
-              <span :title="review.topicTitle">{{ truncateTitle(review.topicTitle) }}</span>
+              <span :title="review.topicTitle">{{ truncateTitle(review.topicTitle, isDesktop ? 50 : 30) }}</span>
 
               <span class="topic-select-wrap" @click.stop
                 @mouseenter="isDesktop && openTopicDropdown($event)"
