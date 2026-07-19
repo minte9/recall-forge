@@ -483,12 +483,6 @@
               </span>
             </span>
 
-            <span class="review-title-right">
-              <span v-if="lastReview" class="last-score-badge" title="Show feedback history">
-
-                Score: {{ formatScore(lastReview.score) }}
-              </span>
-            </span>
           </h3>
 
           <p>{{ review.question }}</p>
@@ -506,6 +500,11 @@
               <span class="btn-icon">✓</span>
               Submit Answer
             </button>
+
+            <span v-if="lastReview" class="last-score-badge last-score-badge--actions"
+              title="Show feedback history" @click="toggleFeedbackHistory">
+              Score: {{ formatScore(lastReview.score) }}
+            </span>
 
           </div>
 
