@@ -62,6 +62,22 @@ class TopicServiceTest {
         );
     }
 
+    private Topic topicWithSubcategoryTitleAndFileOrder(String subcategory, String title, Integer fileDisplayOrder) {
+        UserAccount user = new UserAccount();
+        dev.recallforge.domain.MarkdownFile markdownFile = new dev.recallforge.domain.MarkdownFile(
+            "file.md", "content", "hash-" + subcategory + "-" + title,
+            "General", "Uncategorized", subcategory, "File", user
+        );
+        markdownFile.updateDisplayOrder(fileDisplayOrder);
+
+        Topic topic = new Topic(
+            "General", "Uncategorized", subcategory, "File",
+            title, "Content", markdownFile, user
+        );
+        topic.updateMemory(0.0, LocalDateTime.now());
+        return topic;
+    }
+
     private Topic topicWithTitleAndMemoryScore(String title, double memoryScore) {
         Topic topic = topicWithTitle(title);
         topic.updateMemory(memoryScore, LocalDateTime.now());
@@ -159,6 +175,25 @@ class TopicServiceTest {
         ));
 
         assertThat(topicService.selectNextTopic(1L, "java")).contains(generics);
+    }
+
+    @Test
+    void selectNextTopic_tiedMemoryScoreAndSubcategory_prefersLowerMarkdownFileDisplayOrder() {
+        setUp();
+        // Every file's topic numbering restarts at "1.", so two topics from
+        // different files in the same subcategory tie on memory score,
+        // subcategory, and leading title number. The file's own
+        // display_order should still decide it instead of falling through
+        // to the essentially-arbitrary nextReviewAt from bulk import.
+        Topic fromThirdFile = topicWithSubcategoryTitleAndFileOrder(
+            "Basics", "1. == for Primitives vs References", 3);
+        Topic fromFirstFile = topicWithSubcategoryTitleAndFileOrder(
+            "Basics", "1. The 8 Primitive Types and Their Defaults", 1);
+        when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any()))
+            .thenReturn(List.of(fromThirdFile, fromFirstFile));
+        when(subcategoryOrderRepository.findByCategoryIgnoreCase("java")).thenReturn(List.of());
+
+        assertThat(topicService.selectNextTopic(1L, "java")).contains(fromFirstFile);
     }
 
     @Test

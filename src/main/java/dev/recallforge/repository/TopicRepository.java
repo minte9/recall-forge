@@ -41,6 +41,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     @Query("""
         select t from Topic t
+        left join fetch t.markdownFile
         where t.nextReviewAt <= :now
             and t.user.id = :userId
             and lower(t.category) = lower(:category)

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.repository.SubcategoryOrderRepository;
@@ -60,11 +61,15 @@ public class TopicService {
                 // difference rather than a meaningful signal. Prefer the
                 // subcategory order shown in the markdown list (same
                 // subcategory_order table/alphabetical fallback as
-                // DashboardService.getMarkdownSummaries), then the topic
-                // that comes first in its file ("1." before "2.").
+                // DashboardService.getMarkdownSummaries), then the file's own
+                // display_order within that subcategory (every file's topic
+                // numbering restarts at "1.", so without this, files tie and
+                // fall through to nextReviewAt too), then the topic that
+                // comes first in its file ("1." before "2.").
                 Comparator.comparing(Topic::getMemoryScore)
                     .thenComparing(topic -> subcategoryDisplayOrder(topic, subcategoryOrder))
                     .thenComparing(Topic::getSubcategory, String.CASE_INSENSITIVE_ORDER)
+                    .thenComparing(TopicService::markdownFileDisplayOrder, Comparator.nullsLast(Comparator.naturalOrder()))
                     .thenComparingLong(topic -> leadingTitleNumber(topic.getTitle()))
                     .thenComparing(Topic::getNextReviewAt, Comparator.nullsFirst(Comparator.naturalOrder()))
             )
@@ -73,6 +78,11 @@ public class TopicService {
 
     private static int subcategoryDisplayOrder(Topic topic, Map<String, Integer> subcategoryOrder) {
         return subcategoryOrder.getOrDefault(topic.getSubcategory(), Integer.MAX_VALUE);
+    }
+
+    private static Integer markdownFileDisplayOrder(Topic topic) {
+        MarkdownFile markdownFile = topic.getMarkdownFile();
+        return markdownFile != null ? markdownFile.getDisplayOrder() : null;
     }
 
     public Optional<Topic> selectNextTopicByMarkdownFileId(Long markdownFileId, Long userId) {
