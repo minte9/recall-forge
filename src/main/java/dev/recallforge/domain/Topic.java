@@ -22,7 +22,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)  // JPA requieres no-args constructor
 public class Topic {
-    
+
+    private static final double DEFAULT_MEMORY_SCORE = 0.6;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -84,7 +86,7 @@ public class Topic {
         this.markdownFile = markdownFile;
         this.user = user;
 
-        this.memoryScore = 0.6;
+        this.memoryScore = DEFAULT_MEMORY_SCORE;
         this.nextReviewAt = LocalDateTime.now();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
@@ -123,7 +125,7 @@ public class Topic {
     }
 
     public void resetProgress() {
-        this.memoryScore = 0;
+        this.memoryScore = DEFAULT_MEMORY_SCORE;
         this.nextReviewAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
