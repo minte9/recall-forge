@@ -166,6 +166,8 @@ class MarkdownFileServiceTest {
                 "Programming", "Java", "Core", "Java Basics", 1L))
             .thenReturn(Optional.empty());
         when(topicRepository.findByTitleAndUserId("Java Basics", 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "Java", "Core"))
+            .thenReturn(Optional.empty());
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Java Basics"), eq(1L)))
             .thenReturn(Optional.empty());
@@ -182,6 +184,7 @@ class MarkdownFileServiceTest {
         assertThat(savedMarkdownFile.getEnvironment()).isEqualTo("Programming");
         assertThat(savedMarkdownFile.getCategory()).isEqualTo("Java");
         assertThat(savedMarkdownFile.getSubcategory()).isEqualTo("Core");
+        assertThat(savedMarkdownFile.getDisplayOrder()).isEqualTo(1);
 
         ArgumentCaptor<Topic> topicCaptor = ArgumentCaptor.forClass(Topic.class);
         verify(topicRepository).save(topicCaptor.capture());
@@ -189,6 +192,72 @@ class MarkdownFileServiceTest {
         assertThat(savedTopic.getTitle()).isEqualTo("Java Basics");
         assertThat(savedTopic.getContent()).isEqualTo("Some content.");
         assertThat(savedTopic.getMarkdownFile()).isSameAs(savedMarkdownFile);
+    }
+
+    @Test
+    void upload_newFile_assignsDisplayOrderAfterExistingMaxInSameCategoryAndSubcategory() throws Exception {
+        setUp();
+        String content = "### Java Basics\nSome content.";
+        MockMultipartFile file = new MockMultipartFile(
+            "file", "notes.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Java Basics", "Some content."
+        );
+        UserAccount user = new UserAccount();
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Programming", "Java", "Core", "Java Basics", 1L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("Java Basics", 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "Java", "Core"))
+            .thenReturn(Optional.of(4));
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Java Basics"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        markdownFileService.upload(file);
+
+        ArgumentCaptor<MarkdownFile> markdownFileCaptor = ArgumentCaptor.forClass(MarkdownFile.class);
+        verify(markdownFileRepository).save(markdownFileCaptor.capture());
+        assertThat(markdownFileCaptor.getValue().getDisplayOrder()).isEqualTo(5);
+    }
+
+    @Test
+    void upload_existingMarkdownFile_doesNotRecomputeDisplayOrderOnEdit() throws Exception {
+        setUp();
+        String newContent = "### Java Basics\nUpdated content.";
+        MockMultipartFile file = new MockMultipartFile(
+            "file", "notes.md", "text/markdown", newContent.getBytes(StandardCharsets.UTF_8)
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Java Basics", "Updated content."
+        );
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        existingMarkdownFile.updateDisplayOrder(3);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(newContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Programming", "Java", "Core", "Java Basics", 1L))
+            .thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(
+                eq(existingMarkdownFile), eq("Java Basics"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        markdownFileService.upload(file);
+
+        assertThat(existingMarkdownFile.getDisplayOrder()).isEqualTo(3);
+        verify(markdownFileRepository, org.mockito.Mockito.never())
+            .findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(any(), any(), any());
     }
 
     @Test

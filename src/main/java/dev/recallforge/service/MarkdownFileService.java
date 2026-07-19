@@ -79,9 +79,14 @@ public class MarkdownFileService {
         return importMarkdown(content, sanitizeFilename(filename));
     }
 
+    /**
+     * Imports starter-pack content, carrying over the template file's
+     * display order verbatim (rather than auto-assigning one, as manual
+     * uploads do).
+     */
     @Transactional
-    public MarkdownUploadResponse importMarkdown(String content) throws Exception {
-        return importMarkdown(content, null);
+    public MarkdownUploadResponse importMarkdown(String content, Integer displayOrder) throws Exception {
+        return importMarkdown(content, null, false, displayOrder);
     }
 
     @Transactional
@@ -130,6 +135,15 @@ public class MarkdownFileService {
     }
 
     private MarkdownUploadResponse importMarkdown(String content, String filename) throws Exception {
+        return importMarkdown(content, filename, true, null);
+    }
+
+    private MarkdownUploadResponse importMarkdown(
+            String content,
+            String filename,
+            boolean autoAssignDisplayOrder,
+            Integer explicitDisplayOrder
+    ) throws Exception {
         if (content.length() > MAX_CONTENT_LENGTH) {
             throw new IllegalArgumentException("Markdown content is too large.");
         }
@@ -167,9 +181,17 @@ public class MarkdownFileService {
                     firstTopic.fileTitle()
             );
 
+            if (!autoAssignDisplayOrder) {
+                markdownFile.updateDisplayOrder(explicitDisplayOrder);
+            }
+
             markdownFileRepository.save(markdownFile);
 
         } else {
+            Integer resolvedDisplayOrder = autoAssignDisplayOrder
+                    ? nextDisplayOrder(userId, firstTopic.category(), firstTopic.subcategory())
+                    : explicitDisplayOrder;
+
             markdownFile = new MarkdownFile(
                     filename != null ? filename : sanitizeFilename(firstTopic.fileTitle() + ".md"),
                     content,
@@ -180,6 +202,7 @@ public class MarkdownFileService {
                     firstTopic.fileTitle(),
                     user
             );
+            markdownFile.updateDisplayOrder(resolvedDisplayOrder);
 
             markdownFileRepository.save(markdownFile);
         }
@@ -219,6 +242,13 @@ public class MarkdownFileService {
 
         topicRepository.deleteByMarkdownFileIdAndUserId(markdownFileId, userId);
         markdownFileRepository.delete(markdownFile);
+    }
+
+    private Integer nextDisplayOrder(Long userId, String category, String subcategory) {
+        return markdownFileRepository
+                .findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(userId, category, subcategory)
+                .map(max -> max + 1)
+                .orElse(1);
     }
 
     private String sanitizeFilename(String filename) {

@@ -39,4 +39,17 @@ public interface MarkdownFileRepository extends JpaRepository<MarkdownFile, Long
         @Param("userId") Long userId,
         @Param("category") String category
     );
+
+    @Query("""
+        select max(m.displayOrder)
+        from MarkdownFile m
+        where m.user.id = :userId
+        and m.category = :category
+        and m.subcategory = :subcategory
+    """)
+    Optional<Integer> findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("subcategory") String subcategory
+    );
 }
