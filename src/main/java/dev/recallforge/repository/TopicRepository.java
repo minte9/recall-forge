@@ -159,6 +159,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         where t.nextReviewAt <= :now
             and t.markdownFile.user.id = :userId
             and lower(t.category) = lower(:category)
+            and exists (select 1 from Review r where r.topic = t)
         group by t.environment, t.category, t.subcategory
         order by count(t) desc, avg(t.memoryScore) asc
     """)
