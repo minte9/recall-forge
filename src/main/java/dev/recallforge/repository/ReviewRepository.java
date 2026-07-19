@@ -53,4 +53,18 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Param("category") String category,
         @Param("since") LocalDateTime since
     );
+
+    @Query("""
+        select
+            r.topic.subcategory as subcategory,
+            count(r) as reviewCount
+        from Review r
+        where r.user.id = :userId
+        and lower(r.topic.category) = lower(:category)
+        group by r.topic.subcategory
+    """)
+    List<SubcategoryReviewCountProjection> countReviewsBySubcategory(
+        @Param("userId") Long userId,
+        @Param("category") String category
+    );
 }
