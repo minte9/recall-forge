@@ -70,8 +70,21 @@ public class DashboardService {
         long totalTopics = topicRepository.countByUser(userId, category);
 
 
+        Map<String, Long> reviewCountBySubcategory = reviewRepository.countReviewsBySubcategory(userId, category)
+            .stream()
+            .collect(Collectors.toMap(
+                SubcategoryReviewCountProjection::getSubcategory,
+                SubcategoryReviewCountProjection::getReviewCount
+            ));
+
+        // A subcategory whose topics are all still at their creation-time
+        // nextReviewAt looks "due" from day one, before it's ever been
+        // reviewed. Only surface subcategories with real review history here
+        // — otherwise a large, untouched subcategory reads as the biggest
+        // "weak area" purely for being unstarted, not for being weak.
         List<WeakAreaResponse> weakAreas = topicRepository.findWeakAreas(userId, category, now)
             .stream()
+            .filter(area -> reviewCountBySubcategory.getOrDefault(area.getSubcategory(), 0L) > 0)
             .limit(3)
             .map(area -> new WeakAreaResponse(
                 area.getEnvironment(),
@@ -81,13 +94,6 @@ public class DashboardService {
                 area.getAverageMemoryScore()
             ))
             .toList();
-
-        Map<String, Long> reviewCountBySubcategory = reviewRepository.countReviewsBySubcategory(userId, category)
-            .stream()
-            .collect(Collectors.toMap(
-                SubcategoryReviewCountProjection::getSubcategory,
-                SubcategoryReviewCountProjection::getReviewCount
-            ));
 
         List<KnowledgeAreaResponse> strongKnowledgeAreas = topicRepository.findStrongKnowledgeAreas(userId, category)
             .stream()
