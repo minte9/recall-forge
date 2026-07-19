@@ -92,7 +92,7 @@ public class DashboardService {
             ))
             .toList();
 
-        List<KnowledgeAreaResponse> strongKnowledgeAreas = topicRepository.findStrongKnowledgeAreas(userId, category)
+        List<KnowledgeAreaResponse> strongCandidates = topicRepository.findStrongKnowledgeAreas(userId, category)
             .stream()
             .filter(area -> hasEnoughReviewsForInsights(area, reviewCountBySubcategory))
             .limit(2)
@@ -102,7 +102,7 @@ public class DashboardService {
             ))
             .toList();
 
-        List<KnowledgeAreaResponse> weakKnowledgeAreas = topicRepository.findWeakKnowledgeAreas(userId, category)
+        List<KnowledgeAreaResponse> weakCandidates = topicRepository.findWeakKnowledgeAreas(userId, category)
             .stream()
             .filter(area -> hasEnoughReviewsForInsights(area, reviewCountBySubcategory))
             .limit(2)
@@ -112,27 +112,31 @@ public class DashboardService {
             ))
             .toList();
 
-        Set<String> weakTitles = weakKnowledgeAreas.stream()
+        // A subcategory that lands in both top-2 lists (common when only a
+        // few subcategories qualify at all) isn't distinctly strong or weak
+        // — it's just the middle of a small pack. Drop it from both rather
+        // than showing it as simultaneously "Strong" and "Weak".
+        Set<String> weakTitles = weakCandidates.stream()
             .map(area -> area.title())
             .collect(Collectors.toSet());
 
-        List<KnowledgeAreaResponse> strongOnly = strongKnowledgeAreas.stream()
+        List<KnowledgeAreaResponse> strongOnly = strongCandidates.stream()
             .filter(area -> !weakTitles.contains(area.title()))
             .toList();
 
-        Set<String> strongTitles = strongKnowledgeAreas.stream()
+        Set<String> strongTitles = strongCandidates.stream()
             .map(area -> area.title())
             .collect(Collectors.toSet());
 
-        List<KnowledgeAreaResponse> weakOnly = weakKnowledgeAreas.stream()
+        List<KnowledgeAreaResponse> weakOnly = weakCandidates.stream()
             .filter(area -> !strongTitles.contains(area.title()))
             .toList();
 
         // True only when there's a genuine strong/weak contrast between subcategories
         // that have each individually cleared MIN_REVIEWS_FOR_KNOWLEDGE_INSIGHTS —
-        // strongKnowledgeAreas/weakKnowledgeAreas above are already filtered down to
-        // those, so a single review to one otherwise-untouched subcategory can no
-        // longer masquerade as a meaningful outlier.
+        // strongCandidates/weakCandidates above are already filtered down to those,
+        // so a single review to one otherwise-untouched subcategory can no longer
+        // masquerade as a meaningful outlier.
         boolean showKnowledgeInsights =
             !strongOnly.isEmpty() && !weakOnly.isEmpty();
 
@@ -157,8 +161,8 @@ public class DashboardService {
             dueThisWeek,
             totalTopics,
             weakAreas,
-            strongKnowledgeAreas,
-            weakKnowledgeAreas,
+            strongOnly,
+            weakOnly,
             rewardService.getCurrentUserReward(category),
             showKnowledgeInsights,
             dailyReviewLimit,
