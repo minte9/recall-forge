@@ -53,7 +53,7 @@ public class StarterPackService {
         }
 
         for (MarkdownFile templateFile : templateFiles) {
-            markdownFileService.importMarkdown(templateFile.getContent());
+            markdownFileService.importMarkdown(templateFile.getContent(), templateFile.getDisplayOrder());
         }
     }
 }

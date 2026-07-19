@@ -109,4 +109,8 @@ public class MarkdownFile {
         this.subcategory = subcategory;
         this.topicGroup = topicGroup;
     }
+
+    public void updateDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
+    }
 }
