@@ -1300,7 +1300,7 @@
   .environment-menu-dropdown {
     position: absolute;
     left: 0;
-    top: 46px;
+    top: 44px;
     width: 100%;
     background: white;
     border: 1px solid var(--line);
