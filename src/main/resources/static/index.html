@@ -487,7 +487,8 @@
 
           <p>{{ review.question }}</p>
 
-          <textarea v-model="userAnswer" placeholder="Write your answer here...">
+          <textarea v-model="userAnswer" placeholder="Write your answer here..."
+            @keydown.ctrl.enter="submitAnswer">
         </textarea>
 
           <div class="actions-row">
@@ -496,7 +497,7 @@
               <span>→</span> Next Review
             </button>
 
-            <button class="submit-btn" @click="submitAnswer" :disabled="loading || answerSubmitted">
+            <button class="submit-btn" @click="submitAnswer" :disabled="loading || answerSubmitted" title="Ctrl+Enter">
               <span class="btn-icon">✓</span>
               Submit Answer
             </button>
@@ -680,7 +681,7 @@
             <div class="reward-top">
 
               <span class="reward-label"
-                title="Topics with a memory score of at least 0.7 and a next review scheduled at least 7 days from now.">
+                title="Topics with an average memory score of at least 0.7 and a next review scheduled at least 7 days from now.">
                 {{ categoryOptions.length > 0 ? dashboard.reward.masteryScope + " Mastery" : "Mastery" }}: {{ dashboard.reward.masteryPercent }}%
               </span>
 
