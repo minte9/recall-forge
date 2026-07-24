@@ -79,14 +79,14 @@ public class ReviewService {
             return ReviewQuestionResponse.noReviewsDue();
         }
 
-        long questionsToday = questionGenerationRepository.countByUserIdAndGeneratedAtAfter(
-                userId, LocalDate.now().atStartOfDay());
+        Topic topic = topicOptional.get();
+
+        long questionsToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
+                userId, topic.getCategory(), LocalDate.now().atStartOfDay());
 
         if (questionsToday >= reviewLimitProperties.dailyQuestionLimit()) {
             throw new DailyQuestionLimitExceededException();
         }
-
-        Topic topic = topicOptional.get();
 
         List<ReviewSummary> recentReviews = reviewRepository
                 .findTop3ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(topic.getId(), userId)
@@ -97,7 +97,7 @@ public class ReviewService {
         String question = openAiService.generateQuestion(
                 topic.getTitle(), topic.getContent(), topic.getMemoryScore(), recentReviews);
 
-        questionGenerationRepository.save(new QuestionGeneration(userId));
+        questionGenerationRepository.save(new QuestionGeneration(userId, topic.getCategory()));
 
         String markdownContent = topic.getMarkdownFile() != null
                 ? topic.getMarkdownFile().getContent()

@@ -11,7 +11,7 @@ import dev.recallforge.domain.QuestionGeneration;
 
 public interface QuestionGenerationRepository extends JpaRepository<QuestionGeneration, Long> {
 
-    long countByUserIdAndGeneratedAtAfter(Long userId, LocalDateTime since);
+    long countByUserIdAndCategoryAndGeneratedAtAfter(Long userId, String category, LocalDateTime since);
 
     @Modifying
     @Query("delete from QuestionGeneration q where q.userId = :userId")

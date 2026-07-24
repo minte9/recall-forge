@@ -175,7 +175,7 @@ class ReviewServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
         when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
-        when(questionGenerationRepository.countByUserIdAndGeneratedAtAfter(eq(1L), any()))
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("Uncategorized"), any()))
             .thenReturn(50L);
 
         assertThatThrownBy(() -> reviewService.startReview(null, "java", null))
@@ -192,7 +192,7 @@ class ReviewServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
         when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
-        when(questionGenerationRepository.countByUserIdAndGeneratedAtAfter(eq(1L), any()))
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("Uncategorized"), any()))
             .thenReturn(49L);
         when(openAiService.generateQuestion(any(), any(), anyDouble(), any())).thenReturn("What is X?");
 
