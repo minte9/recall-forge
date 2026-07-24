@@ -489,7 +489,7 @@
           <p>{{ review.question }}</p>
 
           <textarea v-model="userAnswer" placeholder="Write your answer here..."
-            @keydown.ctrl.enter="submitAnswer">
+            @keydown.ctrl.enter="answerSubmitted ? startReview(review.topicId) : submitAnswer()">
         </textarea>
 
           <div class="actions-row">
@@ -499,9 +499,16 @@
               <span>→</span> Next Review
             </button>
 
-            <button class="submit-btn" @click="submitAnswer" :disabled="loading || answerSubmitted" title="Ctrl+Enter">
+            <button v-if="!answerSubmitted" class="submit-btn" @click="submitAnswer" :disabled="loading"
+              title="Ctrl+Enter">
               <span class="btn-icon">✓</span>
               Submit Answer
+            </button>
+
+            <button v-else class="submit-btn" @click="startReview(review.topicId)" :disabled="loading"
+              title="Ctrl+Enter">
+              <span class="btn-icon">↻</span>
+              Try Again
             </button>
 
             <span v-if="averageScore !== null" class="last-score-badge last-score-badge--actions"
