@@ -386,6 +386,26 @@
 
           </div>
 
+          <div v-if="leftPanel === 'account' && currentUser" class="account-panel">
+            <h3>Settings</h3>
+
+            <div class="account-row">
+              <span>Answers per day</span>
+              <strong>{{ currentUser.dailyReviewLimit }}</strong>
+            </div>
+
+            <div class="account-row">
+              <span>Questions per day</span>
+              <strong>{{ currentUser.dailyQuestionLimit }}</strong>
+            </div>
+
+            <div class="account-row">
+              <span>Skip allowed</span>
+              <strong>Yes</strong>
+            </div>
+
+          </div>
+
           <div v-if="leftPanel === 'danger-zone'" class="account-panel">
             <h3>Danger Zone</h3>
 
