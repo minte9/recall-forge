@@ -64,7 +64,14 @@ public class ReviewService {
 
         Topic topic = topicOptional.get();
 
-        String question = openAiService.generateQuestion(topic.getTitle(), topic.getContent());
+        List<ReviewSummary> recentReviews = reviewRepository
+                .findTop3ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(topic.getId(), userId)
+                .stream()
+                .map(r -> new ReviewSummary(r.getQuestion(), r.getScore(), r.getFeedback()))
+                .toList();
+
+        String question = openAiService.generateQuestion(
+                topic.getTitle(), topic.getContent(), topic.getMemoryScore(), recentReviews);
 
         String markdownContent = topic.getMarkdownFile() != null
                 ? topic.getMarkdownFile().getContent()

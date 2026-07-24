@@ -71,10 +71,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return this.leftPanel !== "markdown";
     },
 
-    lastReview() {
-      return this.feedbackHistory.length > 0
-        ? this.feedbackHistory[0]
-        : null;
+    averageScore() {
+      if (this.feedbackHistory.length === 0) {
+        return null;
+      }
+
+      const total = this.feedbackHistory.reduce((sum, r) => sum + r.score, 0);
+      return total / this.feedbackHistory.length;
     },
 
     environmentGroups() {

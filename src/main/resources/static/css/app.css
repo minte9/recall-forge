@@ -613,9 +613,14 @@
     font-size: 14px;
   }
 
-  .feedback {
+  .feedback--high-score {
     background: #ecfdf5;
     border-left: 4px solid #10b981;
+  }
+
+  .feedback--low-score {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
   }
 
   .success {
@@ -1066,6 +1071,14 @@
     background: #fff;
   }
 
+  .feedback-history-item--high-score {
+    border-left: 4px solid #10b981;
+  }
+
+  .feedback-history-item--low-score {
+    border-left: 4px solid #f59e0b;
+  }
+
   .feedback-history-card-header {
     display: flex;
     justify-content: space-between;
@@ -1089,8 +1102,8 @@
     flex: 0 0 auto;
     font-size: 12px;
     color: #64748b;
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
+    /* background: #f8fafc;
+    border: 1px solid #e5e7eb; */
     border-radius: 999px;
     padding: 4px 9px;
   }
@@ -1103,7 +1116,7 @@
   .feedback-qa-details {
     margin-top: 0px;
     padding-top: 10px;
-    border-top: 1px solid #f1f5f9;
+    /* border-top: 1px solid #f1f5f9; */
   }
 
   .feedback-qa-details summary {

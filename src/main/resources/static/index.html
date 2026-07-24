@@ -502,9 +502,9 @@
               Submit Answer
             </button>
 
-            <span v-if="lastReview" class="last-score-badge last-score-badge--actions"
+            <span v-if="averageScore !== null" class="last-score-badge last-score-badge--actions"
               title="Show feedback history" @click="toggleFeedbackHistory">
-              Score: {{ formatScore(lastReview.score) }}
+              Avg Score: {{ formatScore(averageScore) }}
             </span>
 
           </div>
@@ -520,7 +520,8 @@
             </div>
 
             <div v-else>
-              <div v-for="item in feedbackHistory" :key="item.id" class="feedback-history-item">
+              <div v-for="item in feedbackHistory" :key="item.id" class="feedback-history-item"
+                :class="item.score >= 0.7 ? 'feedback-history-item--high-score' : 'feedback-history-item--low-score'">
 
                 <div class="feedback-history-card-header">
                   <div>
@@ -719,7 +720,8 @@
           </div>
         </div>
 
-        <div v-if="result" class="feedback">
+        <div v-if="result" class="feedback"
+          :class="result.score >= 0.7 ? 'feedback--high-score' : 'feedback--low-score'">
           <p><strong>Score:</strong> {{ result.score }}</p>
           <p><strong>Feedback:</strong> {{ result.feedback }}</p>
           <p><strong>Updated memory score:</strong> {{ formatScore(result.updateMemoryScore) }}</p>

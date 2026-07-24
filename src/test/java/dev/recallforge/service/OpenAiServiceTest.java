@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -74,7 +75,7 @@ class OpenAiServiceTest {
     void generateQuestion_shortTopicContent_isKeptAsIsAndNotTruncated() {
         mockAiReply("Some question?");
 
-        openAiService.generateQuestion("Title", "  Short topic content  ");
+        openAiService.generateQuestion("Title", "  Short topic content  ", 0.5, List.of());
 
         String prompt = capturePromptSentToAi();
         assertThat(prompt).contains("Short topic content");
@@ -87,7 +88,7 @@ class OpenAiServiceTest {
         String longContent = "0123456789".repeat(350); // 3500 chars
         String expectedTruncated = longContent.substring(0, 3000) + "\n...[truncated]";
 
-        openAiService.generateQuestion("Title", longContent);
+        openAiService.generateQuestion("Title", longContent, 0.5, List.of());
 
         String prompt = capturePromptSentToAi();
         assertThat(prompt).contains(expectedTruncated);
@@ -98,10 +99,82 @@ class OpenAiServiceTest {
     void generateQuestion_nullTopicContent_doesNotThrowAndIsTreatedAsEmpty() {
         mockAiReply("Some question?");
 
-        assertThat(openAiService.generateQuestion("Title", null)).isEqualTo("Some question?");
+        assertThat(openAiService.generateQuestion("Title", null, 0.5, List.of())).isEqualTo("Some question?");
 
         String prompt = capturePromptSentToAi();
         assertThat(prompt).doesNotContain("null");
+    }
+
+    // --- proficiency guidance derived from memoryScore ---
+
+    @Test
+    void generateQuestion_memoryScoreBelowThreshold_labelsProficiencyEasy() {
+        mockAiReply("Some question?");
+
+        openAiService.generateQuestion("Title", "Content", 0.69, List.of());
+
+        String prompt = capturePromptSentToAi();
+        assertThat(prompt).contains("User's proficiency on this topic: EASY");
+    }
+
+    @Test
+    void generateQuestion_memoryScoreAtThreshold_labelsProficiencyMedium() {
+        mockAiReply("Some question?");
+
+        openAiService.generateQuestion("Title", "Content", 0.7, List.of());
+
+        String prompt = capturePromptSentToAi();
+        assertThat(prompt).contains("User's proficiency on this topic: MEDIUM");
+    }
+
+    @Test
+    void generateQuestion_memoryScoreAboveThreshold_labelsProficiencyMedium() {
+        mockAiReply("Some question?");
+
+        openAiService.generateQuestion("Title", "Content", 0.95, List.of());
+
+        String prompt = capturePromptSentToAi();
+        assertThat(prompt).contains("User's proficiency on this topic: MEDIUM");
+    }
+
+    // --- recent review history included in prompt ---
+
+    @Test
+    void generateQuestion_noRecentReviews_omitsRecentlyAskedSection() {
+        mockAiReply("Some question?");
+
+        openAiService.generateQuestion("Title", "Content", 0.5, List.of());
+
+        String prompt = capturePromptSentToAi();
+        assertThat(prompt).doesNotContain("Recently asked questions");
+    }
+
+    @Test
+    void generateQuestion_withRecentReviews_listsThemAndAsksToAvoidRepeats() {
+        mockAiReply("Some question?");
+        List<ReviewSummary> recentReviews = List.of(
+            new ReviewSummary("What is X?", 0.8, "Good understanding"),
+            new ReviewSummary("What is Y?", 0.3, "Missed the point"));
+
+        openAiService.generateQuestion("Title", "Content", 0.5, recentReviews);
+
+        String prompt = capturePromptSentToAi();
+        assertThat(prompt).contains("Recently asked questions on this topic (avoid repeating these):");
+        assertThat(prompt).contains("\"What is X?\" (score 0.80, feedback: Good understanding)");
+        assertThat(prompt).contains("\"What is Y?\" (score 0.30, feedback: Missed the point)");
+        assertThat(prompt).contains("Do not ask a question that duplicates or closely rephrases");
+    }
+
+    @Test
+    void generateQuestion_recentReviewWithBlankFeedback_omitsFeedbackSuffix() {
+        mockAiReply("Some question?");
+        List<ReviewSummary> recentReviews = List.of(new ReviewSummary("What is X?", 0.8, "  "));
+
+        openAiService.generateQuestion("Title", "Content", 0.5, recentReviews);
+
+        String prompt = capturePromptSentToAi();
+        assertThat(prompt).contains("\"What is X?\" (score 0.80)");
+        assertThat(prompt).doesNotContain("feedback:");
     }
 
     // --- trimUserAnswer, exercised through evaluateAnswer ---

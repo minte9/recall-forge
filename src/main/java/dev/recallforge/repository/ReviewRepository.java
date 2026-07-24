@@ -21,6 +21,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         Long userId
     );
 
+    List<Review> findTop3ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(
+        Long topicId,
+        Long userId
+    );
+
     @Modifying
     @Query("delete from Review r where r.user.id = :userId")
     void deleteByUserId(@Param("userId") Long userId);

@@ -3,6 +3,7 @@ package dev.recallforge.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -87,7 +88,7 @@ class ReviewServiceTest {
         assertThat(response.done()).isTrue();
         assertThat(response.message()).isEqualTo("All reviews are done for now. Come back later.");
         assertThat(response.topicId()).isNull();
-        verify(openAiService, never()).generateQuestion(any(), any());
+        verify(openAiService, never()).generateQuestion(any(), any(), anyDouble(), any());
     }
 
     @Test
@@ -96,7 +97,8 @@ class ReviewServiceTest {
         Topic topic = topicWithId(10L, null);
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
-        when(openAiService.generateQuestion("Title", "Content body")).thenReturn("What is X?");
+        when(openAiService.generateQuestion(eq("Title"), eq("Content body"), eq(0.6), any()))
+            .thenReturn("What is X?");
 
         ReviewQuestionResponse response = reviewService.startReview(null, "java", null);
 
@@ -119,7 +121,7 @@ class ReviewServiceTest {
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
-        when(openAiService.generateQuestion(any(), any())).thenReturn("Q");
+        when(openAiService.generateQuestion(any(), any(), anyDouble(), any())).thenReturn("Q");
 
         ReviewQuestionResponse response = reviewService.startReview(null, "java", null);
 
@@ -146,7 +148,8 @@ class ReviewServiceTest {
         Topic topic = topicWithId(42L, null);
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(42L, 1L)).thenReturn(topic);
-        when(openAiService.generateQuestion("Title", "Content body")).thenReturn("What is X?");
+        when(openAiService.generateQuestion(eq("Title"), eq("Content body"), eq(0.6), any()))
+            .thenReturn("What is X?");
 
         ReviewQuestionResponse response = reviewService.startReview(5L, "java", 42L);
 
@@ -155,6 +158,33 @@ class ReviewServiceTest {
         assertThat(response.done()).isFalse();
         verify(topicService, never()).selectNextTopic(any(), any());
         verify(topicService, never()).selectNextTopicByMarkdownFileId(any(), any());
+    }
+
+    @Test
+    void startReview_passesTopicMemoryScoreAndRecentReviewSummariesToQuestionGeneration() {
+        setUp();
+        Topic topic = topicWithId(15L, null);
+        Review review1 = new Review(topic, new UserAccount(), "Old Q1", "A1", 0.9, "fb1", 50);
+        Review review2 = new Review(topic, new UserAccount(), "Old Q2", "A2", 0.4, "fb2", 60);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
+        when(reviewRepository.findTop3ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(15L, 1L))
+            .thenReturn(List.of(review1, review2));
+        when(openAiService.generateQuestion(any(), any(), anyDouble(), any())).thenReturn("New question");
+
+        reviewService.startReview(null, "java", null);
+
+        ArgumentCaptor<Double> memoryScoreCaptor = ArgumentCaptor.forClass(Double.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<ReviewSummary>> reviewsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(openAiService).generateQuestion(
+            eq("Title"), eq("Content body"), memoryScoreCaptor.capture(), reviewsCaptor.capture());
+
+        assertThat(memoryScoreCaptor.getValue()).isEqualTo(0.6);
+        assertThat(reviewsCaptor.getValue()).containsExactly(
+            new ReviewSummary("Old Q1", 0.9, "fb1"),
+            new ReviewSummary("Old Q2", 0.4, "fb2"));
     }
 
     @Test
