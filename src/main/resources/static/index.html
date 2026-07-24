@@ -98,10 +98,10 @@
     }">
 
       <section class="panel left-panel" :class="{ expanded: leftExpanded }">
-        <button class="expand-btn" v-if="review" :title="leftExpanded ? 'Restore split view' : 'Expand markdown panel'"
+        <!-- <button class="expand-btn" v-if="review" :title="leftExpanded ? 'Restore split view' : 'Expand markdown panel'"
           @click="leftExpanded = !leftExpanded">
           {{ leftExpanded ? '◀' : '▶' }}
-        </button>
+        </button> -->
 
         <div class="panel-menu desktop-menu">
           <div class="panel-menu" @mouseenter="menuOpen = true" @mouseleave="menuOpen = false">
@@ -509,7 +509,7 @@
           <p>{{ review.question }}</p>
 
           <textarea v-model="userAnswer" placeholder="Write your answer here..."
-            @keydown.ctrl.enter="answerSubmitted ? startReview(review.topicId) : submitAnswer()">
+            @keydown.ctrl.enter="submitAnswer">
         </textarea>
 
           <div class="actions-row">
@@ -519,8 +519,7 @@
               <span>→</span> Next Review
             </button>
 
-            <button v-else class="review-btn" @click="skipReview()" :disabled="loading"
-              title="Ctrl+Shift+Enter">
+            <button v-else class="review-btn" @click="skipReview()" :disabled="loading">
               <span>→</span> Skip Today
             </button>
 
@@ -530,8 +529,7 @@
               Submit Answer
             </button>
 
-            <button v-else class="submit-btn" @click="startReview(review.topicId)" :disabled="loading"
-              title="Ctrl+Enter">
+            <button v-else class="submit-btn" @click="startReview(review.topicId)" :disabled="loading">
               <span class="btn-icon">↻</span>
               Try Again
             </button>
