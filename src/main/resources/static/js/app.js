@@ -211,17 +211,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return;
       }
 
-      if (!this.review || this.loading) {
+      if (!this.review || !this.answerSubmitted || this.loading) {
         return;
       }
 
       event.preventDefault();
-
-      if (this.answerSubmitted) {
-        this.startReview();
-      } else {
-        this.skipReview();
-      }
+      this.startReview();
     },
 
     onTitleClick() {
