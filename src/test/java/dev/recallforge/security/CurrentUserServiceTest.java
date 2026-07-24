@@ -26,6 +26,7 @@ import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.exception.TemplateUserOperationException;
 import dev.recallforge.repository.MarkdownFileRepository;
+import dev.recallforge.repository.QuestionGenerationRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserAccountRepository;
@@ -50,6 +51,9 @@ class CurrentUserServiceTest {
     private UserRewardRepository userRewardRepository;
 
     @Mock
+    private QuestionGenerationRepository questionGenerationRepository;
+
+    @Mock
     private OAuth2User oauthUser;
 
     private CurrentUserService currentUserService;
@@ -60,7 +64,8 @@ class CurrentUserServiceTest {
             reviewRepository,
             topicRepository,
             markdownFileRepository,
-            userRewardRepository
+            userRewardRepository,
+            questionGenerationRepository
         );
     }
 

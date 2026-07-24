@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,7 +31,9 @@ import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
 import dev.recallforge.dto.ReviewQueueResponse;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.exception.DailyQuestionLimitExceededException;
 import dev.recallforge.exception.DailyReviewLimitExceededException;
+import dev.recallforge.repository.QuestionGenerationRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.security.CurrentUserService;
 
@@ -42,6 +45,9 @@ class ReviewServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
+
+    @Mock
+    private QuestionGenerationRepository questionGenerationRepository;
 
     @Mock
     private OpenAiService openAiService;
@@ -62,10 +68,12 @@ class ReviewServiceTest {
 
     private void setUp() {
         reviewService = new ReviewService(
-            topicService, reviewRepository, openAiService,
+            topicService, reviewRepository, questionGenerationRepository, openAiService,
             repetitionService, rewardService, currentUserService,
             reviewLimitProperties
         );
+
+        lenient().when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
     }
 
     private Topic topicWithId(long id, MarkdownFile markdownFile) {
@@ -158,6 +166,40 @@ class ReviewServiceTest {
         assertThat(response.done()).isFalse();
         verify(topicService, never()).selectNextTopic(any(), any());
         verify(topicService, never()).selectNextTopicByMarkdownFileId(any(), any());
+    }
+
+    @Test
+    void startReview_dailyQuestionLimitReached_throwsAndSkipsQuestionGeneration() {
+        setUp();
+        Topic topic = topicWithId(10L, null);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
+        when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
+        when(questionGenerationRepository.countByUserIdAndGeneratedAtAfter(eq(1L), any()))
+            .thenReturn(50L);
+
+        assertThatThrownBy(() -> reviewService.startReview(null, "java", null))
+            .isInstanceOf(DailyQuestionLimitExceededException.class);
+
+        verify(openAiService, never()).generateQuestion(any(), any(), anyDouble(), any());
+        verify(questionGenerationRepository, never()).save(any());
+    }
+
+    @Test
+    void startReview_belowDailyQuestionLimit_generatesQuestionAndRecordsGeneration() {
+        setUp();
+        Topic topic = topicWithId(10L, null);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
+        when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
+        when(questionGenerationRepository.countByUserIdAndGeneratedAtAfter(eq(1L), any()))
+            .thenReturn(49L);
+        when(openAiService.generateQuestion(any(), any(), anyDouble(), any())).thenReturn("What is X?");
+
+        ReviewQuestionResponse response = reviewService.startReview(null, "java", null);
+
+        assertThat(response.question()).isEqualTo("What is X?");
+        verify(questionGenerationRepository).save(any());
     }
 
     @Test

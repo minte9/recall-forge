@@ -14,6 +14,7 @@ import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.exception.TemplateUserOperationException;
 import dev.recallforge.repository.MarkdownFileRepository;
+import dev.recallforge.repository.QuestionGenerationRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserAccountRepository;
@@ -29,19 +30,22 @@ public class CurrentUserService {
     private final TopicRepository topicRepository;
     private final MarkdownFileRepository markdownFileRepository;
     private final UserRewardRepository userRewardRepository;
+    private final QuestionGenerationRepository questionGenerationRepository;
 
     public CurrentUserService(
             UserAccountRepository userAccountRepository,
             ReviewRepository reviewRepository,
             TopicRepository topicRepository,
             MarkdownFileRepository markdownFileRepository,
-            UserRewardRepository userRewardRepository) {
+            UserRewardRepository userRewardRepository,
+            QuestionGenerationRepository questionGenerationRepository) {
 
         this.userAccountRepository = userAccountRepository;
         this.reviewRepository = reviewRepository;
         this.topicRepository = topicRepository;
         this.markdownFileRepository = markdownFileRepository;
         this.userRewardRepository = userRewardRepository;
+        this.questionGenerationRepository = questionGenerationRepository;
     }
 
     public UserAccount currentUser() {
@@ -100,6 +104,7 @@ public class CurrentUserService {
         topicRepository.deleteByUserId(userId);
         markdownFileRepository.deleteByUserId(userId);
         userRewardRepository.deleteByUserId(userId);
+        questionGenerationRepository.deleteByUserId(userId);
     }
 
     @Transactional
