@@ -201,7 +201,39 @@
 }
 
 .reset-file-reviews-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
     margin: 0;
+    background: var(--orange-dark);
+}
+
+.reset-file-reviews-button:hover,
+.reset-file-reviews-button:disabled:hover {
+    background: var(--orange-dark);
+}
+
+.start-review-file-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 42px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 8px;
+    background: #ff9f1c;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.start-review-file-button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
 }
 
 .warning-button:disabled,
@@ -1678,6 +1710,14 @@
 
     .layout.mobile-review>.left-panel {
       display: block;
+    }
+
+    .layout.mobile-review-below-markdown>.left-panel {
+      order: 1;
+    }
+
+    .layout.mobile-review-below-markdown>.app-panel {
+      order: 2;
     }
 
     .stats-grid {

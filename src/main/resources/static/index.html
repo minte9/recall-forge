@@ -94,7 +94,8 @@
       expanded: leftExpanded,
       'mobile-dashboard': mobileView === 'dashboard',
       'mobile-markdown': mobileView === 'markdown',
-      'mobile-review': mobileView === 'review'
+      'mobile-review': mobileView === 'review',
+      'mobile-review-below-markdown': mobileView === 'review' && mobileReviewBelowMarkdown
     }">
 
       <section class="panel left-panel" :class="{ expanded: leftExpanded }">
@@ -267,7 +268,7 @@
             </summary>
 
             <div v-for="file in group.files" :key="file.markdownFileId" class="markdown-row clickable"
-              @click="isDesktop ? previewMarkdownFile(file.markdownFileId) : startReviewForFile(file.markdownFileId)">
+              @click="previewMarkdownFile(file.markdownFileId)">
 
               <div class="row-left">
                 <div>
@@ -324,11 +325,18 @@
 
           <div v-if="!markdownLoading && !markdownEditing && currentMarkdownFileId"
             class="markdown-file-actions">
+            <button v-if="!review && !isDesktop" class="start-review-file-button"
+              @click="startReviewForFile(currentMarkdownFileId)" :disabled="loading">
+              <span class="btn-icon">►</span>
+              {{ loading ? "Loading..." : "Start Review" }}
+            </button>
+
             <button
               class="warning-button reset-file-reviews-button"
               :disabled="currentMarkdownReviewCount === 0"
               :title="currentMarkdownReviewCount === 0 ? 'No reviews to reset for this file' : ''"
               @click="resetFileReviews">
+              <span class="btn-icon">↻</span>
               Reset Reviews
             </button>
           </div>
