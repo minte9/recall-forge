@@ -79,6 +79,19 @@ const Api = {
     return await response.json();
   },
 
+  async getMarkdown(markdownFileId) {
+    const response = await fetch("/api/markdown/" + encodeURIComponent(markdownFileId), {
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not load markdown file.");
+    }
+
+    return await response.json();
+  },
+
   async updateMarkdown(markdownFileId, content) {
     const response = await fetch("/api/markdown/" + encodeURIComponent(markdownFileId), {
       method: "PUT",

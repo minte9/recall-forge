@@ -36,6 +36,11 @@ public class MarkdownController {
         return markdownFileService.upload(file);
     }
 
+    @GetMapping("/{id}")
+    public MarkdownUploadResponse getMarkdown(@PathVariable Long id) {
+        return markdownFileService.getById(id);
+    }
+
     @PutMapping("/{id}")
     public MarkdownUploadResponse updateMarkdown(
             @PathVariable Long id,

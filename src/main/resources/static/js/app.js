@@ -345,10 +345,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.environmentMenuOpen = !this.environmentMenuOpen;
     },
 
-    async startReview(topicId = null) {
+    async startReview(topicId = null, allowBroaderFallback = !topicId) {
       await this.loadReviewQuestion(
         () => Api.startReview(this.currentMarkdownFileId, this.currentCategory, topicId),
-        !topicId
+        allowBroaderFallback
       );
     },
 
@@ -365,8 +365,15 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async loadReviewQuestion(fetchQuestion, allowBroaderFallback) {
+      // If a file's content is already showing (e.g. previewed on desktop
+      // before clicking Start Review), don't flash a loading state over it —
+      // only show "Loading..." when there's no markdown on screen yet.
+      const markdownAlreadyShown = !!this.currentMarkdownFileId && !!this.markdown;
+
       this.loading = true;
-      this.markdownLoading = true;
+      if (!markdownAlreadyShown) {
+        this.markdownLoading = true;
+      }
       this.markdownEditing = false;
       this.mobilePageTitle = "Review";
       this.error = null;
@@ -423,14 +430,16 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     async startReviewForFile(markdownFileId) {
       this.currentMarkdownFileId = markdownFileId;
-      await this.startReview();
 
-      // Nothing was due in this specific file, so startReview()'s own
-      // fallback already broadened the search (possibly landing on a
-      // different file, or finding nothing at all). Since the user
-      // explicitly chose this file, show them its first topic anyway
-      // instead of silently redirecting away from it.
-      if (!this.review || this.review.markdownFileId !== markdownFileId) {
+      // Disable broadening here so a miss never briefly renders a due
+      // question from a different file — go straight to this file's own
+      // first topic below instead.
+      await this.startReview(null, false);
+
+      // Nothing was due in this specific file. Since the user explicitly
+      // chose this file, show them its first topic anyway instead of
+      // silently redirecting away from it.
+      if (!this.review) {
         let topics = [];
 
         try {
@@ -443,6 +452,41 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           this.currentMarkdownFileId = markdownFileId;
           await this.startReview(topics[0].id);
         }
+      }
+    },
+
+    // Desktop-only: shows a file's markdown without generating a review
+    // question, so browsing files doesn't spend the daily question limit.
+    async previewMarkdownFile(markdownFileId) {
+      this.currentMarkdownFileId = markdownFileId;
+      this.review = null;
+      this.result = null;
+      this.error = null;
+      this.success = null;
+      this.markdownEditing = false;
+      this.leftPanel = "markdown";
+      this.mobilePageTitle = "Markdown";
+      this.mobileView = "markdown";
+      this.markdownLoading = true;
+
+      try {
+        const data = await Api.getMarkdown(markdownFileId);
+        this.markdown = data.content;
+      } catch (err) {
+        this.error = err.message || "Could not load markdown file.";
+      } finally {
+        this.markdownLoading = false;
+      }
+
+      await this.loadTopicsInFile(markdownFileId);
+      await this.loadMarkdownReviewCount();
+    },
+
+    async startReviewFromDashboard() {
+      if (this.currentMarkdownFileId) {
+        await this.startReviewForFile(this.currentMarkdownFileId);
+      } else {
+        await this.startReview();
       }
     },
 

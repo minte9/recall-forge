@@ -89,6 +89,19 @@ public class MarkdownFileService {
         return importMarkdown(content, null, false, displayOrder);
     }
 
+    public MarkdownUploadResponse getById(Long markdownFileId) {
+        Long userId = currentUserService.currentUserId();
+
+        MarkdownFile markdownFile = markdownFileRepository.findByIdAndUserId(markdownFileId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Markdown file not found: " + markdownFileId));
+
+        return new MarkdownUploadResponse(
+                markdownFile.getId(),
+                markdownFile.getFilename(),
+                markdownFile.getContent()
+        );
+    }
+
     @Transactional
     public MarkdownUploadResponse update(Long markdownFileId, String content) throws Exception {
         if (content.length() > MAX_CONTENT_LENGTH) {

@@ -267,7 +267,7 @@
             </summary>
 
             <div v-for="file in group.files" :key="file.markdownFileId" class="markdown-row clickable"
-              @click="startReviewForFile(file.markdownFileId)">
+              @click="isDesktop ? previewMarkdownFile(file.markdownFileId) : startReviewForFile(file.markdownFileId)">
 
               <div class="row-left">
                 <div>
@@ -738,7 +738,8 @@
           </div>
 
           <div class="actions-row">
-            <button class="review-btn" @click="startReview()" :disabled="loading || !dashboard || dashboard.dueNow === 0">
+            <button class="review-btn" @click="startReviewFromDashboard()"
+              :disabled="loading || (!currentMarkdownFileId && (!dashboard || dashboard.dueNow === 0))">
               <span class="btn-icon">►</span>
               {{ loading ? "Loading..." : "Start Review" }}
             </button>
