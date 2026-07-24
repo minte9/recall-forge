@@ -310,9 +310,10 @@
 
           <div v-else-if="markdownEditing" class="markdown-editor-wrap">
             <textarea ref="markdownEditor" class="markdown markdown-editor" v-model="markdown"
-              @input="resizeMarkdownEditor" @keydown.esc="showMarkdown()"></textarea>
+              @input="resizeMarkdownEditor" @keydown.esc="showMarkdown()"
+              @keydown.ctrl.enter="submitMarkdownEdit"></textarea>
 
-            <button class="markdown-editor-submit" @click="submitMarkdownEdit">
+            <button class="markdown-editor-submit" @click="submitMarkdownEdit" title="Ctrl+Enter">
               Submit
             </button>
           </div>
@@ -493,7 +494,8 @@
 
           <div class="actions-row">
 
-            <button class="review-btn" @click="startReview()" :disabled="loading || !answerSubmitted">
+            <button class="review-btn" @click="startReview()" :disabled="loading || !answerSubmitted"
+              title="Ctrl+Shift+Enter">
               <span>→</span> Next Review
             </button>
 

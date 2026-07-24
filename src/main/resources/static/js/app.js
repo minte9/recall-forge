@@ -118,6 +118,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
   async mounted() {
     document.addEventListener("click", this.handleBodyClick);
+    document.addEventListener("keydown", this.handleGlobalKeydown);
 
     await this.loadCategoryOptions();
     await this.loadDashboard();
@@ -133,6 +134,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
   beforeUnmount() {
     document.removeEventListener("click", this.handleBodyClick);
+    document.removeEventListener("keydown", this.handleGlobalKeydown);
   },
 
   methods: {
@@ -202,6 +204,19 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       if (menu && !menu.contains(event.target)) {
         this.mobileMenuOpen = false;
       }
+    },
+
+    handleGlobalKeydown(event) {
+      if (!event.ctrlKey || !event.shiftKey || event.key !== "Enter") {
+        return;
+      }
+
+      if (!this.review || !this.answerSubmitted || this.loading) {
+        return;
+      }
+
+      event.preventDefault();
+      this.startReview();
     },
 
     onTitleClick() {
