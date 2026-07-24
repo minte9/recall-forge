@@ -514,9 +514,14 @@
 
           <div class="actions-row">
 
-            <button class="review-btn" @click="startReview()" :disabled="loading || !answerSubmitted"
+            <button v-if="answerSubmitted" class="review-btn" @click="startReview()" :disabled="loading"
               title="Ctrl+Shift+Enter">
               <span>→</span> Next Review
+            </button>
+
+            <button v-else class="review-btn" @click="skipReview()" :disabled="loading"
+              title="Ctrl+Shift+Enter">
+              <span>→</span> Skip Today
             </button>
 
             <button v-if="!answerSubmitted" class="submit-btn" @click="submitAnswer" :disabled="loading"

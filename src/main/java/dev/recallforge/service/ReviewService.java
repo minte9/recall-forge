@@ -106,6 +106,17 @@ public class ReviewService {
                 null);
     }
 
+    public ReviewQuestionResponse skipTopic(Long topicId, Long markdownFileId, String category) {
+        Long userId = currentUserService.currentUserId();
+        Topic topic = topicService.getTopic(topicId, userId);
+
+        topic.skipReview(repetitionService.calculateSkipReviewAt());
+        topicService.save(topic);
+        topicService.flush();
+
+        return startReview(markdownFileId, category, null);
+    }
+
     public AnswerResponse answerQuestion(Long topicId, String question, String userAnswer) {
         Long userId = currentUserService.currentUserId();
         Topic topic = topicService.getTopic(topicId, userId);

@@ -46,6 +46,21 @@ public class ReviewController {
     }
 
     /**
+     * Skips the given topic for today without answering it.
+     *
+     * Pushes the topic's next review out by a day (no memoryScore change,
+     * no Review row written) and hands back a fresh question, same shape
+     * as startReview.
+     */
+    @PostMapping("/{topicId}/skip")
+    public ReviewQuestionResponse skipTopic(
+            @PathVariable Long topicId,
+            @RequestParam(required = false) Long markdownFileId,
+            @RequestParam(required = false, defaultValue = "Java") String category) {
+        return reviewService.skipTopic(topicId, markdownFileId, category);
+    }
+
+    /**
      * Evaluates the user's answer.
      * 
      * The backend sends the question + user answer + topic content to openAI, 
