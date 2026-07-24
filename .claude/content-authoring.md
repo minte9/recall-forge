@@ -51,6 +51,12 @@ not teach the topic from scratch.
 - **Code should be short and commented**, not a full runnable-app dump.
   Explain the non-obvious part with a comment; trim boilerplate (imports,
   full class ceremony) unless it's the point of the topic.
+- **Keep code lines ≤ 80 characters, including trailing comments.** The
+  review panel renders code in a fixed-width, non-wrapping `<pre>` block
+  (~75-80 usable characters at desktop width) — longer lines trigger a
+  horizontal scrollbar instead of wrapping. If an inline comment would push
+  a line past 80 chars, put the comment on its own line above the code
+  instead of trailing it, or shorten it.
 - File titles should be short and specific — prefer full names over
   ambiguous abbreviations (`Inversion of Control`, not `IoC`), but don't let
   them run long (`Boot Testing`, not `Testing with @SpringBootTest`).
