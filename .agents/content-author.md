@@ -113,6 +113,8 @@ Before considering the work complete, verify that:
 - Every topic teaches exactly one main idea.
 - No topic duplicates another subcategory.
 - Code examples illustrate concepts rather than APIs.
+- Code lines (including trailing comments) stay within ~80 characters so
+  they don't overflow the review panel and trigger a horizontal scrollbar.
 - Each explanation can be read in under one minute.
 - Every sentence contributes to helping the learner remember the concept.
 - The overall content is optimized for review sessions rather than reference reading.
