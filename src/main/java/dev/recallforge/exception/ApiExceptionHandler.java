@@ -49,4 +49,11 @@ public class ApiExceptionHandler {
                 .status(HttpStatus.TOO_MANY_REQUESTS)
                 .body(ex.getMessage());
     }
+
+    @ExceptionHandler(DailyQuestionLimitExceededException.class)
+    public ResponseEntity<String> handleDailyQuestionLimitExceeded(DailyQuestionLimitExceededException ex) {
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ex.getMessage());
+    }
 }

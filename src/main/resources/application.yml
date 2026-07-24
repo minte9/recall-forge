@@ -62,3 +62,4 @@ app:
     enabled: ${APP_LOGIN_ENABLED:true}
   reviews:
     daily-limit: ${APP_DAILY_REVIEW_LIMIT:20}
+    daily-question-limit: ${APP_DAILY_QUESTION_LIMIT:50}

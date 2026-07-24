@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.dto.FeedbackHistoryResponse;
+import dev.recallforge.domain.QuestionGeneration;
 import dev.recallforge.domain.Review;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
@@ -17,7 +18,9 @@ import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
 import dev.recallforge.dto.ReviewQueueResponse;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.exception.DailyQuestionLimitExceededException;
 import dev.recallforge.exception.DailyReviewLimitExceededException;
+import dev.recallforge.repository.QuestionGenerationRepository;
 import dev.recallforge.repository.ReviewRepository;
 import jakarta.transaction.Transactional;
 
@@ -28,6 +31,7 @@ public class ReviewService {
 
     private final TopicService topicService;
     private final ReviewRepository reviewRepository;
+    private final QuestionGenerationRepository questionGenerationRepository;
     private final OpenAiService openAiService;
     private final RepetitionService repetitionService;
     private final RewardService rewardService;
@@ -36,12 +40,14 @@ public class ReviewService {
 
     public ReviewService(
             TopicService topicService, ReviewRepository reviewRepository,
+            QuestionGenerationRepository questionGenerationRepository,
             OpenAiService openAiService, RepetitionService repetitionService,
             RewardService rewardService, CurrentUserService currentUserService,
             AppReviewLimitProperties reviewLimitProperties) {
 
         this.topicService = topicService;
         this.reviewRepository = reviewRepository;
+        this.questionGenerationRepository = questionGenerationRepository;
         this.openAiService = openAiService;
         this.repetitionService = repetitionService;
         this.rewardService = rewardService;
@@ -62,6 +68,13 @@ public class ReviewService {
             return ReviewQuestionResponse.noReviewsDue();
         }
 
+        long questionsToday = questionGenerationRepository.countByUserIdAndGeneratedAtAfter(
+                userId, LocalDate.now().atStartOfDay());
+
+        if (questionsToday >= reviewLimitProperties.dailyQuestionLimit()) {
+            throw new DailyQuestionLimitExceededException();
+        }
+
         Topic topic = topicOptional.get();
 
         List<ReviewSummary> recentReviews = reviewRepository
@@ -72,6 +85,8 @@ public class ReviewService {
 
         String question = openAiService.generateQuestion(
                 topic.getTitle(), topic.getContent(), topic.getMemoryScore(), recentReviews);
+
+        questionGenerationRepository.save(new QuestionGeneration(userId));
 
         String markdownContent = topic.getMarkdownFile() != null
                 ? topic.getMarkdownFile().getContent()
