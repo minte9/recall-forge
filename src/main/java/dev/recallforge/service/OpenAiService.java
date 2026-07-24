@@ -1,5 +1,6 @@
 package dev.recallforge.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -19,12 +20,19 @@ public class OpenAiService {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAiService.class);
 
+    // Below this, the user is still shaky on the topic and gets recall-level questions.
+    private static final double PROFICIENCY_THRESHOLD = 0.7;
+
     public OpenAiService(RestClient openAiRestClient, @Value("${openai.model}") String model) {
         this.openAiRestClient = openAiRestClient;
         this.model = model;
     }
 
-    public String generateQuestion(String topicTitle, String topicContent) {
+    public String generateQuestion(
+            String topicTitle,
+            String topicContent,
+            double memoryScore,
+            List<ReviewSummary> recentReviews) {
         String prompt = """
         Create one simple question to test understanding of this topic.
 
@@ -35,7 +43,9 @@ public class OpenAiService {
         are part of the explanation, not just syntax):
         %s
 
-        Rules:
+        User's proficiency on this topic: %s
+
+        %sRules:
         - Return only the question.
         - Keep it short (one sentence when possible).
         - Test understanding of the concept, not memorization of code syntax.
@@ -47,12 +57,53 @@ public class OpenAiService {
           Do not require outside knowledge or reasoning that isn't spelled out there.
         - Before asking "why" or "how", confirm the content above actually explains that
           reason or mechanism. If it doesn't, ask a "what" or "when" question instead.
+        - Do not ask a question that duplicates or closely rephrases one of the
+          recently asked questions listed above, if any.
         - Do not include the answer.
         """;
-        prompt = prompt.formatted(topicTitle, trimTopicContent(topicContent));
+        prompt = prompt.formatted(
+                topicTitle,
+                trimTopicContent(topicContent),
+                proficiencyGuidance(memoryScore),
+                recentReviewsSection(recentReviews));
 
         AiResponse response = ask(prompt, 40);  // question generation
         return response.content();
+    }
+
+    private String proficiencyGuidance(double memoryScore) {
+        if (memoryScore < PROFICIENCY_THRESHOLD) {
+            return "EASY - the user is still building basic understanding of this topic. "
+                + "Ask a foundational, recall-oriented question about a single concept "
+                + "explicitly stated above.";
+        }
+
+        return "MEDIUM - the user already has a solid grasp of this topic. "
+            + "Ask a question that requires connecting two ideas, explaining a "
+            + "relationship, or applying the concept, not just recalling a definition.";
+    }
+
+    private String recentReviewsSection(List<ReviewSummary> recentReviews) {
+        if (recentReviews == null || recentReviews.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder section = new StringBuilder(
+            "Recently asked questions on this topic (avoid repeating these):\n");
+
+        for (ReviewSummary review : recentReviews) {
+            String feedbackSuffix = review.feedback() == null || review.feedback().isBlank()
+                ? ""
+                : ", feedback: " + trimText(review.feedback(), 200);
+
+            section.append("- \"%s\" (score %.2f%s)\n".formatted(
+                trimText(review.question(), 200),
+                review.score(),
+                feedbackSuffix));
+        }
+        section.append("\n");
+
+        return section.toString();
     }
 
     public EvaluationResult evaluateAnswer(String topicTitle, String topicContent, String question, String userAnswer) {
@@ -190,6 +241,15 @@ public class OpenAiService {
         }
 
         return trimmed.substring(0, maxChars) + "\n...[truncated]";
+    }
+
+    private String trimText(String text, int maxChars) {
+        if (text == null) {
+            return "";
+        }
+
+        String trimmed = text.trim();
+        return trimmed.length() <= maxChars ? trimmed : trimmed.substring(0, maxChars);
     }
 
     private String trimUserAnswer(String answer) {
