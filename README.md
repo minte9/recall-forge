@@ -93,6 +93,15 @@ v1.0.5
 - 8.7 Login disabled
 - 8.9 Daily reviews limit
 
+### 9. Tokens
+
+- 9.1 Difficutly aware questions
+- 9.2 User tokens spent
+- 9.3 Daily caps (reviews and questions)
+- 9.4 Skip today (and shortcuts)
+- 9.5 Architecture overview doc
+- 9.6 Main classes header comments
+
 ## Architecture
 
 ![Screenshot](docs/images/recall-forge_architecture.png)
