@@ -1,5 +1,6 @@
 package dev.recallforge.controller;
 
+import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.dto.CurrentUserResponse;
 import dev.recallforge.security.CurrentUserService;
@@ -16,9 +17,13 @@ import org.springframework.http.ResponseEntity;
 public class CurrentUserController {
 
     private final CurrentUserService currentUserService;
+    private final AppReviewLimitProperties reviewLimitProperties;
 
-    public CurrentUserController(CurrentUserService currentUserService) {
+    public CurrentUserController(
+            CurrentUserService currentUserService,
+            AppReviewLimitProperties reviewLimitProperties) {
         this.currentUserService = currentUserService;
+        this.reviewLimitProperties = reviewLimitProperties;
     }
 
     @GetMapping("/me")
@@ -31,7 +36,9 @@ public class CurrentUserController {
             user.isAdmin(),
             user.getDisplayName(),
             user.getRole().name(),
-            user.getAvatarUrl()
+            user.getAvatarUrl(),
+            reviewLimitProperties.dailyLimit(),
+            reviewLimitProperties.dailyQuestionLimit()
         );
     }
 

@@ -3,8 +3,10 @@ package dev.recallforge.dto;
 public record CurrentUserResponse(
     Long id,
     String email,
-    boolean admin, 
+    boolean admin,
     String displayName,
     String role,
-    String avatarUrl
+    String avatarUrl,
+    int dailyReviewLimit,
+    int dailyQuestionLimit
 ) {}
