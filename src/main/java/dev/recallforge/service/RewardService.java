@@ -12,6 +12,13 @@ import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
 import dev.recallforge.security.CurrentUserService;
 
+/**
+ * XP/level/streak/mastery bookkeeping for the current user, backed by a
+ * single {@link UserReward} row per user. {@link #rewardDefaultUser} is
+ * called by {@link ReviewService} after each graded answer; {@link
+ * #getCurrentUserReward} is a read-only variant used by
+ * {@code DashboardService} to display current standing without granting XP.
+ */
 @Service
 public class RewardService {
 

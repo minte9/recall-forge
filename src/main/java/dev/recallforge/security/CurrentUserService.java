@@ -20,6 +20,14 @@ import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserAccountRepository;
 import dev.recallforge.repository.UserRewardRepository;
 
+/**
+ * Resolves "who is making this request" from the Spring Security context
+ * (an {@link OAuth2AuthenticationToken}) into a {@link UserAccount}, and
+ * scopes destructive "danger zone" resets to that user. Nearly every other
+ * service calls {@link #currentUserId()} to scope its queries, so this is
+ * the one place that knows how to go from the OAuth2 principal to a user
+ * row.
+ */
 @Service
 public class CurrentUserService {
 

@@ -14,9 +14,20 @@ import dev.recallforge.security.DatabaseOAuth2UserService;
 import dev.recallforge.security.DatabaseOidcUserService;
 import dev.recallforge.exception.LoginDisabledException;
 
+/**
+ * Builds the security filter chain with three distinct modes, checked in
+ * order: {@link AppSecurityProperties#enabled()} off -&gt; everything
+ * permitted (local/dev bypass); {@link AppLoginProperties#enabled()} off
+ * -&gt; existing sessions keep working but no new login is possible;
+ * otherwise -&gt; normal OAuth2 login via {@link DatabaseOAuth2UserService}
+ * (GitHub) / {@link DatabaseOidcUserService} (Google). See the inline
+ * comments in {@link #securityFilterChain} for why CSRF is disabled and why
+ * {@code /oauth2/**} is deliberately excluded from the login-disabled
+ * permit-list.
+ */
 @Configuration
 @EnableConfigurationProperties({
-    AppSecurityProperties.class, 
+    AppSecurityProperties.class,
     AppLoginProperties.class
 })
 public class SecurityConfig {

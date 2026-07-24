@@ -18,6 +18,14 @@ import dev.recallforge.domain.Topic;
 import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
 
+/**
+ * Topic lookup and "what's next" selection. The two
+ * {@code selectNextTopic*} methods each apply their own tie-breaking order
+ * (subcategory/file/topic-number, or file/topic-number for a single-file
+ * queue) so due topics come back in a stable, document-like order instead
+ * of database id order. Used by {@link ReviewService} to pick the topic for
+ * the next review.
+ */
 @Service
 public class TopicService {
 

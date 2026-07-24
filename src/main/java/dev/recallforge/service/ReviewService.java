@@ -26,6 +26,17 @@ import jakarta.transaction.Transactional;
 
 import dev.recallforge.security.CurrentUserService;
 
+/**
+ * Orchestrates the review lifecycle for the current user: picks the next
+ * due topic (via {@link TopicService}), gets a question from
+ * {@link OpenAiService}, grades the submitted answer, updates the topic's
+ * memory score and next-review date via {@link RepetitionService}, awards
+ * XP via {@link RewardService}, and enforces the daily review/question
+ * limits from {@link AppReviewLimitProperties}. {@code evaluateAnswer} and
+ * {@code saveAnswer} are split out (rather than inlined in
+ * {@code answerQuestion}) so a caller can grade an answer without
+ * necessarily persisting it.
+ */
 @Service
 public class ReviewService {
 

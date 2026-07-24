@@ -24,6 +24,12 @@ import dev.recallforge.repository.SubcategoryReviewCountProjection;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.security.CurrentUserService;
 
+/**
+ * Read-only aggregation for the dashboard view: due-topic counts, weak/strong
+ * knowledge areas, per-markdown-file review summaries, category options, and
+ * daily-review-limit projections. Delegates XP/streak data to
+ * {@link RewardService} rather than duplicating it.
+ */
 @Service
 public class DashboardService {
 

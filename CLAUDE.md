@@ -6,6 +6,7 @@ General rules:
 - Prefer small, focused changes.
 
 Task guides:
+- For an architecture overview (request flow, package layout, feature → class index), read `docs/ARCHITECTURE.md` before exploring an unfamiliar area.
 - For unit tests, read `.claude/unit-testing.md`.
 - For integration tests, read `.claude/integration-testing.md`.
 - For debugging, read `.claude/debugging.md`.

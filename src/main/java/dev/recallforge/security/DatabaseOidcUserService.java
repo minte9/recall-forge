@@ -12,6 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * OIDC login path (Google): delegates to Spring's {@link OidcUserService}
+ * to fetch/validate the ID token, then upserts a {@link UserAccount} keyed
+ * by {@code (provider, providerUserId)}. See {@link DatabaseOAuth2UserService}
+ * for the plain-OAuth2 (GitHub) equivalent.
+ */
 @Service
 public class DatabaseOidcUserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
 

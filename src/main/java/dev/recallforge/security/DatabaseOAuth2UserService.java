@@ -13,6 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * Plain OAuth2 login path (GitHub): delegates to Spring's
+ * {@link DefaultOAuth2UserService} to fetch the provider profile, then
+ * upserts a {@link UserAccount} keyed by {@code (provider, providerUserId)}.
+ * See {@link DatabaseOidcUserService} for the OIDC (Google) equivalent —
+ * kept as a separate class because Spring Security wires OAuth2 and OIDC
+ * logins through different service interfaces.
+ */
 @Service
 public class DatabaseOAuth2UserService
     implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {

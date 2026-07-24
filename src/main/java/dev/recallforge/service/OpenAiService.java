@@ -12,6 +12,14 @@ import tools.jackson.databind.JsonNode;
 
 import dev.recallforge.dto.AiResponse;
 
+/**
+ * All prompt-building and response-parsing for OpenAI calls lives here:
+ * {@link #generateQuestion} builds a review question from a topic (adjusting
+ * difficulty by memory score and avoiding repeats from recent reviews), and
+ * {@link #evaluateAnswer} grades a submitted answer into a 0-1 score plus
+ * feedback. Called by {@link ReviewService}. Uses the {@code RestClient}
+ * bean configured in {@code config/OpenAiConfig}.
+ */
 @Service
 public class OpenAiService {
     

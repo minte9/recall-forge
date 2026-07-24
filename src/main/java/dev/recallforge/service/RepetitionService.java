@@ -4,9 +4,17 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
+/**
+ * Pure spaced-repetition math: no persistence, no user context.
+ *
+ * Used by {@link ReviewService} after grading an answer to blend the new
+ * score into a topic's memory score and to pick the next review date from
+ * that score. Kept separate from {@link ReviewService} so the scoring rules
+ * are easy to find and adjust without touching orchestration logic.
+ */
 @Service
 public class RepetitionService {
-    
+
     /**
      * Memory score update:
      * 
