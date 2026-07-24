@@ -42,4 +42,13 @@ public class RepetitionService {
 
         return LocalDateTime.now().plusDays(intervalDays);
     }
+
+    /**
+     * Skipping a question isn't an answer, so it shouldn't touch memoryScore.
+     * Push it out by the shortest existing interval so it drops out of
+     * today's due queue without implying anything about answer quality.
+     */
+    public LocalDateTime calculateSkipReviewAt() {
+        return LocalDateTime.now().plusDays(1);
+    }
 }

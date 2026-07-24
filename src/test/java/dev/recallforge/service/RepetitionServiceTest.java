@@ -53,4 +53,13 @@ class RepetitionServiceTest {
 
         assertThat(result).isBetween(before.plusDays(14), after.plusDays(14));
     }
+
+    @Test
+    void calculateSkipReviewAt_schedules1DayOut() {
+        LocalDateTime before = LocalDateTime.now();
+        LocalDateTime result = repetitionService.calculateSkipReviewAt();
+        LocalDateTime after = LocalDateTime.now();
+
+        assertThat(result).isBetween(before.plusDays(1), after.plusDays(1));
+    }
 }

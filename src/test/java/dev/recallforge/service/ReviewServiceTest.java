@@ -203,6 +203,58 @@ class ReviewServiceTest {
     }
 
     @Test
+    void skipTopic_pushesNextReviewAtOneDayWithoutChangingMemoryScoreOrWritingReview() {
+        setUp();
+        Topic topic = topicWithId(20L, null);
+        double originalMemoryScore = topic.getMemoryScore();
+        LocalDateTime skipReviewAt = LocalDateTime.now().plusDays(1);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(20L, 1L)).thenReturn(topic);
+        when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
+        when(repetitionService.calculateSkipReviewAt()).thenReturn(skipReviewAt);
+        when(openAiService.generateQuestion(any(), any(), anyDouble(), any())).thenReturn("New Q");
+
+        reviewService.skipTopic(20L, null, "java");
+
+        assertThat(topic.getMemoryScore()).isEqualTo(originalMemoryScore);
+        assertThat(topic.getNextReviewAt()).isEqualTo(skipReviewAt);
+        verify(topicService).save(topic);
+        verify(topicService).flush();
+        verify(reviewRepository, never()).save(any());
+    }
+
+    @Test
+    void skipTopic_returnsFreshQuestionFromStartReviewFlow() {
+        setUp();
+        Topic topic = topicWithId(20L, null);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(20L, 1L)).thenReturn(topic);
+        when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
+        when(openAiService.generateQuestion(any(), any(), anyDouble(), any())).thenReturn("Fresh question");
+
+        ReviewQuestionResponse response = reviewService.skipTopic(20L, null, "java");
+
+        assertThat(response.question()).isEqualTo("Fresh question");
+        assertThat(response.done()).isFalse();
+        verify(topicService).selectNextTopic(1L, "java");
+    }
+
+    @Test
+    void skipTopic_topicNotOwnedByUser_throwsAndSkipsMutation() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(99L, 1L))
+            .thenThrow(new IllegalArgumentException("Topic not found: 99"));
+
+        assertThatThrownBy(() -> reviewService.skipTopic(99L, null, "java"))
+            .isInstanceOf(IllegalArgumentException.class);
+
+        verify(topicService, never()).save(any());
+        verify(topicService, never()).flush();
+    }
+
+    @Test
     void startReview_passesTopicMemoryScoreAndRecentReviewSummariesToQuestionGeneration() {
         setUp();
         Topic topic = topicWithId(15L, null);

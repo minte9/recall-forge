@@ -32,6 +32,35 @@ const Api = {
     return await response.json();
   },
 
+  async skipReview(topicId, markdownFileId, category) {
+    const params = new URLSearchParams();
+
+    if (markdownFileId) {
+      params.set("markdownFileId", markdownFileId);
+    }
+
+    params.set("category", category || "Java");
+
+    const url = `/api/reviews/${topicId}/skip?` + params.toString();
+
+    const response = await fetch(url, {
+      method: "POST",
+      credentials: "same-origin"
+    });
+
+    if (response.redirected || response.url.includes("/login")) {
+      window.location.href = "/login";
+      return;
+    }
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not skip this topic.");
+    }
+
+    return await response.json();
+  },
+
   async uploadMarkdown(file) {
     const formData = new FormData();
     formData.append("file", file);

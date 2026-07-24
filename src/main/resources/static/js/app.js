@@ -211,12 +211,17 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return;
       }
 
-      if (!this.review || !this.answerSubmitted || this.loading) {
+      if (!this.review || this.loading) {
         return;
       }
 
       event.preventDefault();
-      this.startReview();
+
+      if (this.answerSubmitted) {
+        this.startReview();
+      } else {
+        this.skipReview();
+      }
     },
 
     onTitleClick() {
@@ -346,6 +351,25 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async startReview(topicId = null) {
+      await this.loadReviewQuestion(
+        () => Api.startReview(this.currentMarkdownFileId, this.currentCategory, topicId),
+        !topicId
+      );
+    },
+
+    async skipReview() {
+      if (!this.review) {
+        return;
+      }
+
+      const topicId = this.review.topicId;
+      await this.loadReviewQuestion(
+        () => Api.skipReview(topicId, this.currentMarkdownFileId, this.currentCategory),
+        true
+      );
+    },
+
+    async loadReviewQuestion(fetchQuestion, allowBroaderFallback) {
       this.loading = true;
       this.markdownLoading = true;
       this.markdownEditing = false;
@@ -364,9 +388,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.topicDropdownOpen = false;
 
       try {
-        let data = await Api.startReview(this.currentMarkdownFileId, this.currentCategory, topicId);
+        let data = await fetchQuestion();
 
-        if (data.done && this.currentMarkdownFileId && !topicId) {
+        if (data.done && this.currentMarkdownFileId && allowBroaderFallback) {
           this.currentMarkdownFileId = null;
           data = await Api.startReview(null, this.currentCategory);
         }

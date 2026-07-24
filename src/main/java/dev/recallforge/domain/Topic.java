@@ -108,6 +108,10 @@ public class Topic {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void skipReview(LocalDateTime nextReviewAt) {
+        this.nextReviewAt = nextReviewAt;
+    }
+
     public void updateFromMarkdown(
         String environment,
         String category,
