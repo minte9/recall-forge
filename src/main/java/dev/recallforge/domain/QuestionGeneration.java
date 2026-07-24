@@ -25,10 +25,14 @@ public class QuestionGeneration {
     private Long userId;
 
     @Column(nullable = false)
+    private String category;
+
+    @Column(nullable = false)
     private LocalDateTime generatedAt;
 
-    public QuestionGeneration(Long userId) {
+    public QuestionGeneration(Long userId, String category) {
         this.userId = userId;
+        this.category = category;
         this.generatedAt = LocalDateTime.now();
     }
 }
