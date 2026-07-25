@@ -325,7 +325,8 @@
           <div v-if="!markdownLoading && !markdownEditing && currentMarkdownFileId"
             class="markdown-file-actions">
             <button v-if="!review && !isDesktop" class="start-review-file-button"
-              @click="startReviewForFile(currentMarkdownFileId)" :disabled="loading">
+              @click="startReviewForFile(currentMarkdownFileId)" :disabled="loading || dailyLimitReached"
+              :title="dailyLimitReached ? 'Daily review limit reached' : null">
               <span class="btn-icon">►</span>
               {{ loading ? "Loading..." : "Start Review" }}
             </button>
@@ -530,8 +531,8 @@
 
             <div class="actions-row">
 
-              <button v-if="answerSubmitted" class="review-btn" @click="startReview()" :disabled="loading"
-                title="Ctrl+Shift+Enter">
+              <button v-if="answerSubmitted" class="review-btn" @click="startReview()" :disabled="loading || dailyLimitReached"
+                :title="dailyLimitReached ? 'Daily review limit reached' : 'Ctrl+Shift+Enter'">
                 <span>→</span> Next Review
               </button>
 
@@ -756,7 +757,8 @@
 
           <div class="actions-row">
             <button class="review-btn" @click="startReviewFromDashboard()"
-              :disabled="loading || (!currentMarkdownFileId && (!dashboard || dashboard.dueNow === 0))">
+              :disabled="loading || dailyLimitReached || (!currentMarkdownFileId && (!dashboard || dashboard.dueNow === 0))"
+              :title="dailyLimitReached ? 'Daily review limit reached' : null">
               <span class="btn-icon">►</span>
               {{ loading ? "Loading..." : "Start Review" }}
             </button>
