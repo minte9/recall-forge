@@ -428,6 +428,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           this.markdown = this.review.markdownContent;
         }
 
+        this.$nextTick(() => window.scrollTo(0, 0));
+
         await this.loadDashboard();
 
         await this.loadFeedbackHistory(this.review.topicId);
