@@ -30,6 +30,7 @@ createApp({
       openMarkdownGroup: null,
       mobilePageTitle: "Dashboard",
       markdownLoading: false,
+      reviewQuestionLoading: false,
       markdownEditing: false,
       feedbackHistory: [],
       feedbackHistoryVisible: false,
@@ -376,6 +377,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       const startingFreshReview = markdownAlreadyShown && !this.review;
 
       this.loading = true;
+      this.reviewQuestionLoading = true;
       if (!markdownAlreadyShown) {
         this.markdownLoading = true;
       }
@@ -437,6 +439,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       } finally {
         this.loading = false;
         this.markdownLoading = false;
+        this.reviewQuestionLoading = false;
       }
     },
 

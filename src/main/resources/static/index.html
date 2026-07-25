@@ -485,69 +485,75 @@
             <img src="recall-forge.png" alt="" class="brain-icon">
           </a>
 
-          <h3 class="review-title" @click="toggleFeedbackHistory">
+          <div v-if="reviewQuestionLoading" class="markdown-loading">
+            Loading...
+          </div>
 
-            <span class="review-title-left">
-              <span :title="review.topicTitle">{{ truncateTitle(review.topicTitle, isDesktop ? 50 : 30) }}</span>
+          <template v-else>
+            <h3 class="review-title" @click="toggleFeedbackHistory">
 
-              <span class="topic-select-wrap" @click.stop
-                @mouseenter="isDesktop && openTopicDropdown($event)"
-                @mouseleave="isDesktop && closeTopicDropdown()">
-                <span class="group-arrow topic-select-arrow" :class="{ open: topicDropdownOpen }"
-                  @click="!isDesktop && toggleTopicDropdown($event)" title="Select a topic from this file">
-                  ⌄
-                </span>
+              <span class="review-title-left">
+                <span :title="review.topicTitle">{{ truncateTitle(review.topicTitle, isDesktop ? 50 : 30) }}</span>
 
-                <div v-if="topicDropdownOpen" class="topic-select-dropdown" :class="{ 'align-right': topicDropdownAlignRight }">
-                  <div v-if="topicsInFile.length === 0" class="menu-group-title">
-                    No other topics
+                <span class="topic-select-wrap" @click.stop
+                  @mouseenter="isDesktop && openTopicDropdown($event)"
+                  @mouseleave="isDesktop && closeTopicDropdown()">
+                  <span class="group-arrow topic-select-arrow" :class="{ open: topicDropdownOpen }"
+                    @click="!isDesktop && toggleTopicDropdown($event)" title="Select a topic from this file">
+                    ⌄
+                  </span>
+
+                  <div v-if="topicDropdownOpen" class="topic-select-dropdown" :class="{ 'align-right': topicDropdownAlignRight }">
+                    <div v-if="topicsInFile.length === 0" class="menu-group-title">
+                      No other topics
+                    </div>
+
+                    <button v-for="topic in topicsInFile" :key="topic.id"
+                      :class="{ active: review && topic.id === review.topicId }"
+                      @click="selectTopic(topic.id)">
+                      {{ topic.title }}
+                    </button>
                   </div>
-
-                  <button v-for="topic in topicsInFile" :key="topic.id"
-                    :class="{ active: review && topic.id === review.topicId }"
-                    @click="selectTopic(topic.id)">
-                    {{ topic.title }}
-                  </button>
-                </div>
+                </span>
               </span>
-            </span>
 
-          </h3>
+            </h3>
 
-          <p>{{ review.question }}</p>
+            <p>{{ review.question }}</p>
 
-          <textarea v-model="userAnswer" placeholder="Write your answer here..."
-            @keydown.ctrl.enter="submitAnswer">
+            <textarea v-model="userAnswer" placeholder="Write your answer here..."
+              @keydown.ctrl.enter="submitAnswer">
         </textarea>
 
-          <div class="actions-row">
+            <div class="actions-row">
 
-            <button v-if="answerSubmitted" class="review-btn" @click="startReview()" :disabled="loading"
-              title="Ctrl+Shift+Enter">
-              <span>→</span> Next Review
-            </button>
+              <button v-if="answerSubmitted" class="review-btn" @click="startReview()" :disabled="loading"
+                title="Ctrl+Shift+Enter">
+                <span>→</span> Next Review
+              </button>
 
-            <button v-else class="review-btn" @click="skipReview()" :disabled="loading">
-              <span>→</span> Skip Today
-            </button>
+              <button v-else class="review-btn" @click="skipReview()" :disabled="loading">
+                <span>→</span> Skip Today
+              </button>
 
-            <button v-if="!answerSubmitted" class="submit-btn" @click="submitAnswer" :disabled="loading"
-              title="Ctrl+Enter">
-              <span class="btn-icon">✓</span>
-              Submit Answer
-            </button>
+              <button v-if="!answerSubmitted" class="submit-btn" @click="submitAnswer" :disabled="loading"
+                title="Ctrl+Enter">
+                <span class="btn-icon">✓</span>
+                Submit Answer
+              </button>
 
-            <button v-else class="submit-btn" @click="startReview(review.topicId)" :disabled="loading">
-              <span class="btn-icon">↻</span>
-              Try Again
-            </button>
+              <button v-else class="submit-btn" @click="startReview(review.topicId)" :disabled="loading">
+                <span class="btn-icon">↻</span>
+                Try Again
+              </button>
 
-            <span v-if="averageScore !== null" class="last-score-badge last-score-badge--actions"
-              title="Show feedback history" @click="toggleFeedbackHistory">
-              Avg Score: {{ formatScore(averageScore) }}
-            </span>
+              <span v-if="averageScore !== null" class="last-score-badge last-score-badge--actions"
+                title="Show feedback history" @click="toggleFeedbackHistory">
+                Avg Score: {{ formatScore(averageScore) }}
+              </span>
 
-          </div>
+            </div>
+          </template>
 
 
           <div v-if="feedbackHistoryVisible" class="feedback-history-panel">
