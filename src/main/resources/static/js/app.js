@@ -68,6 +68,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return window.innerWidth > 900;
     },
 
+    dailyLimitReached() {
+      return !!this.dashboard && this.dashboard.reviewsToday >= this.dashboard.dailyReviewLimit;
+    },
+
     mobileTitleDisplay() {
       if (this.mobilePageTitle === "Review" && this.dashboard) {
         return `${this.dashboard.reviewsToday}/${this.dashboard.todayReviewLimit}`; // Reviews: 
@@ -220,7 +224,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return;
       }
 
-      if (!this.review || !this.answerSubmitted || this.loading) {
+      if (!this.review || !this.answerSubmitted || this.loading || this.dailyLimitReached) {
         return;
       }
 
