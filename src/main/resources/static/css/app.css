@@ -1494,6 +1494,7 @@
     }
 
     .mobile-title {
+      margin-top: 15px;
       font-size: 22px;
       font-weight: 800;
       cursor: pointer;
@@ -1716,14 +1717,6 @@
 
     .layout.mobile-review>.left-panel {
       display: block;
-    }
-
-    .layout.mobile-review-below-markdown>.left-panel {
-      order: 1;
-    }
-
-    .layout.mobile-review-below-markdown>.app-panel {
-      order: 2;
     }
 
     .stats-grid {

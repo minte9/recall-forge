@@ -23,9 +23,6 @@ createApp({
       leftPanel: "markdown",
       selectedGroup: null,
       mobileView: "dashboard",
-      // Mobile only: when true, a just-started review renders below the
-      // already-open markdown file instead of above it (see startReviewForFile).
-      mobileReviewBelowMarkdown: false,
       mobileMenuOpen: false,
       openMarkdownGroup: null,
       mobilePageTitle: "Dashboard",
@@ -73,7 +70,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     mobileTitleDisplay() {
       if (this.mobilePageTitle === "Review" && this.dashboard) {
-        return `Reviews: ${this.dashboard.reviewsToday}/${this.dashboard.todayReviewLimit}`;
+        return `${this.dashboard.reviewsToday}/${this.dashboard.todayReviewLimit}`; // Reviews: 
       }
 
       return this.mobilePageTitle;
@@ -411,7 +408,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         if (data.done && this.currentMarkdownFileId && allowBroaderFallback) {
           this.currentMarkdownFileId = null;
-          this.mobileReviewBelowMarkdown = false;
           data = await Api.startReview(null, this.currentCategory);
         }
 
@@ -454,10 +450,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     async startReviewForFile(markdownFileId) {
       this.currentMarkdownFileId = markdownFileId;
 
-      // Mobile only: keep the question below the already-open file's
-      // content instead of above it, for as long as this review continues.
-      this.mobileReviewBelowMarkdown = true;
-
       // Disable broadening here so a miss never briefly renders a due
       // question from a different file — go straight to this file's own
       // first topic below instead.
@@ -495,7 +487,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.leftPanel = "markdown";
       this.mobilePageTitle = "Markdown";
       this.mobileView = "markdown";
-      this.mobileReviewBelowMarkdown = false;
       this.markdownLoading = true;
 
       try {
@@ -585,7 +576,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.markdown = uploaded.content;
         this.leftPanel = "markdown";
         this.mobileView = "review"; // show markdown + right panel on mobile
-        this.mobileReviewBelowMarkdown = false;
 
         await this.startReview();
         await this.loadCategoryOptions();
@@ -720,7 +710,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.result = null;
       this.userAnswer = "";
       this.currentMarkdownFileId = null;
-      this.mobileReviewBelowMarkdown = false;
       this.showAccount = false;
       this.mobileView = "dashboard";
       this.leftExpanded = false;
@@ -800,7 +789,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.result = null;
       this.userAnswer = "";
       this.currentMarkdownFileId = null;
-      this.mobileReviewBelowMarkdown = false;
       this.mobileView = "dashboard";
       this.leftExpanded = false;
       this.mobilePageTitle = "Dashboard";
@@ -1052,7 +1040,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         await Api.deleteMarkdown(this.currentMarkdownFileId);
 
         this.currentMarkdownFileId = null;
-        this.mobileReviewBelowMarkdown = false;
         this.currentMarkdownReviewCount = null;
         this.review = null;
         this.result = null;
@@ -1110,7 +1097,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.showAccount = false;
       this.mobileView = "markdown";
       this.currentMarkdownFileId = null;
-      this.mobileReviewBelowMarkdown = false;
       this.markdownEditing = false;
       this.markdown = `
 <h3>File Example Pattern</h3>
