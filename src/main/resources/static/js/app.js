@@ -625,6 +625,16 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
+    // Keeps the same question in place instead of fetching a new one,
+    // so the user can attempt it again.
+    retryQuestion() {
+      this.userAnswer = "";
+      this.answerSubmitted = false;
+      this.result = null;
+      this.error = null;
+      this.success = null;
+    },
+
     async loadCategoryOptions() {
       try {
         const options = await Api.loadCategoryOptions();
