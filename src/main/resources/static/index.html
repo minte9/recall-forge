@@ -545,7 +545,7 @@
                 Submit Answer
               </button>
 
-              <button v-else class="submit-btn" @click="startReview(review.topicId)" :disabled="loading">
+              <button v-else class="submit-btn" @click="retryQuestion" :disabled="loading">
                 <span class="btn-icon">↻</span>
                 Try Again
               </button>
