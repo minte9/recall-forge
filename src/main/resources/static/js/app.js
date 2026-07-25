@@ -73,7 +73,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     mobileTitleDisplay() {
       if (this.mobilePageTitle === "Review" && this.dashboard) {
-        return `${this.dashboard.reviewsToday}/${this.dashboard.todayReviewLimit}`;
+        return `Reviews: ${this.dashboard.reviewsToday}/${this.dashboard.todayReviewLimit}`;
       }
 
       return this.mobilePageTitle;

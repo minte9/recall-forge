@@ -495,10 +495,6 @@
               <span class="review-title-left">
                 <span :title="review.topicTitle">{{ truncateTitle(review.topicTitle, isDesktop ? 50 : 30) }}</span>
 
-                <span v-if="dashboard" class="review-today-badge" title="Today's reviews / daily limit">
-                  {{ dashboard.reviewsToday }}<font color='gray'>/</font>{{ dashboard.todayReviewLimit }}
-                </span>
-
                 <span class="topic-select-wrap" @click.stop
                   @mouseenter="isDesktop && openTopicDropdown($event)"
                   @mouseleave="isDesktop && closeTopicDropdown()">
@@ -518,6 +514,10 @@
                       {{ topic.title }}
                     </button>
                   </div>
+                </span>
+
+                <span v-if="isDesktop && dashboard" class="review-today-badge" title="Today's reviews / daily limit">
+                  {{ dashboard.reviewsToday }}<font color='gray'>/</font>{{ dashboard.todayReviewLimit }}
                 </span>
               </span>
 
