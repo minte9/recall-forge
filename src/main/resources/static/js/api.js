@@ -79,6 +79,24 @@ const Api = {
     return await response.json();
   },
 
+  async createMarkdown(content) {
+    const response = await fetch("/api/markdown", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ content })
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not create markdown file.");
+    }
+
+    return await response.json();
+  },
+
   async getMarkdown(markdownFileId) {
     const response = await fetch("/api/markdown/" + encodeURIComponent(markdownFileId), {
       credentials: "same-origin"
