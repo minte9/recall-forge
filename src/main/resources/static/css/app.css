@@ -1636,6 +1636,10 @@
       font-size: 13px;
     }
 
+    .actions-row .upload-btn .btn-icon {
+      display: none;
+    }
+
     .actions-row .last-score-badge--actions {
       grid-column: 1 / -1;
       justify-self: end;
