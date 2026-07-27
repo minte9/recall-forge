@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
+import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
 
@@ -33,10 +34,13 @@ class TopicServiceTest {
     @Mock
     private SubcategoryOrderRepository subcategoryOrderRepository;
 
+    @Mock
+    private ReviewRepository reviewRepository;
+
     private TopicService topicService;
 
     private void setUp() {
-        topicService = new TopicService(topicRepository, subcategoryOrderRepository);
+        topicService = new TopicService(topicRepository, subcategoryOrderRepository, reviewRepository);
     }
 
     private Topic topicWithMemoryScore(double memoryScore) {
@@ -81,6 +85,12 @@ class TopicServiceTest {
     private Topic topicWithTitleAndMemoryScore(String title, double memoryScore) {
         Topic topic = topicWithTitle(title);
         topic.updateMemory(memoryScore, LocalDateTime.now());
+        return topic;
+    }
+
+    private Topic topicWithIdAndMemoryScore(long id, double memoryScore) {
+        Topic topic = topicWithMemoryScore(memoryScore);
+        org.springframework.test.util.ReflectionTestUtils.setField(topic, "id", id);
         return topic;
     }
 
@@ -202,6 +212,35 @@ class TopicServiceTest {
         when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any())).thenReturn(List.of());
 
         assertThat(topicService.selectNextTopic(1L, "java")).isEmpty();
+    }
+
+    @Test
+    void selectNextTopic_prefersReviewedDueTopicOverNeverReviewedTopicDespiteWorseMemoryScore() {
+        setUp();
+        // A never-reviewed topic always sits at the same default memory
+        // score and is due immediately, so without this priority it would
+        // permanently outrank topics that were already reviewed and are due
+        // again - starving genuine spaced-repetition reviews behind an
+        // ever-growing backlog of new material.
+        Topic neverReviewed = topicWithIdAndMemoryScore(1L, 0.2);
+        Topic reviewedButDue = topicWithIdAndMemoryScore(2L, 0.8);
+        when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any()))
+            .thenReturn(List.of(neverReviewed, reviewedButDue));
+        when(reviewRepository.findReviewedTopicIds(any(), eq(1L))).thenReturn(List.of(2L));
+
+        assertThat(topicService.selectNextTopic(1L, "java")).contains(reviewedButDue);
+    }
+
+    @Test
+    void selectNextTopic_amongReviewedDueTopics_stillPrefersLowerMemoryScore() {
+        setUp();
+        Topic weaker = topicWithIdAndMemoryScore(1L, 0.2);
+        Topic stronger = topicWithIdAndMemoryScore(2L, 0.8);
+        when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any()))
+            .thenReturn(List.of(stronger, weaker));
+        when(reviewRepository.findReviewedTopicIds(any(), eq(1L))).thenReturn(List.of(1L, 2L));
+
+        assertThat(topicService.selectNextTopic(1L, "java")).contains(weaker);
     }
 
     @Test
