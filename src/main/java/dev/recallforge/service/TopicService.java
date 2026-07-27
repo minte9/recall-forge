@@ -2,9 +2,11 @@ package dev.recallforge.service;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.domain.Topic;
+import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
 
@@ -23,18 +26,26 @@ import dev.recallforge.repository.TopicRepository;
  * {@code selectNextTopic*} methods each apply their own tie-breaking order
  * (subcategory/file/topic-number, or file/topic-number for a single-file
  * queue) so due topics come back in a stable, document-like order instead
- * of database id order. Used by {@link ReviewService} to pick the topic for
- * the next review.
+ * of database id order. {@link #selectNextTopic} additionally prioritizes
+ * topics with prior review history over never-reviewed ones, so an
+ * ever-growing backlog of new material can't crowd out topics that are
+ * actually due for spaced repetition. Used by {@link ReviewService} to pick
+ * the topic for the next review.
  */
 @Service
 public class TopicService {
 
     private final TopicRepository topicRepository;
     private final SubcategoryOrderRepository subcategoryOrderRepository;
+    private final ReviewRepository reviewRepository;
 
-    public TopicService(TopicRepository topicRepository, SubcategoryOrderRepository subcategoryOrderRepository) {
+    public TopicService(
+            TopicRepository topicRepository,
+            SubcategoryOrderRepository subcategoryOrderRepository,
+            ReviewRepository reviewRepository) {
         this.topicRepository = topicRepository;
         this.subcategoryOrderRepository = subcategoryOrderRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     public List<Topic> getAllTopics(Long userId) {
@@ -56,12 +67,29 @@ public class TopicService {
     }
 
     public Optional<Topic> selectNextTopic(Long userId, String category) {
+        List<Topic> dueTopics = topicRepository.findDueTopicsByCategory(userId, category, LocalDateTime.now());
+
+        if (dueTopics.isEmpty()) {
+            return Optional.empty();
+        }
+
         Map<String, Integer> subcategoryOrder = subcategoryOrderRepository.findByCategoryIgnoreCase(category)
             .stream()
             .collect(Collectors.toMap(SubcategoryOrder::getSubcategory, SubcategoryOrder::getDisplayOrder));
 
-        return topicRepository.findDueTopicsByCategory(userId, category, LocalDateTime.now())
-            .stream()
+        // Every freshly imported topic starts at the same default memory
+        // score and is due from the moment it's created, so sorting on
+        // memory score alone lets an ever-growing backlog of never-reviewed
+        // topics permanently outrank topics that were already reviewed and
+        // are due again - the opposite of what spaced repetition is for
+        // (a decaying memory is more urgent than material that hasn't been
+        // seen yet, since the latter isn't decaying). Topics with review
+        // history come first; unreviewed topics only fill in once every
+        // reviewed-and-due topic has been offered.
+        Set<Long> reviewedTopicIds = new HashSet<>(
+            reviewRepository.findReviewedTopicIds(dueTopics.stream().map(Topic::getId).toList(), userId));
+
+        return dueTopics.stream()
             .sorted(
                 // Topics tied on memory score (e.g. freshly imported, never
                 // reviewed) would otherwise fall back to nextReviewAt, which
@@ -74,7 +102,8 @@ public class TopicService {
                 // numbering restarts at "1.", so without this, files tie and
                 // fall through to nextReviewAt too), then the topic that
                 // comes first in its file ("1." before "2.").
-                Comparator.comparing(Topic::getMemoryScore)
+                Comparator.<Topic, Boolean>comparing(topic -> !reviewedTopicIds.contains(topic.getId()))
+                    .thenComparing(Topic::getMemoryScore)
                     .thenComparing(topic -> subcategoryDisplayOrder(topic, subcategoryOrder))
                     .thenComparing(Topic::getSubcategory, String.CASE_INSENSITIVE_ORDER)
                     .thenComparing(TopicService::markdownFileDisplayOrder, Comparator.nullsLast(Comparator.naturalOrder()))
