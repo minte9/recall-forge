@@ -620,6 +620,21 @@
     border: 1px solid #cbd5e1 !important;
   }
 
+  .actions-row .add-file-btn {
+    min-width: 0;
+    width: 42px;
+    padding: 0;
+    background: white;
+    color: #cbd5e1;
+    border: 1px solid #cbd5e1;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .actions-row .add-file-btn:hover {
+    color: #0f172a;
+  }
+
   textarea {
     width: 100%;
     min-height: 120px;
@@ -1608,7 +1623,7 @@
 
     .actions-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr auto;
       gap: 8px;
     }
 
@@ -1625,6 +1640,11 @@
       grid-column: 1 / -1;
       justify-self: end;
       margin-left: 0;
+    }
+
+    .actions-row .add-file-btn {
+      width: 44px;
+      min-width: 0;
     }
 
     .markdown {

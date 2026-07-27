@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import dev.recallforge.dto.MarkdownCreateRequest;
 import dev.recallforge.dto.MarkdownReviewCountResponse;
 import dev.recallforge.dto.MarkdownUpdateRequest;
 import dev.recallforge.dto.MarkdownUploadResponse;
@@ -34,6 +35,11 @@ public class MarkdownController {
     @PostMapping("/upload")
     public MarkdownUploadResponse uploadMarkdown(@RequestParam("file") MultipartFile file) throws Exception {
         return markdownFileService.upload(file);
+    }
+
+    @PostMapping
+    public MarkdownUploadResponse createMarkdown(@Valid @RequestBody MarkdownCreateRequest request) throws Exception {
+        return markdownFileService.createFromContent(request.content());
     }
 
     @GetMapping("/{id}")

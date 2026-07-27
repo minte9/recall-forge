@@ -38,6 +38,10 @@
             File Example
           </button>
 
+          <button @click="showAddFile(); mobileMenuOpen = false">
+            Add File
+          </button>
+
           <button @click="showStarterPack(); mobileMenuOpen = false">
             Starter Pack
           </button>
@@ -115,6 +119,10 @@
               </button>
               <button @click="showMarkdownExample(); menuOpen = false">
                 File Example
+              </button>
+
+              <button @click="showAddFile(); menuOpen = false">
+                Add File
               </button>
 
               <button @click="showStarterPack(); menuOpen = false">
@@ -342,6 +350,22 @@
           </div>
         </div>
 
+
+        <div v-if="leftPanel === 'add-file'" class="markdown-page">
+          <h3>Add File</h3>
+          <div class="subtitle">
+            Paste markdown content to create a new file, without uploading it from disk.
+          </div>
+
+          <div class="markdown-editor-wrap">
+            <textarea ref="addFileEditor" class="markdown markdown-editor" v-model="newMarkdownContent"
+              placeholder="Paste or type your markdown content here..."></textarea>
+
+            <button class="markdown-editor-submit" @click="submitAddFile">
+              Submit
+            </button>
+          </div>
+        </div>
 
         <div v-if="leftPanel === 'admin-users'" class="panel">
           <h2>Users</h2>
@@ -768,6 +792,10 @@
               Upload Markdown
               <input hidden type="file" accept=".md,.markdown,text/plain" @change="uploadMarkdown" />
             </label>
+
+            <button class="add-file-btn" @click="showAddFile" title="Add File">
+              +
+            </button>
 
           </div>
         </div>

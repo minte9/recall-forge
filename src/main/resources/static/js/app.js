@@ -8,6 +8,7 @@ createApp({
       success: null,
       currentMarkdownFileId: null,
       currentMarkdownReviewCount: null,
+      newMarkdownContent: "",
       currentCategory: null,
       showMetadataHelp: false,
       markdown: null,
@@ -1134,6 +1135,46 @@ Thread creation basics...
 ### 2. Implementing Runnable
 Java supports single inheritance...</pre>
 `;
+    },
+
+    showAddFile() {
+      this.error = null;
+      this.success = null;
+      this.mobilePageTitle = "Add File";
+      this.leftPanel = "add-file";
+      this.mobileView = "markdown";
+      this.newMarkdownContent = "";
+    },
+
+    async submitAddFile() {
+      if (!this.newMarkdownContent.trim()) {
+        return;
+      }
+
+      this.loading = true;
+      this.error = null;
+      this.success = null;
+      this.result = null;
+
+      try {
+        const created = await Api.createMarkdown(this.newMarkdownContent);
+
+        this.currentMarkdownFileId = created.markdownFileId;
+        this.markdown = created.content;
+        this.newMarkdownContent = "";
+        this.leftPanel = "markdown";
+        this.mobileView = "review"; // show markdown + right panel on mobile
+
+        await this.startReview();
+        await this.loadCategoryOptions();
+        await this.loadDashboard();
+        await this.loadMarkdownSummaries(false);
+
+      } catch (err) {
+        this.error = err.message || "Could not create markdown file.";
+      } finally {
+        this.loading = false;
+      }
     }
   }
 }).mount("#app");

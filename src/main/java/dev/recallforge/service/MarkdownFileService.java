@@ -89,6 +89,11 @@ public class MarkdownFileService {
         return importMarkdown(content, null, false, displayOrder);
     }
 
+    @Transactional
+    public MarkdownUploadResponse createFromContent(String content) throws Exception {
+        return importMarkdown(content, (String) null);
+    }
+
     public MarkdownUploadResponse getById(Long markdownFileId) {
         Long userId = currentUserService.currentUserId();
 
