@@ -1,282 +1,78 @@
 ## JVM / Java / Collections / Lists
 
-### 1. Lists Basics
+### 1. List Basics
 
-A List is an ordered collection that allows duplicate elements and preserves the order in which they are inserted. List is an interface, while ArrayList is its most commonly used implementation, storing elements in a dynamically resizable array. Unlike arrays, lists can grow and shrink as needed, but they store objects rather than primitive types (autoboxing automatically converts primitives to their wrapper classes). Time Complexity is O(1) for index access, O(1) for insertion/removal at the and and O(n) for worst case, insertion/removal in the middle.
-
- ~~~java
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-public class ListBasics {
-   public static void main(String[] args) {
-        
-        // Create and populate
-        // ===================
-        List<String> A = new ArrayList<>();
-        A.add("a");
-        A.add("b");
-        A.add("b");  // duplicates are allowed
-        A.add("c");
-        A.add("d");
-
-        // Iterate using enhanced for loop
-        // ===============================
-        for (String s : A) {
-            System.out.print(s + " ");  // a b b c d 
-        }
-
-        // Remove element by value OR index
-        // ================================
-        A.remove("b");
-        A.remove(2);
-        System.out.println(A);  // a, b, d]
-
-        // Check if element exists
-        // =======================
-        Boolean exists = A.contains("c");
-        System.out.println("c exists = " + exists); // true
-
-        // Get element by index
-        // ====================
-        String first = A.get(0);
-        System.out.println("Fist is " + first);  // a
-
-        // Find the index
-        // ==============
-        int index = A.indexOf("c");
-        System.out.println("Index of c " + index);  // 1
-
-        // Get sublist
-        // ===========
-        List<String> sublist = A.subList(0, 2);
-        System.out.println("Sublist " + sublist);  // [a, c]
-
-        // Get size
-        // ========
-        int size = A.size();
-        System.out.println("Size = " + size);  // 2
-
-        // Sorting
-        // =======
-        A.add("b");
-        Collections.sort(A);
-        System.out.println(A);  // [a, b, b, d]
-
-        // Array to fixed-size List view
-        // =============================
-        String[] arr = {"A", "B", "C"};            // size fixed
-        List<String> fixed = Arrays.asList(arr);   // size fixed
-        
-        fixed.set(1, "B+");                        // OK: writes back into arr
-            // fixed.add("D");                     // ? UnsupportedOperationException
-        System.out.println("Array after set via view: " 
-            + Arrays.toString(arr)                  // [A, B+, C]
-        );  
-         
-        // Array to resizable List
-        // ========================
-        List<String> resizable = new ArrayList<>(fixed);
-        resizable.add("D");
-        System.out.println("Resizable list: " + resizable);  // [A, B+, C, D]
-   } 
-}
-~~~
-
-
-### 2. List Examples
-
-The following examples show how ArrayList is used in practice to manage a collection whose size changes over time. They demonstrate adding, reading, updating, and removing elements, checking for their existence, and iterating through the list. Unlike arrays, no initial capacity needs to be specified, as the list grows automatically when new elements are added.
+`List` is an ordered collection that allows duplicates and preserves
+insertion order. `ArrayList` is the go-to implementation, backed by a
+resizable array (unlike arrays, it stores objects, not primitives).
+Index access is O(1); insert/remove at the end is O(1) amortized, but
+O(n) in the middle since later elements shift.
 
 ~~~java
-import java.util.ArrayList;
-import java.util.List;
-
-public class ListExamples {
-    public static void main(String[] args) {
-
-        // Grades - Dynamic size
-        // =====================
-        List<Integer> grades = new ArrayList<>();
-        grades.add(85);
-        grades.add(90);
-        grades.add(78);
-
-        System.out.println("Initial: " + grades);       // [85, 90, 78]
-        System.out.println("Size: " + grades.size());   // Size: 3
-
-        // Add more letter (grows as needed)
-        grades.add(92);
-        grades.add(88);
-
-        // Parsing loop
-        for (int g : grades) {
-            System.out.print(g + " ");                  // 85 90 78 92 88
-        }
-        
-        // Read and modify elements
-        int last = grades.get(grades.size() - 1);       // 88
-        grades.set(grades.size() - 1, last + 12);       // 100
-
-        System.out.println("Later: " + grades);         // [85, 90, 78, 92, 100]
-        System.out.println("Size: " + grades.size());   // 5
-
-        // Check contain and remove
-        if (grades.contains(90)) {
-            grades.remove(Integer.valueOf(90));             // remove by value
-        }
-        System.out.println("After remove(90): " + grades);  // [85, 78, 92, 100]
-
-        // Remove by index
-        grades.remove(0); // remove first
-        System.out.println("After remove(0): " + grades);  // [78, 92, 100]
-    }
-}
+List<String> a = new ArrayList<>();
+a.add("x"); a.add("y"); a.add("y");  // duplicates allowed
+a.remove("y");                       // remove by value
+a.remove(0);                         // remove by index
+System.out.println(a);               // [y]
+System.out.println(a.contains("y")); // true
+System.out.println(a.indexOf("y"));  // 0
 ~~~
 
+### 2. ArrayList vs LinkedList
 
-### 3. Array vs ArrayList
-
-Arrays and ArrayList are both used to store sequences of elements, but they have different characteristics. Arrays have a fixed size and can store primitive values directly, while ArrayList grows and shrinks dynamically but stores only objects (wrapper classes are used for primitives).
+Both preserve order and allow duplicates, but the internal structure
+differs. `ArrayList` uses a backing array, so `get(i)` is O(1) but
+inserting/removing in the middle shifts elements. `LinkedList` uses
+doubly-linked nodes, so middle insert/remove is O(1) once you're at
+the node, but `get(i)` must walk from the ends — O(n).
 
 ~~~java
-import java.util.ArrayList;
-import java.util.List;
+List<String> arr = new ArrayList<>(List.of("A", "B"));
+List<String> lnk = new LinkedList<>(List.of("A", "B"));
 
-public class ArrayVsArrayList {
-    public static void main(String[] args) {
+arr.get(1);      // fast: direct array index
+lnk.get(1);      // slower: traverses nodes
 
-        // Fixed vs Dynamic
-        // ================
-        int[] arr = new int[3];
-        arr[0] = 1;                  // cannot arr.add()
-        System.out.println(arr[0]);  // 1
-
-        List<String> arrayList = new ArrayList<>(); 
-        arrayList.add("a");
-        System.out.println(arrayList.get(0));        // a
-        System.out.println(arrayList.indexOf("a"));  // 0
-
-        // Types of elements 
-        // =================
-        int[] nums = {1, 2, 3};
-        nums[0] = 4;                 // cannot nums[0] = new Object();
-        System.out.println(arr[0]);  // 1
-
-        List<Integer> numsList = new ArrayList<>();
-        numsList.add(1);
-        numsList.add(2);
-        System.out.println(numsList.get(1));  // 2
-    }
-}
+arr.add(1, "X"); // slower: shifts B and beyond
+lnk.add(1, "X"); // faster: just relinks neighbors
 ~~~
 
+### 3. Sorting a List
 
-### 4. List Sort
-
-Lists can be sorted in ascending or descending order using the utility methods provided by the Collections class. By default, sorting follows the natural ordering of the elements and modifies the original list. For custom classes, you must define how objects are compared by implementing Comparable or providing a Comparator.
+`Collections.sort` (or the newer `list.sort`) orders elements by their
+natural order, which custom types define via `Comparable`. Pass a
+`Comparator` instead to sort by something else, or to reverse order,
+without touching the class.
 
 ~~~java
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Collections;
+List<String> names = new ArrayList<>(List.of("Bea", "Al", "Cy"));
+Collections.sort(names);               // [Al, Bea, Cy] - natural order
+names.sort(Comparator.reverseOrder());  // [Cy, Bea, Al]
 
-public class ListSort {
-    public static void main(String[] args) {
-
-        List<String> myList = new ArrayList<>();
-        myList.add("AB");
-        myList.add("BC");
-        myList.add("AD");
-
-        // Sort the list alphabetically (ascending)
-        Collections.sort(myList);
-        System.out.println(myList); // [AB, AD, BC]
-
-        // Sort in reverse order
-        Collections.sort(myList, Collections.reverseOrder());
-        System.out.println(myList);  // [BC, AD, AB]
-
-        // Equivalent modern call (Java 8+)
-        myList.sort(String::compareTo);
-        System.out.println(myList);  // [AB, AD, BC]
-
-        // Sorting objects (the compiler doesn't know what t sort)
-        List<Song> songList = new ArrayList<>();
-        songList.add(new Song("A", "y"));
-        songList.add(new Song("B", "z"));
-        songList.add(new Song("C", "w"));
-
-        Collections.sort(songList);
-        System.out.println(songList);  // [A:y, B:z, C:w]
-    }
-}
-
+// Comparable: type defines its own order
 class Song implements Comparable<Song> {
     String title;
-    String artist;
-
-    public Song(String title, String artist) {
-        this.title = title;
-        this.artist = artist;
-    }
-
-    @Override
-    public int compareTo(Song song) {
-        return title.compareTo(song.title);
-    }
-
-    @Override public String toString() {
-        return title + ":" + artist;
-    }
+    public int compareTo(Song o) { return title.compareTo(o.title); }
 }
 ~~~
 
+### 4. Fixed-Size vs Immutable Lists
 
-### 5. ArrayList vs. LinkedList
-
-ArrayList and LinkedList are the two most common implementations of the List interface. Both preserve insertion order and allow duplicate elements, but they use different internal data structures. ArrayList provides fast random access, while LinkedList is more efficient for frequent insertions and removals.
+`Arrays.asList(arr)` returns a fixed-size *view* backed by `arr` —
+`set()` writes through to the array, but `add()`/`remove()` throw.
+`List.of(...)` (Java 9+) is truly immutable — every mutating call
+throws. Wrap either in `new ArrayList<>(...)` to get an independent,
+resizable copy.
 
 ~~~java
-package collections.lists;
+String[] raw = {"A", "B"};
+List<String> view = Arrays.asList(raw);
+view.set(0, "Z");             // OK, raw[0] is now "Z"
+// view.add("C");              // UnsupportedOperationException
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+List<String> immutable = List.of("A", "B");
+// immutable.set(0, "Z");      // UnsupportedOperationException
 
-public class ArrayListVsLinkedList {
-    public static void main(String[] args) {
-        
-        // Declaration
-        List<String> arrayList = new ArrayList<>();
-        List<String> linkedList = new LinkedList<>();
-
-        // Adding elements
-        arrayList.add("A");
-        arrayList.add("B");
-
-        linkedList.add("A");
-        linkedList.add("B");
-
-        // Accesing elements
-        System.out.println("ArrayList ge(1): " + arrayList.get(1));    // Fast
-        System.out.println("LinkedList get(1): " + linkedList.get(1)); // Slower
-
-        // Inserting in the middle
-        arrayList.add(1, "X");  // Slower (shifts elements)
-        linkedList.add(1, "X"); // Faster (node relinking)
-
-        System.out.println("ArrayList: " + arrayList);   // [A, X, B]
-        System.out.println("LinkedList: " + linkedList); // [A, X, B]
-
-        // Removing elements
-        arrayList.remove(2);  // Slower
-        linkedList.remove(2); // Faster
-
-        System.out.println("ArrayList: " + arrayList);   // [A, X]
-        System.out.println("LinkedList: " + linkedList); // [A, X]
-    }
-}
+List<String> copy = new ArrayList<>(immutable);
+copy.add("C");                 // OK, independent resizable copy
 ~~~
