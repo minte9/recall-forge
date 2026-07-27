@@ -98,6 +98,7 @@ COMPOSE_FILE="compose.prod.yml"
 
 docker compose -f "$COMPOSE_FILE" pull app
 docker compose -f "$COMPOSE_FILE" up -d app
+docker compose -f "$COMPOSE_FILE" up -d --force-recreate app
 docker compose -f "$COMPOSE_FILE" ps
 ~~~
 
@@ -111,8 +112,13 @@ chmod +x deploy.sh
 ### 4. Docker Hub Workflow
 
 ~~~sh
+docker compose build app
+docker image ls
+docker image prune
+
 docker login
 docker compose push
+    # docker push minte9/recallforge:1.0.0
 
 docker compose -f compose.prod.yml pull
 docker compose -f compose.prod.yml up -d
