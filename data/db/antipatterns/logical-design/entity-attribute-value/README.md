@@ -15,18 +15,17 @@ CREATE TABLE product_attributes (
 -- (1, 'color', 'red'), (1, 'weight', '2kg'), ...
 ~~~
 
-### 2. The Cost: No Types, No Constraints, No Simple Queries
+### 2. Real Columns, Not EAV
 
-Every value is stored as text, so the database can't enforce that
-`weight` is numeric or `color` is one of a known set. Reading a product
-with all its attributes as normal columns needs a self-join per attribute
-(or a pivot), and a query like "products where weight > 1kg" needs a cast
-on every row instead of an index range scan.
+Model the attributes that are actually common to every product as typed,
+constrained columns -- `weight NUMERIC`, `color TEXT`. For the genuinely
+open-ended remainder, a single `JSONB` column keeps the same flexibility
+EAV offered, but as one document per row instead of N rows per attribute,
+and modern engines can still index specific JSON paths.
 
 ~~~sql
-SELECT p.name
-FROM products p
-JOIN product_attributes a ON a.product_id = p.id
-WHERE a.attribute_name = 'weight'
-  AND a.attribute_value::numeric > 1  -- cast text on every row
+CREATE TABLE products (
+  id INT, weight NUMERIC, color TEXT,  -- common attributes: real columns
+  extra JSONB                           -- rare/custom attributes
+)
 ~~~

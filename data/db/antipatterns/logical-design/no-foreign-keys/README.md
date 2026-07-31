@@ -13,13 +13,14 @@ that writes to it, forever, not just the ones you remembered to test.
 CREATE TABLE orders (id INT, customer_id INT)
 ~~~
 
-### 2. What You Lose Without Referential Integrity
+### 2. Add the Foreign Key
 
-Without FKs, a deleted customer silently leaves orphaned orders behind --
-no error, just rows referencing an id that no longer exists, discovered
-later as a `NULL` join result or a bug report. Application-level checks
-can enforce the same rule, but only for the write paths that remember to
-call them.
+Declaring the FK lets the database reject the orphaning write itself,
+across every code path, instead of relying on application checks that
+only cover the ones someone remembered to write. `ON DELETE
+CASCADE`/`RESTRICT` then makes the intended behavior on parent deletion
+explicit, instead of leaving it to whatever the deleting code happens to
+do.
 
 ~~~sql
 ALTER TABLE orders

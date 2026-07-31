@@ -12,12 +12,12 @@ TABLE`, and most rows waste unused columns as `NULL`.
 CREATE TABLE products (id INT, tag1 TEXT, tag2 TEXT, tag3 TEXT)
 ~~~
 
-### 2. Querying Against a Fixed Number of Slots
+### 2. A Child Table Instead
 
-"Does this product have tag X" becomes an `OR` chain across every column
-instead of a single condition, and it only gets worse as more columns are
-added. A separate `product_tags(product_id, tag)` table turns both
-problems -- unlimited tags, simple queries -- into a normal join.
+A separate `product_tags(product_id, tag)` table removes the arbitrary
+cap -- a product can have any number of tags, adding one is just an
+`INSERT`, and "does this product have tag X" becomes a single join
+condition instead of an `OR` chain across every numbered column.
 
 ~~~sql
 -- multicolumn: WHERE tag1 = 'sale' OR tag2 = 'sale' OR tag3 = 'sale'

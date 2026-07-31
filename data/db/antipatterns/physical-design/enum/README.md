@@ -13,13 +13,12 @@ CREATE TABLE products (
 )
 ~~~
 
-### 2. Why It's Painful to Change
+### 2. A Lookup Table Instead
 
-Adding `'extra-large'` later means an `ALTER TABLE` that some engines
-run as a full table rewrite, and the valid-values list isn't queryable
-(no `SELECT DISTINCT valid_size FROM ...`). A lookup table with a foreign
-key gets the same validation, is extensible with an `INSERT`, and can
-carry extra metadata (display order, description) the enum can't.
+A lookup table referenced by foreign key gives the same validation as
+`ENUM`, but the valid-values list becomes ordinary queryable data --
+extending it is an `INSERT`, not an `ALTER TABLE`, and it can carry extra
+metadata (display order, description) an enum type has no room for.
 
 ~~~sql
 CREATE TABLE sizes (code TEXT PRIMARY KEY, display_order INT);

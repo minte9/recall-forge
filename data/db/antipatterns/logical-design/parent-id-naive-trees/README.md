@@ -15,13 +15,13 @@ CREATE TABLE categories (
 )
 ~~~
 
-### 2. Querying Depth-Unknown Trees
+### 2. Better Tree Models
 
-"Get all descendants of category X" can't be a single flat query against
-an adjacency list without knowing the tree's max depth in advance -- it
-needs a recursive CTE, or a different model entirely (nested sets, path
-enumeration, closure table) chosen based on whether reads or writes
-dominate.
+A recursive CTE fixes the immediate query problem without changing the
+schema. For read-heavy trees, a different model pays off further: nested
+sets or path enumeration answer "all descendants" with a single indexed
+range scan, and a closure table (one row per ancestor-descendant pair)
+trades storage for the fastest reads at write-time cost.
 
 ~~~sql
 WITH RECURSIVE descendants AS (

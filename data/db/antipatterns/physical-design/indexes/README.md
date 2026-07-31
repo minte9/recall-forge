@@ -12,12 +12,13 @@ just adds write overhead with no matching read benefit.
 CREATE INDEX idx_notes ON products (internal_notes)
 ~~~
 
-### 2. Missing the Indexes That Matter
+### 2. Index What EXPLAIN Shows
 
-The opposite mistake is just as common: no index on foreign key columns
-or the columns actually used in `WHERE`/`JOIN`/`ORDER BY`, forcing a full
-table scan on every such query. `EXPLAIN` shows exactly which queries are
-scanning instead of seeking -- that's where an index earns its write cost.
+`EXPLAIN` shows exactly which queries are scanning instead of seeking --
+that's the signal for where an index earns its write cost, rather than
+guessing. Foreign key columns and whatever actually drives `WHERE`,
+`JOIN`, and `ORDER BY` in real queries are the ones worth indexing;
+everything else is a cost with no matching benefit.
 
 ~~~sql
 -- customer_id is joined/filtered on constantly but has no index

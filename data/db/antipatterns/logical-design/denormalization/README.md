@@ -13,15 +13,17 @@ optimized for.
 CREATE TABLE orders (id INT, customer_id INT, customer_name TEXT)
 ~~~
 
-### 2. Keeping Duplicates in Sync
+### 2. Denormalize Deliberately
 
-Once a value is copied into a second table, every update path must touch
-both places or the copies drift -- a customer rename that only updates
-`customers` leaves stale `customer_name` values sitting in `orders`
-forever. Triggers or application-level sync logic can paper over this, but
-they're extra failure surface a normalized schema doesn't need.
+Keep the schema normalized by default -- a join on an indexed key. If a
+specific read path is proven too slow, denormalize as an explicit,
+documented decision (a materialized view or a cache table with a known
+refresh strategy), not by scattering duplicate columns wherever a join
+felt inconvenient.
 
 ~~~sql
--- must be kept in sync with customers.name, or it silently goes stale
-UPDATE orders SET customer_name = 'New Name' WHERE customer_id = 1;
+-- explicit, refreshable, not an ad hoc duplicate column
+CREATE MATERIALIZED VIEW order_summary AS
+SELECT o.id, c.name AS customer_name FROM orders o
+JOIN customers c ON c.id = o.customer_id;
 ~~~

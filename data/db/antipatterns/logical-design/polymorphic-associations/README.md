@@ -13,13 +13,13 @@ CREATE TABLE comments (
 )
 ~~~
 
-### 2. Why the Database Can't Enforce It
+### 2. Exclusive-Arc Foreign Keys
 
-A standard foreign key references exactly one table, so `parent_id` here
-can't have a real FK constraint at all -- nothing stops it from pointing
-at a row that never existed in either table. The two common fixes are
-exclusive-arc tables (a nullable FK per parent type, one non-null at a
-time) or a separate join table per parent type.
+Give each parent type its own nullable FK column with a `CHECK` that
+exactly one is non-null -- both `post_id` and `photo_id` get real,
+enforceable foreign keys. When the set of parent types is large or grows
+often, a separate join table per parent type is the more scalable version
+of the same idea.
 
 ~~~sql
 CREATE TABLE comments (

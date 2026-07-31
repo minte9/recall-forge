@@ -14,18 +14,16 @@ CREATE TABLE orders_2023 (id INT, customer_id INT, total NUMERIC);
 CREATE TABLE orders_2024 (id INT, customer_id INT, total NUMERIC);
 ~~~
 
-### 2. Why This Breaks Aggregation & Schema Changes
+### 2. Partition Instead
 
-"Total sales across all years" now needs a `UNION ALL` across every clone
-table instead of a `GROUP BY`, and adding a column means repeating the
-`ALTER TABLE` once per clone, easy to miss one. Partitioning (one logical
-table, physically split by the database) gives the same storage benefit
-without splitting the schema.
+A partitioned table is one logical table -- one schema, one `ALTER TABLE`,
+one `GROUP BY` -- physically split into per-year segments by the database
+itself. It keeps the storage/maintenance benefit clone tables were reaching
+for, without forcing every cross-period query into a manual `UNION ALL`.
 
 ~~~sql
-SELECT SUM(total) FROM (
-  SELECT total FROM orders_2023
-  UNION ALL
-  SELECT total FROM orders_2024
-) all_orders
+CREATE TABLE orders (id INT, order_date DATE, total NUMERIC)
+  PARTITION BY RANGE (order_date);
+CREATE TABLE orders_2023 PARTITION OF orders
+  FOR VALUES FROM ('2023-01-01') TO ('2024-01-01');
 ~~~
