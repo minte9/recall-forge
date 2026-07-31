@@ -107,7 +107,34 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         groups[option.environment].push(option.category);
       });
 
-      return groups;
+      const priorityOrder = ["JVM", "PVM", "DB"];
+
+      const orderedNames = Object.keys(groups).sort((a, b) => {
+        const priorityA = priorityOrder.indexOf(a.toUpperCase());
+        const priorityB = priorityOrder.indexOf(b.toUpperCase());
+
+        if (priorityA !== -1 && priorityB !== -1) {
+          return priorityA - priorityB;
+        }
+
+        if (priorityA !== -1) {
+          return -1;
+        }
+
+        if (priorityB !== -1) {
+          return 1;
+        }
+
+        return a.localeCompare(b);
+      });
+
+      const orderedGroups = {};
+
+      orderedNames.forEach(name => {
+        orderedGroups[name] = groups[name];
+      });
+
+      return orderedGroups;
     },
 
     filteredMarkdownGroups() {
