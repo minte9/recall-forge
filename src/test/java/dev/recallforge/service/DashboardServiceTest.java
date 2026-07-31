@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.recallforge.config.AppReviewLimitProperties;
+import dev.recallforge.domain.CategoryOrder;
 import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.dto.CategoryOptionResponse;
 import dev.recallforge.dto.DashboardResponse;
@@ -22,6 +23,7 @@ import dev.recallforge.dto.KnowledgeAreaResponse;
 import dev.recallforge.dto.MarkdownSummaryDto;
 import dev.recallforge.dto.RewardResponse;
 import dev.recallforge.dto.WeakAreaResponse;
+import dev.recallforge.repository.CategoryOrderRepository;
 import dev.recallforge.repository.EnvironmentCategoryProjection;
 import dev.recallforge.repository.KnowledgeAreaProjection;
 import dev.recallforge.repository.ReviewRepository;
@@ -50,6 +52,9 @@ class DashboardServiceTest {
     private SubcategoryOrderRepository subcategoryOrderRepository;
 
     @Mock
+    private CategoryOrderRepository categoryOrderRepository;
+
+    @Mock
     private AppReviewLimitProperties reviewLimitProperties;
 
     private DashboardService dashboardService;
@@ -57,7 +62,7 @@ class DashboardServiceTest {
     private void setUp() {
         dashboardService = new DashboardService(
             topicRepository, reviewRepository, rewardService, currentUserService,
-            subcategoryOrderRepository, reviewLimitProperties
+            subcategoryOrderRepository, categoryOrderRepository, reviewLimitProperties
         );
         when(currentUserService.currentUserId()).thenReturn(1L);
     }
@@ -405,5 +410,77 @@ class DashboardServiceTest {
         List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getCategoryOptions_reordersCategoriesWithinEnvironmentByConfiguredDisplayOrder() {
+        setUp();
+        // Repository already returns them alphabetically (Antipatterns, SQL) within DB
+        List<EnvironmentCategoryProjection> options = List.of(
+            environmentCategory("DB", "Antipatterns"),
+            environmentCategory("DB", "SQL")
+        );
+        when(topicRepository.findDistinctEnvironmentCategories(1L)).thenReturn(options);
+        when(categoryOrderRepository.findAll()).thenReturn(List.of(
+            new CategoryOrder("DB", "SQL", 1),
+            new CategoryOrder("DB", "Antipatterns", 2)
+        ));
+
+        List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
+
+        assertThat(result).containsExactly(
+            new CategoryOptionResponse("DB", "SQL"),
+            new CategoryOptionResponse("DB", "Antipatterns")
+        );
+    }
+
+    @Test
+    void getCategoryOptions_categoryWithNoConfiguredOrder_sortsAfterConfiguredOnesKeepingAlphabeticalFallback() {
+        setUp();
+        // repository already returns alphabetical order for the unconfigured ones (Python, Spring)
+        List<EnvironmentCategoryProjection> options = List.of(
+            environmentCategory("JVM", "Python"),
+            environmentCategory("JVM", "Spring"),
+            environmentCategory("JVM", "Java")
+        );
+        when(topicRepository.findDistinctEnvironmentCategories(1L)).thenReturn(options);
+        when(categoryOrderRepository.findAll()).thenReturn(List.of(
+            new CategoryOrder("JVM", "Java", 1)
+        ));
+
+        List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
+
+        assertThat(result).containsExactly(
+            new CategoryOptionResponse("JVM", "Java"),
+            new CategoryOptionResponse("JVM", "Python"),
+            new CategoryOptionResponse("JVM", "Spring")
+        );
+    }
+
+    @Test
+    void getCategoryOptions_configuredOrderDoesNotLeakAcrossEnvironments() {
+        setUp();
+        // A category ranked #1 in its own environment must not jump ahead of
+        // an unrelated environment's categories - environment order stays
+        // alphabetical regardless of per-category display order values.
+        List<EnvironmentCategoryProjection> options = List.of(
+            environmentCategory("DB", "Antipatterns"),
+            environmentCategory("DB", "SQL"),
+            environmentCategory("JVM", "Java")
+        );
+        when(topicRepository.findDistinctEnvironmentCategories(1L)).thenReturn(options);
+        when(categoryOrderRepository.findAll()).thenReturn(List.of(
+            new CategoryOrder("JVM", "Java", 1),
+            new CategoryOrder("DB", "SQL", 1),
+            new CategoryOrder("DB", "Antipatterns", 2)
+        ));
+
+        List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
+
+        assertThat(result).containsExactly(
+            new CategoryOptionResponse("DB", "SQL"),
+            new CategoryOptionResponse("DB", "Antipatterns"),
+            new CategoryOptionResponse("JVM", "Java")
+        );
     }
 }

@@ -11,12 +11,15 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import dev.recallforge.config.AppReviewLimitProperties;
+import dev.recallforge.domain.CategoryOrder;
 import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.dto.CategoryOptionResponse;
 import dev.recallforge.dto.DashboardResponse;
 import dev.recallforge.dto.KnowledgeAreaResponse;
 import dev.recallforge.dto.MarkdownSummaryDto;
 import dev.recallforge.dto.WeakAreaResponse;
+import dev.recallforge.repository.CategoryOrderRepository;
+import dev.recallforge.repository.EnvironmentCategoryProjection;
 import dev.recallforge.repository.KnowledgeAreaProjection;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
@@ -44,6 +47,7 @@ public class DashboardService {
     private final RewardService rewardService;
     private final CurrentUserService currentUserService;
     private final SubcategoryOrderRepository subcategoryOrderRepository;
+    private final CategoryOrderRepository categoryOrderRepository;
     private final AppReviewLimitProperties reviewLimitProperties;
 
     public DashboardService(
@@ -52,6 +56,7 @@ public class DashboardService {
         RewardService rewardService,
         CurrentUserService currentUserService,
         SubcategoryOrderRepository subcategoryOrderRepository,
+        CategoryOrderRepository categoryOrderRepository,
         AppReviewLimitProperties reviewLimitProperties
     ) {
         this.topicRepository = topicRepository;
@@ -59,6 +64,7 @@ public class DashboardService {
         this.rewardService = rewardService;
         this.currentUserService = currentUserService;
         this.subcategoryOrderRepository = subcategoryOrderRepository;
+        this.categoryOrderRepository = categoryOrderRepository;
         this.reviewLimitProperties = reviewLimitProperties;
     }
     
@@ -207,12 +213,31 @@ public class DashboardService {
     public List<CategoryOptionResponse> getCategoryOptions() {
         Long userId = currentUserService.currentUserId();
 
+        Map<String, Integer> categoryOrder = categoryOrderRepository.findAll()
+            .stream()
+            .collect(Collectors.toMap(
+                order -> categoryOrderKey(order.getEnvironment(), order.getCategory()),
+                CategoryOrder::getDisplayOrder
+            ));
+
+        // Environment order stays alphabetical (unchanged). Within an
+        // environment, categories with an explicit order sort by it; a
+        // category with no explicit order falls back to the alphabetical
+        // position the query already returned it in (stable sort).
         return topicRepository.findDistinctEnvironmentCategories(userId)
             .stream()
+            .sorted(Comparator
+                .comparing((EnvironmentCategoryProjection option) -> option.getEnvironment())
+                .thenComparingInt(option -> categoryOrder.getOrDefault(
+                    categoryOrderKey(option.getEnvironment(), option.getCategory()), Integer.MAX_VALUE)))
             .map(option -> new CategoryOptionResponse(
                 option.getEnvironment(),
                 option.getCategory()
             ))
             .toList();
+    }
+
+    private static String categoryOrderKey(String environment, String category) {
+        return environment.toLowerCase() + "::" + category.toLowerCase();
     }
 }
