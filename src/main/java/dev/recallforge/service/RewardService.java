@@ -2,21 +2,26 @@ package dev.recallforge.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
 import dev.recallforge.security.CurrentUserService;
 
 /**
- * XP/level/streak/mastery bookkeeping for the current user, backed by a
- * single {@link UserReward} row per user. {@link #rewardDefaultUser} is
- * called by {@link ReviewService} after each graded answer; {@link
- * #getCurrentUserReward} is a read-only variant used by
+ * XP/level/streak/mastery bookkeeping for the current user. XP/level are
+ * global, backed by a single {@link UserReward} row per user; streak and
+ * mastery are computed per category from review/topic history. {@link
+ * #rewardDefaultUser} is called by {@link ReviewService} after each graded
+ * answer; {@link #getCurrentUserReward} is a read-only variant used by
  * {@code DashboardService} to display current standing without granting XP.
  */
 @Service
@@ -28,15 +33,18 @@ public class RewardService {
     private final UserRewardRepository userRewardRepository;
     private final CurrentUserService currentUserService;
     private final TopicRepository topicRepository;
+    private final ReviewRepository reviewRepository;
 
     public RewardService(
         UserRewardRepository userRewardRepository,
         CurrentUserService currentUserService,
-        TopicRepository topicRepository
+        TopicRepository topicRepository,
+        ReviewRepository reviewRepository
     ) {
         this.userRewardRepository = userRewardRepository;
         this.currentUserService = currentUserService;
         this.topicRepository = topicRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     @Transactional
@@ -106,7 +114,7 @@ public class RewardService {
             titleForLevel(level),
             xpInLevel,
             100,
-            reward.currentStreakDays(LocalDate.now()),
+            categoryStreakDays(userId, category, LocalDate.now()),
             gainedXp,
 
             category,
@@ -114,6 +122,49 @@ public class RewardService {
             totalTopics,
             masteryPercent
         );
+    }
+
+    // Consecutive days (ending today or yesterday) with at least one review
+    // in this category. Computed live from review history rather than a
+    // stored counter, so it's correct per category with no staleness.
+    private int categoryStreakDays(Long userId, String category, LocalDate today) {
+        List<LocalDateTime> reviewedAt =
+            reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(userId, category);
+
+        Set<LocalDate> distinctDatesDesc = new LinkedHashSet<>();
+
+        for (LocalDateTime timestamp : reviewedAt) {
+            distinctDatesDesc.add(timestamp.toLocalDate());
+        }
+
+        if (distinctDatesDesc.isEmpty()) {
+            return 0;
+        }
+
+        LocalDate mostRecent = distinctDatesDesc.iterator().next();
+        boolean streakAlive = mostRecent.equals(today) || mostRecent.equals(today.minusDays(1));
+
+        if (!streakAlive) {
+            return 0;
+        }
+
+        int streak = 1;
+        LocalDate expected = mostRecent.minusDays(1);
+
+        for (LocalDate date : distinctDatesDesc) {
+            if (date.equals(mostRecent)) {
+                continue;
+            }
+
+            if (!date.equals(expected)) {
+                break;
+            }
+
+            streak++;
+            expected = expected.minusDays(1);
+        }
+
+        return streak;
     }
 
     private String titleForLevel(int level) {
