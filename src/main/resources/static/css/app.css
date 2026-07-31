@@ -17,6 +17,10 @@
     box-sizing: border-box;
   }
 
+  [v-cloak] {
+    display: none;
+  }
+
   body {
     max-width: 1400px;
     margin: 0 auto;
