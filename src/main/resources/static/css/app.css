@@ -58,6 +58,11 @@
     padding: 14px;
     overflow: auto;
     box-shadow: var(--shadow);
+    scrollbar-width: none;
+  }
+
+  .panel::-webkit-scrollbar {
+    display: none;
   }
 
   .left-panel {
