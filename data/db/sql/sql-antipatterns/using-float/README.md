@@ -1,4 +1,4 @@
-## DB / Antipatterns / Physical Design / Using Float
+## DB / SQL / SQL Antipatterns / Using Float
 
 ### 1. Floating-Point Rounding Errors
 

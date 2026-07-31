@@ -1,4 +1,4 @@
-## DB / Antipatterns / Physical Design / Images
+## DB / SQL / SQL Antipatterns / Images
 
 ### 1. Storing Files Directly in the Database
 

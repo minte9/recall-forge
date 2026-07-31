@@ -1,4 +1,4 @@
-## DB / Antipatterns / Logical Design / Polymorphic Associations
+## DB / SQL / SQL Antipatterns / Polymorphic Associations
 
 ### 1. A Single FK Column Pointing at Multiple Tables
 

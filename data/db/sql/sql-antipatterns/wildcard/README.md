@@ -1,4 +1,4 @@
-## DB / Antipatterns / Query / Wildcard
+## DB / SQL / SQL Antipatterns / Wildcard
 
 ### 1. Leading-Wildcard LIKE Searches
 

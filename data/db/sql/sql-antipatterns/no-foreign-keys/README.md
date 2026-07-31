@@ -1,4 +1,4 @@
-## DB / Antipatterns / Logical Design / No Foreign Keys
+## DB / SQL / SQL Antipatterns / No Foreign Keys
 
 ### 1. Skipping FKs "for Performance"
 

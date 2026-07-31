@@ -1,4 +1,4 @@
-## DB / Antipatterns / Physical Design / Enum
+## DB / SQL / SQL Antipatterns / Enum
 
 ### 1. Baking a Fixed Value List into the Column Type
 

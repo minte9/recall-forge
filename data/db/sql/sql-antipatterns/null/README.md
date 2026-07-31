@@ -1,4 +1,4 @@
-## DB / Antipatterns / Query / Null
+## DB / SQL / SQL Antipatterns / Null
 
 ### 1. Treating NULL Like a Regular Value
 

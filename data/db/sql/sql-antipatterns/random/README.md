@@ -1,4 +1,4 @@
-## DB / Antipatterns / Query / Random
+## DB / SQL / SQL Antipatterns / Random
 
 ### 1. ORDER BY RANDOM() for "Pick One Row"
 

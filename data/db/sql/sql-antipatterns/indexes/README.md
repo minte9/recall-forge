@@ -1,4 +1,4 @@
-## DB / Antipatterns / Physical Design / Indexes
+## DB / SQL / SQL Antipatterns / Indexes
 
 ### 1. Indexing Every Column "Just in Case"
 

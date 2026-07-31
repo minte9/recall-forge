@@ -1,4 +1,4 @@
-## DB / Antipatterns / Logical Design / Mandatory ID
+## DB / SQL / SQL Antipatterns / Mandatory ID
 
 ### 1. Forcing a Surrogate Key Everywhere
 

@@ -1,4 +1,4 @@
-## DB / Antipatterns / Logical Design / Multicolumn Attributes
+## DB / SQL / SQL Antipatterns / Multicolumn Attributes
 
 ### 1. tag1, tag2, tag3 Columns
 

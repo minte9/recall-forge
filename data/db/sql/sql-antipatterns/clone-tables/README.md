@@ -1,4 +1,4 @@
-## DB / Antipatterns / Logical Design / Clone Tables
+## DB / SQL / SQL Antipatterns / Clone Tables
 
 ### 1. Splitting by Year/Region into Separate Tables
 

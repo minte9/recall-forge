@@ -1,4 +1,4 @@
-## DB / Antipatterns / Logical Design / Entity-Attribute-Value
+## DB / SQL / SQL Antipatterns / Entity-Attribute-Value
 
 ### 1. The EAV Temptation
 

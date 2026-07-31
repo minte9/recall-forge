@@ -1,4 +1,4 @@
-## DB / Antipatterns / Logical Design / Parent ID (Naive Trees)
+## DB / SQL / SQL Antipatterns / Parent ID (Naive Trees)
 
 ### 1. The Adjacency List Model
 

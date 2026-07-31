@@ -1,4 +1,4 @@
-## DB / Antipatterns / Query / Search
+## DB / SQL / SQL Antipatterns / Search
 
 ### 1. Chaining LIKE/OR for Multi-Keyword Search
 

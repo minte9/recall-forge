@@ -1,4 +1,4 @@
-## DB / Antipatterns / Logical Design / Denormalization
+## DB / SQL / SQL Antipatterns / Denormalization
 
 ### 1. Premature Denormalization
 
