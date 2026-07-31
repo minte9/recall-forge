@@ -195,14 +195,11 @@
                   <div v-if="index > 0" class="menu-divider">
                   </div>
 
-                  <div class="menu-group-title">
-                    {{ groupName }}
-                  </div>
-
-                  <button v-for="environment in items" :key="environment"
+                  <button v-for="(environment, envIndex) in items" :key="environment"
                     :class="{ active: selectedEnvironment === environment }" @click="selectEnvironment(environment)">
 
-                    {{ environment }}
+                    <span>{{ environment }}</span>
+                    <span v-if="envIndex === 0" class="environment-badge">{{ groupName }}</span>
 
                   </button>
 
