@@ -36,6 +36,8 @@ createApp({
       feedbackHistoryLoadedForTopicId: null,
       selectedEnvironment: null,
       environmentMenuOpen: false,
+      selectedEnvironmentGroup: null,
+      categoryMenuOpen: false,
       adminUsers: [],
       categoryOptions: [],
       showDangerZone: false,
@@ -106,6 +108,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       });
 
       return groups;
+    },
+
+    environmentGroupNames() {
+      return Object.keys(this.environmentGroups);
+    },
+
+    categoriesForSelectedEnvironmentGroup() {
+      return this.environmentGroups[this.selectedEnvironmentGroup] || [];
     },
 
     filteredMarkdownGroups() {
@@ -338,13 +348,29 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     async selectEnvironment(environment) {
       this.selectedEnvironment = environment;
       this.currentCategory = environment;
-      this.environmentMenuOpen = false;
+      this.categoryMenuOpen = false;
       this.openMarkdownGroup = null;
 
       await this.loadDashboard();
       await this.loadMarkdownSummaries(false);
 
       this.autoOpenSingleMarkdownGroup();
+    },
+
+    selectEnvironmentGroup(groupName) {
+      this.selectedEnvironmentGroup = groupName;
+      this.environmentMenuOpen = false;
+
+      const categories = this.environmentGroups[groupName] || [];
+
+      if (categories.length > 0) {
+        this.selectEnvironment(categories[0]);
+      }
+    },
+
+    syncEnvironmentGroupForCategory(category) {
+      const option = this.categoryOptions.find(o => o.category === category);
+      this.selectedEnvironmentGroup = option ? option.environment : null;
     },
 
     autoOpenSingleMarkdownGroup() {
@@ -357,6 +383,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     toggleEnvironmentMenu() {
       this.environmentMenuOpen = !this.environmentMenuOpen;
+    },
+
+    toggleCategoryMenu() {
+      this.categoryMenuOpen = !this.categoryMenuOpen;
     },
 
     async startReview(topicId = null, allowBroaderFallback = !topicId) {
@@ -653,6 +683,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           this.currentCategory = this.categoryOptions[0].category;
         }
 
+        this.syncEnvironmentGroupForCategory(this.currentCategory);
+
       } catch (err) {
         console.error("Could not load category options", err);
       }
@@ -909,8 +941,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.categoryOptions = [];
         this.currentCategory = null;
         this.selectedEnvironment = null;
+        this.selectedEnvironmentGroup = null;
         this.openMarkdownGroup = null;
         this.environmentMenuOpen = false;
+        this.categoryMenuOpen = false;
 
         this.markdown = this.initialMarkdown;
         this.leftPanel = "markdowns";
@@ -954,8 +988,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.categoryOptions = [];
         this.currentCategory = null;
         this.selectedEnvironment = null;
+        this.selectedEnvironmentGroup = null;
         this.openMarkdownGroup = null;
         this.environmentMenuOpen = false;
+        this.categoryMenuOpen = false;
 
         this.markdown = this.initialMarkdown;
         this.leftPanel = "markdowns";
@@ -1092,6 +1128,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         this.currentCategory = category;
         this.selectedEnvironment = category;
+        this.syncEnvironmentGroupForCategory(category);
 
         await this.loadDashboard();
         await this.loadMarkdownSummaries(true);
