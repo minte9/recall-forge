@@ -182,32 +182,43 @@
               Browse your markdown files by category
             </div>
 
-            <div class="environment-menu-wrap" @mouseenter="isDesktop && (environmentMenuOpen = true)"
-              @mouseleave="isDesktop && (environmentMenuOpen = false)">
-              <button class="environment-menu-btn" @click="!isDesktop && toggleEnvironmentMenu()">
-                <span>{{ selectedEnvironment }}</span>
-                <span>⌄</span>
-              </button>
+            <div class="environment-category-row">
 
-              <div v-if="environmentMenuOpen" class="environment-menu-dropdown">
-                <template v-for="(items, groupName, index) in environmentGroups" :key="groupName">
+              <div class="environment-menu-wrap" @mouseenter="isDesktop && (environmentMenuOpen = true)"
+                @mouseleave="isDesktop && (environmentMenuOpen = false)">
+                <button class="environment-menu-btn" @click="!isDesktop && toggleEnvironmentMenu()">
+                  <span>{{ selectedEnvironmentGroup }}</span>
+                  <span>⌄</span>
+                </button>
 
-                  <div v-if="index > 0" class="menu-divider">
-                  </div>
+                <div v-if="environmentMenuOpen" class="environment-menu-dropdown">
+                  <button v-for="groupName in environmentGroupNames" :key="groupName"
+                    :class="{ active: selectedEnvironmentGroup === groupName }"
+                    @click="selectEnvironmentGroup(groupName)">
 
-                  <div class="menu-group-title">
                     {{ groupName }}
-                  </div>
-
-                  <button v-for="environment in items" :key="environment"
-                    :class="{ active: selectedEnvironment === environment }" @click="selectEnvironment(environment)">
-
-                    {{ environment }}
 
                   </button>
-
-                </template>
+                </div>
               </div>
+
+              <div class="environment-menu-wrap" @mouseenter="isDesktop && (categoryMenuOpen = true)"
+                @mouseleave="isDesktop && (categoryMenuOpen = false)">
+                <button class="environment-menu-btn" @click="!isDesktop && toggleCategoryMenu()">
+                  <span>{{ selectedEnvironment }}</span>
+                  <span>⌄</span>
+                </button>
+
+                <div v-if="categoryMenuOpen" class="environment-menu-dropdown">
+                  <button v-for="category in categoriesForSelectedEnvironmentGroup" :key="category"
+                    :class="{ active: selectedEnvironment === category }" @click="selectEnvironment(category)">
+
+                    {{ category }}
+
+                  </button>
+                </div>
+              </div>
+
             </div>
           </div>
 
