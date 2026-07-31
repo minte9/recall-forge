@@ -83,4 +83,16 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Param("userId") Long userId,
         @Param("category") String category
     );
+
+    @Query("""
+        select r.reviewedAt
+        from Review r
+        where r.user.id = :userId
+        and lower(r.topic.category) = lower(:category)
+        order by r.reviewedAt desc
+    """)
+    List<LocalDateTime> findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(
+        @Param("userId") Long userId,
+        @Param("category") String category
+    );
 }
