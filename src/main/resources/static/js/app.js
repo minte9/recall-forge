@@ -1,5 +1,7 @@
 const { createApp } = Vue;
 
+const LAST_CATEGORY_STORAGE_KEY = "recallforge.lastCategory";
+
 createApp({
   data() {
     return {
@@ -350,6 +352,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.currentCategory = environment;
       this.categoryMenuOpen = false;
       this.openMarkdownGroup = null;
+      this.saveLastCategory(environment);
 
       await this.loadDashboard();
       await this.loadMarkdownSummaries(false);
@@ -679,14 +682,40 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         );
 
         if (!hasCurrentCategory && this.categoryOptions.length > 0) {
-          this.selectedEnvironment = this.categoryOptions[0].category;
-          this.currentCategory = this.categoryOptions[0].category;
+          const lastCategory = this.readLastCategory();
+
+          const hasLastCategory = lastCategory && this.categoryOptions.some(
+            option => option.category === lastCategory
+          );
+
+          const fallbackCategory = hasLastCategory
+            ? lastCategory
+            : this.categoryOptions[0].category;
+
+          this.selectedEnvironment = fallbackCategory;
+          this.currentCategory = fallbackCategory;
         }
 
         this.syncEnvironmentGroupForCategory(this.currentCategory);
 
       } catch (err) {
         console.error("Could not load category options", err);
+      }
+    },
+
+    readLastCategory() {
+      try {
+        return localStorage.getItem(LAST_CATEGORY_STORAGE_KEY);
+      } catch (err) {
+        return null;
+      }
+    },
+
+    saveLastCategory(category) {
+      try {
+        localStorage.setItem(LAST_CATEGORY_STORAGE_KEY, category);
+      } catch (err) {
+        // localStorage unavailable (disabled/private mode) - preference just won't persist
       }
     },
 
