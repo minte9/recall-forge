@@ -935,13 +935,9 @@
 
             </div>
 
-            <div class="review-preview panel">
+            <!-- <div class="review-preview panel">
 
                 <div class="label">Interactive Example</div>
-
-                <!-- <div class="notes-title">
-                    Algorithms → Binary Search
-                </div> -->
 
                 <div class="question">
                     What is Binary Search?
@@ -966,6 +962,44 @@
 
                     <div class="feedback-row">
                         <strong>Updated memory score:</strong> 0.68
+                    </div>
+
+                    <div class="feedback-row">
+                        <strong>Next review:</strong> in 7 days
+                    </div>
+                </div>
+
+            </div> -->
+
+             <div class="review-preview panel">
+
+                <div class="label">JVM / Java / Spring / Transactions</div>
+
+                <div class="question">
+                    What does @Transactional do?
+                </div>
+
+                <textarea id="demo-answer"
+                    placeholder="Type a quick answer...">It runs the method inside a database transaction and rolls back when needed.</textarea>
+
+                <button class="demo-button" onclick="submitDemoAnswer()">
+                    Submit answer
+                </button>
+
+                <div id="demo-feedback" class="feedback">
+                    <div class="feedback-row">
+                        <strong>Score:</strong> 0.72
+                    </div>
+
+                    <div class="feedback-row">
+                        <strong>Feedback:</strong>
+                        You correctly described the main purpose of @Transactional. However, it's worth remembering that Spring rolls back only for unchecked exceptions by default unless configured otherwise.
+
+                    </div>
+
+                    <div class="feedback-row">
+                        <strong>Updated memory score::</strong> 0.68
+
                     </div>
 
                     <div class="feedback-row">
@@ -1053,12 +1087,12 @@
 
         </div>
 
-        <!-- <div class="signin-reminder">
+        <div class="signin-reminder">
             <strong>Ready to begin?</strong>
             <span>
                 Use Google or GitHub to sign in and create your first review queue.
             </span>
-        </div> -->
+        </div>
 
     </section>
 
