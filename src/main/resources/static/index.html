@@ -227,6 +227,14 @@
               <button class="starter-pack-btn" @click="importStarterPack('Python')">
                 Python
               </button>
+
+              <button class="starter-pack-btn" @click="importStarterPack('Git')">
+                Git
+              </button>
+
+              <button class="starter-pack-btn" @click="importStarterPack('SQL')">
+                SQL
+              </button>
             </div>
 
           </div>
@@ -488,6 +496,18 @@
                 :disabled="categoryOptions.some(o => o.category === 'Python')"
                 @click="importStarterPack('Python')">
                 Python
+              </button>
+
+              <button class="starter-pack-btn"
+                :disabled="categoryOptions.some(o => o.category === 'Git')"
+                @click="importStarterPack('Git')">
+                Git
+              </button>
+
+              <button class="starter-pack-btn"
+                :disabled="categoryOptions.some(o => o.category === 'SQL')"
+                @click="importStarterPack('SQL')">
+                SQL
               </button>
             </div>
           </div>

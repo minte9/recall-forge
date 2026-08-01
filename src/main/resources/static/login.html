@@ -47,14 +47,14 @@
         text-align: center;
 
         align-self: start;
+        position: sticky;
+        top: 16px;
     }
 
     .demo-card {
         padding: 44px;
         display: flex;
         flex-direction: column;
-        justify-content: flex-start;
-
         align-self: start;
     }
 
@@ -96,7 +96,8 @@
     }
 
     .google {
-        background: #5b3df5;
+        /* background: #5b3df5; */
+        background: #3b82f6;
         color: white;
     }
 
@@ -121,13 +122,6 @@
 
     .footer a:hover {
         text-decoration: underline;
-    }
-
-    .demo-card {
-        padding: 44px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
     }
 
     .demo-header {
@@ -247,7 +241,7 @@
 
     .feedback.visible {
         display: block;
-        animation: fadeSlideIn 0.25s ease-out;
+        animation: fadeSlideIn 0.55s ease-out;
     }
 
     @keyframes fadeSlideIn {
@@ -312,6 +306,360 @@
         background: #22c55e;
     }
 
+    /* Shared landing sections */
+
+    .landing-section {
+        padding: 40px 0;
+        /* border-bottom: 1px solid #e2e8f0; */
+    }
+
+    .landing-section:first-child {
+        padding-top: 0;
+    }
+
+    .landing-section:last-child {
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .section-header,
+    .demo-header {
+        margin-bottom: 28px;
+    }
+
+    .section-header h2,
+    .demo-header h2 {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+        line-height: 1.25;
+    }
+
+    .section-header p,
+    .demo-header p {
+        max-width: 850px;
+        color: #64748b;
+        line-height: 1.55;
+    }
+
+    .section-label,
+    .option-label {
+        margin-bottom: 8px;
+        color: #64748b;
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+
+    /* Benefits section */
+
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .benefit-item {
+        display: flex;
+        gap: 14px;
+        padding: 20px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+    }
+
+    .benefit-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: #ffb703;
+        /* border: 1px solid #ff9f1c; */
+        color: #ffffff;
+        font-weight: 800;
+    }
+
+    .benefit-item h3 {
+        margin-bottom: 7px;
+        color: #0f172a;
+        font-size: 1rem;
+        line-height: 1.35;
+    }
+
+    .benefit-item p {
+        color: #64748b;
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+
+    .free-message {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-top: 18px;
+        padding: 17px 20px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 14px;
+    }
+
+    .free-badge {
+        flex: 0 0 auto;
+        padding: 5px 10px;
+        background: #dcfce7;
+        border-radius: 999px;
+        color: #15803d;
+        font-size: 0.78rem;
+        font-weight: 800;
+    }
+
+    .free-message strong {
+        color: #166534;
+    }
+
+    .free-message p {
+        margin-top: 4px;
+        color: #4b6955;
+        line-height: 1.45;
+    }
+
+
+    /* Starting options */
+
+    .start-options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+        align-items: stretch;
+    }
+
+    .start-option {
+        padding: 24px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+    }
+
+    .start-option-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+
+    .start-option-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 32px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #f97316;
+        color: #ffffff;
+        font-weight: 800;
+    }
+
+    .start-option h3 {
+        font-size: 1.15rem;
+        line-height: 1.3;
+    }
+
+    .start-option p {
+        color: #64748b;
+        line-height: 1.55;
+    }
+
+    .option-label {
+        margin-bottom: 3px;
+    }
+
+    .option-separator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .option-separator span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 50%;
+    }
+
+    .starter-pack-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    .starter-pack-list span {
+        padding: 7px 12px;
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        border-radius: 8px;
+        color: #1e3a5f;
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .markdown-example {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-top: 18px;
+        padding: 14px;
+        overflow-x: auto;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+    }
+
+    .markdown-example code {
+        color: #475569;
+        font-size: 0.82rem;
+        white-space: nowrap;
+    }
+
+    .option-note {
+        margin-top: 16px;
+        color: #94a3b8;
+        font-size: 0.84rem;
+    }
+
+    .signin-reminder {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 22px;
+        padding: 16px;
+        text-align: center;
+        background: #f8fafc;
+        border-radius: 12px;
+        color: #64748b;
+    }
+
+    .signin-reminder strong {
+        color: #0f172a;
+    }
+
+    .learning-flow {
+        display: grid;
+        grid-template-columns: 1fr 0.9fr;
+        gap: 24px;
+        align-items: stretch;
+    }
+
+    .journey-panel {
+        padding: 24px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+    }
+
+    .journey-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .journey-step h3 {
+        margin-bottom: 4px;
+        font-size: 1rem;
+    }
+
+    .journey-step p {
+        margin-bottom: 3px;
+        color: #334155;
+    }
+
+    .journey-step span {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .journey-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 32px;
+        width: 32px;
+        height: 32px;
+        font-weight: 800;
+        font-size: 1.05rem;
+        border-radius: 50%;
+        margin-right: 10px;
+        color: white;
+    }
+
+    .journey-icon.orange {
+        background: #f97316;
+    }
+
+    .journey-icon.purple {
+        background: #8b5cf6;
+    }
+
+    .journey-icon.blue {
+        background: #3b82f6;
+    }
+
+    .journey-icon.green {
+        background: #22c55e;
+    }
+
+    .journey-arrow {
+        margin: 8px 0 8px 10px;
+        color: #aaaaaa;
+        font-size: 1.4rem;
+    }
+
+    .review-preview {
+        align-self: stretch;
+    }
+
+    .developer-message {
+        margin-top: 0px;
+        margin-bottom: 30px;
+        padding: 22px 24px;
+
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #5b3df5;
+        border-radius: 12px;
+    }
+
+    .developer-message h3 {
+        margin: 8px 0 10px;
+
+        font-size: 1.35rem;
+        line-height: 1.3;
+
+        color: #0f172a;
+    }
+
+    .developer-message p {
+        margin: 0;
+
+        color: #64748b;
+        line-height: 1.65;
+
+        max-width: 780px;
+    }
+
     @media (max-width: 980px) {
         .page {
             grid-template-columns: 1fr;
@@ -325,6 +673,27 @@
         .login-card,
         .demo-card {
             padding: 28px;
+        }
+
+        .login-card {
+            position: static;
+        }
+
+        .benefits-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .start-options {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .option-separator {
+            height: 28px;
+        }
+
+        .learning-flow {
+            grid-template-columns: 1fr;
         }
     }
 
@@ -362,6 +731,33 @@
 
         .demo-button {
             padding: 14px;
+        }
+
+        .landing-section {
+            padding: 32px 0;
+        }
+
+        .section-header,
+        .demo-header {
+            margin-bottom: 20px;
+        }
+
+        .section-header h2,
+        .demo-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .benefit-item,
+        .start-option {
+            padding: 18px;
+        }
+
+        .free-message {
+            flex-direction: column;
+        }
+
+        .signin-reminder {
+            flex-direction: column;
         }
     }
 </style>
@@ -401,74 +797,269 @@
 </section>
 
 <section class="demo-card">
-    <div class="demo-header">
-        <div>
-            <h2>See how a review works</h2>
+
+    <!-- WHY RECALLFORGE -->
+
+    <section class="landing-section benefits-section">
+
+        <div class="section-header">
+            <div class="section-label">Build for developers</div>
+
+            <h2>Turn your Markdown notes into lasting knowledge</h2>
+
             <p>
-                Recall Forge turns your markdown notes into active recall questions,
-                evaluates your answer, gives feedback and schedules the next review.
+                RecallForge transforms your existing notes into adaptive review sessions that help you remember what you learn.
             </p>
         </div>
-    </div>
 
-    <div class="demo-layout">
+        <div class="benefits-grid">
 
-        <div class="panel">
-            <div class="label">Source note</div>
+            <article class="benefit-item">
+                <div class="benefit-icon" title="Why?">✓</div>
 
-            <div class="notes">
-                <div class="notes-title">Algorithms → Binary Search</div>
+                <div>
+                    <h3>Stop relearning the same topics.</h3>
+
+                    <p>
+                        Keep important concepts fresh instead of repeatedly searching
+                        for things you have already learned.
+                    </p>
+                </div>
+            </article>
+
+            <article class="benefit-item">
+                <div class="benefit-icon" title="What do I need?">◆</div>
+
+                <div>
+                    <h3>Use the notes you already have.</h3>
+
+                    <p>
+                        Import Markdown from your projects, courses, documentation,
+                        Obsidian vaults, or Git repositories.
+                    </p>
+                </div>
+            </article>
+
+            <article class="benefit-item">
+                <div class="benefit-icon" title="How is it different?">◷</div>
+
+                <div>
+                    <h3>Learn concepts, not answers.</h3>
+
+                    <p>
+                        RecallForge varies questions and adapts review intervals 
+                        based on your progress.
+                    </p>
+                </div>
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- EXISTING REVIEW DEMO -->
+
+    <section class="landing-section review-demo-section">
+
+        <div class="section-header">
+
+            <div class="section-label">
+                How it works over time
+            </div>
+
+            <h2>
+                Learning that adapts to you
+            </h2>
+
+            <p>
+                Every review teaches RecallForge what you know. As your understanding grows, reviews become less frequent.
+            </p>
+
+        </div>
+
+        <div class="learning-flow">
+
+            <div class="journey-panel">
+
+                <div class="journey-step">
+                    <div class="journey-icon orange" title="Import">1</div>
+
+                    <div>
+                        <!-- <div class="label">Import</div> -->
+                        <h3>Upload your notes</h3>
+                        <p>Spring Security.md</p>
+                        <span>24 topics found</span>
+                    </div>
+                </div>
+
+                <div class="journey-arrow">↓</div>
+
+                <div class="journey-step">
+                    <div class="journey-icon orange" title="Review">2</div>
+
+                    <div>
+                        <!-- <div class="label">Review</div> -->
+                        <h3>Complete a small daily session</h3>
+                        <p>7 reviews due today</p>
+                        <span>About 5 minutes</span>
+                    </div>
+                </div>
+
+                <div class="journey-arrow">↓</div>
+
+                <div class="journey-step">
+                    <div class="journey-icon orange" title="Adapt">3</div>
+
+                    <div>
+                        <!-- <div class="label">Adapt</div> -->
+                        <h3>RecallForge adjusts the schedule</h3>
+                        <p>Weak topics return sooner</p>
+                        <span>Strong topics appear less often</span>
+                    </div>
+                </div>
+
+                <!-- <div class="journey-arrow">↓</div>
+
+                <div class="journey-step">
+                    <div class="journey-icon orange" title="Progress">4</div>
+
+                    <div>
+                        <h3>Keep knowledge fresh</h3>
+                        <p>Mastery: 84%</p>
+                        <span>Next review in 12 days</span>
+                    </div>
+                </div> -->
+
+            </div>
+
+            <div class="review-preview panel">
+
+                <div class="label">Interactive Example</div>
+
+                <!-- <div class="notes-title">
+                    Algorithms → Binary Search
+                </div> -->
+
+                <div class="question">
+                    What is Binary Search?
+                </div>
+
+                <textarea id="demo-answer"
+                    placeholder="Type a quick answer...">Binary Search repeatedly checks the middle element to find a value faster than a linear search.</textarea>
+
+                <button class="demo-button" onclick="submitDemoAnswer()">
+                    Submit answer
+                </button>
+
+                <div id="demo-feedback" class="feedback">
+                    <div class="feedback-row">
+                        <strong>Score:</strong> 0.72
+                    </div>
+
+                    <div class="feedback-row">
+                        <strong>Feedback:</strong>
+                        Good answer. Binary Search repeatedly checks the middle element to narrow the search space, but it only works correctly on sorted collections.
+                    </div>
+
+                    <div class="feedback-row">
+                        <strong>Updated memory score:</strong> 0.68
+                    </div>
+
+                    <div class="feedback-row">
+                        <strong>Next review:</strong> in 7 days
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- HOW TO START -->
+
+    <section class="landing-section start-section">
+
+        <div class="section-header">
+            <div class="section-label">Choose how to begin</div>
+
+            <h2>Choose your starting point</h2>
+
+            <p>
+                Start with a Starter Pack or import your own Markdown notes.
+            </p>
+        </div>
+
+        <div class="start-options">
+
+            <article class="start-option">
+
+                <div class="start-option-header">
+                    <div class="start-option-icon">+</div>
+
+                    <div>
+                        <div class="option-label">Quick start</div>
+                        <h3>Import a Starter Pack</h3>
+                    </div>
+                </div>
 
                 <p>
-                    Binary Search finds a value in a sorted array by repeatedly comparing
-                    the target with the middle element and eliminating half of the remaining
-                    search space.
+                    Explore the review workflow with prepared topics.
+                    Choose a pack after signing in and begin reviewing immediately.
                 </p>
 
-                <ul>
-                    <li>Works only on sorted data.</li>
-                    <li>Halves the search space on each step.</li>
-                    <li>Time complexity: O(log n).</li>
-                </ul>
-            </div>
+                <div class="starter-pack-list">
+                    <span>Java</span>
+                    <span>Python</span>
+                    <span>Git</span>
+                    <span>SQL</span>
+                </div>
+
+                <div class="option-note">
+                    Best for discovering how RecallForge works.
+                </div>
+
+            </article>
+
+            <article class="start-option">
+
+                <div class="start-option-header">
+                    <div class="start-option-icon">+</div>
+
+                    <div>
+                        <div class="option-label">Your own knowledge</div>
+                        <h3>Upload your Markdown files</h3>
+                    </div>
+                </div>
+
+                <p>
+                    Turn Markdown files into adaptive reviews.
+                </p>
+
+                <div class="markdown-example">
+                    <code>## JVM / Java / Collections / Maps</code>
+                    <code>### 1. HashMap</code>
+                    <code>Stores key-value pairs...</code>
+                </div>
+
+                <div class="option-note">
+                    Best for remembering knowledge that matters to you.
+                </div>
+
+            </article>
+
         </div>
 
-        <div class="panel">
-            <div class="label">Question</div>
+        <!-- <div class="signin-reminder">
+            <strong>Ready to begin?</strong>
+            <span>
+                Use Google or GitHub to sign in and create your first review queue.
+            </span>
+        </div> -->
 
-            <div class="question">
-                What is Binary Search?
-            </div>
+    </section>
 
-            <textarea id="demo-answer" placeholder="Type a quick answer...">Binary Search repeatedly checks the middle element to find a value faster than a linear search.</textarea>
-
-            <button class="demo-button" onclick="submitDemoAnswer()">
-                Submit answer
-            </button>
-
-            <div id="demo-feedback" class="feedback">
-                <div class="feedback-row">
-                    <strong>Score:</strong> 0.82
-                </div>
-
-                <div class="feedback-row">
-                    <strong>Feedback:</strong>
-                    Good answer. Binary Search repeatedly checks the middle element to narrow
-                    the search space, but it only works correctly on sorted
-                    collections.
-                </div>
-
-                <div class="feedback-row">
-                    <strong>Updated memory score:</strong> 0.72
-                </div>
-
-                <div class="feedback-row">
-                    <strong>Next review:</strong> tomorrow
-                </div>
-            </div>
-        </div>
-
-    </div>
 </section>
 
 
