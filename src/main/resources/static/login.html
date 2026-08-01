@@ -72,6 +72,7 @@
     h1 {
         font-size: 2rem;
         margin-bottom: 10px;
+        color: #64748b;
     }
 
     .subtitle {
@@ -310,7 +311,7 @@
 
     .landing-section {
         padding: 40px 0;
-        border-bottom: 1px solid #e2e8f0;
+        /* border-bottom: 1px solid #e2e8f0; */
     }
 
     .landing-section:first-child {
@@ -356,7 +357,7 @@
 
     .benefits-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 16px;
     }
 
@@ -539,22 +540,6 @@
         margin-top: 16px;
         color: #94a3b8;
         font-size: 0.84rem;
-    }
-
-    .signin-reminder {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 22px;
-        padding: 16px;
-        text-align: center;
-        background: #f8fafc;
-        border-radius: 12px;
-        color: #64748b;
-    }
-
-    .signin-reminder strong {
-        color: #0f172a;
     }
 
     .learning-flow {
@@ -806,9 +791,9 @@
     <section class="landing-section benefits-section">
 
         <div class="section-header">
-            <div class="section-label">Build for developers</div>
+            <div class="section-label">Built for developers</div>
 
-            <h2>Turn Markdown notes into lasting knowledge</h2>
+            <h2>Turn Markdowns into lasting knowledge</h2>
 
             <p>
                 RecallForge transforms your existing notes into adaptive review sessions.
@@ -824,13 +809,13 @@
                     <h3>Stop relearning the same topics.</h3>
 
                     <p>
-                        Keep important concepts fresh instead of repeatedly searching
+                        Keep important concepts fresh instead of searching
                         for things you have already learned.
                     </p>
                 </div>
             </article>
 
-            <article class="benefit-item">
+            <!-- <article class="benefit-item">
                 <div class="benefit-icon" title="What do I need?">◆</div>
 
                 <div>
@@ -841,7 +826,7 @@
                         Obsidian vaults, or Git repositories.
                     </p>
                 </div>
-            </article>
+            </article> -->
 
             <article class="benefit-item">
                 <div class="benefit-icon" title="How is it different?">◷</div>
@@ -985,7 +970,7 @@
 
     <!-- HOW TO START -->
 
-    <section class="landing-section start-section">
+    <!-- <section class="landing-section start-section">
 
         <div class="section-header">
             <div class="section-label">Choose how to begin</div>
@@ -1056,28 +1041,23 @@
             </article>
 
         </div>
-<!-- 
-        <div class="signin-reminder">
-            <strong>Ready to begin?</strong>
-            <span>
-                Use Google or GitHub to sign in and create your first review queue.
-            </span>
-        </div> -->
 
-    </section>
+    </section> -->
 
     <div class="free-message">
-            <div class="free-badge">Free</div>
+        <div class="free-badge">Free</div>
 
             <div>
                 <b>Ready to begin?</b>
                 
                 <p>
+                    Start immediately with a Starter Pack or import your own Markdown notes. <br>
                     Use Google or GitHub to sign in and create your first review queue. <br>
                     Free to use, no payment details are required.
                 </p>
             </div>
         </div>
+    </div>
 
 </section>
 
