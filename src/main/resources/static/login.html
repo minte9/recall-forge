@@ -345,7 +345,7 @@
     .section-label,
     .option-label {
         margin-bottom: 8px;
-        color: #e85800;
+        color: #94a3b8;
         font-size: 0.78rem;
         font-weight: 800;
         text-transform: uppercase;
@@ -379,7 +379,6 @@
         height: 34px;
         border-radius: 10px;
         background: #ffb703;
-        /* border: 1px solid #ff9f1c; */
         color: #ffffff;
         font-weight: 800;
     }
@@ -401,10 +400,7 @@
         display: flex;
         align-items: flex-start;
         gap: 14px;
-        margin-top: 18px;
         padding: 17px 20px;
-        /* background: #f0fdf4; */
-        /* border: 1px solid #bbf7d0; */
         border-radius: 14px;
     }
 
@@ -437,6 +433,7 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 24px;
         align-items: stretch;
+        margin-top: 20px;
     }
 
     .start-option {
@@ -457,17 +454,17 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 32px;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: #f97316;
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: #ffb703;
         color: #ffffff;
         font-weight: 800;
     }
 
     .start-option h3 {
-        font-size: 1.15rem;
+        font-size: 1rem;
         line-height: 1.3;
     }
 
@@ -544,9 +541,10 @@
 
     .learning-flow {
         display: grid;
-        grid-template-columns: 1fr 0.9fr;
-        gap: 24px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
         align-items: stretch;
+        margin-top: 20px;
     }
 
     .journey-panel {
@@ -587,12 +585,15 @@
         font-weight: 800;
         font-size: 1.05rem;
         border-radius: 50%;
-        margin-right: 10px;
         color: white;
     }
 
     .journey-icon.orange {
         background: #ffb703;
+    }
+
+    .journey-icon.orange-dark {
+        background: #f97316;
     }
 
     .journey-icon.purple {
@@ -609,7 +610,7 @@
 
     .journey-arrow {
         margin: 8px 0 8px 10px;
-        color: #aaaaaa;
+        color: #f97316;
         font-size: 1.4rem;
     }
 
@@ -819,19 +820,6 @@
                 </div>
             </article>
 
-            <!-- <article class="benefit-item">
-                <div class="benefit-icon" title="What do I need?">◆</div>
-
-                <div>
-                    <h3>Use the notes you already have.</h3>
-
-                    <p>
-                        Import Markdown from your projects, courses, documentation,
-                        Obsidian vaults, or Git repositories.
-                    </p>
-                </div>
-            </article> -->
-
             <article class="benefit-item">
                 <div class="benefit-icon" title="How is it different?">◷</div>
 
@@ -847,35 +835,14 @@
 
         </div>
 
-    </section>
-
-
-    <!-- EXISTING REVIEW DEMO -->
-
-    <section class="landing-section review-demo-section">
-
-        <div class="section-header">
-
-            <div class="section-label">
-                How it works
-            </div>
-
-            <h2>
-                Learning that adapts to you
-            </h2>
-
-            <p>
-                As your understanding grows, reviews become less frequent.
-            </p>
-
-        </div>
+        <!-- EXISTING REVIEW DEMO -->
 
         <div class="learning-flow">
 
             <div class="journey-panel">
 
                 <div class="journey-step">
-                    <div class="journey-icon orange" title="Import">1</div>
+                    <div class="journey-icon orange-dark" title="Import">1</div>
 
                     <div>
                         <div class="label">Import</div>
@@ -888,7 +855,7 @@
                 <div class="journey-arrow">↓</div>
 
                 <div class="journey-step">
-                    <div class="journey-icon orange" title="Review">2</div>
+                    <div class="journey-icon orange-dark" title="Review">2</div>
 
                     <div>
                         <div class="label">Review</div>
@@ -901,7 +868,7 @@
                 <div class="journey-arrow">↓</div>
 
                 <div class="journey-step">
-                    <div class="journey-icon orange" title="Adapt">3</div>
+                    <div class="journey-icon orange-dark" title="Adapt">3</div>
 
                     <div>
                         <div class="label">Adapt</div>
@@ -911,10 +878,10 @@
                     </div>
                 </div>
 
-                <!-- <div class="journey-arrow">↓</div>
+                <div class="journey-arrow">↓</div>
 
                 <div class="journey-step">
-                    <div class="journey-icon orange" title="Progress">4</div>
+                    <div class="journey-icon orange-dark" title="Progress">4</div>
 
                     <div>
                         <div class="label">Progress</div>
@@ -922,7 +889,7 @@
                         <p>Mastery: 84%</p>
                         <span>Next review in 12 days</span>
                     </div>
-                </div> -->
+                </div>
 
             </div>
 
@@ -938,13 +905,9 @@
                 <textarea id="demo-answer"
                     placeholder="Type a quick answer...">It runs the method inside a database transaction and rolls back when needed.</textarea>
 
-                <button class="demo-button"> <!--onclick="submitDemoAnswer()"-->
+                <button class="demo-button">
                     Submit answer
                 </button>
-
-                <!-- <div class="option-note">
-                    * Evaluation and feedback example
-                </div> -->
 
                 <div id="demo-feedback" class="feedback visible">
                     <div class="feedback-row">
@@ -970,22 +933,8 @@
             </div>
 
         </div>
-    </section>
 
-
-    <!-- HOW TO START -->
-
-    <!-- <section class="landing-section start-section">
-
-        <div class="section-header">
-            <div class="section-label">Choose how to begin</div>
-
-            <h2>Choose your starting point</h2>
-
-            <p>
-                Start immediately with a Starter Pack or import your own Markdown notes.
-            </p>
-        </div>
+        <!-- HOW TO START -->
 
         <div class="start-options">
 
@@ -995,7 +944,6 @@
                     <div class="start-option-icon">+</div>
 
                     <div>
-                        <div class="option-label">Quick start</div>
                         <h3>Import a Starter Pack</h3>
                     </div>
                 </div>
@@ -1008,8 +956,9 @@
                 <div class="starter-pack-list">
                     <span>Java</span>
                     <span>Python</span>
-                    <span>Git</span>
                     <span>SQL</span>
+                    <span>Git</span>
+                    <span>Docker</span>
                 </div>
 
                 <div class="option-note">
@@ -1021,10 +970,9 @@
             <article class="start-option">
 
                 <div class="start-option-header">
-                    <div class="start-option-icon">+</div>
+                    <div class="start-option-icon">↑</div>
 
                     <div>
-                        <div class="option-label">Your own knowledge</div>
                         <h3>Upload your Markdown files</h3>
                     </div>
                 </div>
@@ -1047,7 +995,8 @@
 
         </div>
 
-    </section> -->
+    </section>
+
 
     <div class="free-message">
         <div class="free-badge">Free</div>
@@ -1056,7 +1005,7 @@
                 <b>Ready to begin?</b>
                 
                 <p>
-                    Start immediately with a Starter Pack or import your own Markdown notes. <br>
+                    Sign in with Google or GitHub and build your first review queue.<br>
                     Free to use, no payment details are required.
                 </p>
             </div>
@@ -1067,17 +1016,6 @@
 
 
 </div>
-
-<!-- <script>
-    function submitDemoAnswer() {
-        document
-            .getElementById("demo-feedback")
-            .classList
-            .add("visible");
-
-        document.querySelector(".demo-button").disabled = true;
-    }
-</script> -->
 
 </body>
 </html>
