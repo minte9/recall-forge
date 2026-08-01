@@ -878,7 +878,7 @@
                     <div class="journey-icon orange" title="Import">1</div>
 
                     <div>
-                        <!-- <div class="label">Import</div> -->
+                        <div class="label">Import</div>
                         <h3>Upload your notes</h3>
                         <p>Spring Security.md</p>
                         <span>24 topics found</span>
@@ -891,7 +891,7 @@
                     <div class="journey-icon orange" title="Review">2</div>
 
                     <div>
-                        <!-- <div class="label">Review</div> -->
+                        <div class="label">Review</div>
                         <h3>Complete a small daily session</h3>
                         <p>7 reviews due today</p>
                         <span>About 5 minutes</span>
@@ -904,7 +904,7 @@
                     <div class="journey-icon orange" title="Adapt">3</div>
 
                     <div>
-                        <!-- <div class="label">Adapt</div> -->
+                        <div class="label">Adapt</div>
                         <h3>RecallForge adjusts the schedule</h3>
                         <p>Weak topics return sooner</p>
                         <span>Strong topics appear less often</span>
@@ -917,6 +917,7 @@
                     <div class="journey-icon orange" title="Progress">4</div>
 
                     <div>
+                        <div class="label">Progress</div>
                         <h3>Keep knowledge fresh</h3>
                         <p>Mastery: 84%</p>
                         <span>Next review in 12 days</span>
@@ -937,15 +938,15 @@
                 <textarea id="demo-answer"
                     placeholder="Type a quick answer...">It runs the method inside a database transaction and rolls back when needed.</textarea>
 
-                <button class="demo-button" onclick="submitDemoAnswer()">
+                <button class="demo-button"> <!--onclick="submitDemoAnswer()"-->
                     Submit answer
                 </button>
 
-                <div class="option-note">
+                <!-- <div class="option-note">
                     * Evaluation and feedback example
-                </div>
+                </div> -->
 
-                <div id="demo-feedback" class="feedback">
+                <div id="demo-feedback" class="feedback visible">
                     <div class="feedback-row">
                         <strong>Score:</strong> 0.72
                     </div>
@@ -1067,7 +1068,7 @@
 
 </div>
 
-<script>
+<!-- <script>
     function submitDemoAnswer() {
         document
             .getElementById("demo-feedback")
@@ -1076,7 +1077,7 @@
 
         document.querySelector(".demo-button").disabled = true;
     }
-</script>
+</script> -->
 
 </body>
 </html>
