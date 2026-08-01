@@ -516,21 +516,38 @@
     }
 
     .markdown-example {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        margin-top: 18px;
-        padding: 14px;
+        margin-top: 8px;
+        padding: 18px 20px;
+        background: #333333;
+        border-radius: 12px;
         overflow-x: auto;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
     }
 
     .markdown-example code {
-        color: #475569;
-        font-size: 0.82rem;
+        display: block;
         white-space: nowrap;
+
+        font-family:
+            "JetBrains Mono",
+            "Fira Code",
+            Consolas,
+            monospace;
+
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+
+    .markdown-example .path {
+        color: #f97316;
+    }
+
+    .markdown-example .topic {
+        color: #ffb703;
+        font-weight: 700;
+    }
+
+    .markdown-example .content {
+        color: #d1d5db;
     }
 
     .option-note {
@@ -878,7 +895,7 @@
                     </div>
                 </div>
 
-                <div class="journey-arrow">↓</div>
+                <!-- <div class="journey-arrow">↓</div>
 
                 <div class="journey-step">
                     <div class="journey-icon orange-dark" title="Progress">4</div>
@@ -889,7 +906,7 @@
                         <p>Mastery: 84%</p>
                         <span>Next review in 12 days</span>
                     </div>
-                </div>
+                </div> -->
 
             </div>
 
@@ -982,9 +999,15 @@
                 </p>
 
                 <div class="markdown-example">
-                    <code>## JVM / Java / Collections / Maps</code>
-                    <code>### 1. HashMap</code>
-                    <code>Stores key-value pairs...</code>
+                    <code class="path">
+                        ## JVM / Java / Collections / Maps
+                    </code>
+                    <code class="topic">
+                        ### 1. HashMap
+                    </code>
+                    <code class="content">
+                        Stores key-value pairs...
+                    </code>
                 </div>
 
                 <div class="option-note">
