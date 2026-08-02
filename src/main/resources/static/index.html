@@ -356,12 +356,10 @@
               :disabled="currentMarkdownReviewCount === 0"
               :title="currentMarkdownReviewCount === 0 ? 'No reviews to reset for this file' : ''"
               @click="resetFileReviews">
-              <span class="btn-icon">↻</span>
               Reset Reviews
             </button>
 
             <button class="edit-file-button" @click="editMarkdown" title="Edit this file's content">
-              <span class="btn-icon">✎</span>
               Edit Markdown
             </button>
           </div>
