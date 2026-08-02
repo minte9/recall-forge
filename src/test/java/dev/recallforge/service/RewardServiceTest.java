@@ -7,6 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
 import dev.recallforge.security.CurrentUserService;
@@ -34,10 +37,15 @@ class RewardServiceTest {
     @Mock
     private TopicRepository topicRepository;
 
+    @Mock
+    private ReviewRepository reviewRepository;
+
     private RewardService rewardService;
 
     private void setUp() {
-        rewardService = new RewardService(userRewardRepository, currentUserService, topicRepository);
+        rewardService = new RewardService(
+            userRewardRepository, currentUserService, topicRepository, reviewRepository
+        );
     }
 
     @Test
@@ -46,6 +54,8 @@ class RewardServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.empty());
         when(userRewardRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of(LocalDateTime.now()));
 
         RewardResponse response = rewardService.rewardDefaultUser(0.2, "java");
 
@@ -134,6 +144,8 @@ class RewardServiceTest {
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of(LocalDateTime.now().minusDays(3)));
 
         RewardResponse response = rewardService.getCurrentUserReward("java");
 
@@ -148,6 +160,8 @@ class RewardServiceTest {
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of(LocalDateTime.now().minusDays(1)));
 
         RewardResponse response = rewardService.getCurrentUserReward("java");
 

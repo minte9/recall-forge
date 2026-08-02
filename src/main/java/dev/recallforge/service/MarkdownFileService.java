@@ -140,7 +140,15 @@ public class MarkdownFileService {
             }
         }
 
+        MarkdownTopicImporter.ParsedTopic firstTopic = parsedTopics.get(0);
+
         markdownFile.updateContent(content, contentHash);
+        markdownFile.updateMetadata(
+                firstTopic.environment(),
+                firstTopic.category(),
+                firstTopic.subcategory(),
+                firstTopic.fileTitle()
+        );
         markdownFileRepository.save(markdownFile);
 
         syncTopicsFromMarkdown(markdownFile, parsedTopics, userId, user);
