@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,1076 +8,367 @@
 
     <link rel="icon" type="image/png" href="recall-forge.png">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
-
-    body {
-        max-width: 1400px;
-        margin: 0 auto;
-        min-height: 100vh;
-        font-family: Inter, Arial, sans-serif;
-        background: #f8fafc;
-        color: #0f172a;
-    }
-
-    .page {
-        max-width: 1300px;
-        margin: 0 auto;
-
-        min-height: 100vh;
-        display: grid;
-        grid-template-columns: 320px 1fr;
-        gap: 16px;
-        padding: 16px;
-
-        align-items: start;
-    }
-
-    .login-card {
-        padding: 32px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        text-align: center;
-
-        align-self: start;
-        position: sticky;
-        top: 16px;
-    }
-
-    .demo-card {
-        padding: 44px;
-        display: flex;
-        flex-direction: column;
-        align-self: start;
-    }
-
-    .logo {
-        margin-bottom: 22px;
-    }
-
-    .logo img {
-        width: 120px;
-        height: 120px;
-        object-fit: contain;
-        opacity: .8;
-    }
-
-    h1 {
-        font-size: 2rem;
-        margin-bottom: 10px;
-        color: #64748b;
-    }
-
-    .subtitle {
-        color: #64748b;
-        line-height: 1.5;
-        margin-bottom: 34px;
-    }
-
-    .button {
-        display: block;
-        width: 100%;
-        padding: 14px;
-        margin-bottom: 14px;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 700;
-        transition: 0.15s ease;
-    }
-
-    .button:hover {
-        transform: translateY(-1px);
-    }
-
-    .google {
-        /* background: #5b3df5; */
-        background: #3b82f6;
-        color: white;
-    }
-
-    .github {
-        background: white;
-        color: #0f172a;
-        border: 1px solid #cbd5e1;
-    }
-
-    .footer {
-        margin-top: 10px;
-        color: #94a3b8;
-        font-size: 0.95rem;
-    }
-
-    .footer a {
-        /* color: #5b3df5 */
-        color: #94a3b8;
-        /* font-weight: 700; */
-        /* text-decoration: none; */
-    }
-
-    .footer a:hover {
-        text-decoration: underline;
-    }
-
-    .demo-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 24px;
-        margin-bottom: 28px;
-    }
-
-    .demo-header h2 {
-        font-size: 1.8rem;
-        margin-bottom: 8px;
-    }
-
-    .demo-header p {
-        color: #64748b;
-        line-height: 1.5;
-    }
-
-    .demo-header img {
-        width: 72px;
-        height: 72px;
-        object-fit: contain;
-        opacity: 0.55;
-    }
-
-    .demo-layout {
-        display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        gap: 24px;
-    }
-
-    .panel {
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 24px;
-        background: #ffffff;
-    }
-
-    .label {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        margin-bottom: 8px;
-    }
-
-    .question {
-        font-size: 1.15rem;
-        font-weight: 700;
-        line-height: 1.4;
-        margin-bottom: 20px;
-    }
-
-    textarea {
-        width: 100%;
-        min-height: 110px;
-        resize: vertical;
-        padding: 14px;
-        border: 1px solid #cbd5e1;
-        border-radius: 10px;
-        font: inherit;
-        line-height: 1.5;
-        margin-bottom: 14px;
-    }
-
-    textarea:focus {
-        outline: none;
-        border-color: #3b73ff;
-        box-shadow: 0 0 0 3px rgba(59, 115, 255, 0.15);
-    }
-
-    .demo-button {
-        width: 100%;
-        padding: 14px;
-        border: none;
-        border-radius: 10px;
-        background: #ffb703;
-        color: white;
-        font-weight: 700;
-        cursor: pointer;
-        font-size: 1rem;
-    }
-
-    .demo-button:hover {
-        background: #f4a900;
-    }
-
-    .notes-title {
-        font-weight: 800;
-        margin-bottom: 12px;
-    }
-
-    .notes {
-        color: #334155;
-        line-height: 1.55;
-    }
-
-    .notes ul {
-        padding-left: 20px;
-        margin-top: 10px;
-    }
-
-    .feedback {
-        display: none;
-        margin-top: 18px;
-        padding: 18px 20px;
-
-        background: #dcfce7;
-        border-left: 4px solid #22c55e;
-        border-radius: 6px;
-
-        color: #1e293b;
-    }
-
-    .feedback.visible {
-        display: block;
-        animation: fadeSlideIn 0.55s ease-out;
-    }
-
-    @keyframes fadeSlideIn {
-        from {
-            opacity: 0;
-            transform: translateY(8px);
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        body {
+            max-width: 1400px;
+            min-height: 100vh;
+            margin: 0 auto;
+            background: #f8fafc;
+            color: #0f172a;
+            font-family: Inter, Arial, sans-serif;
         }
-    }
 
-    .feedback p {
-        margin-top: 12px;
-        line-height: 1.45;
-    }
-
-    .feedback-row {
-        margin-bottom: 12px;
-    }
-
-    .feedback-row strong {
-        color: #1e293b;
-    }
-
-    .progress {
-        display: none;
-    }
-
-    .score-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 16px;
-        margin-top: 14px;
-        color: #334155;
-        font-size: 0.95rem;
-    }
-
-    .progress {
-        margin-top: 18px;
-    }
-
-    .progress-top {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 8px;
-        color: #475569;
-    }
-
-    .bar {
-        height: 10px;
-        background: #e5e7eb;
-        border-radius: 999px;
-        overflow: hidden;
-    }
-
-    .bar-fill {
-        height: 100%;
-        width: 72%;
-        background: #22c55e;
-    }
-
-    /* Shared landing sections */
-
-    .landing-section {
-        padding: 30px 0;
-        /* border-bottom: 1px solid #e2e8f0; */
-    }
-
-    .landing-section:first-child {
-        padding-top: 0;
-    }
-
-    .landing-section:last-child {
-        padding-bottom: 0;
-        border-bottom: none;
-    }
-
-    .section-header,
-    .demo-header {
-        margin-bottom: 28px;
-    }
-
-    .section-header h2,
-    .demo-header h2 {
-        font-size: 1.8rem;
-        margin-bottom: 8px;
-        line-height: 1.25;
-    }
-
-    .section-header p,
-    .demo-header p {
-        max-width: 850px;
-        color: #64748b;
-        line-height: 1.55;
-    }
-
-    .section-label,
-    .option-label {
-        margin-bottom: 8px;
-        color: #e85800;
-        font-size: 0.78rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-    }
-
-
-    /* Benefits section */
-
-    .benefits-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-    }
-
-    .benefit-item {
-        display: flex;
-        gap: 14px;
-        padding: 20px;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-    }
-
-    .benefit-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex: 0 0 34px;
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
-        background: #ffb703;
-        /* border: 1px solid #ff9f1c; */
-        color: #ffffff;
-        font-weight: 800;
-    }
-
-    .benefit-item h3 {
-        margin-bottom: 7px;
-        color: #0f172a;
-        font-size: 1rem;
-        line-height: 1.35;
-    }
-
-    .benefit-item p {
-        color: #64748b;
-        font-size: 0.92rem;
-        line-height: 1.5;
-    }
-
-    .free-message {
-        display: flex;
-        align-items: flex-start;
-        gap: 14px;
-        margin-top: 18px;
-        padding: 17px 20px;
-        /* background: #f0fdf4; */
-        /* border: 1px solid #bbf7d0; */
-        border-radius: 14px;
-    }
-
-    .free-badge {
-        flex: 0 0 auto;
-        padding: 5px 20px;
-        background: #22c55e;
-        border-radius: 999px;
-        color: #ffffff;
-        font-size: 1rem;
-        font-weight: 800;
-        border: 1px solid #bbf7d0;
-    }
-
-    .free-message strong {
-        color: #166534;
-    }
-
-    .free-message p {
-        margin-top: 4px;
-        color: #64748b;
-        line-height: 1.45;
-    }
-
-
-    /* Starting options */
-
-    .start-options {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 24px;
-        align-items: stretch;
-    }
-
-    .start-option {
-        padding: 24px;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-    }
-
-    .start-option-header {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        margin-bottom: 16px;
-    }
-
-    .start-option-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex: 0 0 32px;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: #f97316;
-        color: #ffffff;
-        font-weight: 800;
-    }
-
-    .start-option h3 {
-        font-size: 1.15rem;
-        line-height: 1.3;
-    }
-
-    .start-option p {
-        color: #64748b;
-        line-height: 1.55;
-    }
-
-    .option-label {
-        margin-bottom: 3px;
-    }
-
-    .option-separator {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #94a3b8;
-        font-size: 0.85rem;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
-
-    .option-separator span {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 34px;
-        height: 34px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 50%;
-    }
-
-    .starter-pack-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 18px;
-    }
-
-    .starter-pack-list span {
-        padding: 7px 12px;
-        background: #eff6ff;
-        border: 1px solid #dbeafe;
-        border-radius: 8px;
-        color: #1e3a5f;
-        font-size: 0.86rem;
-        font-weight: 700;
-    }
-
-    .markdown-example {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        margin-top: 18px;
-        padding: 14px;
-        overflow-x: auto;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-    }
-
-    .markdown-example code {
-        color: #475569;
-        font-size: 0.82rem;
-        white-space: nowrap;
-    }
-
-    .option-note {
-        margin-top: 16px;
-        color: #94a3b8;
-        font-size: 0.84rem;
-    }
-
-    .learning-flow {
-        display: grid;
-        grid-template-columns: 1fr 0.9fr;
-        gap: 24px;
-        align-items: stretch;
-    }
-
-    .journey-panel {
-        padding: 24px;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-    }
-
-    .journey-step {
-        display: flex;
-        align-items: flex-start;
-        gap: 16px;
-    }
-
-    .journey-step h3 {
-        margin-bottom: 4px;
-        font-size: 1rem;
-    }
-
-    .journey-step p {
-        margin-bottom: 3px;
-        color: #334155;
-    }
-
-    .journey-step span {
-        color: #64748b;
-        font-size: 0.9rem;
-    }
-
-    .journey-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex: 0 0 32px;
-        width: 32px;
-        height: 32px;
-        font-weight: 800;
-        font-size: 1.05rem;
-        border-radius: 50%;
-        margin-right: 10px;
-        color: white;
-    }
-
-    .journey-icon.orange {
-        background: #ffb703;
-    }
-
-    .journey-icon.purple {
-        background: #8b5cf6;
-    }
-
-    .journey-icon.blue {
-        background: #3b82f6;
-    }
-
-    .journey-icon.green {
-        background: #22c55e;
-    }
-
-    .journey-arrow {
-        margin: 8px 0 8px 10px;
-        color: #aaaaaa;
-        font-size: 1.4rem;
-    }
-
-    .review-preview {
-        align-self: stretch;
-    }
-
-    .developer-message {
-        margin-top: 0px;
-        margin-bottom: 30px;
-        padding: 22px 24px;
-
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-left: 4px solid #5b3df5;
-        border-radius: 12px;
-    }
-
-    .developer-message h3 {
-        margin: 8px 0 10px;
-
-        font-size: 1.35rem;
-        line-height: 1.3;
-
-        color: #0f172a;
-    }
-
-    .developer-message p {
-        margin: 0;
-
-        color: #64748b;
-        line-height: 1.65;
-
-        max-width: 780px;
-    }
-
-    @media (max-width: 980px) {
         .page {
-            grid-template-columns: 1fr;
-            padding: 20px;
-        }
-
-        .demo-layout {
-            grid-template-columns: 1fr;
-        }
-
-        .login-card,
-        .demo-card {
-            padding: 28px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            align-items: start;
+            gap: 16px;
+            max-width: 1300px;
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 16px;
         }
 
         .login-card {
-            position: static;
-            margin-bottom: 100px;
-            padding-top: 100px;
+            position: sticky;
+            top: 16px;
+            display: flex;
+            flex-direction: column;
+            align-self: start;
+            padding: 32px;
+            text-align: center;
         }
 
-        .benefits-grid {
-            grid-template-columns: 1fr;
+        .content-card {
+            display: flex;
+            flex-direction: column;
+            align-self: start;
+            padding: 44px;
         }
 
-        .start-options {
-            grid-template-columns: 1fr;
-            gap: 14px;
+        .logo {
+            margin-bottom: 22px;
         }
 
-        .option-separator {
-            height: 28px;
-        }
-
-        .learning-flow {
-            grid-template-columns: 1fr;
+        .logo img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            opacity: 0.8;
         }
 
         h1 {
-            color: #000000;
-        }
-    }
-
-    @media (max-width: 900px) {
-        .page {
-            padding: 10px;
-            gap: 10px;
+            margin-bottom: 10px;
+            color: #64748b;
+            font-size: 2rem;
         }
 
-        .demo-card {
-            padding: 16px;
+        .subtitle {
+            margin-bottom: 34px;
+            color: #64748b;
+            line-height: 1.5;
         }
 
-        .demo-layout {
+        .button {
             display: block;
-        }
-
-        .panel {
-            padding: 16px;
+            width: 100%;
             margin-bottom: 14px;
-        }
-
-        .panel,
-        .question,
-        .notes,
-        textarea,
-        .demo-button {
-            font-size: 16px;
-        }
-
-        .question {
-            line-height: 1.35;
-            margin-bottom: 12px;
-        }
-
-        .demo-button {
             padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.15s ease;
         }
 
-        .landing-section {
-            padding: 32px 0;
+        .button:hover {
+            transform: translateY(-1px);
         }
 
-        .section-header,
-        .demo-header {
-            margin-bottom: 20px;
+        .google {
+            background: #3b82f6;
+            color: #ffffff;
         }
 
-        .section-header h2,
-        .demo-header h2 {
-            font-size: 1.5rem;
+        .github {
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #0f172a;
         }
 
-        .benefit-item,
-        .start-option {
-            padding: 18px;
+        .footer {
+            margin-top: 10px;
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .footer a {
+            color: #94a3b8;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .section-header {
+            margin-bottom: 28px;
+        }
+
+        .section-label {
+            margin-bottom: 8px;
+            color: #f45b00;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .section-header h2 {
+            margin-bottom: 8px;
+            font-size: 1.8rem;
+            line-height: 1.25;
+        }
+
+        .section-header p {
+            max-width: 850px;
+            color: #64748b;
+            line-height: 1.55;
+        }
+
+        .features-card {
+            padding: 30px 28px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 6px 0;
+        }
+
+        .feature-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex: 0 0 0px;
+            width: 30px;
+            height: 20px;
+
+            border-radius: 10px;
+            background: #ffffff;
+            color: #ffb703;
+            font-weight: 800;
+            font-size: 1.8rem;
+        }
+
+        .feature-item h3 {
+            margin-bottom: 4px;
+            font-size: 1rem;
+        }
+
+        .feature-item p {
+            color: #64748b;
+            line-height: 1.5;
         }
 
         .free-message {
-            flex-direction: column;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-top: 70px;
+            padding: 17px 0px;
+            border-radius: 14px;
         }
 
-        .signin-reminder {
-            flex-direction: column;
+        .free-badge {
+            flex: 0 0 auto;
+            padding: 5px 20px;
+            border: 1px solid green;
+            border-radius: 999px;
+            background: #ffffff;
+            color: green;
+            font-size: 1rem;
         }
-    }
-</style>
 
+        .free-message p {
+            margin-top: 4px;
+            color: #64748b;
+            line-height: 1.45;
+        }
 
+        @media (max-width: 980px) {
+            .page {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            .login-card {
+                position: static;
+                margin-bottom: 100px;
+                padding-top: 100px;
+            }
+
+            .login-card,
+            .content-card {
+                padding: 28px;
+            }
+
+            h1 {
+                color: #000000;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .page {
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .content-card {
+                padding: 16px;
+            }
+
+            .section-header {
+                margin-bottom: 20px;
+            }
+
+            .section-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .feature-item {
+                padding: 18px;
+            }
+
+            .free-message {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 
 <body>
-
 <div class="page">
+    <section class="login-card">
+        <div class="logo">
+            <img src="/recall-forge.png" alt="Recall Forge">
+        </div>
 
+        <h1>Recall Forge</h1>
 
-<section class="login-card">
-    <div class="logo">
-        <img src="/recall-forge.png" alt="Recall Forge">
-    </div>
+        <p class="subtitle">
+            Build long-term knowledge through AI-powered spaced repetition.
+        </p>
 
-    <h1>Recall Forge</h1>
+        <a class="button google" href="/oauth2/authorization/google">
+            Continue with Google
+        </a>
 
-    <p class="subtitle">
-        Build long-term knowledge through AI-powered spaced repetition.
-    </p>
+        <a class="button github" href="/oauth2/authorization/github">
+            Continue with GitHub
+        </a>
 
-    <a class="button google" href="/oauth2/authorization/google">
-        Continue with Google
-    </a>
+        <div class="footer">
+            Sign in to access your topics, reviews, and progress.<br><br>
+            By clicking the sign in buttons, you agree to the
+            <a href="/terms">Terms &amp; Conditions</a>
+            and <a href="/privacy">Privacy Policy</a>.
+        </div>
+    </section>
 
-    <a class="button github" href="/oauth2/authorization/github">
-        Continue with GitHub
-    </a>
-
-    <div class="footer">
-        Sign in to access your topics, reviews, and progress. <br><br>
-        By clicking the sign in buttons, you agree to the <a href="/terms">Terms & Conditions</a>
-        and <a href="/privacy">Privacy Policy</a>.
-    </div>
-</section>
-
-<section class="demo-card">
-
-    <!-- WHY RECALLFORGE -->
-
-    <section class="landing-section benefits-section">
-
-        <div class="section-header">
+    <main class="content-card">
+        <header class="section-header">
             <div class="section-label">Built for developers</div>
 
-            <h2>Turn Markdowns into lasting knowledge</h2>
+            <h2>Turn Markdown notes into lasting knowledge</h2>
 
             <p>
-                RecallForge transforms your existing notes into adaptive review sessions.
+                Recall Forge transforms your existing notes into adaptive review sessions.
             </p>
-        </div>
+        </header>
 
-        <div class="benefits-grid">
-
-            <article class="benefit-item">
-                <div class="benefit-icon" title="Why?">✓</div>
+        <section class="features-card" aria-label="Features">
+            <article class="feature-item">
+                <div class="feature-icon" aria-hidden="true">✓</div>
 
                 <div>
-                    <h3>Stop relearning the same topics.</h3>
-
+                    <h3>Markdown uploads</h3>
                     <p>
-                        Keep important concepts fresh instead of searching
-                        for things you have already learned.
+                        Import your existing Markdown notes and turn them into
+                        structured review topics.
                     </p>
                 </div>
             </article>
 
-            <!-- <article class="benefit-item">
-                <div class="benefit-icon" title="What do I need?">◆</div>
+            <article class="feature-item">
+                <div class="feature-icon" aria-hidden="true">✓</div>
 
                 <div>
-                    <h3>Use the notes you already have.</h3>
-
+                    <h3>Starter Packs</h3>
                     <p>
-                        Import Markdown from your projects, courses, documentation,
-                        Obsidian vaults, or Git repositories.
-                    </p>
-                </div>
-            </article> -->
-
-            <article class="benefit-item">
-                <div class="benefit-icon" title="How is it different?">◷</div>
-
-                <div>
-                    <h3>Learn concepts, not answers.</h3>
-
-                    <p>
-                        RecallForge varies questions and adapts review intervals 
-                        based on your progress.
+                        Begin immediately with ready-made collections of
+                        developer topics.
                     </p>
                 </div>
             </article>
 
-        </div>
+            <article class="feature-item">
+                <div class="feature-icon" aria-hidden="true">✓</div>
 
-    </section>
-
-
-    <!-- EXISTING REVIEW DEMO -->
-
-    <section class="landing-section review-demo-section">
-
-        <div class="section-header">
-
-            <div class="section-label">
-                How it works 
-            </div>
-
-            <h2>
-                Learning that adapts to you
-            </h2>
-
-            <p>
-                As your understanding grows, reviews become less frequent.
-            </p>
-
-        </div>
-
-        <div class="learning-flow">
-
-            <div class="journey-panel">
-
-                <div class="journey-step">
-                    <div class="journey-icon orange" title="Import">1</div>
-
-                    <div>
-                        <div class="label">Import</div>
-                        <h3>Upload your notes</h3>
-                        <p>Spring Security.md</p>
-                        <span>24 topics found</span>
-                    </div>
+                <div>
+                    <h3>Adaptive questions</h3>
+                    <p>
+                        Receive questions adapted to your previous scores and
+                        current level of recall.
+                    </p>
                 </div>
-
-                <div class="journey-arrow">↓</div>
-
-                <div class="journey-step">
-                    <div class="journey-icon orange" title="Review">2</div>
-
-                    <div>
-                        <div class="label">Review</div>
-                        <h3>Complete a small daily session</h3>
-                        <p>7 reviews due today</p>
-                        <span>About 5 minutes</span>
-                    </div>
-                </div>
-
-                <div class="journey-arrow">↓</div>
-
-                <div class="journey-step">
-                    <div class="journey-icon orange" title="Adapt">3</div>
-
-                    <div>
-                        <div class="label">Adapt</div>
-                        <h3>RecallForge adjusts the schedule</h3>
-                        <p>Weak topics return sooner</p>
-                        <span>Strong topics appear less often</span>
-                    </div>
-                </div>
-
-                <!-- <div class="journey-arrow">↓</div>
-
-                <div class="journey-step">
-                    <div class="journey-icon orange" title="Progress">4</div>
-
-                    <div>
-                        <div class="label">Progress</div>
-                        <h3>Keep knowledge fresh</h3>
-                        <p>Mastery: 84%</p>
-                        <span>Next review in 12 days</span>
-                    </div>
-                </div> -->
-
-            </div>
-
-
-            <div class="review-preview panel">
-
-                <div class="label">Example review</div>
-
-                <div class="question">
-                    What does @Transactional do?
-                </div>
-
-                <textarea id="demo-answer"
-                    placeholder="Type a quick answer...">It runs the method inside a database transaction and rolls back when needed.</textarea>
-
-                <button class="demo-button"> <!--onclick="submitDemoAnswer()"-->
-                    Submit answer
-                </button>
-
-                <!-- <div class="option-note">
-                    * Evaluation and feedback example
-                </div> -->
-
-                <div id="demo-feedback" class="feedback visible">
-                    <div class="feedback-row">
-                        <strong>Score:</strong> 0.72
-                    </div>
-
-                    <div class="feedback-row">
-                        <strong>Feedback:</strong>
-                        You correctly described the main purpose of @Transactional. However, it's worth remembering that Spring rolls back only for unchecked exceptions by default unless configured otherwise.
-
-                    </div>
-
-                    <div class="feedback-row">
-                        <strong>Updated memory score::</strong> 0.68
-
-                    </div>
-
-                    <div class="feedback-row">
-                        <strong>Next review:</strong> in 7 days
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-    </section>
-
-
-    <!-- HOW TO START -->
-
-    <!-- <section class="landing-section start-section">
-
-        <div class="section-header">
-            <div class="section-label">Choose how to begin</div>
-
-            <h2>Choose your starting point</h2>
-
-            <p>
-                Start immediately with a Starter Pack or import your own Markdown notes.
-            </p>
-        </div>
-
-        <div class="start-options">
-
-            <article class="start-option">
-
-                <div class="start-option-header">
-                    <div class="start-option-icon">+</div>
-
-                    <div>
-                        <div class="option-label">Quick start</div>
-                        <h3>Import a Starter Pack</h3>
-                    </div>
-                </div>
-
-                <p>
-                    Explore the review workflow with prepared programming topics.
-                    Choose a pack after signing in and begin reviewing immediately.
-                </p>
-
-                <div class="starter-pack-list">
-                    <span>Java</span>
-                    <span>Python</span>
-                    <span>Git</span>
-                    <span>SQL</span>
-                </div>
-
-                <div class="option-note">
-                    * Best for discovering how RecallForge works
-                </div>
-
             </article>
 
-            <article class="start-option">
+            <article class="feature-item">
+                <div class="feature-icon" aria-hidden="true">✓</div>
 
-                <div class="start-option-header">
-                    <div class="start-option-icon">+</div>
-
-                    <div>
-                        <div class="option-label">Your own knowledge</div>
-                        <h3>Upload your Markdown files</h3>
-                    </div>
+                <div>
+                    <h3>Answer feedback</h3>
+                    <p>
+                        Get a score and useful feedback after each submitted
+                        answer.
+                    </p>
                 </div>
-
-                <p>
-                    Turn Markdown files into adaptive reviews.
-                </p>
-
-                <div class="markdown-example">
-                    <code>## JVM / Java / Collections / Maps</code>
-                    <code>### 1. HashMap</code>
-                    <code>Stores key-value pairs...</code>
-                </div>
-
-                <div class="option-note">
-                    * Best for remembering knowledge that matters to you
-                </div>
-
             </article>
 
-        </div>
+            <article class="feature-item">
+                <div class="feature-icon" aria-hidden="true">✓</div>
 
-    </section> -->
+                <div>
+                    <h3>Review Dashboard</h3>
+                    <p>
+                        See due reviews, mastery progress and learning streaks.
+                    </p>
+                </div>
+            </article>
+        </section>
 
-    <div class="free-message">
-        <div class="free-badge">Free</div>
+        <!-- <div class="free-message">
+            <div class="free-badge">Free</div>
 
             <div>
-                <b>Ready to begin?</b>
-                
+                <strong>Ready to begin?</strong>
                 <p>
-                    Start immediately with a Starter Pack or import your own Markdown notes. <br>
-                    Free to use, no payment details are required.
+                    Use Google or Github to login and start your first queue review.<br>
+                    Free to use for early stages, no payment details are required.
                 </p>
             </div>
-        </div>
-    </div>
-
-</section>
-
-
+        </div> -->
+    </main>
 </div>
-
-<!-- <script>
-    function submitDemoAnswer() {
-        document
-            .getElementById("demo-feedback")
-            .classList
-            .add("visible");
-
-        document.querySelector(".demo-button").disabled = true;
-    }
-</script> -->
-
 </body>
 </html>
