@@ -223,17 +223,20 @@ public class OpenAiService {
         Format exactly:
         ## <Environment> / <Category> / <Subcategory> / <File Title>
 
-        ### <Topic 1 Title>
+        ### 1. <Topic 1 Title>
         <2-3 sentence explanation, ~45-60 words>
         ~~~<language>
         <short, focused code example, comments explain WHY not WHAT,
         lines under 80 characters>
         ~~~
 
-        ### <Topic 2 Title>
+        ### 2. <Topic 2 Title>
         ...
 
         Rules:
+        - Number each topic title, starting at 1, in the order they
+          appear ("### 1. <Title>", "### 2. <Title>", etc.) - the number
+          is part of the heading text itself, not separate from it.
         - 2 to 5 topics total. Only include topics that are genuinely
           important - do not pad to hit a target count.
         - One main idea per topic, readable in one glance, not a full
