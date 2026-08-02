@@ -290,20 +290,39 @@
     box-sizing: border-box;
   }
 
-  .markdown-editor-submit {
-    align-self: flex-end;
+  .markdown-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .markdown-editor-submit,
+  .markdown-editor-optimize {
     padding: 10px 18px;
     border: none;
     border-radius: 10px;
-    background: var(--orange-dark);
     color: white;
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
   }
 
-  .markdown-editor-submit:hover {
+  .markdown-editor-submit {
+    background: var(--orange-dark);
+  }
+
+  .markdown-editor-optimize {
+    background: #4b5563;
+  }
+
+  .markdown-editor-submit:hover,
+  .markdown-editor-optimize:hover {
     opacity: .9;
+  }
+
+  .markdown-editor-optimize:disabled {
+    opacity: .6;
+    cursor: default;
   }
 
   .markdown> :last-child {

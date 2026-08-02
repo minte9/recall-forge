@@ -2,7 +2,9 @@ package dev.recallforge.service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import dev.recallforge.domain.Topic;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.exception.MarkdownAlreadyImportedException;
 import dev.recallforge.exception.MarkdownFileHasReviewsException;
+import dev.recallforge.repository.AllowedEnvironmentRepository;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
@@ -30,6 +33,11 @@ import jakarta.transaction.Transactional;
  * Files are matched against existing records by content hash or by
  * environment/category/subcategory/title metadata so re-imports update the
  * existing file and its topics instead of creating duplicates.
+ *
+ * {@link #optimize} is a separate, admin-only, non-persisting entry point
+ * that returns AI-rewritten markdown text for preview before the caller
+ * submits it (if at all) through the normal {@link #update}/
+ * {@link #createFromContent} paths.
  */
 @Service
 public class MarkdownFileService {
@@ -39,6 +47,8 @@ public class MarkdownFileService {
     private final ReviewRepository reviewRepository;
     private final MarkdownTopicImporter markdownTopicImporter;
     private final CurrentUserService currentUserService;
+    private final OpenAiService openAiService;
+    private final AllowedEnvironmentRepository allowedEnvironmentRepository;
 
     private static final long MAX_FILE_SIZE = 200 * 1024;  // 200 KB
     private static final int MAX_CONTENT_LENGTH = 200_000;
@@ -49,13 +59,17 @@ public class MarkdownFileService {
             TopicRepository topicRepository,
             ReviewRepository reviewRepository,
             MarkdownTopicImporter markdownTopicImporter,
-            CurrentUserService currentUserService
+            CurrentUserService currentUserService,
+            OpenAiService openAiService,
+            AllowedEnvironmentRepository allowedEnvironmentRepository
     ) {
         this.markdownFileRepository = markdownFileRepository;
         this.topicRepository = topicRepository;
         this.reviewRepository = reviewRepository;
         this.markdownTopicImporter = markdownTopicImporter;
         this.currentUserService = currentUserService;
+        this.openAiService = openAiService;
+        this.allowedEnvironmentRepository = allowedEnvironmentRepository;
     }
 
     @Transactional
@@ -158,6 +172,109 @@ public class MarkdownFileService {
                 markdownFile.getFilename(),
                 markdownFile.getContent()
         );
+    }
+
+    /**
+     * Admin-only. Returns AI-optimized markdown text without persisting
+     * anything - the caller previews it and submits separately through
+     * {@link #update} or {@link #createFromContent} if they want to keep it.
+     *
+     * If {@code content} already has a "##" header, the header/topic titles
+     * were a deliberate choice and are never sent to the AI to rewrite -
+     * only topic bodies are optimized, and the response is validated to
+     * still contain exactly those titles before anything from it is used.
+     * Otherwise (raw/unstructured notes) the AI generates the full
+     * structure, grounded against {@link AllowedEnvironmentRepository}.
+     */
+    public String optimize(String content) {
+        currentUserService.requireAdmin();
+
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("Markdown content is empty.");
+        }
+
+        if (content.length() > MAX_CONTENT_LENGTH) {
+            throw new IllegalArgumentException("Markdown content is too large.");
+        }
+
+        List<MarkdownTopicImporter.ParsedTopic> parsedTopics = markdownTopicImporter.parseMarkdown(content);
+
+        if (parsedTopics.isEmpty()) {
+            throw new IllegalArgumentException("Markdown content does not contain any topics.");
+        }
+
+        return hasPathHeading(content)
+                ? optimizeStructuredContent(parsedTopics)
+                : optimizeUnstructuredContent(content);
+    }
+
+    private String optimizeStructuredContent(List<MarkdownTopicImporter.ParsedTopic> parsedTopics) {
+        List<TopicToOptimize> topics = parsedTopics.stream()
+                .map(topic -> new TopicToOptimize(topic.title(), topic.content()))
+                .toList();
+
+        String aiResponse = openAiService.optimizeTopicBodies(topics);
+
+        List<MarkdownTopicImporter.ParsedTopic> rewrittenTopics =
+                markdownTopicImporter.parseMarkdown(aiResponse);
+
+        Map<String, String> rewrittenBodyByTitle = new HashMap<>();
+
+        for (MarkdownTopicImporter.ParsedTopic rewritten : rewrittenTopics) {
+            rewrittenBodyByTitle.put(rewritten.title(), rewritten.content());
+        }
+
+        MarkdownTopicImporter.ParsedTopic firstTopic = parsedTopics.get(0);
+
+        StringBuilder result = new StringBuilder();
+        result.append("## %s / %s / %s / %s\n\n".formatted(
+                firstTopic.environment(),
+                firstTopic.category(),
+                firstTopic.subcategory(),
+                firstTopic.fileTitle()
+        ));
+
+        for (MarkdownTopicImporter.ParsedTopic original : parsedTopics) {
+            String rewrittenBody = rewrittenBodyByTitle.get(original.title());
+
+            if (rewrittenBody == null) {
+                throw new IllegalStateException(
+                        "AI response did not preserve the existing topic titles. Please try again.");
+            }
+
+            result.append("### %s\n%s\n\n".formatted(original.title(), rewrittenBody));
+        }
+
+        return result.toString().trim();
+    }
+
+    private String optimizeUnstructuredContent(String content) {
+        List<EnvironmentOption> allowedEnvironments = allowedEnvironmentRepository
+                .findAllByOrderByDisplayOrderAsc()
+                .stream()
+                .map(environment -> new EnvironmentOption(environment.getName(), environment.getDescription()))
+                .toList();
+
+        String aiResponse = openAiService.generateStructuredMarkdown(content, allowedEnvironments);
+
+        List<MarkdownTopicImporter.ParsedTopic> generatedTopics =
+                markdownTopicImporter.parseMarkdown(aiResponse);
+
+        if (generatedTopics.isEmpty() || generatedTopics.size() > MAX_TOPICS_PER_FILE) {
+            throw new IllegalStateException(
+                    "AI did not return a valid markdown structure. Please try again.");
+        }
+
+        if (!hasPathHeading(aiResponse)) {
+            throw new IllegalStateException(
+                    "AI response is missing the required header line. Please try again.");
+        }
+
+        return aiResponse.trim();
+    }
+
+    private boolean hasPathHeading(String content) {
+        return content.lines().anyMatch(line -> line.matches("^##\\s+.+"));
     }
 
     private MarkdownUploadResponse importMarkdown(String content, String filename) throws Exception {
