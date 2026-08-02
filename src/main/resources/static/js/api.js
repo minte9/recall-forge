@@ -232,7 +232,8 @@ const Api = {
 
   async loadCategoryOptions() {
     const response = await fetch("/api/dashboard/categories", {
-      credentials: "same-origin"
+      credentials: "same-origin",
+      cache: "no-store"
     });
 
     if (!response.ok) {
