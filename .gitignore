@@ -16,3 +16,5 @@ sh/psql_import_from_server.sh
 .dockerignore
 .claude/*.local.*
 .idea/
+
+deprecated/
