@@ -322,12 +322,20 @@
 
           <div v-else-if="markdownEditing" class="markdown-editor-wrap">
             <textarea ref="markdownEditor" class="markdown markdown-editor" v-model="markdown"
-              @input="resizeMarkdownEditor" @keydown.esc="showMarkdown()"
+              @input="resizeMarkdownEditor(); optimizeFinalized = false" @keydown.esc="showMarkdown()"
               @keydown.ctrl.enter="submitMarkdownEdit"></textarea>
 
-            <button class="markdown-editor-submit" @click="submitMarkdownEdit" title="Ctrl+Enter">
-              Submit
-            </button>
+            <div class="markdown-editor-actions">
+              <button v-if="currentUser?.role == 'ADMIN'" class="markdown-editor-optimize"
+                :disabled="optimizingMarkdown || optimizeFinalized" @click="optimizeMarkdown"
+                title="Preview an AI-tightened version of this content">
+                {{ optimizingMarkdown ? "Optimizing... " + optimizingSeconds + "s" : (optimizeFinalized ? "Finalized" : "Optimize") }}
+              </button>
+
+              <button class="markdown-editor-submit" @click="submitMarkdownEdit" title="Ctrl+Enter">
+                Submit
+              </button>
+            </div>
           </div>
 
           <div v-else class="markdown" v-html="renderMarkdown(markdown)"
@@ -363,11 +371,20 @@
 
           <div class="markdown-editor-wrap">
             <textarea ref="addFileEditor" class="markdown markdown-editor" v-model="newMarkdownContent"
+              @input="resizeMarkdownEditor('addFileEditor'); optimizeFinalized = false"
               placeholder="Paste or type your markdown content here..."></textarea>
 
-            <button class="markdown-editor-submit" @click="submitAddFile">
-              Submit
-            </button>
+            <div class="markdown-editor-actions">
+              <button v-if="currentUser?.role == 'ADMIN'" class="markdown-editor-optimize"
+                :disabled="optimizingMarkdown || optimizeFinalized" @click="optimizeMarkdown"
+                title="Preview an AI-structured version of this content">
+                {{ optimizingMarkdown ? "Optimizing... " + optimizingSeconds + "s" : (optimizeFinalized ? "Finalized" : "Optimize") }}
+              </button>
+
+              <button class="markdown-editor-submit" @click="submitAddFile">
+                Submit
+              </button>
+            </div>
           </div>
         </div>
 

@@ -32,6 +32,10 @@ createApp({
       markdownLoading: false,
       reviewQuestionLoading: false,
       markdownEditing: false,
+      optimizingMarkdown: false,
+      optimizingSeconds: 0,
+      optimizingIntervalId: null,
+      optimizeFinalized: false,
       feedbackHistory: [],
       feedbackHistoryVisible: false,
       feedbackHistoryLoading: false,
@@ -289,6 +293,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       this.leftPanel = "markdown";
       this.markdownEditing = true;
+      this.optimizeFinalized = false;
 
       this.$nextTick(() => {
         this.resizeMarkdownEditor();
@@ -307,8 +312,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       });
     },
 
-    resizeMarkdownEditor() {
-      const el = this.$refs.markdownEditor;
+    resizeMarkdownEditor(refName = "markdownEditor") {
+      const el = this.$refs[refName];
 
       if (!el) {
         return;
@@ -361,6 +366,49 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.error = err.message || "Could not save markdown file.";
       } finally {
         this.loading = false;
+      }
+    },
+
+    // Shared by the edit panel and the add-file panel — both are plain
+    // content-in/content-out textareas, so one method covers both. This
+    // only previews the AI's suggestion in the textarea; nothing is saved
+    // until the existing Submit button is clicked.
+    async optimizeMarkdown() {
+      const isAddFile = this.leftPanel === "add-file";
+      const content = isAddFile ? this.newMarkdownContent : this.markdown;
+
+      if (!content || !content.trim()) {
+        return;
+      }
+
+      this.optimizingMarkdown = true;
+      this.optimizingSeconds = 0;
+      this.error = null;
+      this.success = null;
+
+      this.optimizingIntervalId = setInterval(() => {
+        this.optimizingSeconds++;
+      }, 1000);
+
+      try {
+        const optimized = await Api.optimizeMarkdown(content);
+
+        if (isAddFile) {
+          this.newMarkdownContent = optimized.content;
+          this.$nextTick(() => this.resizeMarkdownEditor("addFileEditor"));
+        } else {
+          this.markdown = optimized.content;
+          this.$nextTick(() => this.resizeMarkdownEditor());
+        }
+
+        this.optimizeFinalized = true;
+
+      } catch (err) {
+        this.error = err.message || "Could not optimize markdown content.";
+      } finally {
+        clearInterval(this.optimizingIntervalId);
+        this.optimizingIntervalId = null;
+        this.optimizingMarkdown = false;
       }
     },
 
@@ -1200,6 +1248,7 @@ Java supports single inheritance...</pre>
       this.leftPanel = "add-file";
       this.mobileView = "markdown";
       this.newMarkdownContent = "";
+      this.optimizeFinalized = false;
     },
 
     async submitAddFile() {

@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,12 +20,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.AccessDeniedException;
 
+import dev.recallforge.domain.AllowedEnvironment;
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.exception.MarkdownFileHasReviewsException;
+import dev.recallforge.repository.AllowedEnvironmentRepository;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
@@ -47,11 +52,18 @@ class MarkdownFileServiceTest {
     @Mock
     private CurrentUserService currentUserService;
 
+    @Mock
+    private OpenAiService openAiService;
+
+    @Mock
+    private AllowedEnvironmentRepository allowedEnvironmentRepository;
+
     private MarkdownFileService markdownFileService;
 
     private void setUp() {
         markdownFileService = new MarkdownFileService(
-            markdownFileRepository, topicRepository, reviewRepository, markdownTopicImporter, currentUserService
+            markdownFileRepository, topicRepository, reviewRepository, markdownTopicImporter,
+            currentUserService, openAiService, allowedEnvironmentRepository
         );
     }
 
@@ -631,5 +643,167 @@ class MarkdownFileServiceTest {
         assertThatThrownBy(() -> markdownFileService.delete(5L))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Markdown file not found: 5");
+    }
+
+    @Test
+    void optimize_notAdmin_throwsAccessDeniedExceptionWithoutParsing() {
+        setUp();
+        doThrow(new AccessDeniedException("Admin access required"))
+            .when(currentUserService).requireAdmin();
+
+        assertThatThrownBy(() -> markdownFileService.optimize("### Topic\ncontent"))
+            .isInstanceOf(AccessDeniedException.class);
+
+        verify(markdownTopicImporter, never()).parseMarkdown(any());
+    }
+
+    @Test
+    void optimize_blankContent_throwsIllegalArgumentException() {
+        setUp();
+
+        assertThatThrownBy(() -> markdownFileService.optimize("   "))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Markdown content is empty.");
+    }
+
+    @Test
+    void optimize_noParsedTopics_throwsIllegalArgumentException() {
+        setUp();
+        String content = "no headings here";
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of());
+
+        assertThatThrownBy(() -> markdownFileService.optimize(content))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Markdown content does not contain any topics.");
+    }
+
+    @Test
+    void optimize_structuredContent_preservesOriginalTitlesAndHeader() {
+        setUp();
+        String content = "## Programming / Java / Core / Java Basics\n"
+            + "### Variables\nOld variables content.\n"
+            + "### Loops\nOld loops content.";
+
+        MarkdownTopicImporter.ParsedTopic variablesTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Variables", "Old variables content."
+        );
+        MarkdownTopicImporter.ParsedTopic loopsTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Loops", "Old loops content."
+        );
+
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(variablesTopic, loopsTopic));
+
+        String aiResponse = "### Variables\nNew tighter variables content.\n\n"
+            + "### Loops\nNew tighter loops content.";
+
+        when(openAiService.optimizeTopicBodies(any())).thenReturn(aiResponse);
+
+        MarkdownTopicImporter.ParsedTopic rewrittenVariables = new MarkdownTopicImporter.ParsedTopic(
+            "General", "Uncategorized", "Uncategorized", "Untitled",
+            "Variables", "New tighter variables content."
+        );
+        MarkdownTopicImporter.ParsedTopic rewrittenLoops = new MarkdownTopicImporter.ParsedTopic(
+            "General", "Uncategorized", "Uncategorized", "Untitled",
+            "Loops", "New tighter loops content."
+        );
+
+        when(markdownTopicImporter.parseMarkdown(aiResponse))
+            .thenReturn(List.of(rewrittenVariables, rewrittenLoops));
+
+        String result = markdownFileService.optimize(content);
+
+        assertThat(result).startsWith("## Programming / Java / Core / Java Basics");
+        assertThat(result).contains("### Variables\nNew tighter variables content.");
+        assertThat(result).contains("### Loops\nNew tighter loops content.");
+    }
+
+    @Test
+    void optimize_structuredContent_aiDropsATitle_throwsIllegalStateException() {
+        setUp();
+        String content = "## Programming / Java / Core / Java Basics\n"
+            + "### Variables\nOld content.\n"
+            + "### Loops\nOld loops content.";
+
+        MarkdownTopicImporter.ParsedTopic variablesTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Variables", "Old content."
+        );
+        MarkdownTopicImporter.ParsedTopic loopsTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Loops", "Old loops content."
+        );
+
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(variablesTopic, loopsTopic));
+
+        String aiResponse = "### Variable Basics\nRenamed title, not allowed.";
+
+        when(openAiService.optimizeTopicBodies(any())).thenReturn(aiResponse);
+
+        MarkdownTopicImporter.ParsedTopic renamedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "General", "Uncategorized", "Uncategorized", "Untitled",
+            "Variable Basics", "Renamed title, not allowed."
+        );
+
+        when(markdownTopicImporter.parseMarkdown(aiResponse)).thenReturn(List.of(renamedTopic));
+
+        assertThatThrownBy(() -> markdownFileService.optimize(content))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("AI response did not preserve the existing topic titles. Please try again.");
+    }
+
+    @Test
+    void optimize_unstructuredContent_returnsAiGeneratedMarkdown() {
+        setUp();
+        String content = "raw notes about java streams, no headings";
+
+        MarkdownTopicImporter.ParsedTopic fallbackTopic = new MarkdownTopicImporter.ParsedTopic(
+            "General", "Uncategorized", "Uncategorized", "Untitled", "Untitled", content
+        );
+
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(fallbackTopic));
+
+        AllowedEnvironment jvmEnvironment = new AllowedEnvironment("JVM", "Java, Kotlin, Scala, Spring", 1);
+        when(allowedEnvironmentRepository.findAllByOrderByDisplayOrderAsc()).thenReturn(List.of(jvmEnvironment));
+
+        String aiResponse = "## JVM / Java / Streams / Streams Basics\n"
+            + "### Stream Creation\nContent about streams.";
+
+        when(openAiService.generateStructuredMarkdown(eq(content), any())).thenReturn(aiResponse);
+
+        MarkdownTopicImporter.ParsedTopic generatedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "JVM", "Java", "Streams", "Streams Basics", "Stream Creation", "Content about streams."
+        );
+
+        when(markdownTopicImporter.parseMarkdown(aiResponse)).thenReturn(List.of(generatedTopic));
+
+        String result = markdownFileService.optimize(content);
+
+        assertThat(result).isEqualTo(aiResponse);
+    }
+
+    @Test
+    void optimize_unstructuredContent_aiResponseMissingHeader_throwsIllegalStateException() {
+        setUp();
+        String content = "raw notes, no headings";
+
+        MarkdownTopicImporter.ParsedTopic fallbackTopic = new MarkdownTopicImporter.ParsedTopic(
+            "General", "Uncategorized", "Uncategorized", "Untitled", "Untitled", content
+        );
+
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(fallbackTopic));
+        when(allowedEnvironmentRepository.findAllByOrderByDisplayOrderAsc()).thenReturn(List.of());
+
+        String aiResponse = "### Just a topic\nNo header line here.";
+
+        when(openAiService.generateStructuredMarkdown(eq(content), any())).thenReturn(aiResponse);
+
+        MarkdownTopicImporter.ParsedTopic generatedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "General", "Uncategorized", "Uncategorized", "Untitled",
+            "Just a topic", "No header line here."
+        );
+
+        when(markdownTopicImporter.parseMarkdown(aiResponse)).thenReturn(List.of(generatedTopic));
+
+        assertThatThrownBy(() -> markdownFileService.optimize(content))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("AI response is missing the required header line. Please try again.");
     }
 }

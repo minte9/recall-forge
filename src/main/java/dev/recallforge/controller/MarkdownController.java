@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import dev.recallforge.dto.MarkdownCreateRequest;
+import dev.recallforge.dto.MarkdownOptimizeRequest;
+import dev.recallforge.dto.MarkdownOptimizeResponse;
 import dev.recallforge.dto.MarkdownReviewCountResponse;
 import dev.recallforge.dto.MarkdownUpdateRequest;
 import dev.recallforge.dto.MarkdownUploadResponse;
@@ -53,6 +55,11 @@ public class MarkdownController {
             @Valid @RequestBody MarkdownUpdateRequest request
     ) throws Exception {
         return markdownFileService.update(id, request.content());
+    }
+
+    @PostMapping("/optimize")
+    public MarkdownOptimizeResponse optimizeMarkdown(@Valid @RequestBody MarkdownOptimizeRequest request) {
+        return new MarkdownOptimizeResponse(markdownFileService.optimize(request.content()));
     }
 
     @DeleteMapping("/{id}/reviews")

@@ -128,6 +128,24 @@ const Api = {
     return await response.json();
   },
 
+  async optimizeMarkdown(content) {
+    const response = await fetch("/api/markdown/optimize", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ content })
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not optimize markdown content.");
+    }
+
+    return await response.json();
+  },
+
   async resetMarkdownReviews(markdownFileId) {
     const response = await fetch("/api/markdown/" + encodeURIComponent(markdownFileId) + "/reviews", {
       method: "DELETE",

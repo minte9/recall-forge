@@ -2,6 +2,7 @@ package dev.recallforge.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +18,14 @@ import dev.recallforge.dto.AiResponse;
  * {@link #generateQuestion} builds a review question from a topic (adjusting
  * difficulty by memory score and avoiding repeats from recent reviews), and
  * {@link #evaluateAnswer} grades a submitted answer into a 0-1 score plus
- * feedback. Called by {@link ReviewService}. Uses the {@code RestClient}
- * bean configured in {@code config/OpenAiConfig}.
+ * feedback. Called by {@link ReviewService}. {@link #optimizeTopicBodies}
+ * and {@link #generateStructuredMarkdown} back the admin-only "Optimize"
+ * markdown feature, called by {@link MarkdownFileService}. Uses the
+ * {@code RestClient} bean configured in {@code config/OpenAiConfig}.
  */
 @Service
 public class OpenAiService {
-    
+
     private final RestClient openAiRestClient;
     private final String model;
 
@@ -30,6 +33,11 @@ public class OpenAiService {
 
     // Below this, the user is still shaky on the topic and gets recall-level questions.
     private static final double PROFICIENCY_THRESHOLD = 0.7;
+
+    // Rewriting a whole file's worth of topics needs far more headroom than
+    // the short question/grading calls above.
+    private static final int OPTIMIZE_MAX_TOKENS = 2500;
+    private static final int MAX_OPTIMIZE_INPUT_CHARS = 12000;
 
     public OpenAiService(RestClient openAiRestClient, @Value("${openai.model}") String model) {
         this.openAiRestClient = openAiRestClient;
@@ -150,6 +158,117 @@ public class OpenAiService {
 
         AiResponse response = ask(prompt, 80);  // answer evaluation
         return parseEvaluation(response.content(), response.totalTokens());
+    }
+
+    /**
+     * Rewrites topic bodies only. Titles are never sent for the model to
+     * echo back with room for drift - the caller matches the response's
+     * "### " headings against its own known titles and splices bodies back
+     * under them, so this only needs to instruct the model to keep them
+     * unchanged and in place.
+     */
+    public String optimizeTopicBodies(List<TopicToOptimize> topics) {
+        StringBuilder topicsBlock = new StringBuilder();
+
+        for (TopicToOptimize topic : topics) {
+            topicsBlock
+                .append("### ").append(topic.title()).append("\n")
+                .append(trimTopicContent(topic.content()))
+                .append("\n\n");
+        }
+
+        String prompt = """
+        Rewrite each topic below for a spaced-repetition recall app, not a
+        knowledgebase article - each explanation must be readable in one
+        glance, not teach the topic from scratch.
+
+        Rules for each topic:
+        - Explanation: 2-3 sentences, ~45-60 words. One main idea only.
+        - Code example: short and focused; comments explain WHY, not WHAT.
+        - Code lines (including trailing comments) must stay under 80
+          characters.
+        - Trim boilerplate (imports, full class ceremony) unless it is the
+          point of the topic.
+        - Do not change the topic titles below (the "### " heading lines) -
+          copy each one back exactly as given, character for character.
+        - Do not add, remove, split, or merge topics - return exactly the
+          same number of topics, in the same order.
+        - Return the result in the same "### <title>" format shown below,
+          one topic per section, nothing else before or after.
+
+        Topics:
+        %s
+        """;
+        prompt = prompt.formatted(topicsBlock.toString().trim());
+
+        AiResponse response = ask(prompt, OPTIMIZE_MAX_TOKENS);
+        return response.content();
+    }
+
+    /**
+     * Turns unstructured raw notes into a fully structured markdown file,
+     * header included. {@code allowedEnvironments} grounds the Environment
+     * choice against the curated list so the model prefers a known bucket
+     * over inventing a new one.
+     */
+    public String generateStructuredMarkdown(String rawContent, List<EnvironmentOption> allowedEnvironments) {
+        String environmentsBlock = allowedEnvironments.stream()
+            .map(option -> "  - %s: %s".formatted(option.name(), option.description()))
+            .collect(Collectors.joining("\n"));
+
+        String prompt = """
+        Turn the raw notes below into a properly structured markdown file
+        for a spaced-repetition recall app.
+
+        Format exactly:
+        ## <Environment> / <Category> / <Subcategory> / <File Title>
+
+        ### <Topic 1 Title>
+        <2-3 sentence explanation, ~45-60 words>
+        ~~~<language>
+        <short, focused code example, comments explain WHY not WHAT,
+        lines under 80 characters>
+        ~~~
+
+        ### <Topic 2 Title>
+        ...
+
+        Rules:
+        - 2 to 5 topics total. Only include topics that are genuinely
+          important - do not pad to hit a target count.
+        - One main idea per topic, readable in one glance, not a full
+          tutorial.
+        - Code lines (including trailing comments) must stay under 80
+          characters.
+        - For <Environment>, choose exactly one from this list unless truly
+          nothing fits:
+        %s
+        - The implementation language is not always the right environment.
+          If the content is fundamentally about a specific domain (machine
+          learning, databases, security, cloud, mobile, etc.) rather than
+          about the language itself, choose that domain environment even
+          when the code example happens to be written in a general-purpose
+          language like Python or Java. Only choose the language
+          environment when the content is teaching the language/framework
+          itself, not a specialized field built on top of it. For example,
+          code using scikit-learn, pandas/numpy for analysis, TensorFlow,
+          PyTorch, or algorithms like KNN/regression/classification/
+          clustering is AI content, not Python content, even though it is
+          written in Python syntax and imports ordinary Python libraries.
+        - Only propose a new environment if none of the above are a
+          reasonable fit; if you do, it must still read like a short
+          ecosystem name (2-3 words max), not a sentence.
+        - Category and Subcategory should be short, specific, and
+          consistent with how a technical curriculum would organize this
+          content.
+
+        Raw notes:
+        %s
+        """;
+        prompt = prompt.formatted(environmentsBlock, trimText(rawContent, MAX_OPTIMIZE_INPUT_CHARS));
+
+        AiResponse response = ask(prompt, OPTIMIZE_MAX_TOKENS);
+        return response.content();
     }
 
     private AiResponse ask(String prompt, int maxTokens) {
