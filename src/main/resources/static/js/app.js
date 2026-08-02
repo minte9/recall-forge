@@ -111,7 +111,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         groups[option.environment].push(option.category);
       });
 
-      const priorityOrder = ["JVM", "PVM", "DEVOPS", "DB"];
+      const priorityOrder = ["JVM", "PYTHON", "DEVOPS", "DB"];
 
       const orderedNames = Object.keys(groups).sort((a, b) => {
         const priorityA = priorityOrder.indexOf(a.toUpperCase());
