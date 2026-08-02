@@ -497,6 +497,40 @@ class MarkdownFileServiceTest {
     }
 
     @Test
+    void update_headerChanged_syncsMarkdownFileMetadata() throws Exception {
+        setUp();
+        String newContent = "## Programming / Java / Collections / Java Basics\n### Java Basics\nUpdated content.";
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Collections", "Java Basics", "Java Basics", "Updated content."
+        );
+        Topic existingTopic = new Topic(
+            "Programming", "Java", "Core", "Java Basics",
+            "Java Basics", "old topic content", existingMarkdownFile, user
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownTopicImporter.parseMarkdown(newContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByContentHashAndUserId(sha256(newContent), 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(
+                eq(existingMarkdownFile), eq("Java Basics"), eq(1L)))
+            .thenReturn(Optional.of(existingTopic));
+
+        markdownFileService.update(1L, newContent);
+
+        assertThat(existingMarkdownFile.getEnvironment()).isEqualTo("Programming");
+        assertThat(existingMarkdownFile.getCategory()).isEqualTo("Java");
+        assertThat(existingMarkdownFile.getSubcategory()).isEqualTo("Collections");
+        assertThat(existingMarkdownFile.getTopicGroup()).isEqualTo("Java Basics");
+    }
+
+    @Test
     void update_contentUnchanged_skipsDuplicateHashLookup() throws Exception {
         setUp();
         String content = "### Java Basics\nSame content.";
