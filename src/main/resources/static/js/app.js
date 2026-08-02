@@ -346,6 +346,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         await this.loadTopicsInFile(this.currentMarkdownFileId);
 
+        // The edit may have changed environment/category (e.g. via
+        // Optimize on a file that started out Uncategorized), so refresh
+        // the dropdown/dashboard/summaries the same way upload/create do.
+        await this.loadCategoryOptions();
+        await this.loadDashboard();
+        await this.loadMarkdownSummaries(false);
+
         // A renamed topic is deleted and recreated with a new id server-side,
         // so the review panel may still be pointing at a topic that no
         // longer exists — reload it onto a valid topic in that case.
@@ -1171,6 +1178,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.leftPanel = "markdowns";
         this.mobileView = "markdown";
 
+        await this.loadCategoryOptions();
         await this.loadMarkdownSummaries(false);
         await this.loadDashboard();
 
