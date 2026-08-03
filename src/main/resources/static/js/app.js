@@ -388,6 +388,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return;
       }
 
+      const confirmed = confirm(
+        "Optimize this content with AI? This can take up to a minute and will replace the current text in the editor (not saved until you click Submit)."
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
       this.optimizingMarkdown = true;
       this.optimizingSeconds = 0;
       this.error = null;
