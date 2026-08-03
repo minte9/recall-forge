@@ -703,6 +703,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         await this.loadDashboard();
         await this.loadMarkdownSummaries(false);
+        await this.loadFeedbackHistory(this.review.topicId);
 
         if (!this.review) {
           this.showMarkdownSummaries();

@@ -836,7 +836,7 @@
           </div>
         </div>
 
-        <div v-if="result" class="feedback"
+        <div v-if="result && !feedbackHistoryVisible" class="feedback"
           :class="result.score >= 0.7 ? 'feedback--high-score' : 'feedback--low-score'">
           <p><strong>Score:</strong> {{ result.score }}</p>
           <p><strong>Feedback:</strong> {{ result.feedback }}</p>
