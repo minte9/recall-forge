@@ -109,11 +109,15 @@ class DashboardServiceTest {
     }
 
     @Test
-    void getDashboard_limitsWeakAreasToTopThreeAndMapsFieldsCorrectly() {
+    void getDashboard_limitsWeakAreasToTopThreeByDueCountAndMapsFieldsCorrectly() {
         setUp();
+        // No SubcategoryOrder configured, so display order falls back to
+        // alphabetical - subcategory names are distinct here so the
+        // selection (top 3 by due count) can be checked without the display
+        // reordering (covered separately below) affecting which 3 land.
         List<WeakAreaProjection> weakAreas = List.of(
             weakArea("Programming", "Java", "Core", 5L, 0.3),
-            weakArea("Programming", "Python", "Core", 4L, 0.4),
+            weakArea("Programming", "Python", "Testing", 4L, 0.4),
             weakArea("Math", "Algebra", "Basics", 3L, 0.5),
             mock(WeakAreaProjection.class) // beyond the top-3 limit; its fields are never read
         );
@@ -125,11 +129,43 @@ class DashboardServiceTest {
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
-        assertThat(dashboard.weakAreas()).hasSize(3);
-        assertThat(dashboard.weakAreas().get(0))
-            .isEqualTo(new WeakAreaResponse("Programming", "Java", "Core", 5L, 0.3));
-        assertThat(dashboard.weakAreas().get(2))
-            .isEqualTo(new WeakAreaResponse("Math", "Algebra", "Basics", 3L, 0.5));
+        assertThat(dashboard.weakAreas()).containsExactlyInAnyOrder(
+            new WeakAreaResponse("Programming", "Java", "Core", 5L, 0.3),
+            new WeakAreaResponse("Programming", "Python", "Testing", 4L, 0.4),
+            new WeakAreaResponse("Math", "Algebra", "Basics", 3L, 0.5)
+        );
+    }
+
+    @Test
+    void getDashboard_selectsBusiestThreeWeakAreasButDisplaysThemInSubcategoryOrder() {
+        setUp();
+        // Selection stays due-count-based (findWeakAreas already returns
+        // busiest-first) - "Streams" is beyond the top-3 cutoff and is
+        // correctly left out despite coming first in document order. Once
+        // the busiest 3 are picked, they're displayed in subcategory order
+        // (OOP, Generics, Collections) rather than by due count.
+        List<WeakAreaProjection> weakAreas = List.of(
+            weakArea("JVM", "Java", "Generics", 5L, 0.3),
+            weakArea("JVM", "Java", "OOP", 4L, 0.4),
+            weakArea("JVM", "Java", "Collections", 3L, 0.5),
+            mock(WeakAreaProjection.class) // "Streams" - beyond the top-3 limit; its fields are never read
+        );
+        when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(weakAreas);
+        when(subcategoryOrderRepository.findByCategoryIgnoreCase("java")).thenReturn(List.of(
+            new SubcategoryOrder("Java", "Streams", 1),
+            new SubcategoryOrder("Java", "OOP", 2),
+            new SubcategoryOrder("Java", "Generics", 3),
+            new SubcategoryOrder("Java", "Collections", 4)
+        ));
+        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
+        when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
+        when(rewardService.getCurrentUserReward("java"))
+            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Java", 0L, 0L, 0));
+
+        DashboardResponse dashboard = dashboardService.getDashboard("java");
+
+        assertThat(dashboard.weakAreas()).extracting(WeakAreaResponse::subcategory)
+            .containsExactly("OOP", "Generics", "Collections");
     }
 
     @Test

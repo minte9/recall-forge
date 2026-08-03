@@ -25,6 +25,7 @@ import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.SubcategoryReviewCountProjection;
 import dev.recallforge.repository.TopicRepository;
+import dev.recallforge.repository.WeakAreaProjection;
 import dev.recallforge.security.CurrentUserService;
 
 /**
@@ -89,12 +90,26 @@ public class DashboardService {
                 SubcategoryReviewCountProjection::getReviewCount
             ));
 
+        Map<String, Integer> subcategoryOrder = subcategoryOrderRepository.findByCategoryIgnoreCase(category)
+            .stream()
+            .collect(Collectors.toMap(SubcategoryOrder::getSubcategory, SubcategoryOrder::getDisplayOrder));
+
         // findWeakAreas itself only considers topics that have been reviewed
         // before (see the query) — a topic due for the very first time isn't
-        // a "weak area," it's just unstarted.
+        // a "weak area," it's just unstarted. Which 3 subcategories make the
+        // cut is still decided by findWeakAreas' own due-count/score
+        // ordering, but once picked, they're displayed in the same
+        // subcategory order as the sidebar and the review queue (same
+        // SubcategoryOrder table/alphabetical fallback as
+        // getMarkdownSummaries) rather than busiest-first, so this list
+        // doesn't jump around independently of what the user will actually
+        // see next.
         List<WeakAreaResponse> weakAreas = topicRepository.findWeakAreas(userId, category, now)
             .stream()
             .limit(3)
+            .sorted(Comparator.<WeakAreaProjection, Integer>comparing(
+                    area -> subcategoryOrder.getOrDefault(area.getSubcategory(), Integer.MAX_VALUE))
+                .thenComparing(WeakAreaProjection::getSubcategory, String.CASE_INSENSITIVE_ORDER))
             .map(area -> new WeakAreaResponse(
                 area.getEnvironment(),
                 area.getCategory(),
