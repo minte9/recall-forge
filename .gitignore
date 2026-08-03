@@ -12,8 +12,6 @@ sh/psql_import_from_server.sh
 !sh/deploy_with_docker.sh
 !sh/deploy_with_rsync.sh
 
-.rsyncignore
-.dockerignore
 .claude/*.local.*
 .idea/
 

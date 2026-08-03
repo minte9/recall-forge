@@ -1,0 +1,10 @@
+# VCS / editor
+.git
+.gitignore
+.idea
+.vscode
+.DS_Store
+
+# Logs / dumps
+*.log
+db/*.sql
