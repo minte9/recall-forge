@@ -550,7 +550,7 @@
           </div>
 
           <template v-else>
-            <h3 class="review-title" @click="toggleFeedbackHistory">
+            <h3 class="review-title"> <!-- @click="toggleFeedbackHistory" -->
 
               <span class="review-title-left">
                 <span :title="review.topicTitle">{{ truncateTitle(review.topicTitle, isDesktop ? 50 : 30) }}</span>
