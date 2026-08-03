@@ -42,6 +42,11 @@ docker system df
     # Local Volumes   16        6         6.613GB   5.36GB (81%)
     # Build Cache     87        0         560.9MB   560.9MB
 
+# Memory usage
+free -h
+ps aux --sort=-%mem | head -15
+docker stats
+
 # Remove unused
 docker system prune
 docker system prune -a
