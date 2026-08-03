@@ -207,6 +207,21 @@ class TopicServiceTest {
     }
 
     @Test
+    void selectNextTopic_differingMemoryScore_prefersDocumentOrderOverWeakerScore() {
+        setUp();
+        // "3." has the weaker (lower) memory score, but "1." should still be
+        // reviewed first - document order now wins over score so the user
+        // isn't yanked into a harder, later topic ahead of an earlier,
+        // easier one.
+        Topic third = topicWithTitleAndMemoryScore("3. Streams", 0.1);
+        Topic first = topicWithTitleAndMemoryScore("1. Primitive Types", 0.8);
+        when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any()))
+            .thenReturn(List.of(third, first));
+
+        assertThat(topicService.selectNextTopic(1L, "java")).contains(first);
+    }
+
+    @Test
     void selectNextTopic_returnsEmptyWhenNoTopicsAreDue() {
         setUp();
         when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any())).thenReturn(List.of());
