@@ -66,6 +66,17 @@ public class TopicService {
             );
     }
 
+    /**
+     * Start Review flow — sorts due topics with this priority:
+     *
+     *  1. reviewed-before-unreviewed
+     *  2. subcategory display order
+     *  3. subcategory name
+     *  4. markdown file displayOrder
+     *  5. the leading number parsed out of the topic title (e.g. "1. Something" → 1)
+     *  6. memoryScore (weakest first, only breaks ties left by document order)
+     *  7. nextReviewAt
+     */
     public Optional<Topic> selectNextTopic(Long userId, String category) {
         List<Topic> dueTopics = topicRepository.findDueTopicsByCategory(userId, category, LocalDateTime.now());
 
@@ -78,36 +89,44 @@ public class TopicService {
             .collect(Collectors.toMap(SubcategoryOrder::getSubcategory, SubcategoryOrder::getDisplayOrder));
 
         // Every freshly imported topic starts at the same default memory
-        // score and is due from the moment it's created, so sorting on
-        // memory score alone lets an ever-growing backlog of never-reviewed
-        // topics permanently outrank topics that were already reviewed and
-        // are due again - the opposite of what spaced repetition is for
-        // (a decaying memory is more urgent than material that hasn't been
-        // seen yet, since the latter isn't decaying). Topics with review
-        // history come first; unreviewed topics only fill in once every
-        // reviewed-and-due topic has been offered.
+        // score and is due from the moment it's created, so letting
+        // never-reviewed topics compete on equal footing with everything
+        // else would let an ever-growing backlog of new material permanently
+        // outrank topics that were already reviewed and are due again - the
+        // opposite of what spaced repetition is for (a decaying memory is
+        // more urgent than material that hasn't been seen yet, since the
+        // latter isn't decaying). Topics with review history come first;
+        // unreviewed topics only fill in once every reviewed-and-due topic
+        // has been offered.
         Set<Long> reviewedTopicIds = new HashSet<>(
             reviewRepository.findReviewedTopicIds(dueTopics.stream().map(Topic::getId).toList(), userId));
 
         return dueTopics.stream()
             .sorted(
-                // Topics tied on memory score (e.g. freshly imported, never
-                // reviewed) would otherwise fall back to nextReviewAt, which
-                // for bulk-imported content is an arbitrary microsecond
-                // difference rather than a meaningful signal. Prefer the
-                // subcategory order shown in the markdown list (same
-                // subcategory_order table/alphabetical fallback as
-                // DashboardService.getMarkdownSummaries), then the file's own
-                // display_order within that subcategory (every file's topic
-                // numbering restarts at "1.", so without this, files tie and
-                // fall through to nextReviewAt too), then the topic that
-                // comes first in its file ("1." before "2.").
+                // Within each of those two groups, present topics in the
+                // same order they appear on the markdown page rather than
+                // weakest-score-first - jumping from a hard topic in file 3
+                // to a basic one in file 1 has no visible logic from the
+                // user's side, and reviewing in document order lets the
+                // user work through easy material and defer harder topics
+                // rather than being forced to confront the weakest one
+                // immediately. Prefer the subcategory order shown in the
+                // markdown list (same subcategory_order table/alphabetical
+                // fallback as DashboardService.getMarkdownSummaries), then
+                // the file's own display_order within that subcategory
+                // (every file's topic numbering restarts at "1.", so without
+                // this, files tie and fall through), then the topic that
+                // comes first in its file ("1." before "2."). Memory score
+                // only breaks ties left over once document order is
+                // exhausted (e.g. two topics with an identical position,
+                // such as freshly imported ones before display_order is
+                // set), instead of dominating the ordering.
                 Comparator.<Topic, Boolean>comparing(topic -> !reviewedTopicIds.contains(topic.getId()))
-                    .thenComparing(Topic::getMemoryScore)
                     .thenComparing(topic -> subcategoryDisplayOrder(topic, subcategoryOrder))
                     .thenComparing(Topic::getSubcategory, String.CASE_INSENSITIVE_ORDER)
                     .thenComparing(TopicService::markdownFileDisplayOrder, Comparator.nullsLast(Comparator.naturalOrder()))
                     .thenComparingLong(topic -> leadingTitleNumber(topic.getTitle()))
+                    .thenComparing(Topic::getMemoryScore)
                     .thenComparing(Topic::getNextReviewAt, Comparator.nullsFirst(Comparator.naturalOrder()))
             )
             .findFirst();
