@@ -7,9 +7,11 @@
 build/
 bin/
 
-sh/psql_export_to_server.sh
-sh/psql_import_from_server.sh
-!sh/deploy_with_docker.sh
+# to be remove later
+!sh/psql_export_to_server.sh
+!sh/psql_import_from_server.sh
+
+!sh/pull_with_docker.sh
 !sh/deploy_with_rsync.sh
 
 .claude/*.local.*
