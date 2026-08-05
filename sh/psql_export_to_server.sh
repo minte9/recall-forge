@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# GUARD: this does a full DROP DATABASE + restore - it overwrites every
+# user's accounts, reviews, and content, not just the template user's.
+# For pushing authored content to prod, use content_sync_to_server.sh
+# instead - it's scoped to user_id=1 and never touches anyone else's data.
+#
+# Only if you really mean to replace the whole database, delete/comment
+# out the line below, run this script, then put it back.
+echo "Refusing to run: use sh/content_sync_to_server.sh for routine content pushes." >&2
+echo "This script replaces the ENTIRE database - see the GUARD comment at the top to override." >&2
+exit 1
+
 SERVER="catalin@72.62.152.27"
 LOCAL_CONTAINER="recallforge-postgres"
 REMOTE_CONTAINER="recallforge-postgres"
