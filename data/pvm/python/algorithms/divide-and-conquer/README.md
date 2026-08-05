@@ -1,4 +1,4 @@
-## PVM / Python / Algorithms / Divide & Conquer
+## Python / Python / Algorithms / Divide & Conquer
 
 ### 1. Merge Sort
 

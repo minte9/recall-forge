@@ -1,4 +1,4 @@
-## PVM / Python / Data Structures / Trees
+## Python / Python / Data Structures / Trees
 
 ### 1. Tree Basics
 

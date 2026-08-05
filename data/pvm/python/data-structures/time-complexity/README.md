@@ -1,4 +1,4 @@
-## PVM / Python / Data Structures / Time Complexity
+## Python / Python / Data Structures / Time Complexity
 
 ### 1. Big-O Notation
 

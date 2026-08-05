@@ -1,4 +1,4 @@
-## PVM / Python / Data Structures / Stacks
+## Python / Python / Data Structures / Stacks
 
 ### 1. Stacks Basics
 
