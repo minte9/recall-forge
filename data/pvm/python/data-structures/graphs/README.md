@@ -1,4 +1,4 @@
-## PVM / Python / Data Structures / Graphs
+## Python / Python / Data Structures / Graphs
 
 ### 1. Graph Basics
 

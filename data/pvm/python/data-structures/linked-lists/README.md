@@ -1,4 +1,4 @@
-## PVM / Python / Data Structures / Linked Lists
+## Python / Python / Data Structures / Linked Lists
 
 ### 1. Linked List Basics
 

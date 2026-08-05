@@ -1,4 +1,4 @@
-## PVM / Python / Algorithms / Comparison Sorts
+## Python / Python / Algorithms / Comparison Sorts
 
 ### 1. Bubble Sort
 

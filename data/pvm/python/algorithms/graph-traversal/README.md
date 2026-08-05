@@ -1,4 +1,4 @@
-## PVM / Python / Algorithms / Graph Traversal
+## Python / Python / Algorithms / Graph Traversal
 
 ### 1. Depth-First Search (Graphs)
 
