@@ -62,7 +62,8 @@
             Delete Markdown
           </button>
 
-          <button v-if="currentMarkdownReviewCount !== 0" @click="resetFileReviews"  menuOpen = false">
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && 
+                    currentMarkdownReviewCount !== 0" @click="resetFileReviews"  menuOpen = false">
             Reset Reviews
           </button>
 
