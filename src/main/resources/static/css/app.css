@@ -1240,10 +1240,8 @@
   .feedback-qa-section {
     margin-top: 12px;
     border-radius: 10px;
-    padding: 12px;
     margin-bottom: 12px;
-    border: 1px solid #cccccc;
-    background: #eeeeee;
+    padding: 0px 12px 0px 12px;
   }
 
   .feedback-qa-section:first-child {
