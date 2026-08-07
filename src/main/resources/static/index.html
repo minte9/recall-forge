@@ -58,6 +58,11 @@
           </button>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
+            @click="showReviewsHistory(); mobileMenuOpen = false">
+            <icon name="file-text" class="menu-icon"></icon>Reviews History
+          </button>
+
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
             @click.stop="deleteMarkdownFile(); mobileMenuOpen = false">
             <icon name="trash" class="menu-icon"></icon>Delete Markdown
           </button>
@@ -141,6 +146,11 @@
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
                 @click="markdownEditing ? showMarkdown() : editMarkdown(); menuOpen = false">
                 <icon :name="markdownEditing ? 'eye' : 'pencil'" class="menu-icon"></icon>{{ markdownEditing ? "Show Markdown" : "Edit Markdown" }}
+              </button>
+
+              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
+                @click="showReviewsHistory(); menuOpen = false">
+                <icon name="file-text" class="menu-icon"></icon>Reviews History
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
