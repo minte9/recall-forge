@@ -624,45 +624,46 @@
             </div>
 
             <div v-else>
-              <div v-for="item in feedbackHistory" :key="item.id" class="feedback-history-item"
+              <details v-for="item in feedbackHistory" :key="item.id" class="feedback-history-item"
                 :class="item.score >= 0.7 ? 'feedback-history-item--high-score' : 'feedback-history-item--low-score'">
 
-                <div class="feedback-history-card-header">
-                  <div>
-                    <div class="feedback-history-title">💬 Feedback</div>
-                    <div class="feedback-history-date">
-                      {{ formatShortDate(item.createdAt) }}
+                <summary class="feedback-history-summary">
+                  <div class="feedback-history-card-header">
+                    <div class="feedback-history-title">
+                      <span class="feedback-history-icon">💬</span>
+                      <span class="feedback-history-date">{{ formatShortDate(item.createdAt) }}</span>
+                    </div>
+
+                    <div class="feedback-history-score">
+                      Score {{ formatScore(item.score) }}
                     </div>
                   </div>
 
-                  <div class="feedback-history-score">
-                    Score {{ formatScore(item.score) }}
+                  <div class="feedback-history-question feedback-qa-text">
+                    {{ item.question || "No question saved for this review." }}
+                  </div>
+
+                  <!-- <div class="feedback-history-toggle-link">Show answer/feedback</div> -->
+                </summary>
+
+                <div class="feedback-qa-box"
+                  :class="item.score >= 0.7 ? 'feedback--high-score' : 'feedback--low-score'">
+                  <div class="feedback-qa-section">
+                    <div class="feedback-qa-label">Answer</div>
+                    <div class="feedback-qa-text">
+                      {{ item.userAnswer || "No answer saved." }}
+                    </div>
+                      
+                    <br>
+
+                    <div class="feedback-qa-label">Feedback</div>
+                    <div class="feedback-qa-text">
+                      {{ item.feedback }}
+                    </div>
                   </div>
                 </div>
 
-                <div class="feedback-preview">
-                  {{ item.feedback }}
-                </div>
-
-                <div class="feedback-history-actions">
-                  <details class="feedback-qa-details">
-                    <summary>Question / Answer</summary>
-
-                    <div class="feedback-qa-box">
-                      <div class="feedback-qa-label">Question</div>
-                      <div class="feedback-qa-text">
-                        {{ item.question || "No question saved for this review." }}
-                      </div>
-
-                      <div class="feedback-qa-label feedback-qa-answer-label">My answer</div>
-                      <div class="feedback-qa-text">
-                        {{ item.userAnswer || "No answer saved." }}
-                      </div>
-                    </div>
-                  </details>
-                </div>
-
-              </div>
+              </details>
             </div>
           </div>
 

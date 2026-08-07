@@ -1159,7 +1159,6 @@
   }
 
   .feedback-history-item {
-    padding: 14px;
     margin: 12px 0;
     border: 1px solid #e5e7eb;
     border-radius: 14px;
@@ -1174,21 +1173,44 @@
     border-left: 4px solid #f59e0b;
   }
 
+  .feedback-history-summary {
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .feedback-history-summary::-webkit-details-marker {
+    display: none;
+  }
+
   .feedback-history-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
-    margin-bottom: 10px;
+  }
+
+  .feedback-history-question {
+    margin-top: 8px;
+  }
+
+  .feedback-history-toggle-link {
+    margin-top: 8px;
+    color: var(--orange);
+    font-weight: 700;
+    font-size: 13px;
   }
 
   .feedback-history-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-weight: 700;
     color: #334155;
   }
 
   .feedback-history-date {
-    margin-top: 8px;
     font-size: 12px;
     color: #64748b;
   }
@@ -1203,45 +1225,36 @@
     padding: 4px 9px;
   }
 
-  .feedback-preview {
-    line-height: 1.45;
-    color: #111827;
-  }
-
-  .feedback-qa-details {
-    margin-top: 0px;
-    padding-top: 10px;
-    /* border-top: 1px solid #f1f5f9; */
-  }
-
-  .feedback-qa-details summary {
-    cursor: pointer;
-    color: var(--orange);
-    font-weight: 700;
-    font-size: 13px;
-    list-style: none;
-  }
-
-  .feedback-qa-details summary::-webkit-details-marker {
-    display: none;
+  .feedback-qa-box.feedback--high-score,
+  .feedback-qa-box.feedback--low-score {
+    border-left: none;
   }
 
   .feedback-qa-box {
-    margin-top: 8px;
-    padding: 12px;
+    margin-top: 0px;
+    padding: 4px 12px;
     border-radius: 10px;
-    background: #f8fafc;
+    background: #ffffff;
+  }
+
+  .feedback-qa-section {
+    margin-top: 12px;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #cccccc;
+    background: #eeeeee;
+  }
+
+  .feedback-qa-section:first-child {
+    margin-top: 0;
   }
 
   .feedback-qa-label {
     font-size: 12px;
     font-weight: 700;
-    color: #64748b;
+    color: #e85800;
     margin-bottom: 4px;
-  }
-
-  .feedback-qa-answer-label {
-    margin-top: 12px;
   }
 
   .feedback-qa-text {
