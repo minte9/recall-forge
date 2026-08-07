@@ -38,6 +38,13 @@ public class Topic {
     @Column(nullable = false)  // Average score from previous reviews(0.0 - 1.0)
     private double memoryScore = 0.5;
 
+    // Consecutive reviews scoring >= RepetitionService's success threshold;
+    // resets to 0 on a weaker answer. Drives how far nextReviewAt grows.
+    // columnDefinition default lets ddl-auto backfill existing rows when
+    // adding this NOT NULL column to an already-populated table.
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private int reviewStreak = 0;
+
     private LocalDateTime nextReviewAt;  // when this topic should appear again
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -102,9 +109,10 @@ public class Topic {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateMemory(double memoryScore, LocalDateTime nextReviewAt) {
+    public void updateMemory(double memoryScore, LocalDateTime nextReviewAt, int reviewStreak) {
         this.memoryScore = memoryScore;
         this.nextReviewAt = nextReviewAt;
+        this.reviewStreak = reviewStreak;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -130,6 +138,7 @@ public class Topic {
 
     public void resetProgress() {
         this.memoryScore = DEFAULT_MEMORY_SCORE;
+        this.reviewStreak = 0;
         this.nextReviewAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
