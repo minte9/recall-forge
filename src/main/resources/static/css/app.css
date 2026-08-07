@@ -1844,7 +1844,7 @@
       position: absolute;
       top: 38px;
       left: 0;
-      width: 190px;
+      width: 230px;
       background: white;
       border: 1px solid var(--line);
       border-radius: 14px;
@@ -1862,6 +1862,7 @@
       background: transparent;
       text-align: left;
       text-decoration: none;
+      white-space: nowrap;
       font: inherit;
       color: #334155;
       border-radius: 10px;
