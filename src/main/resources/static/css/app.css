@@ -1332,6 +1332,10 @@
     font-size: 14px;
   }
 
+  .ai-disabled-notice {
+    margin-top: 10px;
+  }
+
   .review-question {
     display: flex;
     justify-content: space-between;
