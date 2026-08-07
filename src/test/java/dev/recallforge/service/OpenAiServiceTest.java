@@ -150,7 +150,7 @@ class OpenAiServiceTest {
     }
 
     @Test
-    void generateQuestion_withRecentReviews_listsThemAndAsksToAvoidRepeats() {
+    void generateQuestion_withRecentReviews_listsThemAndAsksToFocusOnOneConceptAtATime() {
         mockAiReply("Some question?");
         List<ReviewSummary> recentReviews = List.of(
             new ReviewSummary("What is X?", 0.8, "Good understanding"),
@@ -159,10 +159,11 @@ class OpenAiServiceTest {
         openAiService.generateQuestion("Title", "Content", 0.5, recentReviews);
 
         String prompt = capturePromptSentToAi();
-        assertThat(prompt).contains("Recently asked questions on this topic (avoid repeating these):");
+        assertThat(prompt).contains("Recently asked questions on this topic, most recent first:");
         assertThat(prompt).contains("\"What is X?\" (score 0.80, feedback: Good understanding)");
         assertThat(prompt).contains("\"What is Y?\" (score 0.30, feedback: Missed the point)");
-        assertThat(prompt).contains("Do not ask a question that duplicates or closely rephrases");
+        assertThat(prompt).contains("2-3 consecutive questions on the same concept");
+        assertThat(prompt).contains("never ask a question that is an exact duplicate or a trivial");
     }
 
     @Test

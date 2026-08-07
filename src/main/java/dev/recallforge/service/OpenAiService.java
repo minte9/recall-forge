@@ -16,7 +16,9 @@ import dev.recallforge.dto.AiResponse;
 /**
  * All prompt-building and response-parsing for OpenAI calls lives here:
  * {@link #generateQuestion} builds a review question from a topic (adjusting
- * difficulty by memory score and avoiding repeats from recent reviews), and
+ * difficulty by memory score and using recent reviews to stay focused on the
+ * same concept for a few consecutive questions before moving to another),
+ * and
  * {@link #evaluateAnswer} grades a submitted answer into a 0-1 score plus
  * feedback. Called by {@link ReviewService}. {@link #optimizeTopicBodies}
  * and {@link #generateStructuredMarkdown} back the admin-only "Optimize"
@@ -73,8 +75,17 @@ public class OpenAiService {
           Do not require outside knowledge or reasoning that isn't spelled out there.
         - Before asking "why" or "how", confirm the content above actually explains that
           reason or mechanism. If it doesn't, ask a "what" or "when" question instead.
-        - Do not ask a question that duplicates or closely rephrases one of the
-          recently asked questions listed above, if any.
+        - This topic has roughly 2-3 important concepts. For spaced repetition, the user
+          should get 2-3 consecutive questions on the same concept before moving to another,
+          so the questions below (most recent first) show which concept was covered and
+          how many times in a row:
+          - If the most recent question(s) already focus on one concept and it has been
+            covered fewer than 2-3 times in a row, ask another question about that SAME
+            concept, from a different angle or phrasing - reinforcing it, not switching topics.
+          - Once a concept has been covered 2-3 times in a row, move on to a different
+            concept from the topic content.
+          - Either way, never ask a question that is an exact duplicate or a trivial
+            reword of any single question listed above.
         - Do not include the answer.
         """;
         prompt = prompt.formatted(
@@ -105,7 +116,7 @@ public class OpenAiService {
         }
 
         StringBuilder section = new StringBuilder(
-            "Recently asked questions on this topic (avoid repeating these):\n");
+            "Recently asked questions on this topic, most recent first:\n");
 
         for (ReviewSummary review : recentReviews) {
             String feedbackSuffix = review.feedback() == null || review.feedback().isBlank()
