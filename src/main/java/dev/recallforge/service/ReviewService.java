@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import dev.recallforge.config.AppAiProperties;
 import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.dto.FeedbackHistoryResponse;
 import dev.recallforge.domain.QuestionGeneration;
@@ -18,6 +19,7 @@ import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
 import dev.recallforge.dto.ReviewQueueResponse;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.exception.AiDisabledException;
 import dev.recallforge.exception.DailyQuestionLimitExceededException;
 import dev.recallforge.exception.DailyReviewLimitExceededException;
 import dev.recallforge.repository.QuestionGenerationRepository;
@@ -48,13 +50,14 @@ public class ReviewService {
     private final RewardService rewardService;
     private final CurrentUserService currentUserService;
     private final AppReviewLimitProperties reviewLimitProperties;
+    private final AppAiProperties aiProperties;
 
     public ReviewService(
             TopicService topicService, ReviewRepository reviewRepository,
             QuestionGenerationRepository questionGenerationRepository,
             OpenAiService openAiService, RepetitionService repetitionService,
             RewardService rewardService, CurrentUserService currentUserService,
-            AppReviewLimitProperties reviewLimitProperties) {
+            AppReviewLimitProperties reviewLimitProperties, AppAiProperties aiProperties) {
 
         this.topicService = topicService;
         this.reviewRepository = reviewRepository;
@@ -64,9 +67,14 @@ public class ReviewService {
         this.rewardService = rewardService;
         this.currentUserService = currentUserService;
         this.reviewLimitProperties = reviewLimitProperties;
+        this.aiProperties = aiProperties;
     }
 
     public ReviewQuestionResponse startReview(Long markdownFileId, String category, Long topicId) {
+        if (!aiProperties.enabled()) {
+            throw new AiDisabledException();
+        }
+
         Long userId = currentUserService.currentUserId();
 
         Optional<Topic> topicOptional = topicId != null
@@ -129,6 +137,10 @@ public class ReviewService {
     }
 
     public AnswerResponse answerQuestion(Long topicId, String question, String userAnswer, boolean isRetry) {
+        if (!aiProperties.enabled()) {
+            throw new AiDisabledException();
+        }
+
         Long userId = currentUserService.currentUserId();
         Topic topic = topicService.getTopic(topicId, userId);
 

@@ -15,6 +15,7 @@ const app = createApp({
       showMetadataHelp: false,
       markdown: null,
       review: null,
+      historyTopic: null,
       userAnswer: "",
       result: null,
       dashboard: null,
@@ -99,6 +100,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       const total = this.feedbackHistory.reduce((sum, r) => sum + r.score, 0);
       return total / this.feedbackHistory.length;
+    },
+
+    aiEnabled() {
+      return this.currentUser ? this.currentUser.aiEnabled !== false : true;
+    },
+
+    activeTopic() {
+      return this.review || this.historyTopic;
     },
 
     environmentGroups() {
@@ -454,6 +463,18 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async startReview(topicId = null, allowBroaderFallback = !topicId) {
+      if (!this.aiEnabled) {
+        if (topicId) {
+          await this.viewTopicHistory(topicId);
+        } else if (this.currentMarkdownFileId) {
+          await this.previewMarkdownFile(this.currentMarkdownFileId);
+          await this.loadTopicsInFile(this.currentMarkdownFileId);
+        } else {
+          this.showMarkdownSummaries();
+        }
+        return;
+      }
+
       await this.loadReviewQuestion(
         () => Api.startReview(this.currentMarkdownFileId, this.currentCategory, topicId),
         allowBroaderFallback
@@ -513,6 +534,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         if (data.done) {
           this.review = null;
+          this.historyTopic = null;
           this.reviewMessage = data.message;
           this.topicsInFile = [];
           await this.loadDashboard();
@@ -538,6 +560,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       } catch (err) {
         this.review = null;
+        this.historyTopic = null;
         this.error = err.message || "Could not start review.";
         // Make sure the error is actually visible even if we deferred
         // switching mobileView while hoping for a quiet success above.
@@ -582,6 +605,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     async previewMarkdownFile(markdownFileId) {
       this.currentMarkdownFileId = markdownFileId;
       this.review = null;
+      this.historyTopic = null;
       this.result = null;
       this.error = null;
       this.success = null;
@@ -649,11 +673,32 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     async selectTopic(topicId) {
       this.topicDropdownOpen = false;
 
-      if (this.review && topicId === this.review.topicId) {
+      if (this.activeTopic && topicId === this.activeTopic.topicId) {
+        return;
+      }
+
+      if (!this.aiEnabled) {
+        await this.viewTopicHistory(topicId);
         return;
       }
 
       await this.startReview(topicId);
+    },
+
+    async viewTopicHistory(topicId) {
+      const topic = this.topicsInFile.find(t => t.id === topicId);
+
+      this.review = null;
+      this.historyTopic = {
+        topicId,
+        topicTitle: topic ? topic.title : ""
+      };
+
+      this.leftPanel = "markdown";
+      this.mobilePageTitle = "Review";
+      this.mobileView = "review";
+      this.feedbackHistoryVisible = true;
+      await this.loadFeedbackHistory(topicId);
     },
 
     async uploadMarkdown(event) {
@@ -847,6 +892,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.error = null;
       this.success = null;
       this.review = null;
+      this.historyTopic = null;
       this.result = null;
       this.userAnswer = "";
       this.currentMarkdownFileId = null;
@@ -926,6 +972,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.error = null;
       this.success = null;
       this.review = null;
+      this.historyTopic = null;
       this.result = null;
       this.userAnswer = "";
       this.currentMarkdownFileId = null;
@@ -1025,6 +1072,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.showDangerZone = false;
 
         this.review = null;
+        this.historyTopic = null;
         this.result = null;
         this.markdown = "";
         this.selectedMarkdownFileId = null;
@@ -1070,6 +1118,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.showDangerZone = false;
 
         this.review = null;
+        this.historyTopic = null;
         this.result = null;
         this.markdown = "";
         this.selectedMarkdownFileId = null;
@@ -1119,6 +1168,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         await Api.resetMarkdownReviews(this.currentMarkdownFileId);
 
         this.review = null;
+        this.historyTopic = null;
         this.result = null;
         this.feedbackHistory = [];
         this.feedbackHistoryVisible = false;
@@ -1182,6 +1232,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.currentMarkdownFileId = null;
         this.currentMarkdownReviewCount = null;
         this.review = null;
+        this.historyTopic = null;
         this.result = null;
         this.markdown = "";
         this.feedbackHistory = [];

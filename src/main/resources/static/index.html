@@ -350,11 +350,11 @@
 
           <div v-if="!markdownLoading && !markdownEditing && currentMarkdownFileId"
             class="markdown-file-actions">
-            <button v-if="!review && !isDesktop" class="start-review-file-button"
-              @click="startReviewForFile(currentMarkdownFileId)" :disabled="loading || dailyLimitReached"
-              :title="dailyLimitReached ? 'Daily review limit reached' : null">
+            <button v-if="!activeTopic && !isDesktop" class="start-review-file-button"
+              @click="startReviewForFile(currentMarkdownFileId)" :disabled="loading || (aiEnabled && dailyLimitReached)"
+              :title="aiEnabled && dailyLimitReached ? 'Daily review limit reached' : null">
               <span class="btn-icon">►</span>
-              {{ loading ? "Loading..." : "Start Review" }}
+              {{ loading ? "Loading..." : (aiEnabled ? "Start Review" : "Reviews") }}
             </button>
 
           </div>
@@ -535,7 +535,7 @@
 
       <section v-if="!leftExpanded" class="panel app-panel">
 
-        <div v-if="review">
+        <div v-if="activeTopic">
           <a href="#" class="home-link-btn" @click.prevent="goHome" title="Back to home">
             <img src="recall-forge.png" alt="" class="brain-icon">
           </a>
@@ -548,7 +548,7 @@
             <h3 class="review-title"> <!-- @click="toggleFeedbackHistory" -->
 
               <span class="review-title-left">
-                <span :title="review.topicTitle">{{ truncateTitle(review.topicTitle, isDesktop ? 50 : 30) }}</span>
+                <span :title="activeTopic.topicTitle">{{ truncateTitle(activeTopic.topicTitle, isDesktop ? 50 : 30) }}</span>
 
                 <span class="topic-select-wrap" @click.stop
                   @mouseenter="isDesktop && openTopicDropdown($event)"
@@ -564,7 +564,7 @@
                     </div>
 
                     <button v-for="topic in topicsInFile" :key="topic.id"
-                      :class="{ active: review && topic.id === review.topicId }"
+                      :class="{ active: activeTopic && topic.id === activeTopic.topicId }"
                       @click="selectTopic(topic.id)">
                       {{ topic.title }}
                     </button>
@@ -578,40 +578,42 @@
 
             </h3>
 
-            <p>{{ review.question }}</p>
+            <template v-if="aiEnabled && review">
+              <p>{{ review.question }}</p>
 
-            <textarea v-model="userAnswer" placeholder="Write your answer here..."
-              @keydown.ctrl.enter="submitAnswer">
+              <textarea v-model="userAnswer" placeholder="Write your answer here..."
+                @keydown.ctrl.enter="submitAnswer">
         </textarea>
 
-            <div class="actions-row">
+              <div class="actions-row">
 
-              <button v-if="answerSubmitted" class="review-btn" @click="startReview()" :disabled="loading || dailyLimitReached"
-                :title="dailyLimitReached ? 'Daily review limit reached' : 'Ctrl+Shift+Enter'">
-                <span>→</span> Next Review
-              </button>
+                <button v-if="answerSubmitted" class="review-btn" @click="startReview()" :disabled="loading || dailyLimitReached"
+                  :title="dailyLimitReached ? 'Daily review limit reached' : 'Ctrl+Shift+Enter'">
+                  <span>→</span> Next Review
+                </button>
 
-              <button v-else class="review-btn" @click="skipReview()" :disabled="loading">
-                <span>→</span> Skip Today
-              </button>
+                <button v-else class="review-btn" @click="skipReview()" :disabled="loading">
+                  <span>→</span> Skip Today
+                </button>
 
-              <button v-if="!answerSubmitted" class="submit-btn" @click="submitAnswer" :disabled="loading"
-                title="Ctrl+Enter">
-                <span class="btn-icon">✓</span>
-                Submit Answer
-              </button>
+                <button v-if="!answerSubmitted" class="submit-btn" @click="submitAnswer" :disabled="loading"
+                  title="Ctrl+Enter">
+                  <span class="btn-icon">✓</span>
+                  Submit Answer
+                </button>
 
-              <button v-else class="submit-btn" @click="retryQuestion" :disabled="loading">
-                <span class="btn-icon">↻</span>
-                Try Again
-              </button>
+                <button v-else class="submit-btn" @click="retryQuestion" :disabled="loading">
+                  <span class="btn-icon">↻</span>
+                  Try Again
+                </button>
 
-              <span v-if="averageScore !== null" class="last-score-badge last-score-badge--actions"
-                title="Show feedback history" @click="toggleFeedbackHistory">
-                Avg Score: {{ formatScore(averageScore) }}
-              </span>
+                <span v-if="averageScore !== null" class="last-score-badge last-score-badge--actions"
+                  title="Show feedback history" @click="toggleFeedbackHistory">
+                  Avg Score: {{ formatScore(averageScore) }}
+                </span>
 
-            </div>
+              </div>
+            </template>
           </template>
 
 
@@ -668,7 +670,7 @@
 
         </div>
 
-        <div v-if="!review" class="review-home">
+        <div v-if="!activeTopic" class="review-home">
           <div v-if="dashboard" class="dashboard-card reviews-card">
 
             <div class="card-title-row">
@@ -813,20 +815,20 @@
           </div>
 
           <div class="actions-row">
-            <button class="review-btn" @click="startReviewFromDashboard()"
-              :disabled="loading || dailyLimitReached || (!currentMarkdownFileId && (!dashboard || dashboard.dueNow === 0))"
-              :title="dailyLimitReached ? 'Daily review limit reached' : null">
+            <button v-if="aiEnabled || currentMarkdownFileId" class="review-btn" @click="startReviewFromDashboard()"
+              :disabled="loading || (aiEnabled && (dailyLimitReached || (!currentMarkdownFileId && (!dashboard || dashboard.dueNow === 0))))"
+              :title="aiEnabled && dailyLimitReached ? 'Daily review limit reached' : null">
               <span class="btn-icon">►</span>
-              {{ loading ? "Loading..." : "Start Review" }}
+              {{ loading ? "Loading..." : (aiEnabled ? "Start Review" : "Reviews") }}
             </button>
 
-            <label class="upload-btn">
+            <label v-if="aiEnabled" class="upload-btn">
               <span class="btn-icon">→</span>
               Upload Markdown
               <input hidden type="file" accept=".md,.markdown,text/plain" @change="uploadMarkdown" />
             </label>
 
-            <button class="add-file-btn" @click="showAddFile" title="Add File">
+            <button v-if="aiEnabled" class="add-file-btn" @click="showAddFile" title="Add File">
               +
             </button>
 
