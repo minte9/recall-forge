@@ -2,7 +2,7 @@ const { createApp } = Vue;
 
 const LAST_CATEGORY_STORAGE_KEY = "recallforge.lastCategory";
 
-createApp({
+const app = createApp({
   data() {
     return {
       loading: false,
@@ -1303,4 +1303,20 @@ Java supports single inheritance...</pre>
       }
     }
   }
-}).mount("#app");
+});
+
+// Reusable icon: <icon name="pencil" class="menu-icon"></icon>
+// Backed by the Bootstrap Icons path data in js/icons.js - add a name there
+// to use it here or in any future part of the app.
+app.component("icon", {
+  props: {
+    name: { type: String, required: true }
+  },
+  template: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+    viewBox="0 0 16 16" v-html="ICONS[name] || ''"></svg>`,
+  data() {
+    return { ICONS };
+  }
+});
+
+app.mount("#app");
