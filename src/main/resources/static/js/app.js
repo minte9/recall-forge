@@ -701,6 +701,18 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       await this.loadFeedbackHistory(topicId);
     },
 
+    async showReviewsHistory() {
+      if (!this.currentMarkdownFileId) {
+        return;
+      }
+
+      await this.loadTopicsInFile(this.currentMarkdownFileId);
+
+      if (this.topicsInFile.length > 0) {
+        await this.viewTopicHistory(this.topicsInFile[0].id);
+      }
+    },
+
     async uploadMarkdown(event) {
       const file = event.target.files[0];
 
