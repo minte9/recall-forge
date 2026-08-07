@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -293,11 +294,12 @@ class ReviewServiceTest {
         when(topicService.getTopic(7L, 1L)).thenReturn(topic);
         when(currentUserService.currentUser()).thenReturn(new UserAccount());
         when(repetitionService.calculateUpdateMemoryScore(0.6, 0.8)).thenReturn(0.65);
-        when(repetitionService.calculateNextReviewAt(0.8)).thenReturn(nextReviewAt);
+        when(repetitionService.calculateNextReview(0.8, 0))
+            .thenReturn(new RepetitionService.RepetitionResult(nextReviewAt, 1));
         when(rewardService.rewardDefaultUser(0.8, "Uncategorized")).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AnswerResponse response = reviewService.saveAnswer(7L, "Q?", "My answer", evaluation);
+        AnswerResponse response = reviewService.saveAnswer(7L, "Q?", "My answer", evaluation, false);
 
         assertThat(response.topicId()).isEqualTo(7L);
         assertThat(response.topicTitle()).isEqualTo("Title");
@@ -305,10 +307,12 @@ class ReviewServiceTest {
         assertThat(response.feedback()).isEqualTo("Good job");
         assertThat(response.updateMemoryScore()).isEqualTo(0.65);
         assertThat(response.nextReviewAt()).isEqualTo(nextReviewAt);
+        assertThat(response.reviewStreak()).isEqualTo(1);
         assertThat(response.reward()).isEqualTo(reward);
 
         assertThat(topic.getMemoryScore()).isEqualTo(0.65);
         assertThat(topic.getNextReviewAt()).isEqualTo(nextReviewAt);
+        assertThat(topic.getReviewStreak()).isEqualTo(1);
         verify(topicService).save(topic);
 
         ArgumentCaptor<Review> reviewCaptor = ArgumentCaptor.forClass(Review.class);
@@ -322,6 +326,36 @@ class ReviewServiceTest {
     }
 
     @Test
+    void saveAnswer_isRetry_savesReviewButLeavesMemoryScheduleAndStreakUnchanged() {
+        setUp();
+        Topic topic = topicWithId(7L, null);
+        EvaluationResult evaluation = new EvaluationResult(0.9, "Good job", 120);
+        LocalDateTime originalNextReviewAt = topic.getNextReviewAt();
+        RewardResponse reward = new RewardResponse(100, 2, "Student", 0, 100, 3, 6, "Java", 4L, 8L, 50);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(7L, 1L)).thenReturn(topic);
+        when(currentUserService.currentUser()).thenReturn(new UserAccount());
+        when(rewardService.rewardDefaultUser(0.9, "Uncategorized")).thenReturn(reward);
+        when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AnswerResponse response = reviewService.saveAnswer(7L, "Q?", "My answer", evaluation, true);
+
+        assertThat(response.updateMemoryScore()).isEqualTo(0.6);
+        assertThat(response.nextReviewAt()).isEqualTo(originalNextReviewAt);
+        assertThat(response.reviewStreak()).isZero();
+
+        assertThat(topic.getMemoryScore()).isEqualTo(0.6);
+        assertThat(topic.getNextReviewAt()).isEqualTo(originalNextReviewAt);
+        assertThat(topic.getReviewStreak()).isZero();
+
+        verify(reviewRepository).save(any());
+        verify(topicService, never()).save(any());
+        verify(repetitionService, never()).calculateUpdateMemoryScore(anyDouble(), anyDouble());
+        verify(repetitionService, never()).calculateNextReview(anyDouble(), anyInt());
+    }
+
+    @Test
     void answerQuestion_categoryDailyLimitReached_throwsAndSkipsEvaluation() {
         setUp();
         Topic topic = topicWithId(7L, null);
@@ -332,7 +366,7 @@ class ReviewServiceTest {
         when(reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any()))
             .thenReturn(20L);
 
-        assertThatThrownBy(() -> reviewService.answerQuestion(7L, "Q?", "My answer"))
+        assertThatThrownBy(() -> reviewService.answerQuestion(7L, "Q?", "My answer", false))
             .isInstanceOf(DailyReviewLimitExceededException.class);
 
         verify(openAiService, never()).evaluateAnswer(any(), any(), any(), any());
@@ -353,11 +387,12 @@ class ReviewServiceTest {
         when(openAiService.evaluateAnswer("Title", "Content body", "Q?", "My answer")).thenReturn(evaluation);
         when(currentUserService.currentUser()).thenReturn(new UserAccount());
         when(repetitionService.calculateUpdateMemoryScore(0.6, 0.8)).thenReturn(0.65);
-        when(repetitionService.calculateNextReviewAt(0.8)).thenReturn(LocalDateTime.now().plusDays(7));
+        when(repetitionService.calculateNextReview(0.8, 0))
+            .thenReturn(new RepetitionService.RepetitionResult(LocalDateTime.now().plusDays(7), 1));
         when(rewardService.rewardDefaultUser(0.8, "Uncategorized")).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AnswerResponse response = reviewService.answerQuestion(7L, "Q?", "My answer");
+        AnswerResponse response = reviewService.answerQuestion(7L, "Q?", "My answer", false);
 
         assertThat(response.score()).isEqualTo(0.8);
         verify(reviewRepository).countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any());
@@ -421,7 +456,7 @@ class ReviewServiceTest {
     void getDailyQueue_withMarkdownFileId_usesPerFileCountsAndIsNotDoneWhenPositive() {
         setUp();
         Topic nextTopic = topicWithId(20L, null);
-        nextTopic.updateMemory(0.5, LocalDateTime.now().plusDays(1));
+        nextTopic.updateMemory(0.5, LocalDateTime.now().plusDays(1), 0);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.countDueTopicsByMarkdownFileId(eq(5L), eq(1L), any())).thenReturn(3L);

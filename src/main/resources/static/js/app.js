@@ -21,6 +21,7 @@ createApp({
       markdownSummaries: [],
       leftExpanded: false,
       answerSubmitted: false,
+      isRetry: false,
       currentUser: null,
       menuOpen: false,
       leftPanel: "markdown",
@@ -491,6 +492,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.result = null;
       this.userAnswer = "";
       this.answerSubmitted = false;
+      this.isRetry = false;
       this.showAccount = false;
       this.leftPanel = "markdown";
       if (!startingFreshReview) {
@@ -704,7 +706,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.result = await Api.submitAnswer({
           topicId: this.review.topicId,
           question: this.review.question,
-          userAnswer: this.userAnswer
+          userAnswer: this.userAnswer,
+          isRetry: this.isRetry
         });
 
         this.feedbackHistoryVisible = false;
@@ -724,10 +727,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
-    // Keeps the same question in place instead of fetching a new one,
-    // so the user can attempt it again.
+    // Keeps the same question in place instead of fetching a new one, so
+    // the user can attempt it again. Marked as a retry so the backend
+    // grades it but doesn't move memoryScore/nextReviewAt/reviewStreak.
     retryQuestion() {
       this.answerSubmitted = false;
+      this.isRetry = true;
       this.error = null;
       this.success = null;
     },

@@ -48,7 +48,7 @@ class TopicServiceTest {
             "General", "Uncategorized", "Uncategorized", "File",
             "Title", "Content", null, new UserAccount()
         );
-        topic.updateMemory(memoryScore, LocalDateTime.now());
+        topic.updateMemory(memoryScore, LocalDateTime.now(), 0);
         return topic;
     }
 
@@ -78,13 +78,13 @@ class TopicServiceTest {
             "General", "Uncategorized", subcategory, "File",
             title, "Content", markdownFile, user
         );
-        topic.updateMemory(0.0, LocalDateTime.now());
+        topic.updateMemory(0.0, LocalDateTime.now(), 0);
         return topic;
     }
 
     private Topic topicWithTitleAndMemoryScore(String title, double memoryScore) {
         Topic topic = topicWithTitle(title);
-        topic.updateMemory(memoryScore, LocalDateTime.now());
+        topic.updateMemory(memoryScore, LocalDateTime.now(), 0);
         return topic;
     }
 
@@ -159,8 +159,8 @@ class TopicServiceTest {
         // still win the tie.
         Topic generics = topicWithSubcategoryAndTitle("Generics", "1. Declaring a Generic Class");
         Topic basics = topicWithSubcategoryAndTitle("Basics", "1. The 8 Primitive Types");
-        generics.updateMemory(0.0, LocalDateTime.now());
-        basics.updateMemory(0.0, LocalDateTime.now());
+        generics.updateMemory(0.0, LocalDateTime.now(), 0);
+        basics.updateMemory(0.0, LocalDateTime.now(), 0);
         when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any()))
             .thenReturn(List.of(generics, basics));
         when(subcategoryOrderRepository.findByCategoryIgnoreCase("java")).thenReturn(List.of());
@@ -175,8 +175,8 @@ class TopicServiceTest {
         // fallback, same as DashboardService.getMarkdownSummaries.
         Topic generics = topicWithSubcategoryAndTitle("Generics", "1. Declaring a Generic Class");
         Topic basics = topicWithSubcategoryAndTitle("Basics", "1. The 8 Primitive Types");
-        generics.updateMemory(0.0, LocalDateTime.now());
-        basics.updateMemory(0.0, LocalDateTime.now());
+        generics.updateMemory(0.0, LocalDateTime.now(), 0);
+        basics.updateMemory(0.0, LocalDateTime.now(), 0);
         when(topicRepository.findDueTopicsByCategory(eq(1L), eq("java"), any()))
             .thenReturn(List.of(basics, generics));
         when(subcategoryOrderRepository.findByCategoryIgnoreCase("java")).thenReturn(List.of(

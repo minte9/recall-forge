@@ -834,7 +834,19 @@
           <p><strong>Score:</strong> {{ result.score }}</p>
           <p><strong>Feedback:</strong> {{ result.feedback }}</p>
           <p><strong>Updated memory score:</strong> {{ formatScore(result.updateMemoryScore) }}</p>
-          <p><strong>Next review:</strong> {{ formatDate(result.nextReviewAt) }}</p>
+          <p>
+            <strong>Next review:</strong> {{ formatDate(result.nextReviewAt) }}
+            <span class="info-tooltip" tabindex="0"
+              data-tooltip="Timing depends on your answer: weak answers come back in 1-3 days, strong ones in 7-14. Getting it right several times in a row pushes reviews out further still, up to about 6 months once a topic is clearly mastered.">?</span>
+          </p>
+          <p v-if="result.reviewStreak >= 2">
+            <strong>🔥 Streak:</strong> {{ result.reviewStreak }} correct reviews in a row
+            <span class="info-tooltip" tabindex="0"
+              data-tooltip="Reviews space out further the more you get right in a row - once a topic is clearly mastered, it stops coming back so often.">?</span>
+          </p>
+          <p v-if="isRetry" class="muted">
+            Practice attempt &mdash; doesn't change your schedule or streak.
+          </p>
         </div>
 
         <div v-if="success" class="success">

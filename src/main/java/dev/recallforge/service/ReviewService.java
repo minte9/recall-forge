@@ -128,7 +128,7 @@ public class ReviewService {
         return startReview(markdownFileId, category, null);
     }
 
-    public AnswerResponse answerQuestion(Long topicId, String question, String userAnswer) {
+    public AnswerResponse answerQuestion(Long topicId, String question, String userAnswer, boolean isRetry) {
         Long userId = currentUserService.currentUserId();
         Topic topic = topicService.getTopic(topicId, userId);
 
@@ -140,7 +140,7 @@ public class ReviewService {
         }
 
         EvaluationResult evaluation = evaluateAnswer(topicId, question, userAnswer);
-        return saveAnswer(topicId, question, userAnswer, evaluation);
+        return saveAnswer(topicId, question, userAnswer, evaluation, isRetry);
     }
 
     public EvaluationResult evaluateAnswer(
@@ -162,7 +162,8 @@ public class ReviewService {
             Long topicId,
             String question,
             String userAnswer,
-            EvaluationResult evaluation) {
+            EvaluationResult evaluation,
+            boolean isRetry) {
         Long userId = currentUserService.currentUserId();
         Topic topic = topicService.getTopic(topicId, userId);
 
@@ -179,15 +180,30 @@ public class ReviewService {
 
         reviewRepository.save(review);
 
-        double updatedMemoryScore = repetitionService.calculateUpdateMemoryScore(
-                topic.getMemoryScore(),
-                evaluation.score());
+        double updatedMemoryScore = topic.getMemoryScore();
+        LocalDateTime nextReviewAt = topic.getNextReviewAt();
+        int reviewStreak = topic.getReviewStreak();
 
-        LocalDateTime nextReviewAt = repetitionService.calculateNextReviewAt(evaluation.score());
+        // A retry is a same-sitting redo of the currently displayed question,
+        // not an independent, time-separated recall - grade and save it, but
+        // don't let it move memoryScore/nextReviewAt/reviewStreak, or repeated
+        // retries could inflate the streak or reset it on a single fluky redo.
+        if (!isRetry) {
+            updatedMemoryScore = repetitionService.calculateUpdateMemoryScore(
+                    topic.getMemoryScore(),
+                    evaluation.score());
 
-        topic.updateMemory(updatedMemoryScore, nextReviewAt);
-        topicService.save(topic);
-        topicService.flush();
+            RepetitionService.RepetitionResult repetition = repetitionService.calculateNextReview(
+                    evaluation.score(),
+                    topic.getReviewStreak());
+
+            nextReviewAt = repetition.nextReviewAt();
+            reviewStreak = repetition.reviewStreak();
+
+            topic.updateMemory(updatedMemoryScore, nextReviewAt, reviewStreak);
+            topicService.save(topic);
+            topicService.flush();
+        }
 
         RewardResponse reward = rewardService.rewardDefaultUser(evaluation.score(), topic.getCategory());
 
@@ -198,6 +214,7 @@ public class ReviewService {
                 evaluation.feedback(),
                 updatedMemoryScore,
                 nextReviewAt,
+                reviewStreak,
                 reward);
     }
 

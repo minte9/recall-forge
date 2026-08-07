@@ -71,7 +71,8 @@ public class ReviewController {
         return reviewService.answerQuestion(
             request.topicId(),
             request.question(),
-            request.userAnswer()
+            request.userAnswer(),
+            request.isRetry()
         );
     }
 

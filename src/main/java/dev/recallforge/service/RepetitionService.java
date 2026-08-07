@@ -15,6 +15,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class RepetitionService {
 
+    // Scores at or above this count as a "success" that extends the streak;
+    // anything below resets it. Matches OpenAiService's own proficiency cutoff.
+    private static final double STREAK_SUCCESS_THRESHOLD = 0.7;
+
+    // Interval growth per consecutive success once a streak is underway
+    // (SM-2/Anki-style ease factor), and the ceiling that keeps growth from
+    // running away once a topic is clearly mastered.
+    private static final double EASE_FACTOR = 1.8;
+    private static final long MAX_INTERVAL_DAYS = 180;
+
+    public record RepetitionResult(LocalDateTime nextReviewAt, int reviewStreak) {
+    }
+
     /**
      * Memory score update:
      * 
@@ -29,26 +42,36 @@ public class RepetitionService {
 
     /**
      * Spaced repetition rule:
-     * 
-     * Weak answers come back soon.
-     * Strong answers come back later
+     *
+     * Weak answers come back soon. Strong answers come back later, and
+     * further out still the more consecutive strong answers in a row -
+     * a topic that's clearly mastered should stop coming back every
+     * couple of weeks forever.
      */
-    public LocalDateTime calculateNextReviewAt(double score) {
-        int intervalDays;
+    public RepetitionResult calculateNextReview(double score, int previousStreak) {
+        int baseIntervalDays;
 
         if (score < 0.4) {
-            intervalDays = 1;
+            baseIntervalDays = 1;
         } else
         if (score < 0.7) {
-            intervalDays = 3;
+            baseIntervalDays = 3;
         } else
         if (score < 0.9) {
-            intervalDays = 7;
+            baseIntervalDays = 7;
         } else {
-            intervalDays = 14;
+            baseIntervalDays = 14;
         }
 
-        return LocalDateTime.now().plusDays(intervalDays);
+        int newStreak = score >= STREAK_SUCCESS_THRESHOLD ? previousStreak + 1 : 0;
+
+        long intervalDays = baseIntervalDays;
+        if (newStreak >= 2) {
+            double multiplier = Math.pow(EASE_FACTOR, newStreak - 1);
+            intervalDays = Math.min(MAX_INTERVAL_DAYS, Math.round(baseIntervalDays * multiplier));
+        }
+
+        return new RepetitionResult(LocalDateTime.now().plusDays(intervalDays), newStreak);
     }
 
     /**

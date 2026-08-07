@@ -1,6 +1,7 @@
 package dev.recallforge.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
@@ -126,9 +127,9 @@ class ReviewControllerTest {
         );
         AnswerResponse response = new AnswerResponse(
             1L, "Topic One", 0.8, "Good job", 0.65,
-            LocalDateTime.of(2026, 7, 6, 9, 0), reward
+            LocalDateTime.of(2026, 7, 6, 9, 0), 2, reward
         );
-        when(reviewService.answerQuestion(eq(1L), any(), any())).thenReturn(response);
+        when(reviewService.answerQuestion(eq(1L), any(), any(), anyBoolean())).thenReturn(response);
 
         mockMvcTester.post().uri("/api/reviews/answer")
             .contentType(MediaType.APPLICATION_JSON)
@@ -136,7 +137,8 @@ class ReviewControllerTest {
                 {
                   "topicId": 1,
                   "question": "What is X?",
-                  "userAnswer": "X is Y"
+                  "userAnswer": "X is Y",
+                  "isRetry": false
                 }
                 """)
             .assertThat()
@@ -165,7 +167,7 @@ class ReviewControllerTest {
                 }
                 """);
 
-        verify(reviewService).answerQuestion(1L, "What is X?", "X is Y");
+        verify(reviewService).answerQuestion(1L, "What is X?", "X is Y", false);
     }
 
     @Test
@@ -182,7 +184,7 @@ class ReviewControllerTest {
             .assertThat()
             .hasStatus4xxClientError();
 
-        verify(reviewService, never()).answerQuestion(any(), any(), any());
+        verify(reviewService, never()).answerQuestion(any(), any(), any(), anyBoolean());
     }
 
     @Test
