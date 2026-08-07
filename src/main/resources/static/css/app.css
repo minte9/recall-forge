@@ -1228,6 +1228,10 @@
     background: #fff;
   }
 
+  .feedback-history-item:first-child {
+    clear: right;
+  }
+
   .feedback-history-item--high-score {
     border-left: 4px solid #10b981;
   }

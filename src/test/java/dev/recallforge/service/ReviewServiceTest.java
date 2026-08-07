@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import dev.recallforge.config.AppAiProperties;
 import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Review;
@@ -65,16 +66,20 @@ class ReviewServiceTest {
     @Mock
     private AppReviewLimitProperties reviewLimitProperties;
 
+    @Mock
+    private AppAiProperties aiProperties;
+
     private ReviewService reviewService;
 
     private void setUp() {
         reviewService = new ReviewService(
             topicService, reviewRepository, questionGenerationRepository, openAiService,
             repetitionService, rewardService, currentUserService,
-            reviewLimitProperties
+            reviewLimitProperties, aiProperties
         );
 
         lenient().when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
+        lenient().when(aiProperties.enabled()).thenReturn(true);
     }
 
     private Topic topicWithId(long id, MarkdownFile markdownFile) {

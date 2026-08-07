@@ -8,5 +8,6 @@ public record CurrentUserResponse(
     String role,
     String avatarUrl,
     int dailyReviewLimit,
-    int dailyQuestionLimit
+    int dailyQuestionLimit,
+    boolean aiEnabled
 ) {}
