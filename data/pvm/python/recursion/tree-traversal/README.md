@@ -1,4 +1,4 @@
-## PVM / Python / Recursion / Tree Traversal
+## Python / Python / Recursion / Tree Traversal
 
 ### 1. DFS Traversal (Preorder, Inorder, Postorder)
 

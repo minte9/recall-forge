@@ -1,4 +1,4 @@
-## PVM / Python / Data Structures / Tries
+## Python / Python / Data Structures / Tries
 
 ### 1. Trie Structure
 

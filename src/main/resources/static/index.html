@@ -46,6 +46,12 @@
             Starter Pack
           </button>
 
+          <div class="menu-divider"></div>
+          <div class="menu-group-title" 
+                v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId">
+            Markdown
+          </div>
+
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
             @click="markdownEditing ? showMarkdown() : editMarkdown(); mobileMenuOpen = false">
             {{ markdownEditing ? "Show Markdown" : "Edit Markdown" }}
@@ -56,15 +62,10 @@
             Delete Markdown
           </button>
 
-          <!-- <template v-if="review">
-            <div class="menu-divider"></div>
-            <div class="menu-group-title">Answers</div>
-            <button @click="toggleFeedbackHistory(); mobileMenuOpen = false">
-              Feedbacks
-            </button>
-          </template>
-
-          <div class="menu-divider"></div> -->
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && 
+                    currentMarkdownReviewCount !== 0" @click="resetFileReviews"  menuOpen = false">
+            Reset Reviews
+          </button>
 
           <div class="menu-group-title">Account</div>
           <button @click="showAccountDetails(); mobileMenuOpen = false">
@@ -114,6 +115,7 @@
 
             <div v-if="menuOpen" class="menu-dropdown" @click="success = null; error = null">
               <div class="menu-group-title">Reviews</div>
+              
               <button @click="showDashboard(); mobileMenuOpen = false">
                 Dashboard
               </button>
@@ -129,6 +131,13 @@
                 Starter Pack
               </button>
 
+              <div class="menu-divider" v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"></div>
+
+              <div class="menu-group-title" 
+                    v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId">
+                Markdown
+              </div>
+
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
                 @click="markdownEditing ? showMarkdown() : editMarkdown(); menuOpen = false">
                 {{ markdownEditing ? "Show Markdown" : "Edit Markdown" }}
@@ -139,13 +148,9 @@
                 Delete Markdown
               </button>
 
-              <!-- <template v-if="review">
-                <div class="menu-divider"></div>
-                <div class="menu-group-title">Answers</div>
-                <button @click="toggleFeedbackHistory(); menuOpen = false">
-                  Feedbacks
-                </button>
-              </template> -->
+              <button v-if="currentMarkdownReviewCount !== 0" @click="resetFileReviews"  menuOpen = false">
+                Reset Reviews
+              </button>
 
               <div class="menu-divider"></div>
 
@@ -351,17 +356,6 @@
               {{ loading ? "Loading..." : "Start Review" }}
             </button>
 
-            <button
-              class="warning-button reset-file-reviews-button"
-              :disabled="currentMarkdownReviewCount === 0"
-              :title="currentMarkdownReviewCount === 0 ? 'No reviews to reset for this file' : ''"
-              @click="resetFileReviews">
-              Reset Reviews
-            </button>
-
-            <button class="edit-file-button" @click="editMarkdown" title="Edit this file's content">
-              Edit Markdown
-            </button>
           </div>
         </div>
 

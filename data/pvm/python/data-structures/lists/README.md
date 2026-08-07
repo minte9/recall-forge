@@ -1,4 +1,4 @@
-## PVM / Python / Data Structures / Lists
+## Python / Python / Data Structures / Lists
 
 ### 1. Reading lists
 

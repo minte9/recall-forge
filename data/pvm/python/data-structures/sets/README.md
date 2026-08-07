@@ -1,4 +1,4 @@
-## PVM / Python / Data Structures / Sets
+## Python / Python / Data Structures / Sets
 
 ### 1. Inserting Sets
 
