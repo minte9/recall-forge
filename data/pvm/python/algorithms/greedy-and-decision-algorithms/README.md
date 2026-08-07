@@ -1,4 +1,4 @@
-## PVM / Python / Algorithms / Greedy & Decision Algorithms
+## Python / Python / Algorithms / Greedy & Decision Algorithms
 
 ### 1. Coin Change (Greedy)
 

@@ -1,4 +1,4 @@
-## PVM / Python / Data Structures / Hash Tables
+## Python / Python / Data Structures / Hash Tables
 
 ### 1. Hashing Basics
 

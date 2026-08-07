@@ -1,4 +1,4 @@
-## PVM / Python / Data Structures / Queues
+## Python / Python / Data Structures / Queues
 
 ### 1. Queue Basics
 

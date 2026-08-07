@@ -1,4 +1,4 @@
-## PVM / Python / Data Structures / Binary Search Trees
+## Python / Python / Data Structures / Binary Search Trees
 
 ### 1. BST Ordering Rule
 
