@@ -833,6 +833,10 @@
             </button>
 
           </div>
+
+          <p v-if="!aiEnabled" class="muted ai-disabled-notice">
+            AI capabilities are temporarily disabled — use markdown browsing to see the content and your previous answers.
+          </p>
         </div>
 
         <div v-if="result && !feedbackHistoryVisible" class="feedback"
