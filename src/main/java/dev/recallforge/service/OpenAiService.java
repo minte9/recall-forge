@@ -63,9 +63,10 @@ public class OpenAiService {
 
         User's proficiency on this topic: %s
 
-        %sRules:
+        %s
+        Rules:
         - Return only the question.
-        - Keep it short (one sentence when possible).
+        - Keep it short (one sentence, 70-80 chars maximum).
         - Test understanding of the concept, not memorization of code syntax.
         - Do not include code snippets, code blocks, or inline code in the question itself.
         - Do not ask about the output of code.
@@ -75,17 +76,13 @@ public class OpenAiService {
           Do not require outside knowledge or reasoning that isn't spelled out there.
         - Before asking "why" or "how", confirm the content above actually explains that
           reason or mechanism. If it doesn't, ask a "what" or "when" question instead.
-        - This topic has roughly 2-3 important concepts. For spaced repetition, the user
-          should get 2-3 consecutive questions on the same concept before moving to another,
-          so the questions below (most recent first) show which concept was covered and
-          how many times in a row:
-          - If the most recent question(s) already focus on one concept and it has been
-            covered fewer than 2-3 times in a row, ask another question about that SAME
-            concept, from a different angle or phrasing - reinforcing it, not switching topics.
-          - Once a concept has been covered 2-3 times in a row, move on to a different
-            concept from the topic content.
-          - Either way, never ask a question that is an exact duplicate or a trivial
-            reword of any single question listed above.
+        - Phrase the question so its meaning is clear on first read - plain, direct
+          wording over clever or layered phrasing. The user should spend their effort
+          answering, not figuring out what is being asked.
+        - For spaced repetition, the user should get 2-3 consecutive questions on the
+          same concept before moving to another - use the recently asked questions
+          listed above (most recent first) to judge which concept to continue or move
+          on from.
         - Do not include the answer.
         """;
         prompt = prompt.formatted(
@@ -330,7 +327,9 @@ public class OpenAiService {
             promptTokens,
             completionTokens,
             totalTokens
-        );  
+        ); 
+        
+        //log.debug("OpenAI prompt: {}", prompt);  // docker compose logs -f app | grep -A 40 "OpenAI prompt"
 
         return new AiResponse(
             content,
