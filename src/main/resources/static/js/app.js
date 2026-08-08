@@ -82,10 +82,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     mobileTitleDisplay() {
-      if (this.mobilePageTitle === "Review" && this.dashboard) {
-        return `${this.dashboard.reviewsToday}/${this.dashboard.todayReviewLimit}`; // Reviews: 
-      }
-
       return this.mobilePageTitle;
     },
 
@@ -507,7 +503,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.markdownLoading = true;
       }
       this.markdownEditing = false;
-      this.mobilePageTitle = "Review";
+      this.mobilePageTitle = "Reviews";
       this.error = null;
       this.success = null;
       this.result = null;
@@ -695,7 +691,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       };
 
       this.leftPanel = "markdown";
-      this.mobilePageTitle = "Review";
+      this.mobilePageTitle = "Reviews";
       this.mobileView = "review";
       this.feedbackHistoryVisible = true;
       await this.loadFeedbackHistory(topicId);
