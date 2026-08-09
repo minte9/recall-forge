@@ -102,6 +102,17 @@ v1.0.5
 - 9.5 Architecture overview doc
 - 9.6 Main classes header comments
 
+### 10. Topics selection
+
+- 10.1 Manual topic selection
+- 10.2 Shortcuts
+- 10.3 Daily caps (per category)
+- 10.4 Skip button
+- 10.5 Docker Hub setup
+- 10.6 Markdown Optimize
+- 10.7 Code Challenge
+
+
 ## Architecture
 
 ![Screenshot](docs/images/recall-forge_architecture.png)
