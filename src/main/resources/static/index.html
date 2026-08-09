@@ -638,6 +638,44 @@
 
               </div>
             </template>
+
+            <template v-else-if="aiEnabled && notDueTopic">
+              <p class="muted">Not due for review yet.</p>
+
+              <textarea v-model="userAnswer" placeholder="Write your answer here..."></textarea>
+
+              <div class="actions-row">
+
+                <button class="review-btn" @click="startReview()" :disabled="loading || dailyLimitReached"
+                  :title="dailyLimitReached ? 'Daily review limit reached' : null">
+                  <span>→</span> Next Review
+                </button>
+
+                <div class="retry-split-btn">
+                  <button class="submit-btn retry-btn" @click="startPracticeForNotDueTopic()" :disabled="loading">
+                    <span class="btn-icon">↻</span>
+                    {{ codeChallengeLoading ? "Code Challenge" : "Try Again" }}
+                  </button>
+
+                  <button class="submit-btn retry-caret" @click.stop="toggleRetryMenu()" :disabled="loading"
+                    title="More practice options">
+                    ⌄
+                  </button>
+
+                  <div v-if="retryMenuOpen" class="retry-menu-dropdown">
+                    <button @click="startCodeChallenge(notDueTopic.topicId)">
+                      Code Challenge
+                    </button>
+                  </div>
+                </div>
+
+                <span v-if="averageScore !== null" class="last-score-badge last-score-badge--actions"
+                  title="Show feedback history" @click="toggleFeedbackHistory">
+                  Avg Score: {{ formatScore(averageScore) }}
+                </span>
+
+              </div>
+            </template>
           </template>
 
 
