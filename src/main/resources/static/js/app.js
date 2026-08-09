@@ -16,6 +16,7 @@ const app = createApp({
       markdown: null,
       review: null,
       historyTopic: null,
+      notDueTopic: null,
       userAnswer: "",
       result: null,
       dashboard: null,
@@ -107,7 +108,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     activeTopic() {
-      return this.review || this.historyTopic;
+      return this.review || this.historyTopic || this.notDueTopic;
     },
 
     environmentGroups() {
@@ -514,6 +515,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.userAnswer = "";
       this.answerSubmitted = false;
       this.isRetry = false;
+      this.notDueTopic = null;
       this.showAccount = false;
       this.leftPanel = "markdown";
       if (!startingFreshReview) {
@@ -588,7 +590,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       // Nothing was due in this specific file (and no error, e.g. the
       // daily question limit, stopped us first). Since the user explicitly
       // chose this file, show them its first topic anyway instead of
-      // silently redirecting away from it.
+      // silently redirecting away from it - but don't spend an AI call
+      // generating a question nobody asked for yet. When AI is disabled
+      // there's no question to fetch anyway, so fall back to the same
+      // read-only topic history browsing used elsewhere.
       if (!this.review && !this.error) {
         let topics = [];
 
@@ -600,9 +605,34 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         if (topics.length > 0) {
           this.currentMarkdownFileId = markdownFileId;
-          await this.startReview(topics[0].id);
+
+          if (!this.aiEnabled) {
+            await this.viewTopicHistory(topics[0].id);
+            return;
+          }
+
+          await this.previewMarkdownFile(markdownFileId);
+          this.notDueTopic = { topicId: topics[0].id, topicTitle: topics[0].title };
+          this.userAnswer = "";
+          this.mobilePageTitle = "Reviews";
+          this.mobileView = "review";
+          await this.loadFeedbackHistory(topics[0].id);
         }
       }
+    },
+
+    // Fetches a real practice question for a topic the user was shown as
+    // "not due" (see startReviewForFile above) only once they explicitly
+    // ask for it, instead of spending an AI call automatically.
+    async startPracticeForNotDueTopic() {
+      if (!this.notDueTopic || this.loading) {
+        return;
+      }
+
+      const topicId = this.notDueTopic.topicId;
+      this.retryMenuOpen = false;
+      this.notDueTopic = null;
+      await this.startReview(topicId);
     },
 
     // Shows a file's markdown without generating a review question, so
@@ -611,6 +641,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.currentMarkdownFileId = markdownFileId;
       this.review = null;
       this.historyTopic = null;
+      this.notDueTopic = null;
       this.result = null;
       this.error = null;
       this.success = null;
@@ -694,6 +725,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       const topic = this.topicsInFile.find(t => t.id === topicId);
 
       this.review = null;
+      this.notDueTopic = null;
       this.historyTopic = {
         topicId,
         topicTitle: topic ? topic.title : ""
@@ -808,19 +840,25 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     // answered: a worded prompt asking the user to write code, graded
     // strictly. Always submitted as a retry (see retryQuestion above), so
     // it never moves memoryScore/nextReviewAt/reviewStreak.
-    async startCodeChallenge() {
-      if (!this.review || this.loading) {
+    // topicId is only passed when starting from the "not due" prompt
+    // (see startPracticeForNotDueTopic above), where there's no review
+    // loaded yet to read a topicId from.
+    async startCodeChallenge(topicId) {
+      const targetTopicId = topicId || (this.review && this.review.topicId);
+
+      if (!targetTopicId || this.loading) {
         return;
       }
 
       this.retryMenuOpen = false;
+      this.notDueTopic = null;
       this.loading = true;
       this.codeChallengeLoading = true;
       this.error = null;
       this.success = null;
 
       try {
-        this.review = await Api.startCodeChallenge(this.review.topicId);
+        this.review = await Api.startCodeChallenge(targetTopicId);
         this.userAnswer = "";
         this.answerSubmitted = false;
         this.isRetry = true;
