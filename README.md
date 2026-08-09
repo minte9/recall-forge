@@ -100,10 +100,9 @@ v1.0.5
 - 9.3 Daily caps (reviews and questions, per category)
 - 9.4 Skip today & Shortcuts
 - 9.5 Manual topic selection
-- 9.6 Skip button
-- 9.7 Docker Hub setup
-- 9.8 Markdown Optimize
-- 9.9 Mastery streak (increse next review interval)
+- 9.6 Docker Hub setup
+- 9.7 Markdown Optimize
+- 9.8 Mastery streak (increse next review interval)
 
 
 ## Architecture
