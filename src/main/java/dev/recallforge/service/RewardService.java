@@ -28,8 +28,7 @@ import dev.recallforge.security.CurrentUserService;
 public class RewardService {
 
     private static final double MASTERY_MEMORY_SCORE = 0.7;
-    private static final int MASTERY_DAYS = 7;
-    
+
     private final UserRewardRepository userRewardRepository;
     private final CurrentUserService currentUserService;
     private final TopicRepository topicRepository;
@@ -94,14 +93,12 @@ public class RewardService {
 
         long totalTopics = topicRepository.countByUserIdAndCategory(userId, category);
 
-        LocalDateTime masteryDate = LocalDateTime.now().plusDays(MASTERY_DAYS);
-        
         long masteredTopics =
             topicRepository.countMasteredByUserIdAndCategory(
                 userId,
                 category,
                 MASTERY_MEMORY_SCORE,
-                masteryDate
+                LocalDateTime.now()
             );
 
         int masteryPercent = totalTopics == 0
