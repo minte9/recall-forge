@@ -96,11 +96,19 @@ public class ReviewService {
             throw new DailyQuestionLimitExceededException();
         }
 
-        List<ReviewSummary> recentReviews = reviewRepository
-                .findTop3ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(topic.getId(), userId)
-                .stream()
+        List<Review> recentReviewRows = reviewRepository
+                .findTop3ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(topic.getId(), userId);
+
+        List<ReviewSummary> recentReviews = recentReviewRows.stream()
                 .map(r -> new ReviewSummary(r.getQuestion(), r.getScore(), r.getFeedback()))
                 .toList();
+
+        // A manually selected topic (via the topic dropdown) can already have
+        // a real review from earlier today - flagged so the frontend forces
+        // "Try Again" (practice) grading instead of letting a second full
+        // review move memoryScore/nextReviewAt/reviewStreak for the same day.
+        boolean alreadyReviewedToday = !recentReviewRows.isEmpty()
+                && !recentReviewRows.get(0).getReviewedAt().isBefore(LocalDate.now().atStartOfDay());
 
         String question = openAiService.generateQuestion(
                 topic.getTitle(), topic.getContent(), topic.getMemoryScore(), recentReviews);
@@ -122,7 +130,57 @@ public class ReviewService {
                 markdownContent,
                 responseMarkdownFileId,
                 false,
-                null);
+                null,
+                null,
+                alreadyReviewedToday);
+    }
+
+    /**
+     * Practice-only "Code Challenge": generates a question paired with a
+     * code snippet for the given topic (the one whose normal question the
+     * user just answered). Counts against the daily question-generation
+     * limit like {@link #startReview}, but the resulting answer is always
+     * submitted as a retry (see {@link #saveAnswer}), so it never touches
+     * spaced-repetition scheduling.
+     */
+    public ReviewQuestionResponse startCodeChallenge(Long topicId) {
+        if (!aiProperties.enabled()) {
+            throw new AiDisabledException();
+        }
+
+        Long userId = currentUserService.currentUserId();
+        Topic topic = topicService.getTopic(topicId, userId);
+
+        long questionsToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
+                userId, topic.getCategory(), LocalDate.now().atStartOfDay());
+
+        if (questionsToday >= reviewLimitProperties.dailyQuestionLimit()) {
+            throw new DailyQuestionLimitExceededException();
+        }
+
+        CodeChallenge challenge = openAiService.generateCodeChallenge(
+                topic.getCategory(), topic.getTitle(), topic.getContent(), topic.getMemoryScore());
+
+        questionGenerationRepository.save(new QuestionGeneration(userId, topic.getCategory()));
+
+        String markdownContent = topic.getMarkdownFile() != null
+                ? topic.getMarkdownFile().getContent()
+                : "# " + topic.getTitle() + "\n\n" + topic.getContent();
+
+        Long responseMarkdownFileId = topic.getMarkdownFile() != null
+                ? topic.getMarkdownFile().getId()
+                : null;
+
+        return new ReviewQuestionResponse(
+                topic.getId(),
+                topic.getTitle(),
+                challenge.question(),
+                markdownContent,
+                responseMarkdownFileId,
+                false,
+                null,
+                challenge.codeSnippet(),
+                false);
     }
 
     public ReviewQuestionResponse skipTopic(Long topicId, Long markdownFileId, String category) {
@@ -136,7 +194,8 @@ public class ReviewService {
         return startReview(markdownFileId, category, null);
     }
 
-    public AnswerResponse answerQuestion(Long topicId, String question, String userAnswer, boolean isRetry) {
+    public AnswerResponse answerQuestion(
+            Long topicId, String question, String userAnswer, boolean isRetry, String codeSnippet) {
         if (!aiProperties.enabled()) {
             throw new AiDisabledException();
         }
@@ -151,16 +210,27 @@ public class ReviewService {
             throw new DailyReviewLimitExceededException();
         }
 
-        EvaluationResult evaluation = evaluateAnswer(topicId, question, userAnswer);
+        EvaluationResult evaluation = evaluateAnswer(topicId, question, userAnswer, codeSnippet);
         return saveAnswer(topicId, question, userAnswer, evaluation, isRetry);
     }
 
     public EvaluationResult evaluateAnswer(
             Long topicId,
             String question,
-            String userAnswer) {
+            String userAnswer,
+            String codeSnippet) {
         Long userId = currentUserService.currentUserId();
         Topic topic = topicService.getTopic(topicId, userId);
+
+        if (codeSnippet != null) {
+            return openAiService.evaluateCodeChallenge(
+                    topic.getCategory(),
+                    topic.getTitle(),
+                    topic.getContent(),
+                    question,
+                    codeSnippet,
+                    userAnswer);
+        }
 
         return openAiService.evaluateAnswer(
                 topic.getTitle(),

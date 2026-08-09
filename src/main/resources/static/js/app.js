@@ -44,6 +44,8 @@ const app = createApp({
       feedbackHistoryLoadedForTopicId: null,
       selectedEnvironment: null,
       environmentMenuOpen: false,
+      retryMenuOpen: false,
+      codeChallengeLoading: false,
       adminUsers: [],
       categoryOptions: [],
       showDangerZone: false,
@@ -541,6 +543,11 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.currentMarkdownFileId = this.review.markdownFileId;
         this.mobileView = "review";
 
+        if (this.review.alreadyReviewedToday) {
+          this.answerSubmitted = true;
+          this.isRetry = true;
+        }
+
         if (this.review.markdownContent) {
           this.markdownLoading = false;
           this.markdown = this.review.markdownContent;
@@ -760,7 +767,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           topicId: this.review.topicId,
           question: this.review.question,
           userAnswer: this.userAnswer,
-          isRetry: this.isRetry
+          isRetry: this.isRetry,
+          codeSnippet: this.review.codeSnippet || null
         });
 
         this.feedbackHistoryVisible = false;
@@ -788,6 +796,38 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.isRetry = true;
       this.error = null;
       this.success = null;
+    },
+
+    toggleRetryMenu() {
+      this.retryMenuOpen = !this.retryMenuOpen;
+    },
+
+    // Fetches a practice-only code challenge for the same topic just
+    // answered: a code snippet prefilled into the answer box instead of
+    // an empty one. Always graded as a retry (see retryQuestion above),
+    // so it never moves memoryScore/nextReviewAt/reviewStreak.
+    async startCodeChallenge() {
+      if (!this.review || this.loading) {
+        return;
+      }
+
+      this.retryMenuOpen = false;
+      this.loading = true;
+      this.codeChallengeLoading = true;
+      this.error = null;
+      this.success = null;
+
+      try {
+        this.review = await Api.startCodeChallenge(this.review.topicId);
+        this.userAnswer = this.review.codeSnippet || "";
+        this.answerSubmitted = false;
+        this.isRetry = true;
+      } catch (err) {
+        this.error = err.message || "Could not start code challenge.";
+      } finally {
+        this.loading = false;
+        this.codeChallengeLoading = false;
+      }
     },
 
     async loadCategoryOptions() {
