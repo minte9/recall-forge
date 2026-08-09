@@ -47,7 +47,7 @@ class ReviewControllerTest {
     @Test
     void startReview_withMarkdownFileId_delegatesToServiceAndReturnsQuestion() {
         ReviewQuestionResponse response = new ReviewQuestionResponse(
-            1L, "Topic One", "What is X?", "# markdown content", 7L, false, null, false
+            1L, "Topic One", "What is X?", "# markdown content", 7L, false, null, false, false
         );
         when(reviewService.startReview(7L, "Java", null)).thenReturn(response);
 
@@ -96,7 +96,7 @@ class ReviewControllerTest {
     @Test
     void startReview_withTopicId_passesItThroughToService() {
         ReviewQuestionResponse response = new ReviewQuestionResponse(
-            42L, "Topic Forty-Two", "What is Y?", "# markdown content", 7L, false, null, false
+            42L, "Topic Forty-Two", "What is Y?", "# markdown content", 7L, false, null, false, false
         );
         when(reviewService.startReview(7L, "Java", 42L)).thenReturn(response);
 
@@ -129,7 +129,7 @@ class ReviewControllerTest {
             1L, "Topic One", 0.8, "Good job", 0.65,
             LocalDateTime.of(2026, 7, 6, 9, 0), 2, reward
         );
-        when(reviewService.answerQuestion(eq(1L), any(), any(), anyBoolean())).thenReturn(response);
+        when(reviewService.answerQuestion(eq(1L), any(), any(), anyBoolean(), anyBoolean())).thenReturn(response);
 
         mockMvcTester.post().uri("/api/reviews/answer")
             .contentType(MediaType.APPLICATION_JSON)
@@ -138,7 +138,8 @@ class ReviewControllerTest {
                   "topicId": 1,
                   "question": "What is X?",
                   "userAnswer": "X is Y",
-                  "isRetry": false
+                  "isRetry": false,
+                  "codeChallenge": false
                 }
                 """)
             .assertThat()
@@ -167,7 +168,7 @@ class ReviewControllerTest {
                 }
                 """);
 
-        verify(reviewService).answerQuestion(1L, "What is X?", "X is Y", false);
+        verify(reviewService).answerQuestion(1L, "What is X?", "X is Y", false, false);
     }
 
     @Test
@@ -184,7 +185,36 @@ class ReviewControllerTest {
             .assertThat()
             .hasStatus4xxClientError();
 
-        verify(reviewService, never()).answerQuestion(any(), any(), any(), anyBoolean());
+        verify(reviewService, never()).answerQuestion(any(), any(), any(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    void startCodeChallenge_delegatesToServiceAndReturnsQuestion() {
+        ReviewQuestionResponse response = new ReviewQuestionResponse(
+            1L, "Topic One", "Write a function that reverses a string.",
+            "# markdown content", 7L, false, null, true, true
+        );
+        when(reviewService.startCodeChallenge(1L)).thenReturn(response);
+
+        mockMvcTester.post().uri("/api/reviews/1/code-challenge")
+            .assertThat()
+            .hasStatusOk()
+            .bodyJson()
+            .isLenientlyEqualTo("""
+                {
+                  "topicId": 1,
+                  "topicTitle": "Topic One",
+                  "question": "Write a function that reverses a string.",
+                  "markdownContent": "# markdown content",
+                  "markdownFileId": 7,
+                  "done": false,
+                  "message": null,
+                  "forcePractice": true,
+                  "codeChallenge": true
+                }
+                """);
+
+        verify(reviewService).startCodeChallenge(1L);
     }
 
     @Test
@@ -214,7 +244,7 @@ class ReviewControllerTest {
         List<FeedbackHistoryResponse> history = List.of(
             new FeedbackHistoryResponse(
                 1L, "What is X?", "X is Y", "Good job",
-                LocalDateTime.of(2026, 7, 1, 10, 0), 0.8
+                LocalDateTime.of(2026, 7, 1, 10, 0), 0.8, false
             )
         );
         when(reviewService.getFeedbackHistory(9L)).thenReturn(history);
@@ -231,7 +261,8 @@ class ReviewControllerTest {
                     "userAnswer": "X is Y",
                     "feedback": "Good job",
                     "createdAt": "2026-07-01T10:00:00Z",
-                    "score": 0.8
+                    "score": 0.8,
+                    "isRetry": false
                   }
                 ]
                 """);

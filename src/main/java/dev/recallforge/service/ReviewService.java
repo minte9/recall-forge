@@ -135,7 +135,56 @@ public class ReviewService {
                 responseMarkdownFileId,
                 false,
                 null,
-                forcePractice);
+                forcePractice,
+                false);
+    }
+
+    /**
+     * Practice-only "Code Challenge": generates a worded coding challenge
+     * for the given topic (the one whose normal question the user just
+     * answered). Counts against the daily question-generation limit like
+     * {@link #startReview}, but the frontend always submits the resulting
+     * answer as a retry (see {@link #saveAnswer}), so it never touches
+     * spaced-repetition scheduling - only writes a {@link Review} row.
+     */
+    public ReviewQuestionResponse startCodeChallenge(Long topicId) {
+        if (!aiProperties.enabled()) {
+            throw new AiDisabledException();
+        }
+
+        Long userId = currentUserService.currentUserId();
+        Topic topic = topicService.getTopic(topicId, userId);
+
+        long questionsToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
+                userId, topic.getCategory(), LocalDate.now().atStartOfDay());
+
+        if (questionsToday >= reviewLimitProperties.dailyQuestionLimit()) {
+            throw new DailyQuestionLimitExceededException();
+        }
+
+        String question = openAiService.generateCodeChallenge(
+                topic.getCategory(), topic.getTitle(), topic.getContent(), topic.getMemoryScore());
+
+        questionGenerationRepository.save(new QuestionGeneration(userId, topic.getCategory()));
+
+        String markdownContent = topic.getMarkdownFile() != null
+                ? topic.getMarkdownFile().getContent()
+                : "# " + topic.getTitle() + "\n\n" + topic.getContent();
+
+        Long responseMarkdownFileId = topic.getMarkdownFile() != null
+                ? topic.getMarkdownFile().getId()
+                : null;
+
+        return new ReviewQuestionResponse(
+                topic.getId(),
+                topic.getTitle(),
+                question,
+                markdownContent,
+                responseMarkdownFileId,
+                false,
+                null,
+                true,
+                true);
     }
 
     public ReviewQuestionResponse skipTopic(Long topicId, Long markdownFileId, String category) {
@@ -149,7 +198,8 @@ public class ReviewService {
         return startReview(markdownFileId, category, null);
     }
 
-    public AnswerResponse answerQuestion(Long topicId, String question, String userAnswer, boolean isRetry) {
+    public AnswerResponse answerQuestion(
+            Long topicId, String question, String userAnswer, boolean isRetry, boolean codeChallenge) {
         if (!aiProperties.enabled()) {
             throw new AiDisabledException();
         }
@@ -164,16 +214,26 @@ public class ReviewService {
             throw new DailyReviewLimitExceededException();
         }
 
-        EvaluationResult evaluation = evaluateAnswer(topicId, question, userAnswer);
+        EvaluationResult evaluation = evaluateAnswer(topicId, question, userAnswer, codeChallenge);
         return saveAnswer(topicId, question, userAnswer, evaluation, isRetry);
     }
 
     public EvaluationResult evaluateAnswer(
             Long topicId,
             String question,
-            String userAnswer) {
+            String userAnswer,
+            boolean codeChallenge) {
         Long userId = currentUserService.currentUserId();
         Topic topic = topicService.getTopic(topicId, userId);
+
+        if (codeChallenge) {
+            return openAiService.evaluateCodeChallenge(
+                    topic.getCategory(),
+                    topic.getTitle(),
+                    topic.getContent(),
+                    question,
+                    userAnswer);
+        }
 
         return openAiService.evaluateAnswer(
                 topic.getTitle(),
@@ -201,7 +261,8 @@ public class ReviewService {
                 userAnswer,
                 evaluation.score(),
                 evaluation.feedback(),
-                evaluation.totalTokens());
+                evaluation.totalTokens(),
+                isRetry);
 
         reviewRepository.save(review);
 
@@ -289,7 +350,8 @@ public class ReviewService {
                         r.getUserAnswer(),
                         r.getFeedback(),
                         r.getReviewedAt(),
-                        r.getScore()))
+                        r.getScore(),
+                        r.isRetry()))
                 .toList();
     }
 }

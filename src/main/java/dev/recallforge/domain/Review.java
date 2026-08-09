@@ -54,7 +54,14 @@ public class Review {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Visibility visibility = Visibility.PRIVATE;
-    
+
+    // True for a Try Again / Code Challenge practice attempt - lets callers
+    // (e.g. the feedback history's average score) tell those apart from a
+    // real graded review. Defaults to false so existing rows stay real
+    // reviews when this column backfills onto an already-populated table.
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean isRetry;
+
     public Review(
         Topic topic,
         UserAccount user,
@@ -62,7 +69,8 @@ public class Review {
         String userAnswer,
         double score,
         String feedback,
-        int totalTokens
+        int totalTokens,
+        boolean isRetry
     ) {
         this.topic = topic;
         this.user = user;
@@ -71,6 +79,7 @@ public class Review {
         this.score = score;
         this.feedback = feedback;
         this.totalTokens = totalTokens;
+        this.isRetry = isRetry;
 
         this.reviewedAt = LocalDateTime.now();
     }

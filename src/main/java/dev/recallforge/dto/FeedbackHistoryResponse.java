@@ -11,5 +11,8 @@ public record FeedbackHistoryResponse(
     String feedback,
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     LocalDateTime createdAt,
-    Double score
+    Double score,
+    // True for a Try Again / Code Challenge practice attempt - lets the
+    // frontend flag it in the summary and exclude it from the average score.
+    boolean isRetry
 ) {}

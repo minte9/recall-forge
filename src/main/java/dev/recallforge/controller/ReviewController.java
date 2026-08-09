@@ -46,6 +46,17 @@ public class ReviewController {
     }
 
     /**
+     * Starts a practice-only "Code Challenge" for the given topic: a
+     * worded prompt asking the user to write code, graded strictly and
+     * always submitted as a retry, so it never affects the topic's
+     * spaced-repetition schedule.
+     */
+    @PostMapping("/{topicId}/code-challenge")
+    public ReviewQuestionResponse startCodeChallenge(@PathVariable Long topicId) {
+        return reviewService.startCodeChallenge(topicId);
+    }
+
+    /**
      * Skips the given topic for today without answering it.
      *
      * Pushes the topic's next review out by a day (no memoryScore change,
@@ -72,7 +83,8 @@ public class ReviewController {
             request.topicId(),
             request.question(),
             request.userAnswer(),
-            request.isRetry()
+            request.isRetry(),
+            request.codeChallenge()
         );
     }
 

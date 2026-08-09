@@ -44,6 +44,8 @@ const app = createApp({
       feedbackHistoryLoadedForTopicId: null,
       selectedEnvironment: null,
       environmentMenuOpen: false,
+      retryMenuOpen: false,
+      codeChallengeLoading: false,
       adminUsers: [],
       categoryOptions: [],
       showDangerZone: false,
@@ -90,12 +92,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     averageScore() {
-      if (this.feedbackHistory.length === 0) {
+      const gradedReviews = this.feedbackHistory.filter(r => !r.isRetry);
+
+      if (gradedReviews.length === 0) {
         return null;
       }
 
-      const total = this.feedbackHistory.reduce((sum, r) => sum + r.score, 0);
-      return total / this.feedbackHistory.length;
+      const total = gradedReviews.reduce((sum, r) => sum + r.score, 0);
+      return total / gradedReviews.length;
     },
 
     aiEnabled() {
@@ -765,7 +769,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           topicId: this.review.topicId,
           question: this.review.question,
           userAnswer: this.userAnswer,
-          isRetry: this.isRetry
+          isRetry: this.isRetry,
+          codeChallenge: this.review.codeChallenge || false
         });
 
         this.feedbackHistoryVisible = false;
@@ -793,6 +798,38 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.isRetry = true;
       this.error = null;
       this.success = null;
+    },
+
+    toggleRetryMenu() {
+      this.retryMenuOpen = !this.retryMenuOpen;
+    },
+
+    // Fetches a practice-only Code Challenge for the same topic just
+    // answered: a worded prompt asking the user to write code, graded
+    // strictly. Always submitted as a retry (see retryQuestion above), so
+    // it never moves memoryScore/nextReviewAt/reviewStreak.
+    async startCodeChallenge() {
+      if (!this.review || this.loading) {
+        return;
+      }
+
+      this.retryMenuOpen = false;
+      this.loading = true;
+      this.codeChallengeLoading = true;
+      this.error = null;
+      this.success = null;
+
+      try {
+        this.review = await Api.startCodeChallenge(this.review.topicId);
+        this.userAnswer = "";
+        this.answerSubmitted = false;
+        this.isRetry = true;
+      } catch (err) {
+        this.error = err.message || "Could not start code challenge.";
+      } finally {
+        this.loading = false;
+        this.codeChallengeLoading = false;
+      }
     },
 
     async loadCategoryOptions() {

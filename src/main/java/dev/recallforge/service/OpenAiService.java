@@ -20,7 +20,9 @@ import dev.recallforge.dto.AiResponse;
  * same concept for a few consecutive questions before moving to another),
  * and
  * {@link #evaluateAnswer} grades a submitted answer into a 0-1 score plus
- * feedback. Called by {@link ReviewService}. {@link #optimizeTopicBodies}
+ * feedback. {@link #generateCodeChallenge} and {@link #evaluateCodeChallenge}
+ * are the code-focused counterparts used by the practice-only "Code
+ * Challenge" flow. Called by {@link ReviewService}. {@link #optimizeTopicBodies}
  * and {@link #generateStructuredMarkdown} back the admin-only "Optimize"
  * markdown feature, called by {@link MarkdownFileService}. Uses the
  * {@code RestClient} bean configured in {@code config/OpenAiConfig}.
@@ -95,6 +97,52 @@ public class OpenAiService {
         return response.content();
     }
 
+    /**
+     * Generates a practice-only "Code Challenge" question in the topic's
+     * own category (Java, Python, Git, SQL, ...): unlike
+     * {@link #generateQuestion}, this one deliberately asks the user to
+     * write code from scratch - no snippet is shown, the challenge is
+     * worded only. Always graded strictly (see
+     * {@link #evaluateCodeChallenge}) and treated as practice by the
+     * caller, so it never affects the topic's spaced-repetition state.
+     */
+    public String generateCodeChallenge(
+            String category, String topicTitle, String topicContent, double memoryScore) {
+        String prompt = """
+        Create one %s coding challenge to test understanding of this topic.
+
+        Topic title:
+        %s
+
+        Topic content (a short paragraph, plus a code example whose comments
+        are part of the explanation, not just syntax):
+        %s
+
+        User's proficiency on this topic: %s
+
+        Rules:
+        - Ask the user to write %s code from scratch that applies the
+          concept above - do not show any code in the challenge itself.
+        - Prefer a real-life, practical scenario (a small task someone
+          would actually write this code for) over an abstract or purely
+          academic exercise, whenever the concept allows for one.
+        - State exactly what the code must do, including any inputs and
+          the expected result, so correctness is unambiguous.
+        - Keep it short (1-2 sentences, 200 chars maximum).
+        - Return only the challenge text, nothing else before or after.
+        - Do not include the solution.
+        """;
+        prompt = prompt.formatted(
+                category,
+                topicTitle,
+                trimTopicContent(topicContent),
+                proficiencyGuidance(memoryScore),
+                category);
+
+        AiResponse response = ask(prompt, 100);  // code challenge generation
+        return response.content();
+    }
+
     private String proficiencyGuidance(double memoryScore) {
         if (memoryScore < PROFICIENCY_THRESHOLD) {
             return "EASY - the user is still building basic understanding of this topic. "
@@ -165,6 +213,57 @@ public class OpenAiService {
         prompt = prompt.formatted(topicTitle, topicContent, question, trimUserAnswer(userAnswer));
 
         AiResponse response = ask(prompt, 80);  // answer evaluation
+        return parseEvaluation(response.content(), response.totalTokens());
+    }
+
+    /**
+     * Grades a Code Challenge answer as strictly as a real compiler,
+     * interpreter, or engine for the topic's category would: unlike
+     * {@link #evaluateAnswer},
+     * wording and phrasing are irrelevant - the submitted code must be
+     * exactly correct and compile/run as required.
+     */
+    public EvaluationResult evaluateCodeChallenge(
+            String category, String topicTitle, String topicContent, String question, String userAnswer) {
+        String prompt = """
+        You are grading a %s coding challenge as strictly as a real %s
+        compiler, interpreter, or engine would - correctness only, wording
+        does not matter.
+
+        Topic:
+        %s
+
+        Topic content:
+        %s
+
+        Challenge:
+        %s
+
+        User's submitted code:
+        %s
+
+        Grade from 0 to 1:
+        - 1.0 = the code compiles/runs and correctly does exactly what the
+          challenge asked
+        - 0.5 = compiles/runs but the logic or result is subtly wrong
+        - 0.0 = does not compile/run, is not valid %s, or is fundamentally
+          wrong
+
+        Return exactly this format:
+
+        score: <number>
+        feedback: <short explanation, mentioning the correct approach if wrong>
+        """;
+        prompt = prompt.formatted(
+                category,
+                category,
+                topicTitle,
+                trimTopicContent(topicContent),
+                question,
+                trimUserAnswer(userAnswer),
+                category);
+
+        AiResponse response = ask(prompt, 120);  // code challenge evaluation
         return parseEvaluation(response.content(), response.totalTokens());
     }
 

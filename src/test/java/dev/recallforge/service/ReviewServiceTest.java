@@ -29,6 +29,7 @@ import dev.recallforge.domain.Review;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.dto.AnswerResponse;
+import dev.recallforge.dto.FeedbackHistoryResponse;
 import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
 import dev.recallforge.dto.ReviewQueueResponse;
@@ -193,7 +194,7 @@ class ReviewServiceTest {
         setUp();
         Topic topic = topicWithId(42L, null);
         ReflectionTestUtils.setField(topic, "nextReviewAt", LocalDateTime.now().minusDays(1));
-        Review earlierToday = new Review(topic, new UserAccount(), "Old Q", "A1", 0.9, "fb1", 50);
+        Review earlierToday = new Review(topic, new UserAccount(), "Old Q", "A1", 0.9, "fb1", 50, false);
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(42L, 1L)).thenReturn(topic);
         when(reviewRepository.findTop3ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(42L, 1L))
@@ -254,6 +255,43 @@ class ReviewServiceTest {
     }
 
     @Test
+    void startCodeChallenge_belowDailyQuestionLimit_generatesChallengeAndFlagsResponse() {
+        setUp();
+        Topic topic = topicWithId(30L, null);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(30L, 1L)).thenReturn(topic);
+        when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("Uncategorized"), any()))
+            .thenReturn(10L);
+        when(openAiService.generateCodeChallenge("Uncategorized", "Title", "Content body", 0.6))
+            .thenReturn("Write a function that reverses a string.");
+
+        ReviewQuestionResponse response = reviewService.startCodeChallenge(30L);
+
+        assertThat(response.question()).isEqualTo("Write a function that reverses a string.");
+        assertThat(response.codeChallenge()).isTrue();
+        assertThat(response.forcePractice()).isTrue();
+        verify(questionGenerationRepository).save(any());
+    }
+
+    @Test
+    void startCodeChallenge_dailyQuestionLimitReached_throwsAndSkipsGeneration() {
+        setUp();
+        Topic topic = topicWithId(30L, null);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(30L, 1L)).thenReturn(topic);
+        when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("Uncategorized"), any()))
+            .thenReturn(50L);
+
+        assertThatThrownBy(() -> reviewService.startCodeChallenge(30L))
+            .isInstanceOf(DailyQuestionLimitExceededException.class);
+
+        verify(openAiService, never()).generateCodeChallenge(any(), any(), any(), anyDouble());
+        verify(questionGenerationRepository, never()).save(any());
+    }
+
+    @Test
     void skipTopic_pushesNextReviewAtOneDayWithoutChangingMemoryScoreOrWritingReview() {
         setUp();
         Topic topic = topicWithId(20L, null);
@@ -309,8 +347,8 @@ class ReviewServiceTest {
     void startReview_passesTopicMemoryScoreAndRecentReviewSummariesToQuestionGeneration() {
         setUp();
         Topic topic = topicWithId(15L, null);
-        Review review1 = new Review(topic, new UserAccount(), "Old Q1", "A1", 0.9, "fb1", 50);
-        Review review2 = new Review(topic, new UserAccount(), "Old Q2", "A2", 0.4, "fb2", 60);
+        Review review1 = new Review(topic, new UserAccount(), "Old Q1", "A1", 0.9, "fb1", 50, false);
+        Review review2 = new Review(topic, new UserAccount(), "Old Q2", "A2", 0.4, "fb2", 60, false);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
@@ -416,7 +454,7 @@ class ReviewServiceTest {
         when(reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any()))
             .thenReturn(20L);
 
-        assertThatThrownBy(() -> reviewService.answerQuestion(7L, "Q?", "My answer", false))
+        assertThatThrownBy(() -> reviewService.answerQuestion(7L, "Q?", "My answer", false, false))
             .isInstanceOf(DailyReviewLimitExceededException.class);
 
         verify(openAiService, never()).evaluateAnswer(any(), any(), any(), any());
@@ -442,10 +480,45 @@ class ReviewServiceTest {
         when(rewardService.rewardDefaultUser(0.8, "Uncategorized")).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AnswerResponse response = reviewService.answerQuestion(7L, "Q?", "My answer", false);
+        AnswerResponse response = reviewService.answerQuestion(7L, "Q?", "My answer", false, false);
 
         assertThat(response.score()).isEqualTo(0.8);
         verify(reviewRepository).countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any());
+
+        ArgumentCaptor<Review> reviewCaptor = ArgumentCaptor.forClass(Review.class);
+        verify(reviewRepository).save(reviewCaptor.capture());
+        assertThat(reviewCaptor.getValue().isRetry()).isFalse();
+    }
+
+    @Test
+    void answerQuestion_codeChallenge_evaluatesWithStrictGraderAndForcesRetry() {
+        setUp();
+        Topic topic = topicWithId(7L, null);
+        EvaluationResult evaluation = new EvaluationResult(1.0, "Compiles and runs correctly", 120);
+        RewardResponse reward = new RewardResponse(100, 2, "Student", 0, 100, 3, 6, "Uncategorized", 4L, 8L, 50);
+        LocalDateTime originalNextReviewAt = topic.getNextReviewAt();
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(7L, 1L)).thenReturn(topic);
+        when(reviewLimitProperties.dailyLimit()).thenReturn(20);
+        when(reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any()))
+            .thenReturn(2L);
+        when(openAiService.evaluateCodeChallenge("Uncategorized", "Title", "Content body", "Q?", "My code"))
+            .thenReturn(evaluation);
+        when(currentUserService.currentUser()).thenReturn(new UserAccount());
+        when(rewardService.rewardDefaultUser(1.0, "Uncategorized")).thenReturn(reward);
+        when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AnswerResponse response = reviewService.answerQuestion(7L, "Q?", "My code", true, true);
+
+        assertThat(response.score()).isEqualTo(1.0);
+        assertThat(topic.getNextReviewAt()).isEqualTo(originalNextReviewAt);
+        verify(openAiService, never()).evaluateAnswer(any(), any(), any(), any());
+        verify(topicService, never()).save(any());
+
+        ArgumentCaptor<Review> reviewCaptor = ArgumentCaptor.forClass(Review.class);
+        verify(reviewRepository).save(reviewCaptor.capture());
+        assertThat(reviewCaptor.getValue().isRetry()).isTrue();
     }
 
     @Test
@@ -466,7 +539,7 @@ class ReviewServiceTest {
     void getReviewHistoryForTopic_returnsHistoryMappedFromRepository() {
         setUp();
         Topic topic = topicWithId(3L, null);
-        Review review = new Review(topic, new UserAccount(), "Q1", "A1", 0.9, "fb1", 100);
+        Review review = new Review(topic, new UserAccount(), "Q1", "A1", 0.9, "fb1", 100, false);
         ReflectionTestUtils.setField(review, "id", 1L);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
@@ -485,6 +558,25 @@ class ReviewServiceTest {
         assertThat(entry.userAnswer()).isEqualTo("A1");
         assertThat(entry.score()).isEqualTo(0.9);
         assertThat(entry.feedback()).isEqualTo("fb1");
+    }
+
+    @Test
+    void getFeedbackHistory_mapsIsRetryFromReview() {
+        setUp();
+        Topic topic = topicWithId(3L, null);
+        Review gradedReview = new Review(topic, new UserAccount(), "Q1", "A1", 0.9, "fb1", 100, false);
+        Review practiceReview = new Review(topic, new UserAccount(), "Q2", "A2", 0.5, "fb2", 80, true);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(3L, 1L)).thenReturn(topic);
+        when(reviewRepository.findTop10ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(3L, 1L))
+            .thenReturn(List.of(practiceReview, gradedReview));
+
+        List<FeedbackHistoryResponse> history = reviewService.getFeedbackHistory(3L);
+
+        assertThat(history).hasSize(2);
+        assertThat(history.get(0).isRetry()).isTrue();
+        assertThat(history.get(1).isRetry()).isFalse();
     }
 
     @Test

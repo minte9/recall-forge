@@ -12,7 +12,12 @@ public record ReviewQuestionResponse(
         // already has a real review from earlier today, or isn't due yet -
         // tells the frontend to force "Try Again" (practice) grading rather
         // than let an out-of-schedule answer move the spaced-repetition state.
-        boolean forcePractice
+        boolean forcePractice,
+        // True when this question is a Code Challenge (worded prompt asking
+        // the user to write code, graded strictly) rather than a normal
+        // review question - tells the frontend to submit the answer through
+        // the strict grading path and to keep treating it as practice.
+        boolean codeChallenge
 ) {
     public static ReviewQuestionResponse noReviewsDue() {
         return new ReviewQuestionResponse(
@@ -23,6 +28,7 @@ public record ReviewQuestionResponse(
 			null,
 			true,
 			"All reviews are done for now. Come back later.",
+			false,
 			false
         );
     }
