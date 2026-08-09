@@ -72,8 +72,19 @@ public class ReviewController {
             request.topicId(),
             request.question(),
             request.userAnswer(),
-            request.isRetry()
+            request.isRetry(),
+            request.codeSnippet()
         );
+    }
+
+    /**
+     * Starts a practice-only "Code Challenge" for the given topic: same
+     * topic as the review just answered, but a code-based question that
+     * always grades as a retry (see {@link ReviewService#startCodeChallenge}).
+     */
+    @PostMapping("/{topicId}/code-challenge")
+    public ReviewQuestionResponse startCodeChallenge(@PathVariable Long topicId) {
+        return reviewService.startCodeChallenge(topicId);
     }
 
     @GetMapping("/queue/today")
