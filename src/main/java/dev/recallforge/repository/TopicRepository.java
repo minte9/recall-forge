@@ -282,13 +282,13 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         where t.user.id = :userId
         and lower(t.category) = lower(:category)
         and t.memoryScore >= :memoryScore
-        and t.nextReviewAt >= :reviewDate
+        and t.nextReviewAt >= :now
     """)
     long countMasteredByUserIdAndCategory(
         @Param("userId") Long userId,
         @Param("category") String category,
         @Param("memoryScore") double memoryScore,
-        @Param("reviewDate") LocalDateTime reviewDate
+        @Param("now") LocalDateTime now
     );
 
     @Query("""
