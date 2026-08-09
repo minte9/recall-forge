@@ -515,7 +515,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.userAnswer = "";
       this.answerSubmitted = false;
       this.isRetry = false;
-      this.notDueTopic = null;
       this.showAccount = false;
       this.leftPanel = "markdown";
       if (!startingFreshReview) {
@@ -544,6 +543,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         }
 
         this.review = data;
+        this.notDueTopic = null;
         this.currentMarkdownFileId = this.review.markdownFileId;
         this.mobileView = "review";
 
@@ -629,9 +629,11 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return;
       }
 
+      // Leave notDueTopic set (loadReviewQuestion clears it once the real
+      // review lands, or leaves it as a fallback on error) so the panel
+      // keeps showing instead of falling back to the dashboard mid-fetch.
       const topicId = this.notDueTopic.topicId;
       this.retryMenuOpen = false;
-      this.notDueTopic = null;
       await this.startReview(topicId);
     },
 
@@ -851,14 +853,15 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
 
       this.retryMenuOpen = false;
-      this.notDueTopic = null;
       this.loading = true;
+      this.reviewQuestionLoading = true;
       this.codeChallengeLoading = true;
       this.error = null;
       this.success = null;
 
       try {
         this.review = await Api.startCodeChallenge(targetTopicId);
+        this.notDueTopic = null;
         this.userAnswer = "";
         this.answerSubmitted = false;
         this.isRetry = true;
@@ -866,6 +869,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.error = err.message || "Could not start code challenge.";
       } finally {
         this.loading = false;
+        this.reviewQuestionLoading = false;
         this.codeChallengeLoading = false;
       }
     },
