@@ -1023,6 +1023,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return palette[index % palette.length];
     },
 
+    groupHasDue(group) {
+      return group.files.some(file => file.dueCount > 0);
+    },
+
     softColor(hex) {
       return hex + "18";
     },
