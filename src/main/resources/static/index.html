@@ -165,6 +165,15 @@
 
               <div class="menu-divider"></div>
 
+              <div v-if="currentUser?.role == 'ADMIN'" class="menu-group">
+                <div class="menu-group-title">Admin</div>
+                <button @click="openAdminUsers(); menuOpen = false">
+                  <icon name="people" class="menu-icon"></icon>Users
+                </button>
+              </div>
+
+              <div class="menu-divider"></div>
+
               <div class="menu-group-title">Account</div>
               <button @click="showAccountDetails(); menuOpen = false">
                 <icon name="person" class="menu-icon"></icon>Account Details
@@ -173,15 +182,6 @@
                 <icon name="exclamation-triangle" class="menu-icon"></icon>Danger zone
               </button>
               <a href="/logout"><icon name="box-arrow-right" class="menu-icon"></icon>Logout</a>
-
-              <div class="menu-divider"></div>
-
-              <div v-if="currentUser?.role == 'ADMIN'" class="menu-group">
-                <div class="menu-group-title">Admin</div>
-                <button @click="openAdminUsers(); menuOpen = false">
-                  <icon name="people" class="menu-icon"></icon>Users
-                </button>
-              </div>
 
             </div>
           </div>
@@ -267,7 +267,7 @@
 
               <div class="group-left">
                 <div class="group-icon" :style="{
-                        color: environmentColor(index),
+                        color: groupHasDue(group) ? environmentColor(index) : 'var(--green)',
                         backgroundColor: softColor(environmentColor(groupName))
                     }">
                   <svg viewBox="0 0 24 24">
