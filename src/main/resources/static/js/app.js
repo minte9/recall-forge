@@ -635,6 +635,16 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       const topicId = this.notDueTopic.topicId;
       this.retryMenuOpen = false;
       await this.startReview(topicId);
+
+      // The topic isn't due, so loadReviewQuestion's forcePractice check
+      // jumps straight to answerSubmitted (as it should for a topic
+      // reopened from the topic dropdown, already answered elsewhere) -
+      // but here the user just explicitly chose to practice it for the
+      // first time this session, so show Submit Answer like Code
+      // Challenge does, not the already-answered Try Again state.
+      if (this.review) {
+        this.answerSubmitted = false;
+      }
     },
 
     // Shows a file's markdown without generating a review question, so
