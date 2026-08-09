@@ -625,8 +625,11 @@
                   </button>
 
                   <div v-if="retryMenuOpen" class="retry-menu-dropdown">
+                    <button @click="retryQuestion">
+                      <icon name="arrow-repeat" class="menu-icon"></icon>Review
+                    </button>
                     <button @click="startCodeChallenge()">
-                      Code Challenge
+                      <icon name="code" class="menu-icon"></icon>Code Challenge
                     </button>
                   </div>
                 </div>
@@ -663,8 +666,11 @@
                   </button>
 
                   <div v-if="retryMenuOpen" class="retry-menu-dropdown">
+                    <button @click="startPracticeForNotDueTopic()">
+                      <icon name="arrow-repeat" class="menu-icon"></icon>Review
+                    </button>
                     <button @click="startCodeChallenge(notDueTopic.topicId)">
-                      Code Challenge
+                      <icon name="code" class="menu-icon"></icon>Code Challenge
                     </button>
                   </div>
                 </div>

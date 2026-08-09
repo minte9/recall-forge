@@ -780,15 +780,15 @@
   }
 
   .retry-menu-dropdown button {
+    display: block;
     min-width: 0;
     height: auto;
     width: 100%;
-    padding: 8px 12px;
+    padding: 6px 12px;
     border: none;
     background: transparent;
     text-align: left;
     font: inherit;
-    font-weight: 700;
     color: #334155;
     border-radius: 10px;
     cursor: pointer;
