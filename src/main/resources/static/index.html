@@ -613,10 +613,23 @@
                   Submit Answer
                 </button>
 
-                <button v-else class="submit-btn" @click="retryQuestion" :disabled="loading">
-                  <span class="btn-icon">↻</span>
-                  Try Again
-                </button>
+                <div v-else class="retry-split-btn">
+                  <button class="submit-btn retry-btn" @click="retryQuestion" :disabled="loading">
+                    <span class="btn-icon">↻</span>
+                    {{ codeChallengeLoading ? "Code Challenge" : "Try Again" }}
+                  </button>
+
+                  <button class="submit-btn retry-caret" @click.stop="toggleRetryMenu()" :disabled="loading"
+                    title="More practice options">
+                    ⌄
+                  </button>
+
+                  <div v-if="retryMenuOpen" class="retry-menu-dropdown">
+                    <button @click="startCodeChallenge()">
+                      Code Challenge
+                    </button>
+                  </div>
+                </div>
 
                 <span v-if="averageScore !== null" class="last-score-badge last-score-badge--actions"
                   title="Show feedback history" @click="toggleFeedbackHistory">
@@ -646,6 +659,7 @@
                     <div class="feedback-history-title">
                       <span class="feedback-history-icon">💬</span>
                       <span class="feedback-history-date">{{ formatShortDate(item.createdAt) }}</span>
+                      <span v-if="item.isRetry" class="feedback-history-practice-badge">Practice</span>
                     </div>
 
                     <div class="feedback-history-score">
@@ -854,27 +868,29 @@
           :class="result.score >= 0.7 ? 'feedback--high-score' : 'feedback--low-score'">
           <p><strong>Score:</strong> {{ result.score }}</p>
           <p><strong>Feedback:</strong> {{ result.feedback }}</p>
-          <p>
-            <strong>Updated memory score:</strong> {{ formatScore(result.updateMemoryScore) }}
-            <span class="info-tooltip" tabindex="0"
-              data-tooltip="Blends your previous memory score with this answer's score - 30% old, 70% new - so recent performance shifts it quickly without one bad answer wiping out past progress.">
-              <icon name="question-circle"></icon>
-            </span>
-          </p>
-          <p>
-            <strong>Next review:</strong> {{ formatDate(result.nextReviewAt) }}
-            <span class="info-tooltip" tabindex="0"
-              data-tooltip="Timing depends on your answer: weak answers come back in 1-3 days, strong ones in 7-14. Getting it right several times in a row pushes reviews out further still, up to about 6 months once a topic is clearly mastered.">
-              <icon name="question-circle"></icon>
-            </span>
-          </p>
-          <p v-if="result.reviewStreak >= 2">
-            <strong>🔥 Streak:</strong> {{ result.reviewStreak }} correct reviews in a row
-            <span class="info-tooltip" tabindex="0"
-              data-tooltip="Reviews space out further the more you get right in a row - once a topic is clearly mastered, it stops coming back so often.">
-              <icon name="question-circle"></icon>
-            </span>
-          </p>
+          <template v-if="!isRetry">
+            <p>
+              <strong>Updated memory score:</strong> {{ formatScore(result.updateMemoryScore) }}
+              <span class="info-tooltip" tabindex="0"
+                data-tooltip="Blends your previous memory score with this answer's score - 30% old, 70% new - so recent performance shifts it quickly without one bad answer wiping out past progress.">
+                <icon name="question-circle"></icon>
+              </span>
+            </p>
+            <p>
+              <strong>Next review:</strong> {{ formatDate(result.nextReviewAt) }}
+              <span class="info-tooltip" tabindex="0"
+                data-tooltip="Timing depends on your answer: weak answers come back in 1-3 days, strong ones in 7-14. Getting it right several times in a row pushes reviews out further still, up to about 6 months once a topic is clearly mastered.">
+                <icon name="question-circle"></icon>
+              </span>
+            </p>
+            <p v-if="result.reviewStreak >= 2">
+              <strong>🔥 Streak:</strong> {{ result.reviewStreak }} correct reviews in a row
+              <span class="info-tooltip" tabindex="0"
+                data-tooltip="Reviews space out further the more you get right in a row - once a topic is clearly mastered, it stops coming back so often.">
+                <icon name="question-circle"></icon>
+              </span>
+            </p>
+          </template>
           <p v-if="isRetry" class="muted">
             Practice attempt &mdash; doesn't change your schedule or streak.
           </p>
