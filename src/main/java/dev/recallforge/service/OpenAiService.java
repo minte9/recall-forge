@@ -20,9 +20,7 @@ import dev.recallforge.dto.AiResponse;
  * same concept for a few consecutive questions before moving to another),
  * and
  * {@link #evaluateAnswer} grades a submitted answer into a 0-1 score plus
- * feedback. {@link #generateCodeChallenge} and {@link #evaluateCodeChallenge}
- * are the code-focused counterparts used by the practice-only "Code
- * Challenge" flow. Called by {@link ReviewService}. {@link #optimizeTopicBodies}
+ * feedback. Called by {@link ReviewService}. {@link #optimizeTopicBodies}
  * and {@link #generateStructuredMarkdown} back the admin-only "Optimize"
  * markdown feature, called by {@link MarkdownFileService}. Uses the
  * {@code RestClient} bean configured in {@code config/OpenAiConfig}.
@@ -132,62 +130,6 @@ public class OpenAiService {
         return section.toString();
     }
 
-    /**
-     * Generates a practice-only code challenge in the topic's own category
-     * (Java, Python, Git, SQL, ...): a short question plus a separate code
-     * snippet (a completion gap or a "what does this print/output" prompt)
-     * that the frontend prefills into the answer box. Unlike
-     * {@link #generateQuestion}, this one deliberately does include code.
-     */
-    public CodeChallenge generateCodeChallenge(
-            String category, String topicTitle, String topicContent, double memoryScore) {
-        String prompt = """
-        Create one %s code challenge to test understanding of this topic.
-
-        Topic title:
-        %s
-
-        Topic content (a short paragraph, plus a code example whose comments
-        are part of the explanation, not just syntax):
-        %s
-
-        User's proficiency on this topic: %s
-
-        The challenge must be one of these two kinds:
-        - A completion gap: a short %s snippet with one piece missing
-          (marked with a "TODO" or "___" placeholder, using that language's
-          comment syntax) that the user must fill in to produce a stated
-          desired result.
-        - An output question: a short, self-contained, runnable %s snippet
-          whose exact result (printed output, query result, or command
-          output) the user must state.
-
-        Rules:
-        - The snippet must be valid, self-contained %s (imports/setup
-          included where needed), short (under 15 lines), and directly
-          based on the concept in the topic content above.
-        - Do not include the solution or the expected result anywhere in
-          your response.
-        - Return exactly this format, nothing else before or after:
-
-        QUESTION: <one short sentence stating the task, 70-100 chars maximum>
-        CODE:
-        <the %s snippet, no markdown fences>
-        """;
-        prompt = prompt.formatted(
-                category,
-                topicTitle,
-                trimTopicContent(topicContent),
-                proficiencyGuidance(memoryScore),
-                category,
-                category,
-                category,
-                category);
-
-        AiResponse response = ask(prompt, 220);  // code challenge generation
-        return parseCodeChallenge(response.content());
-    }
-
     public EvaluationResult evaluateAnswer(String topicTitle, String topicContent, String question, String userAnswer) {
         String prompt = """
         You are evaluating a learning review answer.
@@ -223,64 +165,6 @@ public class OpenAiService {
         prompt = prompt.formatted(topicTitle, topicContent, question, trimUserAnswer(userAnswer));
 
         AiResponse response = ask(prompt, 80);  // answer evaluation
-        return parseEvaluation(response.content(), response.totalTokens());
-    }
-
-    /**
-     * Grades a code challenge answer as strictly as a real compiler,
-     * interpreter, or engine for the topic's category would: unlike
-     * {@link #evaluateAnswer}, wording and phrasing are irrelevant - the
-     * completed snippet (or stated result) must be exactly correct.
-     */
-    public EvaluationResult evaluateCodeChallenge(
-            String category,
-            String topicTitle,
-            String topicContent,
-            String question,
-            String codeSnippet,
-            String userAnswer) {
-        String prompt = """
-        You are grading a %s code challenge as strictly as a real %s
-        compiler, interpreter, or engine would - correctness only, wording
-        does not matter.
-
-        Topic:
-        %s
-
-        Topic content:
-        %s
-
-        Challenge:
-        %s
-
-        Original snippet given to the user:
-        %s
-
-        User's submitted answer (the completed snippet, or the stated result):
-        %s
-
-        Grade from 0 to 1:
-        - 1.0 = the snippet runs/executes exactly as required, or the stated
-          result is character-for-character correct
-        - 0.5 = runs but the logic or result is subtly wrong
-        - 0.0 = does not run, is invalid %s, or is fundamentally wrong
-
-        Return exactly this format:
-
-        score: <number>
-        feedback: <short explanation, mentioning the correct answer if wrong>
-        """;
-        prompt = prompt.formatted(
-                category,
-                category,
-                topicTitle,
-                trimTopicContent(topicContent),
-                question,
-                codeSnippet,
-                trimUserAnswer(userAnswer),
-                category);
-
-        AiResponse response = ask(prompt, 120);  // code challenge evaluation
         return parseEvaluation(response.content(), response.totalTokens());
     }
 
@@ -482,68 +366,6 @@ public class OpenAiService {
         score = Math.max(0.0, Math.min(1.0, score));
 
         return new EvaluationResult(score, feedback, totalTokens);
-    }
-
-    // The QUESTION:/CODE: labels are not trusted to carry their content on
-    // the same line - models often put the label on its own line (e.g. a
-    // markdown-style "QUESTION:  \n<text>" line break) instead of
-    // "QUESTION: <text>" as asked. So a label with nothing after the colon
-    // just marks where the next non-blank line's content starts, rather
-    // than being required to hold the content itself. Once question text is
-    // captured, everything else is treated as code regardless of whether a
-    // literal "CODE:" label or markdown fences are present - both are
-    // stripped rather than required.
-    private CodeChallenge parseCodeChallenge(String text) {
-        String[] lines = text.split("\\R", -1);
-
-        String question = "";
-        StringBuilder code = new StringBuilder();
-        boolean questionFound = false;
-        boolean codeStarted = false;
-
-        for (String line : lines) {
-            String trimmedLine = line.trim();
-            String normalized = trimmedLine.toLowerCase();
-
-            if (!questionFound) {
-                if (normalized.startsWith("question:")) {
-                    String rest = line.substring(line.indexOf(":") + 1).trim();
-                    if (!rest.isEmpty()) {
-                        question = rest;
-                        questionFound = true;
-                    }
-                    continue;
-                }
-
-                if (!trimmedLine.isEmpty()) {
-                    question = trimmedLine;
-                    questionFound = true;
-                }
-                continue;
-            }
-
-            if (normalized.startsWith("code:")) {
-                codeStarted = true;
-                String rest = line.substring(line.indexOf(":") + 1).trim();
-                if (!rest.isEmpty() && !rest.startsWith("```")) {
-                    code.append(rest).append("\n");
-                }
-                continue;
-            }
-
-            if (normalized.startsWith("```")) {
-                continue;
-            }
-
-            if (!codeStarted && trimmedLine.isEmpty()) {
-                continue;
-            }
-
-            codeStarted = true;
-            code.append(line).append("\n");
-        }
-
-        return new CodeChallenge(question, code.toString().trim());
     }
 
     private String trimTopicContent(String content) {

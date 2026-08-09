@@ -103,7 +103,6 @@ v1.0.5
 - 9.6 Skip button
 - 9.7 Docker Hub setup
 - 9.8 Markdown Optimize
-- 9.9 Code Challenge
 
 
 ## Architecture

@@ -593,7 +593,6 @@
               <p>{{ review.question }}</p>
 
               <textarea v-model="userAnswer" placeholder="Write your answer here..."
-                :class="{ 'code-challenge': review.codeSnippet }"
                 @keydown.ctrl.enter="submitAnswer">
         </textarea>
 
@@ -614,23 +613,10 @@
                   Submit Answer
                 </button>
 
-                <div v-else class="retry-split-btn">
-                  <button class="submit-btn retry-btn" @click="retryQuestion" :disabled="loading">
-                    <span class="btn-icon">↻</span>
-                    {{ codeChallengeLoading ? "Code Challenge" : "Try Again" }}
-                  </button>
-
-                  <button class="submit-btn retry-caret" @click.stop="toggleRetryMenu()" :disabled="loading"
-                    title="More practice options">
-                    ⌄
-                  </button>
-
-                  <div v-if="retryMenuOpen" class="retry-menu-dropdown">
-                    <button @click="startCodeChallenge()">
-                      Code Challenge
-                    </button>
-                  </div>
-                </div>
+                <button v-else class="submit-btn" @click="retryQuestion" :disabled="loading">
+                  <span class="btn-icon">↻</span>
+                  Try Again
+                </button>
 
                 <span v-if="averageScore !== null" class="last-score-badge last-score-badge--actions"
                   title="Show feedback history" @click="toggleFeedbackHistory">
