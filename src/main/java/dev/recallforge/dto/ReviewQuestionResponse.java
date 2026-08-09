@@ -9,10 +9,10 @@ public record ReviewQuestionResponse(
         boolean done,
         String message,
         // True when this topic (manually selected via the topic dropdown)
-        // already has a real review from earlier today - tells the frontend
-        // to force "Try Again" (practice) grading rather than allow a
-        // second full review to move the spaced-repetition state today.
-        boolean alreadyReviewedToday
+        // already has a real review from earlier today, or isn't due yet -
+        // tells the frontend to force "Try Again" (practice) grading rather
+        // than let an out-of-schedule answer move the spaced-repetition state.
+        boolean forcePractice
 ) {
     public static ReviewQuestionResponse noReviewsDue() {
         return new ReviewQuestionResponse(

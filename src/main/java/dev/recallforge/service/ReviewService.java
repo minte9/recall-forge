@@ -104,11 +104,15 @@ public class ReviewService {
                 .toList();
 
         // A manually selected topic (via the topic dropdown) can already have
-        // a real review from earlier today - flagged so the frontend forces
-        // "Try Again" (practice) grading instead of letting a second full
-        // review move memoryScore/nextReviewAt/reviewStreak for the same day.
+        // a real review from earlier today, or simply not be due yet - either
+        // way it's flagged so the frontend forces "Try Again" (practice)
+        // grading instead of letting a full review move
+        // memoryScore/nextReviewAt/reviewStreak outside the normal schedule.
         boolean alreadyReviewedToday = !recentReviewRows.isEmpty()
                 && !recentReviewRows.get(0).getReviewedAt().isBefore(LocalDate.now().atStartOfDay());
+        boolean notDue = topic.getNextReviewAt() != null
+                && topic.getNextReviewAt().isAfter(LocalDateTime.now());
+        boolean forcePractice = alreadyReviewedToday || notDue;
 
         String question = openAiService.generateQuestion(
                 topic.getTitle(), topic.getContent(), topic.getMemoryScore(), recentReviews);
@@ -131,7 +135,7 @@ public class ReviewService {
                 responseMarkdownFileId,
                 false,
                 null,
-                alreadyReviewedToday);
+                forcePractice);
     }
 
     public ReviewQuestionResponse skipTopic(Long topicId, Long markdownFileId, String category) {

@@ -541,7 +541,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.currentMarkdownFileId = this.review.markdownFileId;
         this.mobileView = "review";
 
-        if (this.review.alreadyReviewedToday) {
+        if (this.review.forcePractice) {
           this.answerSubmitted = true;
           this.isRetry = true;
         }
