@@ -131,56 +131,7 @@ public class ReviewService {
                 responseMarkdownFileId,
                 false,
                 null,
-                null,
                 alreadyReviewedToday);
-    }
-
-    /**
-     * Practice-only "Code Challenge": generates a question paired with a
-     * code snippet for the given topic (the one whose normal question the
-     * user just answered). Counts against the daily question-generation
-     * limit like {@link #startReview}, but the resulting answer is always
-     * submitted as a retry (see {@link #saveAnswer}), so it never touches
-     * spaced-repetition scheduling.
-     */
-    public ReviewQuestionResponse startCodeChallenge(Long topicId) {
-        if (!aiProperties.enabled()) {
-            throw new AiDisabledException();
-        }
-
-        Long userId = currentUserService.currentUserId();
-        Topic topic = topicService.getTopic(topicId, userId);
-
-        long questionsToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
-                userId, topic.getCategory(), LocalDate.now().atStartOfDay());
-
-        if (questionsToday >= reviewLimitProperties.dailyQuestionLimit()) {
-            throw new DailyQuestionLimitExceededException();
-        }
-
-        CodeChallenge challenge = openAiService.generateCodeChallenge(
-                topic.getCategory(), topic.getTitle(), topic.getContent(), topic.getMemoryScore());
-
-        questionGenerationRepository.save(new QuestionGeneration(userId, topic.getCategory()));
-
-        String markdownContent = topic.getMarkdownFile() != null
-                ? topic.getMarkdownFile().getContent()
-                : "# " + topic.getTitle() + "\n\n" + topic.getContent();
-
-        Long responseMarkdownFileId = topic.getMarkdownFile() != null
-                ? topic.getMarkdownFile().getId()
-                : null;
-
-        return new ReviewQuestionResponse(
-                topic.getId(),
-                topic.getTitle(),
-                challenge.question(),
-                markdownContent,
-                responseMarkdownFileId,
-                false,
-                null,
-                challenge.codeSnippet(),
-                false);
     }
 
     public ReviewQuestionResponse skipTopic(Long topicId, Long markdownFileId, String category) {
@@ -194,8 +145,7 @@ public class ReviewService {
         return startReview(markdownFileId, category, null);
     }
 
-    public AnswerResponse answerQuestion(
-            Long topicId, String question, String userAnswer, boolean isRetry, String codeSnippet) {
+    public AnswerResponse answerQuestion(Long topicId, String question, String userAnswer, boolean isRetry) {
         if (!aiProperties.enabled()) {
             throw new AiDisabledException();
         }
@@ -210,27 +160,16 @@ public class ReviewService {
             throw new DailyReviewLimitExceededException();
         }
 
-        EvaluationResult evaluation = evaluateAnswer(topicId, question, userAnswer, codeSnippet);
+        EvaluationResult evaluation = evaluateAnswer(topicId, question, userAnswer);
         return saveAnswer(topicId, question, userAnswer, evaluation, isRetry);
     }
 
     public EvaluationResult evaluateAnswer(
             Long topicId,
             String question,
-            String userAnswer,
-            String codeSnippet) {
+            String userAnswer) {
         Long userId = currentUserService.currentUserId();
         Topic topic = topicService.getTopic(topicId, userId);
-
-        if (codeSnippet != null) {
-            return openAiService.evaluateCodeChallenge(
-                    topic.getCategory(),
-                    topic.getTitle(),
-                    topic.getContent(),
-                    question,
-                    codeSnippet,
-                    userAnswer);
-        }
 
         return openAiService.evaluateAnswer(
                 topic.getTitle(),

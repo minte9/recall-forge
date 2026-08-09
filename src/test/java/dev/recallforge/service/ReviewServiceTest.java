@@ -371,7 +371,7 @@ class ReviewServiceTest {
         when(reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any()))
             .thenReturn(20L);
 
-        assertThatThrownBy(() -> reviewService.answerQuestion(7L, "Q?", "My answer", false, null))
+        assertThatThrownBy(() -> reviewService.answerQuestion(7L, "Q?", "My answer", false))
             .isInstanceOf(DailyReviewLimitExceededException.class);
 
         verify(openAiService, never()).evaluateAnswer(any(), any(), any(), any());
@@ -397,7 +397,7 @@ class ReviewServiceTest {
         when(rewardService.rewardDefaultUser(0.8, "Uncategorized")).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AnswerResponse response = reviewService.answerQuestion(7L, "Q?", "My answer", false, null);
+        AnswerResponse response = reviewService.answerQuestion(7L, "Q?", "My answer", false);
 
         assertThat(response.score()).isEqualTo(0.8);
         verify(reviewRepository).countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any());
