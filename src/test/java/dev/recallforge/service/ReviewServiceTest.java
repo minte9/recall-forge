@@ -175,6 +175,51 @@ class ReviewServiceTest {
     }
 
     @Test
+    void startReview_withExplicitTopicId_notDueYet_forcesPracticeMode() {
+        setUp();
+        Topic topic = topicWithId(42L, null);
+        ReflectionTestUtils.setField(topic, "nextReviewAt", LocalDateTime.now().plusDays(7));
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(42L, 1L)).thenReturn(topic);
+        when(openAiService.generateQuestion(any(), any(), anyDouble(), any())).thenReturn("What is X?");
+
+        ReviewQuestionResponse response = reviewService.startReview(5L, "java", 42L);
+
+        assertThat(response.forcePractice()).isTrue();
+    }
+
+    @Test
+    void startReview_withExplicitTopicId_alreadyReviewedToday_forcesPracticeMode() {
+        setUp();
+        Topic topic = topicWithId(42L, null);
+        ReflectionTestUtils.setField(topic, "nextReviewAt", LocalDateTime.now().minusDays(1));
+        Review earlierToday = new Review(topic, new UserAccount(), "Old Q", "A1", 0.9, "fb1", 50);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(42L, 1L)).thenReturn(topic);
+        when(reviewRepository.findTop3ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(42L, 1L))
+            .thenReturn(List.of(earlierToday));
+        when(openAiService.generateQuestion(any(), any(), anyDouble(), any())).thenReturn("What is X?");
+
+        ReviewQuestionResponse response = reviewService.startReview(5L, "java", 42L);
+
+        assertThat(response.forcePractice()).isTrue();
+    }
+
+    @Test
+    void startReview_topicDueAndNotReviewedToday_doesNotForcePracticeMode() {
+        setUp();
+        Topic topic = topicWithId(10L, null);
+        ReflectionTestUtils.setField(topic, "nextReviewAt", LocalDateTime.now().minusDays(1));
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
+        when(openAiService.generateQuestion(any(), any(), anyDouble(), any())).thenReturn("What is X?");
+
+        ReviewQuestionResponse response = reviewService.startReview(null, "java", null);
+
+        assertThat(response.forcePractice()).isFalse();
+    }
+
+    @Test
     void startReview_dailyQuestionLimitReached_throwsAndSkipsQuestionGeneration() {
         setUp();
         Topic topic = topicWithId(10L, null);
