@@ -1387,6 +1387,12 @@
     line-height: 1.45;
   }
 
+  .feedback-answer-text {
+    white-space: pre-wrap;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+  }
+
   .muted {
     color: #6b7280;
     font-size: 14px;
