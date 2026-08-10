@@ -193,14 +193,14 @@ class OpenAiServiceTest {
     @Test
     void evaluateAnswer_longUserAnswer_isTruncatedAtMaxCharsWithoutMarker() {
         mockAiReply("score: 1\nfeedback: ok");
-        String longAnswer = "a".repeat(1500);
-        String expectedTruncated = longAnswer.substring(0, 1000);
+        String longAnswer = "a".repeat(2500);
+        String expectedTruncated = longAnswer.substring(0, 2000);
 
         openAiService.evaluateAnswer("Title", "Content", "Question?", longAnswer);
 
         String prompt = capturePromptSentToAi();
         assertThat(prompt).contains(expectedTruncated);
-        assertThat(prompt).doesNotContain("a".repeat(1001));
+        assertThat(prompt).doesNotContain("a".repeat(2001));
     }
 
     @Test

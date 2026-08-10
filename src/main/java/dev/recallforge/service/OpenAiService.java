@@ -492,7 +492,7 @@ public class OpenAiService {
     }
 
     private String trimUserAnswer(String answer) {
-        int maxChars = 1000;
+        int maxChars = 2000;
 
         if (answer == null) {
             return "";
