@@ -252,7 +252,7 @@ public class OpenAiService {
         Return exactly this format:
 
         score: <number>
-        feedback: <short explanation, mentioning the correct approach if wrong>
+        feedback: <one short sentence; if wrong, name the correct approach only>
         """;
         prompt = prompt.formatted(
                 category,
@@ -263,7 +263,7 @@ public class OpenAiService {
                 trimUserAnswer(userAnswer),
                 category);
 
-        AiResponse response = ask(prompt, 120);  // code challenge evaluation
+        AiResponse response = ask(prompt, 90);  // code challenge evaluation
         return parseEvaluation(response.content(), response.totalTokens());
     }
 
