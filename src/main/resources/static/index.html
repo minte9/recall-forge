@@ -696,9 +696,15 @@
 
             <div v-else>
               <details v-for="item in feedbackHistory" :key="item.id" class="feedback-history-item"
-                :class="item.score >= 0.7 ? 'feedback-history-item--high-score' : 'feedback-history-item--low-score'">
+                :class="item.score >= 0.7 ? 'feedback-history-item--high-score' : 'feedback-history-item--low-score'"
+                :open="openFeedbackHistoryItemId === item.id">
 
-                <summary class="feedback-history-summary">
+                <summary class="feedback-history-summary" @click.prevent="
+                  openFeedbackHistoryItemId =
+                      openFeedbackHistoryItemId === item.id
+                          ? null
+                          : item.id
+                ">
                   <div class="feedback-history-card-header">
                     <div class="feedback-history-title">
                       <span class="feedback-history-icon">💬</span>
