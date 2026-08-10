@@ -1433,8 +1433,8 @@
   }
 
   .last-score-badge {
-    padding: 4px 20px;
-    border-radius: 999px;
+    padding: 8px 20px;
+    border-radius: 10px;
     border: 1px solid #eeeeee;
     background: #ffffff;
     color: #64748b;
