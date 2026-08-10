@@ -996,6 +996,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.success = null;
       this.review = null;
       this.historyTopic = null;
+      this.notDueTopic = null;
       this.result = null;
       this.userAnswer = "";
       this.currentMarkdownFileId = null;
