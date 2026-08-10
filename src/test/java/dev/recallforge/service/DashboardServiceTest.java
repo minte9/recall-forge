@@ -26,6 +26,7 @@ import dev.recallforge.dto.WeakAreaResponse;
 import dev.recallforge.repository.CategoryOrderRepository;
 import dev.recallforge.repository.EnvironmentCategoryProjection;
 import dev.recallforge.repository.KnowledgeAreaProjection;
+import dev.recallforge.repository.QuestionGenerationRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.SubcategoryReviewCountProjection;
@@ -41,6 +42,9 @@ class DashboardServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
+
+    @Mock
+    private QuestionGenerationRepository questionGenerationRepository;
 
     @Mock
     private RewardService rewardService;
@@ -61,7 +65,7 @@ class DashboardServiceTest {
 
     private void setUp() {
         dashboardService = new DashboardService(
-            topicRepository, reviewRepository, rewardService, currentUserService,
+            topicRepository, reviewRepository, questionGenerationRepository, rewardService, currentUserService,
             subcategoryOrderRepository, categoryOrderRepository, reviewLimitProperties
         );
         when(currentUserService.currentUserId()).thenReturn(1L);
@@ -347,6 +351,26 @@ class DashboardServiceTest {
         assertThat(dashboard.reviewsToday()).isEqualTo(1L);
         assertThat(dashboard.todayReviewLimit()).isEqualTo(14L);
         verify(reviewRepository).countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("python"), any());
+    }
+
+    @Test
+    void getDashboard_questionsToday_usesCategoryScopedQuestionCountNotGlobal() {
+        setUp();
+        when(topicRepository.findWeakAreas(eq(1L), eq("python"), any())).thenReturn(List.of());
+        when(topicRepository.findStrongKnowledgeAreas(1L, "python")).thenReturn(List.of());
+        when(topicRepository.findWeakKnowledgeAreas(1L, "python")).thenReturn(List.of());
+        when(rewardService.getCurrentUserReward("python"))
+            .thenReturn(new RewardResponse(0, 1, "Learner", 0, 100, 0, 0, "Python", 0L, 0L, 0));
+        // Only 3 of the day's generated questions were in "python"; a same-day
+        // question in another category (e.g. "java") must not inflate this
+        // category's count.
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("python"), any()))
+            .thenReturn(3L);
+
+        DashboardResponse dashboard = dashboardService.getDashboard("python");
+
+        assertThat(dashboard.questionsToday()).isEqualTo(3L);
+        verify(questionGenerationRepository).countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("python"), any());
     }
 
     @Test

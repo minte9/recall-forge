@@ -21,6 +21,7 @@ import dev.recallforge.dto.WeakAreaResponse;
 import dev.recallforge.repository.CategoryOrderRepository;
 import dev.recallforge.repository.EnvironmentCategoryProjection;
 import dev.recallforge.repository.KnowledgeAreaProjection;
+import dev.recallforge.repository.QuestionGenerationRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.SubcategoryReviewCountProjection;
@@ -45,6 +46,7 @@ public class DashboardService {
 
     private final TopicRepository topicRepository;
     private final ReviewRepository reviewRepository;
+    private final QuestionGenerationRepository questionGenerationRepository;
     private final RewardService rewardService;
     private final CurrentUserService currentUserService;
     private final SubcategoryOrderRepository subcategoryOrderRepository;
@@ -54,6 +56,7 @@ public class DashboardService {
     public DashboardService(
         TopicRepository topicRepository,
         ReviewRepository reviewRepository,
+        QuestionGenerationRepository questionGenerationRepository,
         RewardService rewardService,
         CurrentUserService currentUserService,
         SubcategoryOrderRepository subcategoryOrderRepository,
@@ -62,6 +65,7 @@ public class DashboardService {
     ) {
         this.topicRepository = topicRepository;
         this.reviewRepository = reviewRepository;
+        this.questionGenerationRepository = questionGenerationRepository;
         this.rewardService = rewardService;
         this.currentUserService = currentUserService;
         this.subcategoryOrderRepository = subcategoryOrderRepository;
@@ -170,6 +174,8 @@ public class DashboardService {
         int dailyReviewLimit = reviewLimitProperties.dailyLimit();
         long reviewsToday = reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(
             userId, category, LocalDate.now().atStartOfDay());
+        long questionsToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
+            userId, category, LocalDate.now().atStartOfDay());
 
         // Tomorrow/this week aren't separately enforced — they show what's realistically
         // reachable given the daily cap. Today's overdue backlog counts too: an overdue
@@ -195,6 +201,7 @@ public class DashboardService {
             dailyReviewLimit,
             reviewsToday,
             todayReviewLimit,
+            questionsToday,
             tomorrowReviewLimit,
             thisWeekReviewLimit
         );

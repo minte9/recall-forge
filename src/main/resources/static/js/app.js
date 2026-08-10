@@ -1075,13 +1075,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       ].join("\n");
     },
 
-    showAccountDetails() {
+    async showAccountDetails() {
       this.error = null;
       this.success = null;
       this.mobilePageTitle = "Account Details";
       this.leftPanel = "account";
       this.mobileView = "markdown";
       this.markdownEditing = false;
+      await this.loadDashboard();
     },
 
     showStarterPack() {

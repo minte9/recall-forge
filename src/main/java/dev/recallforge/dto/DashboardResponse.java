@@ -15,6 +15,7 @@ public record DashboardResponse(
     int dailyReviewLimit,
     long reviewsToday,
     long todayReviewLimit,
+    long questionsToday,
     long tomorrowReviewLimit,
     long thisWeekReviewLimit
 ) {}
