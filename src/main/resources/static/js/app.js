@@ -2,6 +2,10 @@ const { createApp } = Vue;
 
 const LAST_CATEGORY_STORAGE_KEY = "recallforge.lastCategory";
 
+// Mirrors OpenAiService.trimUserAnswer's maxChars server-side - kept in
+// sync manually since there's no shared config between frontend and backend.
+const MAX_ANSWER_LENGTH = 2000;
+
 const app = createApp({
   data() {
     return {
@@ -822,6 +826,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     async submitAnswer() {
       if (this.answerSubmitted || this.loading) {
+        return;
+      }
+
+      const answerLength = this.userAnswer.trim().length;
+
+      if (answerLength > MAX_ANSWER_LENGTH) {
+        this.error = `Your answer is too long (${answerLength}/${MAX_ANSWER_LENGTH} characters) - please shorten it.`;
         return;
       }
 
