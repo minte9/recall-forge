@@ -452,12 +452,16 @@
 
             <div class="account-row">
               <span>Answers daily limit per category</span>
-              <strong>{{ currentUser.dailyReviewLimit }}</strong>
+              <strong>
+                {{ dashboard ? dashboard.reviewsToday : "-" }}/{{ currentUser.dailyReviewLimit }}
+              </strong>
             </div>
 
             <div class="account-row">
               <span>Questions daily limit per category</span>
-              <strong>{{ currentUser.dailyQuestionLimit }}</strong>
+              <strong>
+                {{ dashboard ? dashboard.questionsToday : "-" }}/{{ currentUser.dailyQuestionLimit }}
+              </strong>
             </div>
 
             <div class="account-row">
