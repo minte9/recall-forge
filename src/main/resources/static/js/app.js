@@ -864,6 +864,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.isRetry = true;
       this.error = null;
       this.success = null;
+      this.result = null;
     },
 
     toggleRetryMenu() {
@@ -890,6 +891,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.codeChallengeLoading = true;
       this.error = null;
       this.success = null;
+      this.result = null;
 
       try {
         this.review = await Api.startCodeChallenge(targetTopicId);
