@@ -43,6 +43,7 @@ const app = createApp({
       feedbackHistoryVisible: false,
       feedbackHistoryLoading: false,
       feedbackHistoryLoadedForTopicId: null,
+      openFeedbackHistoryItemId: null,
       selectedEnvironment: null,
       environmentMenuOpen: false,
       retryMenuOpen: false,
