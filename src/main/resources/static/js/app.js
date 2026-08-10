@@ -731,6 +731,27 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return;
       }
 
+      const topic = this.topicsInFile.find(t => t.id === topicId);
+      const notDueByDate = topic && topic.nextReviewAt && new Date(topic.nextReviewAt) > new Date();
+
+      // A forced-practice review earlier today (e.g. from this same not-due
+      // screen) never moves nextReviewAt, so the topic can look "due" again
+      // by the time it's revisited even though it was already answered
+      // today - mirrors ReviewService.startReview's alreadyReviewedToday
+      // half of forcePractice, which nextReviewAt alone doesn't capture.
+      await this.loadFeedbackHistory(topicId);
+      const reviewedToday = this.feedbackHistory.length > 0
+        && new Date(this.feedbackHistory[0].createdAt).toDateString() === new Date().toDateString();
+
+      if (notDueByDate || reviewedToday) {
+        await this.previewMarkdownFile(this.currentMarkdownFileId);
+        this.notDueTopic = { topicId, topicTitle: topic.title };
+        this.userAnswer = "";
+        this.mobilePageTitle = "Reviews";
+        this.mobileView = "review";
+        return;
+      }
+
       await this.startReview(topicId);
     },
 
