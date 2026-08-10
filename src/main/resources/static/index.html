@@ -710,16 +710,13 @@
                       Score {{ formatScore(item.score) }}
                     </div>
                   </div>
-
-                  <div class="feedback-history-question feedback-qa-text">
-                    {{ item.question || "No question saved for this review." }}
-                  </div>
-
-                  <!-- <div class="feedback-history-toggle-link">Show answer/feedback</div> -->
                 </summary>
 
                 <div class="feedback-qa-box"
                   :class="item.score >= 0.7 ? 'feedback--high-score' : 'feedback--low-score'">
+                  <div class="feedback-history-question feedback-qa-text">
+                    {{ item.question || "No question saved for this review." }}
+                  </div>
                   <div class="feedback-qa-section">
                     <div class="feedback-qa-label">Answer:</div>
                     <div class="feedback-qa-text">

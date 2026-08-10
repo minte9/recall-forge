@@ -1275,14 +1275,13 @@
   }
 
   .feedback-history-item {
-    margin: 12px 0;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
     background: #fff;
+    margin-left: 4px;
   }
 
   .feedback-history-item:first-child {
     clear: right;
+    margin-top: 30px;
   }
 
   .feedback-history-item--high-score {
@@ -1294,8 +1293,7 @@
   }
 
   .feedback-history-summary {
-    padding: 12px;
-    border-radius: 10px;
+    padding: 6px 12px;
     cursor: pointer;
     list-style: none;
   }
@@ -1439,7 +1437,7 @@
     border-radius: 999px;
     border: 1px solid #eeeeee;
     background: #ffffff;
-    color: #999999;
+    color: #64748b;
     font-size: 14px;
     font-weight: normal;
     margin-left: 10px;
