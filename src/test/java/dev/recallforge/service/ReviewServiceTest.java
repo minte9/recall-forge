@@ -26,6 +26,7 @@ import dev.recallforge.config.AppAiProperties;
 import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Review;
+import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.dto.AnswerResponse;
@@ -194,7 +195,8 @@ class ReviewServiceTest {
         setUp();
         Topic topic = topicWithId(42L, null);
         ReflectionTestUtils.setField(topic, "nextReviewAt", LocalDateTime.now().minusDays(1));
-        Review earlierToday = new Review(topic, new UserAccount(), "Old Q", "A1", 0.9, "fb1", 50, false);
+        Review earlierToday = new Review(
+            topic, new UserAccount(), "Old Q", "A1", 0.9, "fb1", 50, false, RetryType.REVIEW);
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(42L, 1L)).thenReturn(topic);
         when(reviewRepository.findTop3ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(42L, 1L))
@@ -347,8 +349,10 @@ class ReviewServiceTest {
     void startReview_passesTopicMemoryScoreAndRecentReviewSummariesToQuestionGeneration() {
         setUp();
         Topic topic = topicWithId(15L, null);
-        Review review1 = new Review(topic, new UserAccount(), "Old Q1", "A1", 0.9, "fb1", 50, false);
-        Review review2 = new Review(topic, new UserAccount(), "Old Q2", "A2", 0.4, "fb2", 60, false);
+        Review review1 = new Review(
+            topic, new UserAccount(), "Old Q1", "A1", 0.9, "fb1", 50, false, RetryType.REVIEW);
+        Review review2 = new Review(
+            topic, new UserAccount(), "Old Q2", "A2", 0.4, "fb2", 60, false, RetryType.REVIEW);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
@@ -387,7 +391,7 @@ class ReviewServiceTest {
         when(rewardService.rewardDefaultUser(0.8, "Uncategorized")).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AnswerResponse response = reviewService.saveAnswer(7L, "Q?", "My answer", evaluation, false);
+        AnswerResponse response = reviewService.saveAnswer(7L, "Q?", "My answer", evaluation, false, false);
 
         assertThat(response.topicId()).isEqualTo(7L);
         assertThat(response.topicTitle()).isEqualTo("Title");
@@ -427,7 +431,7 @@ class ReviewServiceTest {
         when(rewardService.rewardDefaultUser(0.9, "Uncategorized")).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AnswerResponse response = reviewService.saveAnswer(7L, "Q?", "My answer", evaluation, true);
+        AnswerResponse response = reviewService.saveAnswer(7L, "Q?", "My answer", evaluation, true, false);
 
         assertThat(response.updateMemoryScore()).isEqualTo(0.6);
         assertThat(response.nextReviewAt()).isEqualTo(originalNextReviewAt);
@@ -441,6 +445,10 @@ class ReviewServiceTest {
         verify(topicService, never()).save(any());
         verify(repetitionService, never()).calculateUpdateMemoryScore(anyDouble(), anyDouble());
         verify(repetitionService, never()).calculateNextReview(anyDouble(), anyInt());
+
+        ArgumentCaptor<Review> reviewCaptor = ArgumentCaptor.forClass(Review.class);
+        verify(reviewRepository).save(reviewCaptor.capture());
+        assertThat(reviewCaptor.getValue().getRetryType()).isEqualTo(RetryType.REVIEW);
     }
 
     @Test
@@ -519,6 +527,7 @@ class ReviewServiceTest {
         ArgumentCaptor<Review> reviewCaptor = ArgumentCaptor.forClass(Review.class);
         verify(reviewRepository).save(reviewCaptor.capture());
         assertThat(reviewCaptor.getValue().isRetry()).isTrue();
+        assertThat(reviewCaptor.getValue().getRetryType()).isEqualTo(RetryType.CODE_CHALLENGE);
     }
 
     @Test
@@ -539,7 +548,8 @@ class ReviewServiceTest {
     void getReviewHistoryForTopic_returnsHistoryMappedFromRepository() {
         setUp();
         Topic topic = topicWithId(3L, null);
-        Review review = new Review(topic, new UserAccount(), "Q1", "A1", 0.9, "fb1", 100, false);
+        Review review = new Review(
+            topic, new UserAccount(), "Q1", "A1", 0.9, "fb1", 100, false, RetryType.REVIEW);
         ReflectionTestUtils.setField(review, "id", 1L);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
@@ -564,8 +574,10 @@ class ReviewServiceTest {
     void getFeedbackHistory_mapsIsRetryFromReview() {
         setUp();
         Topic topic = topicWithId(3L, null);
-        Review gradedReview = new Review(topic, new UserAccount(), "Q1", "A1", 0.9, "fb1", 100, false);
-        Review practiceReview = new Review(topic, new UserAccount(), "Q2", "A2", 0.5, "fb2", 80, true);
+        Review gradedReview = new Review(
+            topic, new UserAccount(), "Q1", "A1", 0.9, "fb1", 100, false, RetryType.REVIEW);
+        Review practiceReview = new Review(
+            topic, new UserAccount(), "Q2", "A2", 0.5, "fb2", 80, true, RetryType.CODE_CHALLENGE);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(3L, 1L)).thenReturn(topic);
@@ -576,7 +588,9 @@ class ReviewServiceTest {
 
         assertThat(history).hasSize(2);
         assertThat(history.get(0).isRetry()).isTrue();
+        assertThat(history.get(0).retryType()).isEqualTo(RetryType.CODE_CHALLENGE);
         assertThat(history.get(1).isRetry()).isFalse();
+        assertThat(history.get(1).retryType()).isEqualTo(RetryType.REVIEW);
     }
 
     @Test

@@ -62,6 +62,10 @@ public class Review {
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean isRetry;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private RetryType retryType = RetryType.REVIEW;
+
     public Review(
         Topic topic,
         UserAccount user,
@@ -70,7 +74,8 @@ public class Review {
         double score,
         String feedback,
         int totalTokens,
-        boolean isRetry
+        boolean isRetry,
+        RetryType retryType
     ) {
         this.topic = topic;
         this.user = user;
@@ -80,6 +85,7 @@ public class Review {
         this.feedback = feedback;
         this.totalTokens = totalTokens;
         this.isRetry = isRetry;
+        this.retryType = retryType;
 
         this.reviewedAt = LocalDateTime.now();
     }

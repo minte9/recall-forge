@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
+import dev.recallforge.domain.RetryType;
 import dev.recallforge.dto.AnswerResponse;
 import dev.recallforge.dto.FeedbackHistoryResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
@@ -244,7 +245,7 @@ class ReviewControllerTest {
         List<FeedbackHistoryResponse> history = List.of(
             new FeedbackHistoryResponse(
                 1L, "What is X?", "X is Y", "Good job",
-                LocalDateTime.of(2026, 7, 1, 10, 0), 0.8, false
+                LocalDateTime.of(2026, 7, 1, 10, 0), 0.8, false, RetryType.REVIEW
             )
         );
         when(reviewService.getFeedbackHistory(9L)).thenReturn(history);
