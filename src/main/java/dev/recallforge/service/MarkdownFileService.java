@@ -2,7 +2,9 @@ package dev.recallforge.service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,7 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import dev.recallforge.domain.MarkdownFile;
+import dev.recallforge.domain.Review;
+import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.Topic;
+import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.exception.MarkdownAlreadyImportedException;
 import dev.recallforge.exception.MarkdownFileHasReviewsException;
@@ -367,6 +372,37 @@ public class MarkdownFileService {
                 .orElseThrow(() -> new IllegalArgumentException("Markdown file not found: " + markdownFileId));
 
         return reviewRepository.countByTopicMarkdownFileIdAndUserId(markdownFileId, userId);
+    }
+
+    // Deduped to the most recent attempt per (topic, question) - a "Try Again"
+    // resubmission of the same challenge shouldn't show up twice, matching
+    // the distinct-question semantics of the dashboard's codeChallengeCount.
+    @Transactional
+    public List<CodeChallengeResponse> getCodeChallenges(Long markdownFileId) {
+        Long userId = currentUserService.currentUserId();
+
+        markdownFileRepository.findByIdAndUserId(markdownFileId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Markdown file not found: " + markdownFileId));
+
+        List<Review> reviews = reviewRepository.findByTopicMarkdownFileIdAndUserIdAndRetryTypeOrderByReviewedAtDesc(
+                markdownFileId, userId, RetryType.CODE_CHALLENGE);
+
+        Map<String, Review> mostRecentByTopicAndQuestion = new LinkedHashMap<>();
+        for (Review review : reviews) {
+            mostRecentByTopicAndQuestion.putIfAbsent(review.getTopic().getId() + "|" + review.getQuestion(), review);
+        }
+
+        return mostRecentByTopicAndQuestion.values().stream()
+                .sorted(Comparator.comparing(Review::getReviewedAt))
+                .map(review -> new CodeChallengeResponse(
+                        review.getTopic().getId(),
+                        review.getTopic().getTitle(),
+                        review.getQuestion(),
+                        review.getUserAnswer(),
+                        review.getFeedback(),
+                        review.getScore(),
+                        review.getReviewedAt()))
+                .toList();
     }
 
     @Transactional

@@ -62,6 +62,12 @@
             <icon name="file-text" class="menu-icon"></icon>Reviews History
           </button>
 
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
+                    currentMarkdownCodeChallenges.length > 0"
+            @click="showCodeChallenges(); mobileMenuOpen = false">
+            <icon name="code" class="menu-icon"></icon> Code Challenges
+          </button>
+
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
             @click.stop="deleteMarkdownFile(); mobileMenuOpen = false">
             <icon name="trash" class="menu-icon"></icon>Delete Markdown
@@ -151,6 +157,12 @@
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
                 @click="showReviewsHistory(); menuOpen = false">
                 <icon name="file-text" class="menu-icon"></icon>Reviews History
+              </button>
+
+              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
+                  currentMarkdownCodeChallenges.length > 0"
+                @click="showCodeChallenges(); menuOpen = false">
+                <icon name="code" class="menu-icon"></icon>Code Challenges
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
@@ -359,17 +371,32 @@
             </div>
           </div>
 
+          <div v-else-if="viewingCodeChallenges" class="markdown code-challenges-markdown"
+            v-html="renderMarkdown(codeChallengesMarkdown())">
+          </div>
+
           <div v-else class="markdown" v-html="renderMarkdown(markdown)"
             @click="onMarkdownClick">
           </div>
 
           <div v-if="!markdownLoading && !markdownEditing && currentMarkdownFileId"
             class="markdown-file-actions">
-            <button v-if="!activeTopic && !isDesktop" class="start-review-file-button"
+            <button v-if="!activeTopic && !isDesktop && !viewingCodeChallenges" class="start-review-file-button"
               @click="startReviewForFile(currentMarkdownFileId)" :disabled="loading || (aiEnabled && dailyLimitReached)"
               :title="aiEnabled && dailyLimitReached ? 'Daily review limit reached' : null">
               <span class="btn-icon">►</span>
               {{ loading ? "Loading..." : (aiEnabled ? "Start Review" : "Reviews") }}
+            </button>
+
+            <button v-if="!viewingCodeChallenges && currentMarkdownCodeChallenges.length > 0"
+              class="edit-file-button" @click="showCodeChallenges">
+              <span class="btn-icon">→</span>
+              Code Challenges
+            </button>
+
+            <button v-if="viewingCodeChallenges" class="edit-file-button" @click="hideCodeChallenges">
+              <span class="btn-icon">←</span>
+              Back to Markdown
             </button>
 
           </div>

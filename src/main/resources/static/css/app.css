@@ -315,6 +315,27 @@
     padding: 0 16px;
     border: none;
     border-radius: 10px;
+    background: white;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 300;
+    margin: 0;
+}
+  .edit-file-button:hover {
+    color: #0f172a;
+  }
+
+/* .edit-file-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 42px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 10px;
     background: #4b5563;
     color: white;
     cursor: pointer;
@@ -326,6 +347,7 @@
 .edit-file-button:hover {
     opacity: .9;
 }
+    */
 
 .warning-button:disabled,
 .danger-button:disabled {
@@ -466,6 +488,13 @@
     border: 1px solid #ececec;
     border-radius: 10px;
     overflow: hidden;
+  }
+
+  /* Extra breathing room after each "show code" block, scoped to the Code
+     Challenges list only - the regular file-content view keeps its normal
+     spacing. */
+  .code-challenges-markdown .code-block {
+    margin-bottom: 20px;
   }
 
   .markdown summary {

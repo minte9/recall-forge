@@ -5,6 +5,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration;
@@ -16,6 +19,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
+import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.exception.MarkdownFileHasReviewsException;
 import dev.recallforge.security.CurrentUserService;
@@ -127,6 +131,32 @@ class MarkdownControllerTest {
                 {
                   "count": 3
                 }
+                """);
+    }
+
+    @Test
+    void getMarkdownCodeChallenges_delegatesToServiceAndReturnsList() throws Exception {
+        when(markdownFileService.getCodeChallenges(1L)).thenReturn(List.of(
+            new CodeChallengeResponse(
+                10L, "Arrays", "Write a method that reverses an array.", "answer", "Good", 0.9,
+                LocalDateTime.of(2026, 7, 1, 10, 0))
+        ));
+
+        mockMvcTester.get().uri("/api/markdown/1/reviews/code-challenges")
+            .assertThat()
+            .hasStatusOk()
+            .bodyJson()
+            .isLenientlyEqualTo("""
+                [
+                  {
+                    "topicId": 10,
+                    "topicTitle": "Arrays",
+                    "question": "Write a method that reverses an array.",
+                    "userAnswer": "answer",
+                    "feedback": "Good",
+                    "score": 0.9
+                  }
+                ]
                 """);
     }
 
