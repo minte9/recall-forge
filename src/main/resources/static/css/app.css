@@ -322,6 +322,7 @@
     font-size: 14px;
     font-weight: 300;
     margin: 0;
+    margin-left: 12px;
 }
   .edit-file-button:hover {
     color: #0f172a;
