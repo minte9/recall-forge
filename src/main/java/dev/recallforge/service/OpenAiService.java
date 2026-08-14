@@ -107,7 +107,8 @@ public class OpenAiService {
      * caller, so it never affects the topic's spaced-repetition state.
      */
     public String generateCodeChallenge(
-            String category, String topicTitle, String topicContent, double memoryScore) {
+            String category, String topicTitle, String topicContent, double memoryScore,
+            List<String> recentChallenges) {
         String prompt = """
         Create one %s coding challenge to test understanding of this topic.
 
@@ -120,6 +121,7 @@ public class OpenAiService {
 
         User's proficiency on this topic: %s
 
+        %s
         Rules:
         - Ask the user to write %s code from scratch that applies the
           concept above - do not show any code in the challenge itself.
@@ -129,6 +131,8 @@ public class OpenAiService {
         - State exactly what the code must do, including any inputs and
           the expected result, so correctness is unambiguous.
         - Keep it short (1-2 sentences, 200 chars maximum).
+        - Do not repeat any of the challenges already given for this topic,
+          listed above - ask something meaningfully different.
         - Return only the challenge text, nothing else before or after.
         - Do not include the solution.
         """;
@@ -137,10 +141,27 @@ public class OpenAiService {
                 topicTitle,
                 trimTopicContent(topicContent),
                 proficiencyGuidance(memoryScore),
+                recentChallengesSection(recentChallenges),
                 category);
 
         AiResponse response = ask(prompt, 100);  // code challenge generation
         return response.content();
+    }
+
+    private String recentChallengesSection(List<String> recentChallenges) {
+        if (recentChallenges == null || recentChallenges.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder section = new StringBuilder(
+            "Challenges already given for this topic, most recent first:\n");
+
+        for (String challenge : recentChallenges) {
+            section.append("- \"%s\"\n".formatted(trimText(challenge, 200)));
+        }
+        section.append("\n");
+
+        return section.toString();
     }
 
     private String proficiencyGuidance(double memoryScore) {

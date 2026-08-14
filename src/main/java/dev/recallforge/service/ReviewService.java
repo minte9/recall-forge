@@ -163,8 +163,17 @@ public class ReviewService {
             throw new DailyQuestionLimitExceededException();
         }
 
+        List<String> recentChallenges = reviewRepository
+                .findByTopicIdAndTopicUserIdAndRetryTypeOrderByReviewedAtDesc(
+                        topic.getId(), userId, RetryType.CODE_CHALLENGE)
+                .stream()
+                .map(Review::getQuestion)
+                .distinct()
+                .toList();
+
         String question = openAiService.generateCodeChallenge(
-                topic.getCategory(), topic.getTitle(), topic.getContent(), topic.getMemoryScore());
+                topic.getCategory(), topic.getTitle(), topic.getContent(), topic.getMemoryScore(),
+                recentChallenges);
 
         questionGenerationRepository.save(new QuestionGeneration(userId, topic.getCategory()));
 

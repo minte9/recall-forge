@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import dev.recallforge.domain.Review;
+import dev.recallforge.domain.RetryType;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,6 +25,16 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findTop3ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(
         Long topicId,
         Long userId
+    );
+
+    // No Top-N cap: a single topic only ever has a handful of code-challenge
+    // attempts, and callers dedupe by question text (repeated "Try Again"
+    // resubmissions of the same challenge share one question) rather than
+    // relying on row count.
+    List<Review> findByTopicIdAndTopicUserIdAndRetryTypeOrderByReviewedAtDesc(
+        Long topicId,
+        Long userId,
+        RetryType retryType
     );
 
     @Modifying
@@ -99,7 +110,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("""
         select
             r.topic.markdownFile.id as markdownFileId,
-            count(r) as codeChallengeCount
+            count(distinct r.question) as codeChallengeCount
         from Review r
         where r.user.id = :userId
         and lower(r.topic.category) = lower(:category)

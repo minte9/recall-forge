@@ -265,7 +265,7 @@ class ReviewServiceTest {
         when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
         when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("Uncategorized"), any()))
             .thenReturn(10L);
-        when(openAiService.generateCodeChallenge("Uncategorized", "Title", "Content body", 0.6))
+        when(openAiService.generateCodeChallenge("Uncategorized", "Title", "Content body", 0.6, List.of()))
             .thenReturn("Write a function that reverses a string.");
 
         ReviewQuestionResponse response = reviewService.startCodeChallenge(30L);
@@ -274,6 +274,39 @@ class ReviewServiceTest {
         assertThat(response.codeChallenge()).isTrue();
         assertThat(response.forcePractice()).isTrue();
         verify(questionGenerationRepository).save(any());
+    }
+
+    @Test
+    void startCodeChallenge_passesDistinctRecentChallengeQuestionsToOpenAiService() {
+        setUp();
+        Topic topic = topicWithId(30L, null);
+        UserAccount user = new UserAccount();
+        Review resubmission = new Review(
+            topic, user, "Write a function that reverses a string.", "answer1", 0.5, "fb1", 80,
+            true, RetryType.CODE_CHALLENGE);
+        Review sameQuestionRetried = new Review(
+            topic, user, "Write a function that reverses a string.", "answer2", 0.9, "fb2", 90,
+            true, RetryType.CODE_CHALLENGE);
+        Review olderDistinctChallenge = new Review(
+            topic, user, "Write a function that sorts a list.", "answer3", 0.8, "fb3", 70,
+            true, RetryType.CODE_CHALLENGE);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(30L, 1L)).thenReturn(topic);
+        when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("Uncategorized"), any()))
+            .thenReturn(10L);
+        when(reviewRepository.findByTopicIdAndTopicUserIdAndRetryTypeOrderByReviewedAtDesc(
+                30L, 1L, RetryType.CODE_CHALLENGE))
+            .thenReturn(List.of(sameQuestionRetried, resubmission, olderDistinctChallenge));
+        when(openAiService.generateCodeChallenge(any(), any(), any(), anyDouble(), any()))
+            .thenReturn("New challenge.");
+
+        reviewService.startCodeChallenge(30L);
+
+        verify(openAiService).generateCodeChallenge(
+            "Uncategorized", "Title", "Content body", 0.6,
+            List.of("Write a function that reverses a string.", "Write a function that sorts a list."));
     }
 
     @Test
@@ -289,7 +322,7 @@ class ReviewServiceTest {
         assertThatThrownBy(() -> reviewService.startCodeChallenge(30L))
             .isInstanceOf(DailyQuestionLimitExceededException.class);
 
-        verify(openAiService, never()).generateCodeChallenge(any(), any(), any(), anyDouble());
+        verify(openAiService, never()).generateCodeChallenge(any(), any(), any(), anyDouble(), any());
         verify(questionGenerationRepository, never()).save(any());
     }
 
