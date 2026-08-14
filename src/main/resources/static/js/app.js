@@ -14,6 +14,8 @@ const app = createApp({
       success: null,
       currentMarkdownFileId: null,
       currentMarkdownReviewCount: null,
+      currentMarkdownCodeChallenges: [],
+      viewingCodeChallenges: false,
       newMarkdownContent: "",
       currentCategory: null,
       showMetadataHelp: false,
@@ -309,6 +311,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       this.leftPanel = "markdown";
       this.markdownEditing = true;
+      this.viewingCodeChallenges = false;
       this.optimizeFinalized = false;
 
       this.$nextTick(() => {
@@ -568,6 +571,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         await this.loadFeedbackHistory(this.review.topicId);
         await this.loadMarkdownReviewCount();
+        await this.loadMarkdownCodeChallenges();
         await this.loadTopicsInFile(this.review.markdownFileId);
 
       } catch (err) {
@@ -663,6 +667,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.error = null;
       this.success = null;
       this.markdownEditing = false;
+      this.viewingCodeChallenges = false;
       this.leftPanel = "markdown";
       this.mobilePageTitle = "Markdown";
       this.mobileView = "markdown";
@@ -679,6 +684,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       await this.loadTopicsInFile(markdownFileId);
       await this.loadMarkdownReviewCount();
+      await this.loadMarkdownCodeChallenges();
     },
 
     async startReviewFromDashboard() {
@@ -1320,6 +1326,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         await this.loadMarkdownSummaries(false);
         await this.loadDashboard();
         await this.loadMarkdownReviewCount();
+        await this.loadMarkdownCodeChallenges();
+        this.viewingCodeChallenges = false;
 
         this.success = "Reviews reset for this file.";
 
@@ -1344,6 +1352,49 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       } catch (e) {
         this.currentMarkdownReviewCount = null;
       }
+    },
+
+    async loadMarkdownCodeChallenges() {
+      if (!this.currentMarkdownFileId) {
+        this.currentMarkdownCodeChallenges = [];
+        return;
+      }
+
+      this.currentMarkdownCodeChallenges = [];
+
+      try {
+        this.currentMarkdownCodeChallenges = await Api.getMarkdownCodeChallenges(this.currentMarkdownFileId);
+      } catch (e) {
+        this.currentMarkdownCodeChallenges = [];
+      }
+    },
+
+    // Assembles all of the current file's code challenges into one markdown
+    // string - userAnswer is fenced so Markdown.render()'s existing "show
+    // code" spoiler picks it up, same mechanism used for file content.
+    codeChallengesMarkdown() {
+      const challenges = this.currentMarkdownCodeChallenges
+        .map(c => {
+          const answer = (c.userAnswer || "").trim();
+          const answerBlock = answer ? "```\n" + answer + "\n```" : "*No answer submitted.*";
+          return "<b>Q. </b> " + c.question + "\n\n" + answerBlock;
+        })
+        .join("\n\n");
+
+      return "## Code Challenges\n\n <br>" + challenges;
+    },
+
+    showCodeChallenges() {
+      if (!this.currentMarkdownFileId || this.currentMarkdownCodeChallenges.length === 0) {
+        return;
+      }
+
+      this.markdownEditing = false;
+      this.viewingCodeChallenges = true;
+    },
+
+    hideCodeChallenges() {
+      this.viewingCodeChallenges = false;
     },
 
     async deleteMarkdownFile() {
@@ -1374,6 +1425,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         this.currentMarkdownFileId = null;
         this.currentMarkdownReviewCount = null;
+        this.currentMarkdownCodeChallenges = [];
+        this.viewingCodeChallenges = false;
         this.review = null;
         this.historyTopic = null;
         this.result = null;

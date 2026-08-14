@@ -1,5 +1,7 @@
 package dev.recallforge.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownCreateRequest;
 import dev.recallforge.dto.MarkdownOptimizeRequest;
 import dev.recallforge.dto.MarkdownOptimizeResponse;
@@ -71,6 +74,11 @@ public class MarkdownController {
     @GetMapping("/{id}/reviews/count")
     public MarkdownReviewCountResponse getMarkdownReviewCount(@PathVariable Long id) {
         return new MarkdownReviewCountResponse(markdownFileService.countReviews(id));
+    }
+
+    @GetMapping("/{id}/reviews/code-challenges")
+    public List<CodeChallengeResponse> getMarkdownCodeChallenges(@PathVariable Long id) {
+        return markdownFileService.getCodeChallenges(id);
     }
 
     @DeleteMapping("/{id}")

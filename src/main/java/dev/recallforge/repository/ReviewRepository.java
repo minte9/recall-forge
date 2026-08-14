@@ -57,6 +57,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     long countByTopicMarkdownFileIdAndUserId(Long markdownFileId, Long userId);
 
+    List<Review> findByTopicMarkdownFileIdAndUserIdAndRetryTypeOrderByReviewedAtDesc(
+        Long markdownFileId,
+        Long userId,
+        RetryType retryType
+    );
+
     @Query("""
         select distinct r.topic.id
         from Review r

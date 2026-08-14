@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,11 +22,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import dev.recallforge.domain.AllowedEnvironment;
 import dev.recallforge.domain.MarkdownFile;
+import dev.recallforge.domain.Review;
+import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
+import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.exception.MarkdownFileHasReviewsException;
 import dev.recallforge.repository.AllowedEnvironmentRepository;
@@ -592,6 +597,64 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByIdAndUserId(5L, 1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> markdownFileService.countReviews(5L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Markdown file not found: 5");
+    }
+
+    @Test
+    void getCodeChallenges_ownedFile_dedupesRepeatedQuestionsKeepingMostRecentAttempt() {
+        setUp();
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "content", "hash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        Topic topicA = new Topic(
+            "Programming", "Java", "Core", "Java Basics",
+            "Arrays", "content", existingMarkdownFile, user
+        );
+        ReflectionTestUtils.setField(topicA, "id", 10L);
+        Topic topicB = new Topic(
+            "Programming", "Java", "Core", "Java Basics",
+            "Lists", "content", existingMarkdownFile, user
+        );
+        ReflectionTestUtils.setField(topicB, "id", 11L);
+
+        Review newestAttempt = new Review(
+            topicA, user, "Write a method that reverses an array.", "newest answer", 0.9, "Good", 100,
+            true, RetryType.CODE_CHALLENGE);
+        ReflectionTestUtils.setField(newestAttempt, "reviewedAt", LocalDateTime.of(2026, 8, 10, 10, 0));
+        Review olderRetriedAttempt = new Review(
+            topicA, user, "Write a method that reverses an array.", "older answer", 0.4, "Try again", 80,
+            true, RetryType.CODE_CHALLENGE);
+        ReflectionTestUtils.setField(olderRetriedAttempt, "reviewedAt", LocalDateTime.of(2026, 8, 5, 10, 0));
+        Review distinctChallenge = new Review(
+            topicB, user, "Write a method that sorts a list.", "sort answer", 0.8, "Nice", 90,
+            true, RetryType.CODE_CHALLENGE);
+        ReflectionTestUtils.setField(distinctChallenge, "reviewedAt", LocalDateTime.of(2026, 8, 12, 10, 0));
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        // Simulates the repository's own OrderByReviewedAtDesc: most recent first.
+        when(reviewRepository.findByTopicMarkdownFileIdAndUserIdAndRetryTypeOrderByReviewedAtDesc(
+                1L, 1L, RetryType.CODE_CHALLENGE))
+            .thenReturn(List.of(distinctChallenge, newestAttempt, olderRetriedAttempt));
+
+        List<CodeChallengeResponse> challenges = markdownFileService.getCodeChallenges(1L);
+
+        assertThat(challenges).hasSize(2);
+        // Ascending by date: the reverse-array challenge (Aug 10) before the sort-list one (Aug 12).
+        assertThat(challenges.get(0).question()).isEqualTo("Write a method that reverses an array.");
+        assertThat(challenges.get(0).userAnswer()).isEqualTo("newest answer");
+        assertThat(challenges.get(1).question()).isEqualTo("Write a method that sorts a list.");
+    }
+
+    @Test
+    void getCodeChallenges_fileNotOwnedOrMissing_throwsIllegalArgumentException() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(5L, 1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> markdownFileService.getCodeChallenges(5L))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Markdown file not found: 5");
     }

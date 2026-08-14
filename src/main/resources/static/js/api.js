@@ -191,6 +191,20 @@ const Api = {
     return data.count;
   },
 
+  async getMarkdownCodeChallenges(markdownFileId) {
+    const response = await fetch(
+      "/api/markdown/" + encodeURIComponent(markdownFileId) + "/reviews/code-challenges",
+      { credentials: "same-origin" }
+    );
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not load code challenges for this markdown file.");
+    }
+
+    return response.json();
+  },
+
   async deleteMarkdown(markdownFileId) {
     const response = await fetch("/api/markdown/" + encodeURIComponent(markdownFileId), {
       method: "DELETE",
