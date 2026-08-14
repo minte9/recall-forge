@@ -719,8 +719,8 @@
                       <span class="feedback-history-icon">💬</span> 
                       <span class="feedback-history-date">{{ formatShortDate(item.createdAt) }}</span>
                       <span v-if="item.isRetry" class="feedback-history-practice-badge" :title="item.id">Practice</span>
-                      <span v-if="item.isRetry && item.retryType === 'CODE_CHALLENGE'" class="feedback-history-retrytype-badge" title="Code Challenge">
-                        C
+                      <span v-if="item.isRetry && item.retryType" class="feedback-history-retrytype-badge" title="Code Challenge">
+                        {{ item.retryType === "CODE_CHALLENGE" ? "C" : "R" }}
                       </span>
                     </div>
 
