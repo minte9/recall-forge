@@ -21,6 +21,7 @@ import dev.recallforge.dto.WeakAreaResponse;
 import dev.recallforge.repository.CategoryOrderRepository;
 import dev.recallforge.repository.EnvironmentCategoryProjection;
 import dev.recallforge.repository.KnowledgeAreaProjection;
+import dev.recallforge.repository.MarkdownFileCodeChallengeCountProjection;
 import dev.recallforge.repository.QuestionGenerationRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
@@ -220,6 +221,16 @@ public class DashboardService {
         List<MarkdownSummaryDto> summaries =
             topicRepository.findMarkdownSummaries(userId, category, LocalDateTime.now());
 
+        // Separate query rather than joining reviews into findMarkdownSummaries -
+        // a join there would multiply topic rows for topics with more than one
+        // code-challenge retry, inflating topicCont/dueCount/averageMemoryScore.
+        Map<Long, Long> codeChallengeCountsByFile = reviewRepository
+            .countCodeChallengesByMarkdownFile(userId, category)
+            .stream()
+            .collect(Collectors.toMap(
+                MarkdownFileCodeChallengeCountProjection::getMarkdownFileId,
+                MarkdownFileCodeChallengeCountProjection::getCodeChallengeCount));
+
         Map<String, Integer> subcategoryOrder = subcategoryOrderRepository.findByCategoryIgnoreCase(category)
             .stream()
             .collect(Collectors.toMap(SubcategoryOrder::getSubcategory, SubcategoryOrder::getDisplayOrder));
@@ -227,6 +238,10 @@ public class DashboardService {
         // Stable sort: subcategories with no explicit order fall back to
         // the alphabetical order the query already returned them in.
         return summaries.stream()
+            .map(s -> new MarkdownSummaryDto(
+                s.markdownFileId(), s.environment(), s.category(), s.subcategory(), s.fileTitle(),
+                s.topicCont(), s.dueCount(), s.averageMemoryScore(),
+                codeChallengeCountsByFile.getOrDefault(s.markdownFileId(), 0L)))
             .sorted(Comparator.comparingInt(
                 s -> subcategoryOrder.getOrDefault(s.subcategory(), Integer.MAX_VALUE)))
             .toList();

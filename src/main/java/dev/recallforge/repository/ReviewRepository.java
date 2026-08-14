@@ -95,4 +95,19 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Param("userId") Long userId,
         @Param("category") String category
     );
+
+    @Query("""
+        select
+            r.topic.markdownFile.id as markdownFileId,
+            count(r) as codeChallengeCount
+        from Review r
+        where r.user.id = :userId
+        and lower(r.topic.category) = lower(:category)
+        and r.retryType = dev.recallforge.domain.RetryType.CODE_CHALLENGE
+        group by r.topic.markdownFile.id
+    """)
+    List<MarkdownFileCodeChallengeCountProjection> countCodeChallengesByMarkdownFile(
+        @Param("userId") Long userId,
+        @Param("category") String category
+    );
 }
