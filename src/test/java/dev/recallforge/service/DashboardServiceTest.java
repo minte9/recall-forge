@@ -1,6 +1,7 @@
 package dev.recallforge.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -29,6 +30,7 @@ import dev.recallforge.repository.KnowledgeAreaProjection;
 import dev.recallforge.repository.QuestionGenerationRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
+import dev.recallforge.repository.MarkdownFileCodeChallengeCountProjection;
 import dev.recallforge.repository.SubcategoryReviewCountProjection;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.WeakAreaProjection;
@@ -102,6 +104,13 @@ class DashboardServiceTest {
         SubcategoryReviewCountProjection projection = mock(SubcategoryReviewCountProjection.class);
         when(projection.getSubcategory()).thenReturn(subcategory);
         when(projection.getReviewCount()).thenReturn(reviewCount);
+        return projection;
+    }
+
+    private MarkdownFileCodeChallengeCountProjection codeChallengeCount(Long markdownFileId, long count) {
+        MarkdownFileCodeChallengeCountProjection projection = mock(MarkdownFileCodeChallengeCountProjection.class);
+        when(projection.getMarkdownFileId()).thenReturn(markdownFileId);
+        when(projection.getCodeChallengeCount()).thenReturn(count);
         return projection;
     }
 
@@ -400,6 +409,24 @@ class DashboardServiceTest {
         List<MarkdownSummaryDto> result = dashboardService.getMarkdownSummaries("java");
 
         assertThat(result).isEqualTo(summaries);
+    }
+
+    @Test
+    void getMarkdownSummaries_mergesCodeChallengeCountsFromReviewRepository() {
+        setUp();
+        MarkdownSummaryDto fileWithChallenge =
+            new MarkdownSummaryDto(1L, "Programming", "Java", "Core", "Basics", 5L, 2L, 0.6);
+        MarkdownSummaryDto fileWithoutChallenge =
+            new MarkdownSummaryDto(2L, "Programming", "Java", "Core", "OOP", 3L, 1L, 0.7);
+        when(topicRepository.findMarkdownSummaries(eq(1L), eq("java"), any()))
+            .thenReturn(List.of(fileWithChallenge, fileWithoutChallenge));
+        List<MarkdownFileCodeChallengeCountProjection> codeChallengeCounts = List.of(codeChallengeCount(1L, 2L));
+        when(reviewRepository.countCodeChallengesByMarkdownFile(1L, "java")).thenReturn(codeChallengeCounts);
+
+        List<MarkdownSummaryDto> result = dashboardService.getMarkdownSummaries("java");
+
+        assertThat(result).extracting(MarkdownSummaryDto::markdownFileId, MarkdownSummaryDto::codeChallengeCount)
+            .containsExactly(tuple(1L, 2L), tuple(2L, 0L));
     }
 
     @Test

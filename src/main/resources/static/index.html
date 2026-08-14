@@ -315,6 +315,11 @@
 
                     avg {{ formatScore(file.averageMemoryScore) }}
 
+                    <template v-if="file.codeChallengeCount > 0">
+                      •
+                      {{ file.codeChallengeCount }} code
+                    </template>
+
                   </div>
                 </div>
               </div>
