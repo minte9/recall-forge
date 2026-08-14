@@ -12,6 +12,7 @@ import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.dto.FeedbackHistoryResponse;
 import dev.recallforge.domain.QuestionGeneration;
 import dev.recallforge.domain.Review;
+import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.dto.AnswerResponse;
@@ -215,7 +216,7 @@ public class ReviewService {
         }
 
         EvaluationResult evaluation = evaluateAnswer(topicId, question, userAnswer, codeChallenge);
-        return saveAnswer(topicId, question, userAnswer, evaluation, isRetry);
+        return saveAnswer(topicId, question, userAnswer, evaluation, isRetry, codeChallenge);
     }
 
     public EvaluationResult evaluateAnswer(
@@ -248,11 +249,14 @@ public class ReviewService {
             String question,
             String userAnswer,
             EvaluationResult evaluation,
-            boolean isRetry) {
+            boolean isRetry,
+            boolean codeChallenge) {
         Long userId = currentUserService.currentUserId();
         Topic topic = topicService.getTopic(topicId, userId);
 
         UserAccount user = currentUserService.currentUser();
+
+        RetryType retryType = isRetry && codeChallenge ? RetryType.CODE_CHALLENGE : RetryType.REVIEW;
 
         Review review = new Review(
                 topic,
@@ -262,7 +266,8 @@ public class ReviewService {
                 evaluation.score(),
                 evaluation.feedback(),
                 evaluation.totalTokens(),
-                isRetry);
+                isRetry,
+                retryType);
 
         reviewRepository.save(review);
 
@@ -351,7 +356,8 @@ public class ReviewService {
                         r.getFeedback(),
                         r.getReviewedAt(),
                         r.getScore(),
-                        r.isRetry()))
+                        r.isRetry(),
+                        r.getRetryType()))
                 .toList();
     }
 }
