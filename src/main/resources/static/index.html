@@ -716,7 +716,7 @@
                 ">
                   <div class="feedback-history-card-header">
                     <div class="feedback-history-title">
-                      <span class="feedback-history-icon">💬</span>
+                      <span class="feedback-history-icon">💬</span> 
                       <span class="feedback-history-date">{{ formatShortDate(item.createdAt) }}</span>
                       <span v-if="item.isRetry" class="feedback-history-practice-badge" :title="item.id">Practice</span>
                       <span v-if="item.isRetry && item.retryType === 'CODE_CHALLENGE'" class="feedback-history-retrytype-badge" title="Code Challenge">
@@ -735,17 +735,21 @@
                   <div class="feedback-history-question feedback-qa-text">
                     {{ item.question || "No question saved for this review." }}
                   </div>
-                  <div class="feedback-qa-section">
-                    <div class="feedback-qa-label">Answer:</div>
-                    <div class="feedback-qa-text feedback-answer-text">
-                      {{ item.userAnswer || "No answer saved." }}
+
+                  <details class="feedback-answer-block">
+                    <summary>show answer</summary>
+                    <div class="feedback-qa-section">
+                      <!-- <div class="feedback-qa-label">Answer:</div> -->
+                      <div class="feedback-qa-text feedback-answer-text">
+                        {{ item.userAnswer || "No answer saved." }}
+                      </div>
+                      <br>
+                      <!-- <div class="feedback-qa-label">Feedback:</div> -->
+                      <div class="feedback-qa-text">
+                        {{ item.feedback }}
+                      </div>
                     </div>
-                    <br>
-                    <div class="feedback-qa-label">Feedback:</div>
-                    <div class="feedback-qa-text">
-                      {{ item.feedback }}
-                    </div>
-                  </div>
+                  </details>
                 </div>
 
               </details>
