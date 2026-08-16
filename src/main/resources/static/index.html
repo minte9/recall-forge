@@ -632,26 +632,6 @@
                 @keydown.ctrl.enter="submitAnswer">
         </textarea>
 
-              <div v-if="subcategoryMastery" class="reward-card">
-                <div class="reward-top">
-                  <span class="reward-label">
-                    {{ formatSubcategory(subcategoryMastery.subcategory) }} Mastery: {{ subcategoryMastery.masteryPercent }}%
-                  </span>
-
-                  <span>
-                    {{ subcategoryMastery.masteredTopics }}
-                    /
-                    {{ subcategoryMastery.totalTopicsInScope }}
-                    topics
-                  </span>
-                </div>
-
-                <div class="reward-bar">
-                  <div class="reward-bar-fill" :style="{ width: subcategoryRewardProgress + '%' }">
-                  </div>
-                </div>
-              </div>
-
               <div class="actions-row">
 
                 <button v-if="answerSubmitted" class="review-btn" @click="startReview()" :disabled="loading || dailyLimitReached"
@@ -805,6 +785,26 @@
                 </div>
 
               </details>
+            </div>
+          </div>
+
+          <div v-if="subcategoryMastery" class="reward-card review-mastery-card">
+            <div class="reward-top">
+              <span class="reward-label">
+                {{ formatSubcategory(subcategoryMastery.subcategory) }} Mastery: {{ subcategoryMastery.masteryPercent }}%
+              </span>
+
+              <span>
+                {{ subcategoryMastery.masteredTopics }}
+                /
+                {{ subcategoryMastery.totalTopicsInScope }}
+                topics
+              </span>
+            </div>
+
+            <div class="reward-bar">
+              <div class="reward-bar-fill" :style="{ width: subcategoryRewardProgress + '%' }">
+              </div>
             </div>
           </div>
 
