@@ -123,8 +123,7 @@ class ReviewControllerTest {
     @Test
     void answerQuestion_validRequest_returnsScoreAndReward() {
         RewardResponse reward = new RewardResponse(
-            150, 3, "Novice", 50, 100, 4, 10,
-            "backend", 6L, 10L, 60
+            4, "backend", 6L, 10L, 60
         );
         AnswerResponse response = new AnswerResponse(
             1L, "Topic One", 0.8, "Good job", 0.65,
@@ -154,13 +153,7 @@ class ReviewControllerTest {
                   "feedback": "Good job",
                   "updateMemoryScore": 0.65,
                   "reward": {
-                    "totalXp": 150,
-                    "level": 3,
-                    "title": "Novice",
-                    "xpInLevel": 50,
-                    "xpForNextLevel": 100,
                     "streakDays": 4,
-                    "gainedXp": 10,
                     "masteryScope": "backend",
                     "masteredTopics": 6,
                     "totalTopicsInScope": 10,
