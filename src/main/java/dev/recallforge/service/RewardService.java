@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.dto.SubcategoryMasteryResponse;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
@@ -72,6 +73,23 @@ public class RewardService {
             .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
 
         return toResponse(reward, 0, category);
+    }
+
+    @Transactional
+    public SubcategoryMasteryResponse getSubcategoryMastery(String category, String subcategory) {
+        Long userId = currentUserService.currentUserId();
+
+        long totalTopics = topicRepository.countByUserIdAndCategoryAndSubcategory(
+            userId, category, subcategory);
+
+        long masteredTopics = topicRepository.countMasteredByUserIdAndCategoryAndSubcategory(
+            userId, category, subcategory, MASTERY_MEMORY_SCORE, LocalDateTime.now());
+
+        int masteryPercent = totalTopics == 0
+            ? 0
+            : (int) Math.round(masteredTopics * 100.0 / totalTopics);
+
+        return new SubcategoryMasteryResponse(subcategory, masteredTopics, totalTopics, masteryPercent);
     }
 
     private int xpForScore(double score) {

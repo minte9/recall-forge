@@ -291,6 +291,36 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     );
 
     @Query("""
+        select count(t)
+        from Topic t
+        where t.user.id = :userId
+        and lower(t.category) = lower(:category)
+        and lower(t.subcategory) = lower(:subcategory)
+    """)
+    long countByUserIdAndCategoryAndSubcategory(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("subcategory") String subcategory
+    );
+
+    @Query("""
+        select count(t)
+        from Topic t
+        where t.user.id = :userId
+        and lower(t.category) = lower(:category)
+        and lower(t.subcategory) = lower(:subcategory)
+        and t.memoryScore >= :memoryScore
+        and t.nextReviewAt >= :now
+    """)
+    long countMasteredByUserIdAndCategoryAndSubcategory(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("subcategory") String subcategory,
+        @Param("memoryScore") double memoryScore,
+        @Param("now") LocalDateTime now
+    );
+
+    @Query("""
         select distinct
             t.environment as environment,
             t.category as category
