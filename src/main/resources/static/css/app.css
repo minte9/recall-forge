@@ -538,6 +538,13 @@
     border: 0px solid !important;
   }
 
+  /* Extra breathing room above the subcategory mastery card in the review
+     panel - the dashboard's reward-card already gets spacing from its
+     .review-home flex gap, so this is scoped to the review-panel instance. */
+  .review-mastery-card {
+    margin-top: 20px;
+  }
+
   .dashboard-title {
     font-size: 18px;
     font-weight: 800;
