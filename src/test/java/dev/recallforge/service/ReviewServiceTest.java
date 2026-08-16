@@ -413,7 +413,7 @@ class ReviewServiceTest {
         Topic topic = topicWithId(7L, null);
         EvaluationResult evaluation = new EvaluationResult(0.8, "Good job", 120);
         LocalDateTime nextReviewAt = LocalDateTime.now().plusDays(7);
-        RewardResponse reward = new RewardResponse(100, 2, "Student", 0, 100, 3, 6, "Java", 4L, 8L, 50);
+        RewardResponse reward = new RewardResponse(3, "Java", 4L, 8L, 50);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(7L, 1L)).thenReturn(topic);
@@ -456,7 +456,7 @@ class ReviewServiceTest {
         Topic topic = topicWithId(7L, null);
         EvaluationResult evaluation = new EvaluationResult(0.9, "Good job", 120);
         LocalDateTime originalNextReviewAt = topic.getNextReviewAt();
-        RewardResponse reward = new RewardResponse(100, 2, "Student", 0, 100, 3, 6, "Java", 4L, 8L, 50);
+        RewardResponse reward = new RewardResponse(3, "Java", 4L, 8L, 50);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(7L, 1L)).thenReturn(topic);
@@ -506,7 +506,7 @@ class ReviewServiceTest {
         setUp();
         Topic topic = topicWithId(7L, null);
         EvaluationResult evaluation = new EvaluationResult(0.8, "Good job", 120);
-        RewardResponse reward = new RewardResponse(100, 2, "Student", 0, 100, 3, 6, "Uncategorized", 4L, 8L, 50);
+        RewardResponse reward = new RewardResponse(3, "Uncategorized", 4L, 8L, 50);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(7L, 1L)).thenReturn(topic);
@@ -536,7 +536,7 @@ class ReviewServiceTest {
         setUp();
         Topic topic = topicWithId(7L, null);
         EvaluationResult evaluation = new EvaluationResult(1.0, "Compiles and runs correctly", 120);
-        RewardResponse reward = new RewardResponse(100, 2, "Student", 0, 100, 3, 6, "Uncategorized", 4L, 8L, 50);
+        RewardResponse reward = new RewardResponse(3, "Uncategorized", 4L, 8L, 50);
         LocalDateTime originalNextReviewAt = topic.getNextReviewAt();
 
         when(currentUserService.currentUserId()).thenReturn(1L);

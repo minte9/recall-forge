@@ -20,7 +20,7 @@ class UserRewardTest {
         UserReward reward = new UserReward(1L);
         LocalDate today = LocalDate.now();
 
-        reward.addReviewReward(10, false, today);
+        reward.addReviewReward(false,today);
 
         assertThat(reward.currentStreakDays(today)).isEqualTo(1);
     }
@@ -30,7 +30,7 @@ class UserRewardTest {
         UserReward reward = new UserReward(1L);
         LocalDate today = LocalDate.now();
 
-        reward.addReviewReward(10, false, today.minusDays(1));
+        reward.addReviewReward(false,today.minusDays(1));
 
         assertThat(reward.currentStreakDays(today)).isEqualTo(1);
     }
@@ -40,7 +40,7 @@ class UserRewardTest {
         UserReward reward = new UserReward(1L);
         LocalDate today = LocalDate.now();
 
-        reward.addReviewReward(10, false, today.minusDays(3));
+        reward.addReviewReward(false,today.minusDays(3));
 
         assertThat(reward.currentStreakDays(today)).isZero();
         assertThat(reward.getStreakDays()).isEqualTo(1);

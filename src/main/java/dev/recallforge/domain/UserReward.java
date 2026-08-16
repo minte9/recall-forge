@@ -18,7 +18,6 @@ public class UserReward {
     @Column(nullable = false, unique = true)
     private Long userId;
 
-    private int totalXp;
     private int streakDays;
     private int perfectStreak;
     private LocalDate lastReviewDate;
@@ -27,9 +26,7 @@ public class UserReward {
         this.userId = userId;
     }
 
-    public void addReviewReward(int xp, boolean perfect, LocalDate today) {
-        this.totalXp += xp;
-
+    public void addReviewReward(boolean perfect, LocalDate today) {
         if (lastReviewDate == null) {
             streakDays = 1;
         } else if (lastReviewDate.equals(today.minusDays(1))) {

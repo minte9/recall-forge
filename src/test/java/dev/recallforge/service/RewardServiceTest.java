@@ -14,8 +14,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -61,74 +59,14 @@ class RewardServiceTest {
 
         RewardResponse response = rewardService.rewardDefaultUser(0.2, "java");
 
-        assertThat(response.gainedXp()).isEqualTo(1);
-        assertThat(response.totalXp()).isEqualTo(1);
-        assertThat(response.level()).isEqualTo(1);
-        assertThat(response.title()).isEqualTo("Learner");
         assertThat(response.streakDays()).isEqualTo(1);
-    }
-
-    @Test
-    void rewardDefaultUser_perfectScore_addsBonusXpOnTopOfBaseXp() {
-        setUp();
-        when(currentUserService.currentUserId()).thenReturn(1L);
-        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.empty());
-        when(userRewardRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-
-        RewardResponse response = rewardService.rewardDefaultUser(0.95, "java");
-
-        assertThat(response.gainedXp()).isEqualTo(15);
-        assertThat(response.totalXp()).isEqualTo(15);
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-        "0.39, 1",
-        "0.40, 3",
-        "0.69, 3",
-        "0.70, 6",
-        "0.89, 6",
-        "0.90, 10",
-    })
-    void rewardDefaultUser_awardsXpByScoreBand(double score, int expectedXp) {
-        setUp();
-        when(currentUserService.currentUserId()).thenReturn(1L);
-        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.empty());
-        when(userRewardRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-
-        RewardResponse response = rewardService.rewardDefaultUser(score, "java");
-
-        assertThat(response.gainedXp()).isEqualTo(expectedXp);
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-        "0, 1, Learner",
-        "150, 2, Student",
-        "250, 3, Apprentice",
-        "950, 10, Grandmaster",
-        "1000, 11, Grandmaster",
-    })
-    void getCurrentUserReward_mapsTotalXpToLevelAndTitle(int existingXp, int expectedLevel, String expectedTitle) {
-        setUp();
-        UserReward existingReward = new UserReward(1L);
-        existingReward.addReviewReward(existingXp, false, LocalDate.now());
-
-        when(currentUserService.currentUserId()).thenReturn(1L);
-        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
-
-        RewardResponse response = rewardService.getCurrentUserReward("java");
-
-        assertThat(response.level()).isEqualTo(expectedLevel);
-        assertThat(response.title()).isEqualTo(expectedTitle);
-        assertThat(response.gainedXp()).isZero();
     }
 
     @Test
     void getCurrentUserReward_doesNotCreateOrMutateRewardWhenOneAlreadyExists() {
         setUp();
         UserReward existingReward = new UserReward(1L);
-        existingReward.addReviewReward(50, false, LocalDate.now());
+        existingReward.addReviewReward(false, LocalDate.now());
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
@@ -142,7 +80,7 @@ class RewardServiceTest {
     void getCurrentUserReward_streakReadsZero_whenUserMissedMoreThanOneDay() {
         setUp();
         UserReward existingReward = new UserReward(1L);
-        existingReward.addReviewReward(50, false, LocalDate.now().minusDays(3));
+        existingReward.addReviewReward(false, LocalDate.now().minusDays(3));
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
@@ -158,7 +96,7 @@ class RewardServiceTest {
     void getCurrentUserReward_streakStillCounts_whenLastReviewWasYesterday() {
         setUp();
         UserReward existingReward = new UserReward(1L);
-        existingReward.addReviewReward(50, false, LocalDate.now().minusDays(1));
+        existingReward.addReviewReward(false, LocalDate.now().minusDays(1));
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(existingReward));
