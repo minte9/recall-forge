@@ -594,14 +594,15 @@
             <h3 class="review-title">
 
               <span class="review-title-left">
-                <span :title="activeTopic.topicTitle">{{ activeTopic.topicTitle }}</span>
-
                 <span class="topic-select-wrap" @click.stop
                   @mouseenter="isDesktop && openTopicDropdown($event)"
                   @mouseleave="isDesktop && closeTopicDropdown()">
-                  <span class="group-arrow topic-select-arrow" :class="{ open: topicDropdownOpen }"
-                    @click="!isDesktop && toggleTopicDropdown($event)" title="Select a topic from this file">
-                    ⌄
+                  <span class="topic-select-trigger" :title="activeTopic.topicTitle"
+                    @click="!isDesktop && toggleTopicDropdown($event)">
+                    <span class="topic-select-title">{{ activeTopic.topicTitle }}</span>
+                    <span class="group-arrow topic-select-arrow" :class="{ open: topicDropdownOpen }">
+                      ⌄
+                    </span>
                   </span>
 
                   <div v-if="topicDropdownOpen" class="topic-select-dropdown" :class="{ 'align-right': topicDropdownAlignRight }">
