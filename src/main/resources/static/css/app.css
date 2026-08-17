@@ -402,7 +402,8 @@
   }
 
   .markdown-editor-submit,
-  .markdown-editor-optimize {
+  .markdown-editor-optimize,
+  .markdown-editor-cancel {
     padding: 10px 18px;
     border: none;
     border-radius: 10px;
@@ -420,9 +421,19 @@
     background: #4b5563;
   }
 
+  .markdown-editor-cancel {
+    background: transparent;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+  }
+
   .markdown-editor-submit:hover,
   .markdown-editor-optimize:hover {
     opacity: .9;
+  }
+
+  .markdown-editor-cancel:hover {
+    background: #f3f4f6;
   }
 
   .markdown-editor-optimize:disabled {
