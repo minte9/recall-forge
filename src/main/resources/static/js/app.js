@@ -99,15 +99,21 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return this.leftPanel !== "markdown";
     },
 
-    averageScore() {
-      const gradedReviews = this.feedbackHistory.filter(r => !r.isRetry);
-
-      if (gradedReviews.length === 0) {
+    // The topic's actual spaced-repetition memory score (30% old / 70% new
+    // blend), not a plain average of past attempt scores - keeps this badge
+    // consistent with "Updated memory score" in the feedback card and with
+    // file.averageMemoryScore elsewhere in the app.
+    topicMemoryScore() {
+      if (!this.activeTopic) {
         return null;
       }
 
-      const total = gradedReviews.reduce((sum, r) => sum + r.score, 0);
-      return total / gradedReviews.length;
+      if (this.result && this.result.topicId === this.activeTopic.topicId) {
+        return this.result.updateMemoryScore;
+      }
+
+      const topic = this.topicsInFile.find(t => t.id === this.activeTopic.topicId);
+      return topic ? topic.memoryScore : null;
     },
 
     aiEnabled() {
