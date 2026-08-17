@@ -127,7 +127,7 @@ class ReviewControllerTest {
         );
         AnswerResponse response = new AnswerResponse(
             1L, "Topic One", 0.8, "Good job", 0.65,
-            LocalDateTime.of(2026, 7, 6, 9, 0), 2, reward, 3L
+            LocalDateTime.of(2026, 7, 6, 9, 0), 2, reward, 3L, "collections"
         );
         when(reviewService.answerQuestion(eq(1L), any(), any(), anyBoolean(), anyBoolean())).thenReturn(response);
 
@@ -153,6 +153,7 @@ class ReviewControllerTest {
                   "feedback": "Good job",
                   "updateMemoryScore": 0.65,
                   "dueInSubcategory": 3,
+                  "subcategory": "collections",
                   "reward": {
                     "streakDays": 4,
                     "masteryScope": "backend",

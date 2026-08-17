@@ -319,7 +319,8 @@ public class ReviewService {
                 nextReviewAt,
                 reviewStreak,
                 reward,
-                dueInSubcategory);
+                dueInSubcategory,
+                topic.getSubcategory());
     }
 
     public List<ReviewHistoryResponse> getReviewHistoryForTopic(Long topicId) {

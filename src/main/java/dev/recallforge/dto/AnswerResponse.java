@@ -11,6 +11,7 @@ public record AnswerResponse(
     LocalDateTime nextReviewAt,
     int reviewStreak,
     RewardResponse reward,
-    long dueInSubcategory
+    long dueInSubcategory,
+    String subcategory
 ) {
 }
