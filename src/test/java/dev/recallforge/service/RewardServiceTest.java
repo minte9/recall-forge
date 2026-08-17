@@ -2,7 +2,6 @@ package dev.recallforge.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
-import dev.recallforge.dto.SubcategoryMasteryResponse;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
@@ -106,35 +104,5 @@ class RewardServiceTest {
         RewardResponse response = rewardService.getCurrentUserReward("java");
 
         assertThat(response.streakDays()).isEqualTo(1);
-    }
-
-    @Test
-    void getSubcategoryMastery_computesPercentFromMasteredAndTotalCounts() {
-        setUp();
-        when(currentUserService.currentUserId()).thenReturn(1L);
-        when(topicRepository.countByUserIdAndCategoryAndSubcategory(1L, "java", "threads"))
-            .thenReturn(8L);
-        when(topicRepository.countMasteredByUserIdAndCategoryAndSubcategory(
-                eq(1L), eq("java"), eq("threads"), any(Double.class), any()))
-            .thenReturn(6L);
-
-        SubcategoryMasteryResponse response = rewardService.getSubcategoryMastery("java", "threads");
-
-        assertThat(response.subcategory()).isEqualTo("threads");
-        assertThat(response.masteredTopics()).isEqualTo(6L);
-        assertThat(response.totalTopicsInScope()).isEqualTo(8L);
-        assertThat(response.masteryPercent()).isEqualTo(75);
-    }
-
-    @Test
-    void getSubcategoryMastery_returnsZeroPercent_whenSubcategoryHasNoTopics() {
-        setUp();
-        when(currentUserService.currentUserId()).thenReturn(1L);
-        when(topicRepository.countByUserIdAndCategoryAndSubcategory(1L, "java", "empty"))
-            .thenReturn(0L);
-
-        SubcategoryMasteryResponse response = rewardService.getSubcategoryMastery("java", "empty");
-
-        assertThat(response.masteryPercent()).isZero();
     }
 }

@@ -10,7 +10,6 @@ public record AnswerResponse(
     double updateMemoryScore,
     LocalDateTime nextReviewAt,
     int reviewStreak,
-    RewardResponse reward,
-    SubcategoryMasteryResponse subcategoryMastery
+    RewardResponse reward
 ) {
 }

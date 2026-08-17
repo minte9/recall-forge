@@ -17,8 +17,7 @@ public record ReviewQuestionResponse(
         // the user to write code, graded strictly) rather than a normal
         // review question - tells the frontend to submit the answer through
         // the strict grading path and to keep treating it as practice.
-        boolean codeChallenge,
-        SubcategoryMasteryResponse subcategoryMastery
+        boolean codeChallenge
 ) {
     public static ReviewQuestionResponse noReviewsDue() {
         return new ReviewQuestionResponse(
@@ -30,8 +29,7 @@ public record ReviewQuestionResponse(
 			true,
 			"All reviews are done for now. Come back later.",
 			false,
-			false,
-			null
+			false
         );
     }
 }
