@@ -199,6 +199,16 @@ public class TopicService {
         return topicRepository.countDueByUser(userId, category, now);
     }
 
+    public long countDueTopicsBySubcategory(
+        Long userId,
+        String category,
+        String subcategory,
+        LocalDateTime now
+    ) {
+        return topicRepository.countDueByUserAndCategoryAndSubcategory(
+            userId, category, subcategory, now);
+    }
+
     public long countDueTopicsByMarkdownFileId(
         Long markdownFileId,
         Long userId,

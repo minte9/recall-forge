@@ -307,6 +307,9 @@ public class ReviewService {
 
         RewardResponse reward = rewardService.rewardDefaultUser(evaluation.score(), topic.getCategory());
 
+        long dueInSubcategory = topicService.countDueTopicsBySubcategory(
+                userId, topic.getCategory(), topic.getSubcategory(), LocalDateTime.now());
+
         return new AnswerResponse(
                 topic.getId(),
                 topic.getTitle(),
@@ -315,7 +318,8 @@ public class ReviewService {
                 updatedMemoryScore,
                 nextReviewAt,
                 reviewStreak,
-                reward);
+                reward,
+                dueInSubcategory);
     }
 
     public List<ReviewHistoryResponse> getReviewHistoryForTopic(Long topicId) {
