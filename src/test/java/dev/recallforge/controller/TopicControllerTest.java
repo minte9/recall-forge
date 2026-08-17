@@ -73,7 +73,7 @@ class TopicControllerTest {
                     "id": 1,
                     "title": "Topic One",
                     "memoryScore": 0.75,
-                    "nextReviewAt": "2026-07-10T09:00:00"
+                    "nextReviewAt": "2026-07-10T09:00:00Z"
                   }
                 ]
                 """);
@@ -110,7 +110,7 @@ class TopicControllerTest {
                     "id": 2,
                     "title": "Topic Two",
                     "memoryScore": 0.3,
-                    "nextReviewAt": "2026-07-05T08:30:00"
+                    "nextReviewAt": "2026-07-05T08:30:00Z"
                   }
                 ]
                 """);
@@ -148,13 +148,13 @@ class TopicControllerTest {
                     "id": 1,
                     "title": "Topic One",
                     "memoryScore": 0.75,
-                    "nextReviewAt": "2026-07-10T09:00:00"
+                    "nextReviewAt": "2026-07-10T09:00:00Z"
                   },
                   {
                     "id": 2,
                     "title": "Topic Two",
                     "memoryScore": 0.3,
-                    "nextReviewAt": "2026-07-05T08:30:00"
+                    "nextReviewAt": "2026-07-05T08:30:00Z"
                   }
                 ]
                 """);
