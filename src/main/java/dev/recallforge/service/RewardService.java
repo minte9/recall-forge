@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
-import dev.recallforge.dto.SubcategoryMasteryResponse;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
@@ -19,12 +18,12 @@ import dev.recallforge.security.CurrentUserService;
 
 /**
  * Streak/mastery bookkeeping for the current user. Streak and mastery are
- * computed per category (and, for mastery, optionally per subcategory) from
- * review/topic history; the per-user {@link UserReward} row tracks the
- * streak's day bookkeeping. {@link #rewardDefaultUser} is called by
- * {@link ReviewService} after each graded answer; {@link #getCurrentUserReward}
- * is a read-only variant used by {@code DashboardService} to display current
- * standing without recording a review.
+ * computed per category from review/topic history; the per-user
+ * {@link UserReward} row tracks the streak's day bookkeeping. {@link
+ * #rewardDefaultUser} is called by {@link ReviewService} after each graded
+ * answer; {@link #getCurrentUserReward} is a read-only variant used by
+ * {@code DashboardService} to display current standing without recording a
+ * review.
  */
 @Service
 public class RewardService {
@@ -71,23 +70,6 @@ public class RewardService {
             .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
 
         return toResponse(reward, category);
-    }
-
-    @Transactional
-    public SubcategoryMasteryResponse getSubcategoryMastery(String category, String subcategory) {
-        Long userId = currentUserService.currentUserId();
-
-        long totalTopics = topicRepository.countByUserIdAndCategoryAndSubcategory(
-            userId, category, subcategory);
-
-        long masteredTopics = topicRepository.countMasteredByUserIdAndCategoryAndSubcategory(
-            userId, category, subcategory, MASTERY_MEMORY_SCORE, LocalDateTime.now());
-
-        int masteryPercent = totalTopics == 0
-            ? 0
-            : (int) Math.round(masteredTopics * 100.0 / totalTopics);
-
-        return new SubcategoryMasteryResponse(subcategory, masteredTopics, totalTopics, masteryPercent);
     }
 
     private RewardResponse toResponse(

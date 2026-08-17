@@ -83,23 +83,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       );
     },
 
-    subcategoryMastery() {
-      return (this.result && this.result.subcategoryMastery)
-        || (this.review && this.review.subcategoryMastery)
-        || null;
-    },
-
-    subcategoryRewardProgress() {
-      if (!this.subcategoryMastery) {
-        return 0;
-      }
-
-      return Math.max(
-        0,
-        Math.min(100, this.subcategoryMastery.masteryPercent || 0)
-      );
-    },
-
     isDesktop() {
       return window.innerWidth > 900;
     },

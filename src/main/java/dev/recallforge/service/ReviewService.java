@@ -20,7 +20,6 @@ import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.ReviewQuestionResponse;
 import dev.recallforge.dto.ReviewQueueResponse;
 import dev.recallforge.dto.RewardResponse;
-import dev.recallforge.dto.SubcategoryMasteryResponse;
 import dev.recallforge.exception.AiDisabledException;
 import dev.recallforge.exception.DailyQuestionLimitExceededException;
 import dev.recallforge.exception.DailyReviewLimitExceededException;
@@ -138,8 +137,7 @@ public class ReviewService {
                 false,
                 null,
                 forcePractice,
-                false,
-                rewardService.getSubcategoryMastery(topic.getCategory(), topic.getSubcategory()));
+                false);
     }
 
     /**
@@ -196,8 +194,7 @@ public class ReviewService {
                 false,
                 null,
                 true,
-                true,
-                rewardService.getSubcategoryMastery(topic.getCategory(), topic.getSubcategory()));
+                true);
     }
 
     public ReviewQuestionResponse skipTopic(Long topicId, Long markdownFileId, String category) {
@@ -309,8 +306,6 @@ public class ReviewService {
         }
 
         RewardResponse reward = rewardService.rewardDefaultUser(evaluation.score(), topic.getCategory());
-        SubcategoryMasteryResponse subcategoryMastery =
-                rewardService.getSubcategoryMastery(topic.getCategory(), topic.getSubcategory());
 
         return new AnswerResponse(
                 topic.getId(),
@@ -320,8 +315,7 @@ public class ReviewService {
                 updatedMemoryScore,
                 nextReviewAt,
                 reviewStreak,
-                reward,
-                subcategoryMastery);
+                reward);
     }
 
     public List<ReviewHistoryResponse> getReviewHistoryForTopic(Long topicId) {
