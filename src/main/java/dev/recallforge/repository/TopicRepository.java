@@ -102,6 +102,20 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     );
 
     @Query("""
+        select count(t) from Topic t
+        where t.user.id = :userId
+        and lower(t.category) = lower(:category)
+        and lower(t.subcategory) = lower(:subcategory)
+        and t.nextReviewAt <= :now
+    """)
+    long countDueByUserAndCategoryAndSubcategory(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("subcategory") String subcategory,
+        @Param("now") LocalDateTime now
+    );
+
+    @Query("""
         select count(t)
         from Topic t
         where t.markdownFile.user.id = :userId 

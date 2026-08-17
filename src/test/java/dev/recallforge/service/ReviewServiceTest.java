@@ -423,6 +423,8 @@ class ReviewServiceTest {
             .thenReturn(new RepetitionService.RepetitionResult(nextReviewAt, 1));
         when(rewardService.rewardDefaultUser(0.8, "Uncategorized")).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicService.countDueTopicsBySubcategory(eq(1L), eq("Uncategorized"), eq("Uncategorized"), any()))
+            .thenReturn(5L);
 
         AnswerResponse response = reviewService.saveAnswer(7L, "Q?", "My answer", evaluation, false, false);
 
@@ -434,6 +436,7 @@ class ReviewServiceTest {
         assertThat(response.nextReviewAt()).isEqualTo(nextReviewAt);
         assertThat(response.reviewStreak()).isEqualTo(1);
         assertThat(response.reward()).isEqualTo(reward);
+        assertThat(response.dueInSubcategory()).isEqualTo(5L);
 
         assertThat(topic.getMemoryScore()).isEqualTo(0.65);
         assertThat(topic.getNextReviewAt()).isEqualTo(nextReviewAt);

@@ -328,6 +328,17 @@ class TopicServiceTest {
     }
 
     @Test
+    void countDueTopicsBySubcategory_delegatesAllArgsToRepository() {
+        setUp();
+        LocalDateTime now = LocalDateTime.now();
+        when(topicRepository.countDueByUserAndCategoryAndSubcategory(1L, "java", "threads", now))
+            .thenReturn(3L);
+
+        assertThat(topicService.countDueTopicsBySubcategory(1L, "java", "threads", now))
+            .isEqualTo(3L);
+    }
+
+    @Test
     void countDueTopicsByMarkdownFileId_delegatesAllArgsToRepository() {
         setUp();
         LocalDateTime now = LocalDateTime.now();
