@@ -359,6 +359,10 @@
               @keydown.ctrl.enter="submitMarkdownEdit"></textarea>
 
             <div class="markdown-editor-actions">
+              <button class="markdown-editor-cancel" @click="showMarkdown()" title="Esc">
+                Cancel
+              </button>
+
               <button v-if="currentUser?.role == 'ADMIN'" class="markdown-editor-optimize"
                 :disabled="optimizingMarkdown || optimizeFinalized" @click="optimizeMarkdown"
                 title="Preview an AI-tightened version of this content">
