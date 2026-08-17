@@ -674,9 +674,9 @@
                   <icon name="question-circle"></icon>
                 </span>
 
-                <span v-if="averageScore !== null" class="last-score-badge last-score-badge--actions"
-                  title="Avg Score - Show feedback history" @click="toggleFeedbackHistory">
-                  Score: {{ formatScore(averageScore) }}
+                <span v-if="topicMemoryScore !== null" class="last-score-badge last-score-badge--actions"
+                  title="Memory Score - Show feedback history" @click="toggleFeedbackHistory">
+                  Score: {{ formatScore(topicMemoryScore) }}
                 </span>
 
               </div>
@@ -715,9 +715,9 @@
                   </div>
                 </div>
 
-                <span v-if="averageScore !== null" class="last-score-badge last-score-badge--actions"
-                  title="Avg Score - Show feedback history" @click="toggleFeedbackHistory">
-                  Score: {{ formatScore(averageScore) }}
+                <span v-if="topicMemoryScore !== null" class="last-score-badge last-score-badge--actions"
+                  title="Memory Score - Show feedback history" @click="toggleFeedbackHistory">
+                  Score: {{ formatScore(topicMemoryScore) }}
                 </span>
 
               </div>
