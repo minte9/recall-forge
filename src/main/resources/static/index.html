@@ -307,7 +307,7 @@
             </summary>
 
             <div v-for="file in group.files" :key="file.markdownFileId" class="markdown-row clickable"
-              @click="previewMarkdownFile(file.markdownFileId)">
+              @click="file.dueCount > 0 ? previewMarkdownFile(file.markdownFileId) : startReviewForFile(file.markdownFileId)">
 
               <div class="row-left">
                 <div>
