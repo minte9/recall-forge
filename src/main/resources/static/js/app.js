@@ -848,6 +848,11 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return;
       }
 
+      if (this.userAnswer.trim().length === 0) {
+        this.error = `Please enter an answer before submitting.`;
+        return;
+      }
+
       this.answerSubmitted = true;
       this.loading = true;
       this.error = null;
