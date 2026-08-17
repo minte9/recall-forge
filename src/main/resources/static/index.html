@@ -810,7 +810,7 @@
                   </span>
                 </p>
                 <p>
-                  <strong>Due in subcategory:</strong> {{ result.dueInSubcategory }}
+                  <strong>{{ formatSubcategory(result.subcategory) }} due topics:</strong> {{ result.dueInSubcategory }}
                 </p>
               </template>
               <p v-if="isRetry" class="muted">

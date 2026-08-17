@@ -437,6 +437,7 @@ class ReviewServiceTest {
         assertThat(response.reviewStreak()).isEqualTo(1);
         assertThat(response.reward()).isEqualTo(reward);
         assertThat(response.dueInSubcategory()).isEqualTo(5L);
+        assertThat(response.subcategory()).isEqualTo("Uncategorized");
 
         assertThat(topic.getMemoryScore()).isEqualTo(0.65);
         assertThat(topic.getNextReviewAt()).isEqualTo(nextReviewAt);
