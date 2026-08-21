@@ -53,24 +53,25 @@
           </div>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
-            @click="markdownEditing ? showMarkdown() : editMarkdown(); mobileMenuOpen = false">
+            @click="markdownEditing ? showMarkdown() : editMarkdown(); mobileMenuOpen = false"
+            :title="markdownEditing ? null : 'Ctrl+Shift+E'">
             <icon :name="markdownEditing ? 'eye' : 'pencil'" class="menu-icon"></icon>{{ markdownEditing ? "Show Markdown" : "Edit Markdown" }}
           </button>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
-            @click="showReviewsHistory(); mobileMenuOpen = false">
+            @click="showReviewsHistory(); mobileMenuOpen = false" title="Ctrl+Shift+H">
             <icon name="file-text" class="menu-icon"></icon>Reviews History
           </button>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
                     currentMarkdownCodeChallenges.length > 0 && !viewingCodeChallenges"
-            @click="showCodeChallenges(); mobileMenuOpen = false">
+            @click="showCodeChallenges(); mobileMenuOpen = false" title="Ctrl+Shift+C">
             <icon name="code" class="menu-icon"></icon> Code Challenges
           </button>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
                     viewingCodeChallenges"
-            @click="hideCodeChallenges(); mobileMenuOpen = false">
+            @click="hideCodeChallenges(); mobileMenuOpen = false" title="Ctrl+Shift+M">
             <icon name="eye" class="menu-icon"></icon> Show Markdown
           </button>
 
@@ -156,24 +157,25 @@
               </div>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
-                @click="markdownEditing ? showMarkdown() : editMarkdown(); menuOpen = false">
+                @click="markdownEditing ? showMarkdown() : editMarkdown(); menuOpen = false"
+                :title="markdownEditing ? null : 'Ctrl+Shift+E'">
                 <icon :name="markdownEditing ? 'eye' : 'pencil'" class="menu-icon"></icon>{{ markdownEditing ? "Show Markdown" : "Edit Markdown" }}
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
-                @click="showReviewsHistory(); menuOpen = false">
+                @click="showReviewsHistory(); menuOpen = false" title="Ctrl+Shift+H">
                 <icon name="file-text" class="menu-icon"></icon>Reviews History
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
                   currentMarkdownCodeChallenges.length > 0 && !viewingCodeChallenges"
-                @click="showCodeChallenges(); menuOpen = false">
+                @click="showCodeChallenges(); menuOpen = false" title="Ctrl+Shift+C">
                 <icon name="code" class="menu-icon"></icon>Code Challenges
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
                   viewingCodeChallenges"
-                @click="hideCodeChallenges(); menuOpen = false">
+                @click="hideCodeChallenges(); menuOpen = false" title="Ctrl+Shift+M">
                 <icon name="eye" class="menu-icon"></icon>Show Markdown
               </button>
 
@@ -388,7 +390,7 @@
           </div>
 
           <div v-else-if="viewingCodeChallenges" class="markdown code-challenges-markdown"
-            v-html="renderMarkdown(codeChallengesMarkdown())">
+            v-html="codeChallengesMarkdown()">
           </div>
 
           <div v-else class="markdown" v-html="renderMarkdown(markdown)"

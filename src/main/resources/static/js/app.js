@@ -278,7 +278,48 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     handleGlobalKeydown(event) {
-      if (!event.ctrlKey || !event.shiftKey || event.key !== "Enter") {
+      if (!event.ctrlKey || !event.shiftKey) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+
+      if (key === "c") {
+        if (this.leftPanel === "markdown" && !this.markdownLoading && this.currentMarkdownFileId &&
+            this.currentMarkdownCodeChallenges.length > 0 && !this.viewingCodeChallenges) {
+          event.preventDefault();
+          this.showCodeChallenges();
+        }
+        return;
+      }
+
+      if (key === "m") {
+        if (this.leftPanel === "markdown" && !this.markdownLoading && this.currentMarkdownFileId &&
+            this.viewingCodeChallenges) {
+          event.preventDefault();
+          this.hideCodeChallenges();
+        }
+        return;
+      }
+
+      if (key === "h") {
+        if (this.leftPanel === "markdown" && !this.markdownLoading && this.currentMarkdownFileId) {
+          event.preventDefault();
+          this.showReviewsHistory();
+        }
+        return;
+      }
+
+      if (key === "e") {
+        if (this.leftPanel === "markdown" && !this.markdownLoading && this.currentMarkdownFileId &&
+            !this.markdownEditing) {
+          event.preventDefault();
+          this.editMarkdown();
+        }
+        return;
+      }
+
+      if (event.key !== "Enter") {
         return;
       }
 
@@ -793,10 +834,19 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return;
       }
 
+      // Same as clicking the Score badge - toggle the history panel over
+      // whatever topic is already active, instead of clearing review /
+      // notDueTopic and hiding the title, textarea, and buttons.
+      if (this.activeTopic) {
+        this.toggleFeedbackHistory();
+        return;
+      }
+
       await this.loadTopicsInFile(this.currentMarkdownFileId);
 
       if (this.topicsInFile.length > 0) {
-        await this.viewTopicHistory(this.topicsInFile[0].id);
+        await this.selectTopic(this.topicsInFile[0].id);
+        this.feedbackHistoryVisible = true;
       }
     },
 
@@ -1380,19 +1430,40 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
-    // Assembles all of the current file's code challenges into one markdown
-    // string - userAnswer is fenced so Markdown.render()'s existing "show
-    // code" spoiler picks it up, same mechanism used for file content.
+    // "n days ago" label for a challenge's reviewedAt timestamp.
+    daysAgoLabel(dateString) {
+      const days = Math.floor((Date.now() - new Date(dateString).getTime()) / 86400000);
+
+      if (days <= 0) return "today";
+      if (days === 1) return "1 day ago";
+      return days + " days ago";
+    },
+
+    // Assembles all of the current file's code challenges into one HTML
+    // string - each challenge is its own <details>, with the numbered
+    // question as the <summary> so clicking the question itself toggles
+    // the answer open/closed (no separate "show code" label).
     codeChallengesMarkdown() {
+      const escapeHtml = (s) => s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
       const challenges = this.currentMarkdownCodeChallenges
         .map(c => {
           const answer = (c.userAnswer || "").trim();
-          const answerBlock = answer ? "```\n" + answer + "\n```" : "*No answer submitted.*";
-          return "<b>Q. </b> " + c.question + "\n\n" + answerBlock;
+          const answerBlock = answer
+            ? "<pre><code>" + escapeHtml(answer) + "</code></pre>"
+            : "<p><em>No answer submitted.</em></p>";
+          const reviewedRow = c.reviewedAt
+            ? "<div class=\"challenge-reviewed\">Reviewed: " + this.daysAgoLabel(c.reviewedAt) + "</div>"
+            : "";
+          return "<div class=\"challenge-item\"><details class=\"code-block\"><summary>" +
+            escapeHtml(c.question) + "</summary>" + answerBlock + "</details>" + reviewedRow + "</div>";
         })
-        .join("\n\n");
+        .join("");
 
-      return "## Code Challenges\n\n <br>" + challenges;
+      return "<h2>Code Challenges</h2><br>" + challenges;
     },
 
     showCodeChallenges() {
