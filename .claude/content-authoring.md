@@ -16,9 +16,6 @@ files under `data/`) and importing it into the database.
    reviewed. Don't assume "write the files" also means "import them" unless
    told so explicitly — these have been two distinct approval points in past
    sessions.
-5. **Ask about visibility** (`PUBLIC` vs `PRIVATE`) if the subcategory doesn't
-   already have an established convention — check existing files in the same
-   subcategory first; don't assume.
 
 ## 2. Markdown format
 
@@ -101,6 +98,13 @@ can't cover (e.g. importing as a user other than the one currently logged
 in). The mechanics — SQL patterns, `docker compose exec` commands, which
 user ID content lands under — are operational details, not editorial ones;
 see the local companion guide (§7 below).
+
+There's no per-file/subcategory visibility to set — whether a category is
+public (offered as a starter pack) is a hardcoded allow-list in
+`StarterPackService.PUBLIC_CATEGORIES`, checked only for the template user
+(id 1). Every other category, and every other user's content, is private by
+definition. Adding a new public starter-pack category means updating that
+list (and the matching button in `static/index.html`), not tagging content.
 
 ## 6. Ordering
 

@@ -237,11 +237,22 @@
                   <div v-if="index > 0" class="menu-divider">
                   </div>
 
-                  <button v-for="(environment, envIndex) in items" :key="environment"
-                    :class="{ active: selectedEnvironment === environment }" @click="selectEnvironment(environment)">
+                  <button v-for="(category, envIndex) in items" :key="category.category"
+                    :class="{ active: selectedEnvironment === category.category }"
+                    @click="selectEnvironment(category.category)">
 
-                    <span>{{ environment }}</span>
-                    <span v-if="envIndex === 0" class="environment-badge">{{ groupName }}</span>
+                    <span class="category-name">{{ category.category }}</span>
+
+                    <span class="category-meta">
+                      <span v-if="envIndex === 0" class="environment-badge">{{ groupName }}</span>
+
+                      <span class="category-icon-slot">
+                        <icon v-if="category.isPrivate" name="lock-fill" class="category-lock-icon"
+                          title="Private"></icon>
+                        <icon v-else name="unlock-fill" class="category-public-icon"
+                          title="Public"></icon>
+                      </span>
+                    </span>
 
                   </button>
 

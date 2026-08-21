@@ -53,6 +53,7 @@ public class DashboardService {
     private final SubcategoryOrderRepository subcategoryOrderRepository;
     private final CategoryOrderRepository categoryOrderRepository;
     private final AppReviewLimitProperties reviewLimitProperties;
+    private final StarterPackService starterPackService;
 
     public DashboardService(
         TopicRepository topicRepository,
@@ -62,7 +63,8 @@ public class DashboardService {
         CurrentUserService currentUserService,
         SubcategoryOrderRepository subcategoryOrderRepository,
         CategoryOrderRepository categoryOrderRepository,
-        AppReviewLimitProperties reviewLimitProperties
+        AppReviewLimitProperties reviewLimitProperties,
+        StarterPackService starterPackService
     ) {
         this.topicRepository = topicRepository;
         this.reviewRepository = reviewRepository;
@@ -72,6 +74,7 @@ public class DashboardService {
         this.subcategoryOrderRepository = subcategoryOrderRepository;
         this.categoryOrderRepository = categoryOrderRepository;
         this.reviewLimitProperties = reviewLimitProperties;
+        this.starterPackService = starterPackService;
     }
     
     public DashboardResponse getDashboard(String category) {
@@ -269,7 +272,8 @@ public class DashboardService {
                     categoryOrderKey(option.getEnvironment(), option.getCategory()), Integer.MAX_VALUE)))
             .map(option -> new CategoryOptionResponse(
                 option.getEnvironment(),
-                option.getCategory()
+                option.getCategory(),
+                !starterPackService.isPublicCategory(userId, option.getCategory())
             ))
             .toList();
     }

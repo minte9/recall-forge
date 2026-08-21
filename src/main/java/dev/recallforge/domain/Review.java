@@ -51,10 +51,6 @@ public class Review {
     @JoinColumn(name = "user_id", nullable = false)
     private UserAccount user;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Visibility visibility = Visibility.PRIVATE;
-
     // True for a Try Again / Code Challenge practice attempt - lets callers
     // (e.g. the feedback history's average score) tell those apart from a
     // real graded review. Defaults to false so existing rows stay real

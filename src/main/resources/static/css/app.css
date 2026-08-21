@@ -1723,6 +1723,42 @@
     cursor: pointer;
   }
 
+  .category-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .category-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .category-icon-slot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+
+  .category-lock-icon {
+    width: 12px;
+    height: 12px;
+    color: #94a3b8;
+  }
+
+  .category-public-icon {
+    width: 12px;
+    height: 12px;
+    color: #22c55e;
+  }
+
   .environment-badge {
     padding: 2px 12px;
     border-radius: 999px;
@@ -1733,6 +1769,7 @@
     letter-spacing: .04em;
     text-transform: uppercase;
     white-space: nowrap;
+    margin-right: 10px;
   }
 
   .environment-menu-dropdown .menu-divider {

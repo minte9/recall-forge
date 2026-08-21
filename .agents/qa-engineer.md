@@ -80,8 +80,6 @@ resulting data is indistinguishable from a real review.
   `user_answer` / `feedback` (grounded in the topic's actual title/content),
   not placeholder lorem-ipsum — this is what makes the data readable and
   believable when the user checks it in the UI.
-- `reviews.visibility` defaults to `PRIVATE` at the entity level in Java,
-  but raw SQL must set it explicitly — there's no DB-level default.
 - **Token usage** (`reviews.total_tokens`): every real review has a non-zero
   count, captured from the OpenAI evaluation call in `OpenAiService.ask()`
   (never actually called by this agent — see "Known Gaps"). Leaving it `0`
