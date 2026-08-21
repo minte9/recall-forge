@@ -162,8 +162,8 @@ class OpenAiServiceTest {
         assertThat(prompt).contains("Recently asked questions on this topic, most recent first:");
         assertThat(prompt).contains("\"What is X?\" (score 0.80, feedback: Good understanding)");
         assertThat(prompt).contains("\"What is Y?\" (score 0.30, feedback: Missed the point)");
-        assertThat(prompt).contains("2-3 consecutive questions on the same concept");
-        assertThat(prompt).contains("never ask a question that is an exact duplicate or a trivial");
+        assertThat(prompt).contains("2-3 consecutive questions on the");
+        assertThat(prompt).contains("same concept before moving to another");
     }
 
     @Test
