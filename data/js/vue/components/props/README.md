@@ -1,4 +1,4 @@
-## JS / Vue / Components / Props
+## JS / Vue.js / Components / Props
 
 ### 1. Declaring Props
 

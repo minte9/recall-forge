@@ -1,4 +1,4 @@
-## JS / Vue / Components / Slots
+## JS / Vue.js / Components / Slots
 
 ### 1. Default Slots
 

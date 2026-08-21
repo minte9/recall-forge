@@ -1,4 +1,4 @@
-## JS / Vue / Reactivity / toRef & toRefs
+## JS / Vue.js / Reactivity / toRef & toRefs
 
 ### 1. toRef
 

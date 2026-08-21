@@ -1,4 +1,4 @@
-## JS / Vue / Forms & Events / Form Input Bindings
+## JS / Vue.js / Forms & Events / Form Input Bindings
 
 ### 1. v-model Basics
 

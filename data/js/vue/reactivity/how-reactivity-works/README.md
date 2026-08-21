@@ -1,4 +1,4 @@
-## JS / Vue / Reactivity / How Reactivity Works
+## JS / Vue.js / Reactivity / How Reactivity Works
 
 ### 1. Proxies Under the Hood
 

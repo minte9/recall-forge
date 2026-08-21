@@ -1,4 +1,4 @@
-## JS / Vue / Rendering / Class & Style Bindings
+## JS / Vue.js / Rendering / Class & Style Bindings
 
 ### 1. Binding HTML Classes
 

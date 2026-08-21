@@ -1,4 +1,4 @@
-## JS / Vue / Basics / Reactivity Basics
+## JS / Vue.js / Basics / Reactivity Basics
 
 ### 1. ref vs reactive
 

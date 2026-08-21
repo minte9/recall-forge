@@ -1,4 +1,4 @@
-## JS / Vue / Basics / App & Templates
+## JS / Vue.js / Basics / App & Templates
 
 ### 1. Creating an App
 

@@ -1,4 +1,4 @@
-## JS / Vue / Composition API / setup() & script setup
+## JS / Vue.js / Composition API / setup() & script setup
 
 ### 1. The setup() Function
 

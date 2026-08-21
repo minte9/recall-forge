@@ -1,4 +1,4 @@
-## JS / Vue / Composition API / Lifecycle Hooks
+## JS / Vue.js / Composition API / Lifecycle Hooks
 
 ### 1. Mounting Hooks
 
