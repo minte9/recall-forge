@@ -1,4 +1,4 @@
-## JS / Vue / State Management / Pinia Basics
+## JS / Vue.js / State Management / Pinia Basics
 
 ### 1. Defining a Store
 

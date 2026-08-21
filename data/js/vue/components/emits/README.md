@@ -1,4 +1,4 @@
-## JS / Vue / Components / Emits
+## JS / Vue.js / Components / Emits
 
 ### 1. Declaring Emits
 

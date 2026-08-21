@@ -1,4 +1,4 @@
-## JS / Vue / Rendering / Template Refs & Dynamic Components
+## JS / Vue.js / Rendering / Template Refs & Dynamic Components
 
 ### 1. Template Refs
 

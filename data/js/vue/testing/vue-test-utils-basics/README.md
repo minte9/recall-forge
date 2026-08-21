@@ -1,4 +1,4 @@
-## JS / Vue / Testing / Vue Test Utils Basics
+## JS / Vue.js / Testing / Vue Test Utils Basics
 
 ### 1. Mounting a Component
 

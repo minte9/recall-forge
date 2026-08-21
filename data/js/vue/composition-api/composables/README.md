@@ -1,4 +1,4 @@
-## JS / Vue / Composition API / Composables
+## JS / Vue.js / Composition API / Composables
 
 ### 1. Extracting Composables
 

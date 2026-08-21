@@ -1,4 +1,4 @@
-## JS / Vue / Basics / Computed & Watchers
+## JS / Vue.js / Basics / Computed & Watchers
 
 ### 1. Computed Properties
 

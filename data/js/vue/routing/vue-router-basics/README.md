@@ -1,4 +1,4 @@
-## JS / Vue / Routing / Vue Router Basics
+## JS / Vue.js / Routing / Vue Router Basics
 
 ### 1. Routes & router-view
 

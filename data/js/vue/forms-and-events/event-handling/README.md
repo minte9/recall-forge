@@ -1,4 +1,4 @@
-## JS / Vue / Forms & Events / Event Handling
+## JS / Vue.js / Forms & Events / Event Handling
 
 ### 1. Listening to Events (v-on)
 

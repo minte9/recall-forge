@@ -1,4 +1,4 @@
-## JS / Vue / Basics / Conditional & List Rendering
+## JS / Vue.js / Basics / Conditional & List Rendering
 
 ### 1. v-if, v-else, v-show
 

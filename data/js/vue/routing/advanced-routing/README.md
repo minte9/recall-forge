@@ -1,4 +1,4 @@
-## JS / Vue / Routing / Advanced Routing
+## JS / Vue.js / Routing / Advanced Routing
 
 ### 1. Nested Routes
 
