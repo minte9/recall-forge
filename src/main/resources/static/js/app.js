@@ -132,7 +132,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           groups[option.environment] = [];
         }
 
-        groups[option.environment].push(option.category);
+        groups[option.environment].push({
+          category: option.category,
+          isPrivate: option.isPrivate
+        });
       });
 
       const priorityOrder = ["JVM", "PYTHON", "DEVOPS", "DB"];

@@ -1,5 +1,6 @@
 package dev.recallforge.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -60,14 +61,26 @@ class StarterPackServiceTest {
     }
 
     @Test
-    void importStarterPack_emptyPack_throwsIllegalArgumentException() {
+    void importStarterPack_publicCategoryWithNoTemplateFiles_throwsIllegalArgumentException() {
         setUp();
         when(currentUserService.currentUserId()).thenReturn(2L);
-        when(markdownFileRepository.findByUserIdAndCategory(1L, "Unknown")).thenReturn(List.of());
+        when(markdownFileRepository.findByUserIdAndCategory(1L, "Python")).thenReturn(List.of());
+
+        assertThatThrownBy(() -> starterPackService.importStarterPack("Python"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Starter pack not found: Python");
+    }
+
+    @Test
+    void importStarterPack_categoryNotPublic_throwsIllegalArgumentExceptionWithoutQueryingRepository() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(2L);
 
         assertThatThrownBy(() -> starterPackService.importStarterPack("Unknown"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Starter pack not found: Unknown");
+
+        verify(markdownFileRepository, never()).findByUserIdAndCategory(eq(1L), eq("Unknown"));
     }
 
     @Test
@@ -86,5 +99,26 @@ class StarterPackServiceTest {
         verify(markdownFileService).importMarkdown("### Topic 1\ncontent", 1);
         verify(markdownFileService).importMarkdown("### Topic 2\ncontent", 2);
         verify(markdownFileService).importMarkdown("### Topic 3\ncontent", null);
+    }
+
+    @Test
+    void isPublicCategory_templateUserPublicCategoryCaseInsensitive_returnsTrue() {
+        setUp();
+
+        assertThat(starterPackService.isPublicCategory(1L, "java")).isTrue();
+    }
+
+    @Test
+    void isPublicCategory_templateUserNonPublicCategory_returnsFalse() {
+        setUp();
+
+        assertThat(starterPackService.isPublicCategory(1L, "Spring")).isFalse();
+    }
+
+    @Test
+    void isPublicCategory_nonTemplateUserSameCategoryName_returnsFalse() {
+        setUp();
+
+        assertThat(starterPackService.isPublicCategory(2L, "Java")).isFalse();
     }
 }

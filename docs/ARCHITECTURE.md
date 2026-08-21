@@ -50,7 +50,7 @@ on it for scoping data to the current user.
 |---|---|
 | `controller` | REST endpoints. Thin — parse request, delegate to a service, map the result to a DTO/response. |
 | `service` | Business logic: spaced repetition, markdown import/sync, rewards, dashboard aggregation, admin, starter packs. |
-| `domain` | JPA entities (`@Entity`) plus small enums (`Role`, `Visibility`). |
+| `domain` | JPA entities (`@Entity`) plus small enums (`Role`). |
 | `dto` | Request/response records exposed over the REST API. |
 | `repository` | Spring Data JPA repositories + native/projection queries. |
 | `security` | OAuth2 user-loading services and `CurrentUserService` (current-user resolution). |
