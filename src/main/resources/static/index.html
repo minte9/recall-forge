@@ -277,6 +277,10 @@
               <button class="starter-pack-btn" @click="importStarterPack('SQL')">
                 SQL
               </button>
+
+              <button class="starter-pack-btn" @click="importStarterPack('Javascript')">
+                Javascript
+              </button>
             </div>
 
           </div>
@@ -576,6 +580,12 @@
                 :disabled="categoryOptions.some(o => o.category === 'SQL')"
                 @click="importStarterPack('SQL')">
                 SQL
+              </button>
+
+              <button class="starter-pack-btn"
+                :disabled="categoryOptions.some(o => o.category === 'Javascript')"
+                @click="importStarterPack('Javascript')">
+                Javascript
               </button>
             </div>
           </div>
