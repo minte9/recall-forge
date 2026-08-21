@@ -173,6 +173,52 @@ class RewardServiceTest {
     }
 
     @Test
+    void getCurrentUserReward_goalReachedTodayIsTrue_whenTodayHitsTheReviewThreshold() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of());
+        when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any()))
+            .thenReturn(activityOnDay(LocalDateTime.now(), 10, 0.8, RetryType.REVIEW));
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.goalReachedToday()).isTrue();
+    }
+
+    @Test
+    void getCurrentUserReward_goalReachedTodayIsTrue_whenTodayHitsTheCodeChallengeThreshold() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of());
+        when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any()))
+            .thenReturn(activityOnDay(LocalDateTime.now(), 3, 0.3, RetryType.CODE_CHALLENGE));
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.goalReachedToday()).isTrue();
+    }
+
+    @Test
+    void getCurrentUserReward_goalReachedTodayIsFalse_whenOnlyAnEarlierDayQualified() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of());
+        when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any()))
+            .thenReturn(activityOnDay(LocalDateTime.now().minusDays(3), 10, 0.8, RetryType.REVIEW));
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.goalDaysThisMonth()).isEqualTo(1);
+        assertThat(response.goalReachedToday()).isFalse();
+    }
+
+    @Test
     void getCurrentUserReward_goalDaysCountsEachQualifyingDayInTheMonth() {
         setUp();
         when(currentUserService.currentUserId()).thenReturn(1L);

@@ -3,6 +3,7 @@ package dev.recallforge.dto;
 public record RewardResponse(
     int streakDays,
     int goalDaysThisMonth,
+    boolean goalReachedToday,
     int goalReviewsPerDay,
     int goalCodeChallengesPerDay,
 
