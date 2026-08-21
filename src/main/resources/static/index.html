@@ -974,8 +974,8 @@
               </span>
 
               <span class="info-tooltip reward-streak-right" tabindex="0"
-                :data-tooltip="`A day where you log at least ${dashboard.reward.goalReviewsPerDay} green reviews (score of at least 0.7) or ${dashboard.reward.goalCodeChallengesPerDay} code challenges. Counts every goal day you've ever hit, not just a current streak.`">
-                🎯 Goal: {{ dashboard.reward.goalDays }} days
+                :data-tooltip="`A day where you log at least ${dashboard.reward.goalReviewsPerDay} green reviews (score of at least 0.7) or ${dashboard.reward.goalCodeChallengesPerDay} code challenges. Resets on the 1st of each month.`">
+                🎯 Goal: {{ dashboard.reward.goalDaysThisMonth }} days this month
               </span>
             </div>
 

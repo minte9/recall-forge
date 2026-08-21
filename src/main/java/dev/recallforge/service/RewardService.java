@@ -112,7 +112,7 @@ public class RewardService {
 
         return new RewardResponse(
             categoryStreakDays(userId, category, LocalDate.now()),
-            goalDays(userId, category),
+            goalDaysThisMonth(userId, category, LocalDate.now()),
             goalProperties.reviews(),
             goalProperties.codeChallenges(),
 
@@ -166,15 +166,19 @@ public class RewardService {
         return streak;
     }
 
-    // Lifetime count of days (in this category) that hit the daily goal:
-    // goalProperties.reviews() fresh reviews scoring at least
+    // Count of days this calendar month (in this category) that hit the
+    // daily goal: goalProperties.reviews() fresh reviews scoring at least
     // GOAL_REVIEW_SCORE_THRESHOLD, or goalProperties.codeChallenges()
-    // code-challenge attempts. Unlike the streak, this doesn't reset when a
-    // day is missed - it's a running total, computed live from review
-    // history so it stays correct with no stored counter.
-    private int goalDays(Long userId, String category) {
+    // code-challenge attempts. Resets on the 1st of each month rather than
+    // accumulating forever, so the number stays meaningful instead of just
+    // climbing - unlike the streak, a missed day doesn't zero it out, it
+    // just doesn't add to it. Computed live from review history so it stays
+    // correct with no stored counter.
+    private int goalDaysThisMonth(Long userId, String category, LocalDate today) {
+        LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
+
         List<ReviewGoalActivityProjection> activity =
-            reviewRepository.findGoalActivityByUserIdAndCategory(userId, category);
+            reviewRepository.findGoalActivityByUserIdAndCategorySince(userId, category, startOfMonth);
 
         Map<LocalDate, Integer> highScoreReviewCountByDay = new HashMap<>();
         Map<LocalDate, Integer> codeChallengeCountByDay = new HashMap<>();

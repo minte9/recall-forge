@@ -2,6 +2,7 @@ package dev.recallforge.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -118,12 +119,12 @@ class RewardServiceTest {
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
         when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
             .thenReturn(List.of());
-        when(reviewRepository.findGoalActivityByUserIdAndCategory(1L, "java"))
+        when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any()))
             .thenReturn(activityOnOneDay(10, 0.8, RetryType.REVIEW));
 
         RewardResponse response = rewardService.getCurrentUserReward("java");
 
-        assertThat(response.goalDays()).isEqualTo(1);
+        assertThat(response.goalDaysThisMonth()).isEqualTo(1);
     }
 
     @Test
@@ -133,12 +134,12 @@ class RewardServiceTest {
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
         when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
             .thenReturn(List.of());
-        when(reviewRepository.findGoalActivityByUserIdAndCategory(1L, "java"))
+        when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any()))
             .thenReturn(activityOnOneDay(9, 0.8, RetryType.REVIEW));
 
         RewardResponse response = rewardService.getCurrentUserReward("java");
 
-        assertThat(response.goalDays()).isZero();
+        assertThat(response.goalDaysThisMonth()).isZero();
     }
 
     @Test
@@ -148,12 +149,12 @@ class RewardServiceTest {
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
         when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
             .thenReturn(List.of());
-        when(reviewRepository.findGoalActivityByUserIdAndCategory(1L, "java"))
+        when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any()))
             .thenReturn(activityOnOneDay(10, 0.5, RetryType.REVIEW));
 
         RewardResponse response = rewardService.getCurrentUserReward("java");
 
-        assertThat(response.goalDays()).isZero();
+        assertThat(response.goalDaysThisMonth()).isZero();
     }
 
     @Test
@@ -163,16 +164,16 @@ class RewardServiceTest {
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
         when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
             .thenReturn(List.of());
-        when(reviewRepository.findGoalActivityByUserIdAndCategory(1L, "java"))
+        when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any()))
             .thenReturn(activityOnOneDay(3, 0.3, RetryType.CODE_CHALLENGE));
 
         RewardResponse response = rewardService.getCurrentUserReward("java");
 
-        assertThat(response.goalDays()).isEqualTo(1);
+        assertThat(response.goalDaysThisMonth()).isEqualTo(1);
     }
 
     @Test
-    void getCurrentUserReward_goalDaysAccumulatesAcrossNonConsecutiveDays() {
+    void getCurrentUserReward_goalDaysCountsEachQualifyingDayInTheMonth() {
         setUp();
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
@@ -180,14 +181,30 @@ class RewardServiceTest {
             .thenReturn(List.of());
 
         List<ReviewGoalActivityProjection> activity = new ArrayList<>();
-        activity.addAll(activityOnDay(LocalDateTime.now().minusDays(20), 10, 0.8, RetryType.REVIEW));
+        activity.addAll(activityOnDay(LocalDateTime.now().minusDays(3), 10, 0.8, RetryType.REVIEW));
         activity.addAll(activityOnDay(LocalDateTime.now(), 10, 0.8, RetryType.REVIEW));
 
-        when(reviewRepository.findGoalActivityByUserIdAndCategory(1L, "java")).thenReturn(activity);
+        when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any())).thenReturn(activity);
 
         RewardResponse response = rewardService.getCurrentUserReward("java");
 
-        assertThat(response.goalDays()).isEqualTo(2);
+        assertThat(response.goalDaysThisMonth()).isEqualTo(2);
+    }
+
+    @Test
+    void getCurrentUserReward_goalDaysQueriesActivitySinceStartOfCurrentMonth() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of());
+        when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any()))
+            .thenReturn(List.of());
+
+        rewardService.getCurrentUserReward("java");
+
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        verify(reviewRepository).findGoalActivityByUserIdAndCategorySince(1L, "java", startOfMonth);
     }
 
     private List<ReviewGoalActivityProjection> activityOnOneDay(int count, double score, RetryType retryType) {
