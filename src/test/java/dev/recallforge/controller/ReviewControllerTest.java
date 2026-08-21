@@ -122,8 +122,7 @@ class ReviewControllerTest {
 
     @Test
     void answerQuestion_validRequest_returnsScoreAndReward() {
-        RewardResponse reward = new RewardResponse(
-            4, "backend", 6L, 10L, 60
+        RewardResponse reward = new RewardResponse(4, 0, 10, 3, "backend", 6L, 10L, 60
         );
         AnswerResponse response = new AnswerResponse(
             1L, "Topic One", 0.8, "Good job", 0.65,

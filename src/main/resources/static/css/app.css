@@ -502,11 +502,18 @@
     overflow: hidden;
   }
 
-  /* Extra breathing room after each "show code" block, scoped to the Code
+  /* Extra breathing room after each challenge block, scoped to the Code
      Challenges list only - the regular file-content view keeps its normal
      spacing. */
-  .code-challenges-markdown .code-block {
+  .code-challenges-markdown .challenge-item {
     margin-bottom: 20px;
+  }
+
+  .challenge-reviewed {
+    text-align: right;
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
   }
 
   .markdown summary {
@@ -515,6 +522,12 @@
     font-weight: 600;
     color: #374151;
     background: #f7f7f7;
+  }
+
+  /* Challenge questions act as the toggle trigger themselves, so they
+     read as regular text rather than the bold "show code" label. */
+  .code-challenges-markdown summary {
+    font-weight: 400;
   }
 
   .markdown-loading {
@@ -719,9 +732,35 @@
   }
 
   .reward-streak {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
     color: #555;
     margin-top: 10px;
     font-size: 14px;
+  }
+
+  /* Streak/goal days wrap text, not an icon svg - reset the fixed icon box
+     and muted icon color that .info-tooltip otherwise assumes. */
+  .reward-streak .info-tooltip {
+    width: auto;
+    height: auto;
+    margin-left: 0;
+    color: inherit;
+  }
+
+  /* Both triggers sit near a card edge, so the default centered bubble
+     (left: 50%) runs off-screen either side - anchor each to the edge
+     its trigger is closest to instead. */
+  .reward-streak-left::after {
+    left: 0;
+    transform: none;
+  }
+
+  .reward-streak-right::after {
+    left: auto;
+    right: 0;
+    transform: none;
   }
 
   .actions-row {

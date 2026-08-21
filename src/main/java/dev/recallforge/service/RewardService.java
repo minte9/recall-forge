@@ -2,15 +2,21 @@ package dev.recallforge.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.recallforge.config.AppGoalProperties;
+import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.repository.ReviewGoalActivityProjection;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
@@ -30,21 +36,33 @@ public class RewardService {
 
     private static final double MASTERY_MEMORY_SCORE = 0.7;
 
+    // A "goal day" is hit either by grading enough fresh reviews well, or by
+    // doing enough code-challenge attempts (which aren't held to the score
+    // bar - completing the harder task is the point). The score bar itself
+    // isn't user-configurable (unlike the review/code-challenge counts,
+    // via AppGoalProperties) - kept separate from MASTERY_MEMORY_SCORE even
+    // though the value matches today, since the two thresholds represent
+    // different concepts and may diverge later.
+    private static final double GOAL_REVIEW_SCORE_THRESHOLD = 0.7;
+
     private final UserRewardRepository userRewardRepository;
     private final CurrentUserService currentUserService;
     private final TopicRepository topicRepository;
     private final ReviewRepository reviewRepository;
+    private final AppGoalProperties goalProperties;
 
     public RewardService(
         UserRewardRepository userRewardRepository,
         CurrentUserService currentUserService,
         TopicRepository topicRepository,
-        ReviewRepository reviewRepository
+        ReviewRepository reviewRepository,
+        AppGoalProperties goalProperties
     ) {
         this.userRewardRepository = userRewardRepository;
         this.currentUserService = currentUserService;
         this.topicRepository = topicRepository;
         this.reviewRepository = reviewRepository;
+        this.goalProperties = goalProperties;
     }
 
     @Transactional
@@ -94,6 +112,9 @@ public class RewardService {
 
         return new RewardResponse(
             categoryStreakDays(userId, category, LocalDate.now()),
+            goalDays(userId, category),
+            goalProperties.reviews(),
+            goalProperties.codeChallenges(),
 
             category,
             masteredTopics,
@@ -143,5 +164,45 @@ public class RewardService {
         }
 
         return streak;
+    }
+
+    // Lifetime count of days (in this category) that hit the daily goal:
+    // goalProperties.reviews() fresh reviews scoring at least
+    // GOAL_REVIEW_SCORE_THRESHOLD, or goalProperties.codeChallenges()
+    // code-challenge attempts. Unlike the streak, this doesn't reset when a
+    // day is missed - it's a running total, computed live from review
+    // history so it stays correct with no stored counter.
+    private int goalDays(Long userId, String category) {
+        List<ReviewGoalActivityProjection> activity =
+            reviewRepository.findGoalActivityByUserIdAndCategory(userId, category);
+
+        Map<LocalDate, Integer> highScoreReviewCountByDay = new HashMap<>();
+        Map<LocalDate, Integer> codeChallengeCountByDay = new HashMap<>();
+
+        for (ReviewGoalActivityProjection row : activity) {
+            LocalDate day = row.getReviewedAt().toLocalDate();
+
+            if (row.getRetryType() == RetryType.CODE_CHALLENGE) {
+                codeChallengeCountByDay.merge(day, 1, Integer::sum);
+            } else if (row.getScore() >= GOAL_REVIEW_SCORE_THRESHOLD) {
+                highScoreReviewCountByDay.merge(day, 1, Integer::sum);
+            }
+        }
+
+        Set<LocalDate> goalDays = new HashSet<>();
+
+        highScoreReviewCountByDay.forEach((day, count) -> {
+            if (count >= goalProperties.reviews()) {
+                goalDays.add(day);
+            }
+        });
+
+        codeChallengeCountByDay.forEach((day, count) -> {
+            if (count >= goalProperties.codeChallenges()) {
+                goalDays.add(day);
+            }
+        });
+
+        return goalDays.size();
     }
 }

@@ -5,12 +5,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import dev.recallforge.config.AppAiProperties;
+import dev.recallforge.config.AppGoalProperties;
 import dev.recallforge.config.AppReviewLimitProperties;
 
 @SpringBootApplication
 @EnableConfigurationProperties({
     AppReviewLimitProperties.class,
-    AppAiProperties.class
+    AppAiProperties.class,
+    AppGoalProperties.class
 })
 public class RecallForgeApplication {
     
