@@ -806,6 +806,13 @@
               :class="result.score >= 0.7 ? 'feedback--high-score' : 'feedback--low-score'">
               <p><strong>Score:</strong> {{ result.score }}</p>
               <p><strong>Feedback:</strong> {{ result.feedback }}</p>
+              <p v-if="result.reward && result.reward.goalReachedToday">
+                <strong>🎯 Goal reached today!</strong>
+                <span class="info-tooltip" tabindex="0"
+                  :data-tooltip="`You logged at least ${result.reward.goalReviewsPerDay} green reviews (score of at least 0.7) or ${result.reward.goalCodeChallengesPerDay} code challenges today.`">
+                  <icon name="question-circle"></icon>
+                </span>
+              </p>
               <template v-if="!isRetry">
                 <p>
                   <strong>Updated memory score:</strong> {{ formatScore(result.updateMemoryScore) }}

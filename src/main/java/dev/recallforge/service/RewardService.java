@@ -110,9 +110,12 @@ public class RewardService {
             ? 0
             : (int) Math.round(masteredTopics * 100.0 / totalTopics);
 
+        GoalDaysSummary goalDaysSummary = goalDaysThisMonth(userId, category, LocalDate.now());
+
         return new RewardResponse(
             categoryStreakDays(userId, category, LocalDate.now()),
-            goalDaysThisMonth(userId, category, LocalDate.now()),
+            goalDaysSummary.count(),
+            goalDaysSummary.reachedToday(),
             goalProperties.reviews(),
             goalProperties.codeChallenges(),
 
@@ -173,8 +176,11 @@ public class RewardService {
     // accumulating forever, so the number stays meaningful instead of just
     // climbing - unlike the streak, a missed day doesn't zero it out, it
     // just doesn't add to it. Computed live from review history so it stays
-    // correct with no stored counter.
-    private int goalDaysThisMonth(Long userId, String category, LocalDate today) {
+    // correct with no stored counter. Also reports whether today itself is
+    // one of those qualifying days - checked here (same qualifying-day set)
+    // rather than as a separate query, and read by ReviewService after every
+    // answer via rewardDefaultUser to show a "goal reached today" badge.
+    private GoalDaysSummary goalDaysThisMonth(Long userId, String category, LocalDate today) {
         LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
 
         List<ReviewGoalActivityProjection> activity =
@@ -207,6 +213,9 @@ public class RewardService {
             }
         });
 
-        return goalDays.size();
+        return new GoalDaysSummary(goalDays.size(), goalDays.contains(today));
+    }
+
+    private record GoalDaysSummary(int count, boolean reachedToday) {
     }
 }
