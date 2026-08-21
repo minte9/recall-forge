@@ -224,8 +224,9 @@
               Browse your markdown files by category
             </div>
 
-            <div class="environment-menu-wrap">
-              <button class="environment-menu-btn" @click="toggleEnvironmentMenu()">
+            <div class="environment-menu-wrap" @mouseenter="isDesktop && (environmentMenuOpen = true)"
+              @mouseleave="isDesktop && (environmentMenuOpen = false)">
+              <button class="environment-menu-btn" @click="!isDesktop && toggleEnvironmentMenu()">
                 <span>{{ selectedEnvironment }}</span>
                 <span>⌄</span>
               </button>
