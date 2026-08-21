@@ -133,6 +133,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // (isRetry = true, retryType = REVIEW) are excluded. Returned as raw rows
     // rather than pre-aggregated by day so RewardService can apply the two
     // different per-day thresholds (reviews vs. code challenges) in one pass.
+    // Scoped to :since (start of the current month) rather than all history,
+    // since goal days reset monthly.
     @Query("""
         select
             r.reviewedAt as reviewedAt,
@@ -141,10 +143,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         from Review r
         where r.user.id = :userId
         and lower(r.topic.category) = lower(:category)
+        and r.reviewedAt >= :since
         and (r.isRetry = false or r.retryType = dev.recallforge.domain.RetryType.CODE_CHALLENGE)
     """)
-    List<ReviewGoalActivityProjection> findGoalActivityByUserIdAndCategory(
+    List<ReviewGoalActivityProjection> findGoalActivityByUserIdAndCategorySince(
         @Param("userId") Long userId,
-        @Param("category") String category
+        @Param("category") String category,
+        @Param("since") LocalDateTime since
     );
 }
