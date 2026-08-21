@@ -127,4 +127,24 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Param("userId") Long userId,
         @Param("category") String category
     );
+
+    // Fresh reviews (isRetry = false) plus code-challenge attempts, the two
+    // activity kinds that count toward a "goal day" - plain Try Again retries
+    // (isRetry = true, retryType = REVIEW) are excluded. Returned as raw rows
+    // rather than pre-aggregated by day so RewardService can apply the two
+    // different per-day thresholds (reviews vs. code challenges) in one pass.
+    @Query("""
+        select
+            r.reviewedAt as reviewedAt,
+            r.score as score,
+            r.retryType as retryType
+        from Review r
+        where r.user.id = :userId
+        and lower(r.topic.category) = lower(:category)
+        and (r.isRetry = false or r.retryType = dev.recallforge.domain.RetryType.CODE_CHALLENGE)
+    """)
+    List<ReviewGoalActivityProjection> findGoalActivityByUserIdAndCategory(
+        @Param("userId") Long userId,
+        @Param("category") String category
+    );
 }

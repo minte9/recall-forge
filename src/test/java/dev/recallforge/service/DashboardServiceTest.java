@@ -138,7 +138,7 @@ class DashboardServiceTest {
         when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(rewardService.getCurrentUserReward("java"))
-            .thenReturn(new RewardResponse(0, "Java", 0L, 0L, 0));
+            .thenReturn(new RewardResponse(0, 0, 10, 3, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
@@ -173,7 +173,7 @@ class DashboardServiceTest {
         when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(rewardService.getCurrentUserReward("java"))
-            .thenReturn(new RewardResponse(0, "Java", 0L, 0L, 0));
+            .thenReturn(new RewardResponse(0, 0, 10, 3, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
@@ -198,7 +198,7 @@ class DashboardServiceTest {
         );
         when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
         when(rewardService.getCurrentUserReward("java"))
-            .thenReturn(new RewardResponse(0, "Java", 0L, 0L, 0));
+            .thenReturn(new RewardResponse(0, 0, 10, 3, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
@@ -225,7 +225,7 @@ class DashboardServiceTest {
         );
         when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
         when(rewardService.getCurrentUserReward("java"))
-            .thenReturn(new RewardResponse(0, "Java", 0L, 0L, 0));
+            .thenReturn(new RewardResponse(0, 0, 10, 3, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
@@ -251,7 +251,7 @@ class DashboardServiceTest {
         List<SubcategoryReviewCountProjection> reviewCounts = List.of(reviewCount("Collections", 1L));
         when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
         when(rewardService.getCurrentUserReward("java"))
-            .thenReturn(new RewardResponse(0, "Java", 0L, 0L, 0));
+            .thenReturn(new RewardResponse(0, 0, 10, 3, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
@@ -274,7 +274,7 @@ class DashboardServiceTest {
         );
         when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
         when(rewardService.getCurrentUserReward("java"))
-            .thenReturn(new RewardResponse(0, "Java", 0L, 0L, 0));
+            .thenReturn(new RewardResponse(0, 0, 10, 3, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
@@ -308,7 +308,7 @@ class DashboardServiceTest {
         );
         when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
         when(rewardService.getCurrentUserReward("java"))
-            .thenReturn(new RewardResponse(0, "Java", 0L, 0L, 0));
+            .thenReturn(new RewardResponse(0, 0, 10, 3, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
@@ -326,7 +326,7 @@ class DashboardServiceTest {
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
         when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
-        RewardResponse reward = new RewardResponse(4, "Java", 5L, 10L, 50);
+        RewardResponse reward = new RewardResponse(4, 0, 10, 3, "Java", 5L, 10L, 50);
         when(rewardService.getCurrentUserReward("java")).thenReturn(reward);
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
@@ -348,7 +348,7 @@ class DashboardServiceTest {
         when(topicRepository.findStrongKnowledgeAreas(1L, "python")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "python")).thenReturn(List.of());
         when(rewardService.getCurrentUserReward("python"))
-            .thenReturn(new RewardResponse(0, "Python", 0L, 0L, 0));
+            .thenReturn(new RewardResponse(0, 0, 10, 3, "Python", 0L, 0L, 0));
         when(reviewLimitProperties.dailyLimit()).thenReturn(20);
         // Only 1 of the day's reviews was in "python"; a same-day review in another
         // category (e.g. "java") must not inflate this category's count or limit.
@@ -369,7 +369,7 @@ class DashboardServiceTest {
         when(topicRepository.findStrongKnowledgeAreas(1L, "python")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "python")).thenReturn(List.of());
         when(rewardService.getCurrentUserReward("python"))
-            .thenReturn(new RewardResponse(0, "Python", 0L, 0L, 0));
+            .thenReturn(new RewardResponse(0, 0, 10, 3, "Python", 0L, 0L, 0));
         // Only 3 of the day's generated questions were in "python"; a same-day
         // question in another category (e.g. "java") must not inflate this
         // category's count.
@@ -389,7 +389,7 @@ class DashboardServiceTest {
         when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(rewardService.getCurrentUserReward("java"))
-            .thenReturn(new RewardResponse(0, "Java", 0L, 0L, 0));
+            .thenReturn(new RewardResponse(0, 0, 10, 3, "Java", 0L, 0L, 0));
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 

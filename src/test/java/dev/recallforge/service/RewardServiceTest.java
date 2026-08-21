@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,8 +17,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import dev.recallforge.config.AppGoalProperties;
+import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.repository.ReviewGoalActivityProjection;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
@@ -42,7 +46,8 @@ class RewardServiceTest {
 
     private void setUp() {
         rewardService = new RewardService(
-            userRewardRepository, currentUserService, topicRepository, reviewRepository
+            userRewardRepository, currentUserService, topicRepository, reviewRepository,
+            new AppGoalProperties(10, 3)
         );
     }
 
@@ -104,5 +109,122 @@ class RewardServiceTest {
         RewardResponse response = rewardService.getCurrentUserReward("java");
 
         assertThat(response.streakDays()).isEqualTo(1);
+    }
+
+    @Test
+    void getCurrentUserReward_goalDaysCountsADayWithTenHighScoreReviews() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of());
+        when(reviewRepository.findGoalActivityByUserIdAndCategory(1L, "java"))
+            .thenReturn(activityOnOneDay(10, 0.8, RetryType.REVIEW));
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.goalDays()).isEqualTo(1);
+    }
+
+    @Test
+    void getCurrentUserReward_goalDaysExcludesDayWithFewerThanTenHighScoreReviews() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of());
+        when(reviewRepository.findGoalActivityByUserIdAndCategory(1L, "java"))
+            .thenReturn(activityOnOneDay(9, 0.8, RetryType.REVIEW));
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.goalDays()).isZero();
+    }
+
+    @Test
+    void getCurrentUserReward_goalDaysIgnoresLowScoringReviews() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of());
+        when(reviewRepository.findGoalActivityByUserIdAndCategory(1L, "java"))
+            .thenReturn(activityOnOneDay(10, 0.5, RetryType.REVIEW));
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.goalDays()).isZero();
+    }
+
+    @Test
+    void getCurrentUserReward_goalDaysCountsADayWithThreeCodeChallenges() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of());
+        when(reviewRepository.findGoalActivityByUserIdAndCategory(1L, "java"))
+            .thenReturn(activityOnOneDay(3, 0.3, RetryType.CODE_CHALLENGE));
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.goalDays()).isEqualTo(1);
+    }
+
+    @Test
+    void getCurrentUserReward_goalDaysAccumulatesAcrossNonConsecutiveDays() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of());
+
+        List<ReviewGoalActivityProjection> activity = new ArrayList<>();
+        activity.addAll(activityOnDay(LocalDateTime.now().minusDays(20), 10, 0.8, RetryType.REVIEW));
+        activity.addAll(activityOnDay(LocalDateTime.now(), 10, 0.8, RetryType.REVIEW));
+
+        when(reviewRepository.findGoalActivityByUserIdAndCategory(1L, "java")).thenReturn(activity);
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.goalDays()).isEqualTo(2);
+    }
+
+    private List<ReviewGoalActivityProjection> activityOnOneDay(int count, double score, RetryType retryType) {
+        return activityOnDay(LocalDateTime.of(2026, 1, 5, 9, 0), count, score, retryType);
+    }
+
+    private List<ReviewGoalActivityProjection> activityOnDay(
+        LocalDateTime day, int count, double score, RetryType retryType
+    ) {
+        List<ReviewGoalActivityProjection> activity = new ArrayList<>();
+
+        for (int i = 0; i < count; i++) {
+            activity.add(new TestActivity(day.plusMinutes(i), score, retryType));
+        }
+
+        return activity;
+    }
+
+    private record TestActivity(
+        LocalDateTime reviewedAtValue,
+        double scoreValue,
+        RetryType retryTypeValue
+    ) implements ReviewGoalActivityProjection {
+
+        @Override
+        public LocalDateTime getReviewedAt() {
+            return reviewedAtValue;
+        }
+
+        @Override
+        public double getScore() {
+            return scoreValue;
+        }
+
+        @Override
+        public RetryType getRetryType() {
+            return retryTypeValue;
+        }
     }
 }

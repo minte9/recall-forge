@@ -2,6 +2,9 @@ package dev.recallforge.dto;
 
 public record RewardResponse(
     int streakDays,
+    int goalDays,
+    int goalReviewsPerDay,
+    int goalCodeChallengesPerDay,
 
     String masteryScope,
     long masteredTopics,

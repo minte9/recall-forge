@@ -732,9 +732,35 @@
   }
 
   .reward-streak {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
     color: #555;
     margin-top: 10px;
     font-size: 14px;
+  }
+
+  /* Streak/goal days wrap text, not an icon svg - reset the fixed icon box
+     and muted icon color that .info-tooltip otherwise assumes. */
+  .reward-streak .info-tooltip {
+    width: auto;
+    height: auto;
+    margin-left: 0;
+    color: inherit;
+  }
+
+  /* Both triggers sit near a card edge, so the default centered bubble
+     (left: 50%) runs off-screen either side - anchor each to the edge
+     its trigger is closest to instead. */
+  .reward-streak-left::after {
+    left: 0;
+    transform: none;
+  }
+
+  .reward-streak-right::after {
+    left: auto;
+    right: 0;
+    transform: none;
   }
 
   .actions-row {

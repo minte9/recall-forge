@@ -69,3 +69,6 @@ app:
   reviews:
     daily-limit: ${APP_DAILY_REVIEW_LIMIT:20}
     daily-question-limit: ${APP_DAILY_QUESTION_LIMIT:50}
+  goal-days:
+    reviews: ${APP_GOAL_DAYS_REVIEWS:10}
+    code-challenges: ${APP_GOAL_DAYS_CHALLENGES:3}
