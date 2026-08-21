@@ -63,9 +63,15 @@
           </button>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
-                    currentMarkdownCodeChallenges.length > 0"
+                    currentMarkdownCodeChallenges.length > 0 && !viewingCodeChallenges"
             @click="showCodeChallenges(); mobileMenuOpen = false">
             <icon name="code" class="menu-icon"></icon> Code Challenges
+          </button>
+
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
+                    viewingCodeChallenges"
+            @click="hideCodeChallenges(); mobileMenuOpen = false">
+            <icon name="eye" class="menu-icon"></icon> Show Markdown
           </button>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
@@ -160,9 +166,15 @@
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
-                  currentMarkdownCodeChallenges.length > 0"
+                  currentMarkdownCodeChallenges.length > 0 && !viewingCodeChallenges"
                 @click="showCodeChallenges(); menuOpen = false">
                 <icon name="code" class="menu-icon"></icon>Code Challenges
+              </button>
+
+              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
+                  viewingCodeChallenges"
+                @click="hideCodeChallenges(); menuOpen = false">
+                <icon name="eye" class="menu-icon"></icon>Show Markdown
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
@@ -390,17 +402,6 @@
               :title="aiEnabled && dailyLimitReached ? 'Daily review limit reached' : null">
               <span class="btn-icon">►</span>
               {{ loading ? "Loading..." : (aiEnabled ? "Start Review" : "Reviews") }}
-            </button>
-
-            <button v-if="!viewingCodeChallenges && currentMarkdownCodeChallenges.length > 0"
-              class="edit-file-button" @click="showCodeChallenges">
-              <span class="btn-icon">→</span>
-              Code Challenges
-            </button>
-
-            <button v-if="viewingCodeChallenges" class="edit-file-button" @click="hideCodeChallenges">
-              <span class="btn-icon">←</span>
-              Back to Markdown
             </button>
 
           </div>
