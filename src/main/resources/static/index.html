@@ -281,6 +281,10 @@
               <button class="starter-pack-btn" @click="importStarterPack('Javascript')">
                 Javascript
               </button>
+
+              <button class="starter-pack-btn" @click="importStarterPack('Vue')">
+                Vue
+              </button>
             </div>
 
           </div>
@@ -586,6 +590,12 @@
                 :disabled="categoryOptions.some(o => o.category === 'Javascript')"
                 @click="importStarterPack('Javascript')">
                 Javascript
+              </button>
+
+              <button class="starter-pack-btn"
+                :disabled="categoryOptions.some(o => o.category === 'Vue')"
+                @click="importStarterPack('Vue')">
+                Vue
               </button>
             </div>
           </div>
