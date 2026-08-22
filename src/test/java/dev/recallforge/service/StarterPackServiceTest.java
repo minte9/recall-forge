@@ -112,7 +112,18 @@ class StarterPackServiceTest {
     void isPublicCategory_templateUserNonPublicCategory_returnsFalse() {
         setUp();
 
-        assertThat(starterPackService.isPublicCategory(1L, "Spring")).isFalse();
+        assertThat(starterPackService.isPublicCategory(1L, "Kotlin")).isFalse();
+    }
+
+    @Test
+    void isPublicCategory_templateUserRowTwoCategoryCaseInsensitive_returnsTrue() {
+        setUp();
+
+        assertThat(starterPackService.isPublicCategory(1L, "spring")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "fastapi")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "docker")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "mysql")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "node.js")).isTrue();
     }
 
     @Test

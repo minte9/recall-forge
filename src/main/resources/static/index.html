@@ -295,6 +295,28 @@
               </button>
             </div>
 
+            <div class="starter-pack-list">
+              <button class="starter-pack-btn" @click="importStarterPack('Spring')">
+                Spring
+              </button>
+
+              <button class="starter-pack-btn" @click="importStarterPack('FastAPI')">
+                FastAPI
+              </button>
+
+              <button class="starter-pack-btn" @click="importStarterPack('Docker')">
+                Docker
+              </button>
+
+              <button class="starter-pack-btn" @click="importStarterPack('MySQL')">
+                MySQL
+              </button>
+
+              <button class="starter-pack-btn" @click="importStarterPack('Node.js')">
+                Node.js
+              </button>
+            </div>
+
           </div>
 
           <details v-for="(group, groupName, index) in filteredMarkdownGroups" :key="groupName" class="markdown-group"
@@ -598,6 +620,38 @@
                 :disabled="categoryOptions.some(o => o.category === 'Javascript')"
                 @click="importStarterPack('Javascript')">
                 Javascript
+              </button>
+            </div>
+
+            <div class="starter-pack-list">
+              <button class="starter-pack-btn"
+                :disabled="categoryOptions.some(o => o.category === 'Spring')"
+                @click="importStarterPack('Spring')">
+                Spring
+              </button>
+
+              <button class="starter-pack-btn"
+                :disabled="categoryOptions.some(o => o.category === 'FastAPI')"
+                @click="importStarterPack('FastAPI')">
+                FastAPI
+              </button>
+
+              <button class="starter-pack-btn"
+                :disabled="categoryOptions.some(o => o.category === 'Docker')"
+                @click="importStarterPack('Docker')">
+                Docker
+              </button>
+
+              <button class="starter-pack-btn"
+                :disabled="categoryOptions.some(o => o.category === 'MySQL')"
+                @click="importStarterPack('MySQL')">
+                MySQL
+              </button>
+
+              <button class="starter-pack-btn"
+                :disabled="categoryOptions.some(o => o.category === 'Node.js')"
+                @click="importStarterPack('Node.js')">
+                Node.js
               </button>
             </div>
           </div>

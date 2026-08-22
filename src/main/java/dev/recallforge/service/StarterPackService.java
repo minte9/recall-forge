@@ -26,11 +26,16 @@ public class StarterPackService {
 
     private static final Long TEMPLATE_USER_ID = 1L;
 
-    // Hardcoded for now - mirrors the buttons in the Starter Pack panel
-    // (static/index.html). The only categories a non-template user can ever
-    // see as "public"; everything else defaults to private.
+    // Hardcoded for now - mirrors the two button rows in the Starter Pack
+    // panel (static/index.html): row 1 is the language/tooling fundamentals,
+    // row 2 is the matching framework/tool per environment (Spring for JVM,
+    // FastAPI for Python, etc). The only categories a non-template user can
+    // ever see as "public"; everything else defaults to private.
     private static final Set<String> PUBLIC_CATEGORIES =
-            Set.of("Java", "Python", "Git", "SQL", "Javascript");
+            Set.of(
+                "Java", "Python", "Git", "SQL", "Javascript",
+                "Spring", "FastAPI", "Docker", "MySQL", "Node.js"
+            );
 
     private final CurrentUserService currentUserService;
     private final MarkdownFileRepository markdownFileRepository;
