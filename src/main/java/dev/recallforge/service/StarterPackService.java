@@ -4,10 +4,12 @@ import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.security.CurrentUserService;
 import dev.recallforge.service.MarkdownFileService;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,29 +30,40 @@ public class StarterPackService {
 
     private static final Long TEMPLATE_USER_ID = 1L;
 
-    // Hardcoded for now - mirrors the two button rows in the Starter Pack
-    // panel (static/index.html): row 1 is the language/tooling fundamentals,
-    // row 2 is the matching framework/tool per environment (Spring for JVM,
-    // FastAPI for Python, etc). The only categories a non-template user can
-    // ever see as "public"; everything else defaults to private.
-    private static final Set<String> PUBLIC_CATEGORIES =
-            Set.of(
-                "Java", "Python", "Git", "SQL", "Javascript",
-                "Spring", "FastAPI", "Docker", "MySQL", "Node.js"
+    // Hardcoded for now - mirrors the Starter Pack panel's button rows
+    // (static/index.html), one chain per environment, ordered row 1 -> row 2
+    // -> row 3. Not every environment goes three deep (PVM and DevOps stop
+    // at row 2 - the panel renders a spacer in their row 3 slot instead of a
+    // button). Every category across every chain is the full set a
+    // non-template user can ever see as "public"; everything else defaults
+    // to private.
+    private static final List<List<String>> TIER_CHAINS =
+            List.of(
+                List.of("Java", "Spring", "Kotlin"),
+                List.of("Python", "FastAPI"),
+                List.of("Git", "Docker"),
+                List.of("SQL", "MySQL", "MongoDB"),
+                List.of("Javascript", "Node.js", "TypeScript")
             );
 
-    // Row 2 unlocks once the current user's mastery in its row 1 pair (same
-    // environment - see PUBLIC_CATEGORIES above) crosses this threshold.
+    private static final Set<String> PUBLIC_CATEGORIES =
+            TIER_CHAINS.stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toUnmodifiableSet());
+
+    // A category other than the first in its chain unlocks once the current
+    // user's mastery in the entry right before it (same environment) crosses
+    // this threshold.
     private static final int UNLOCK_MASTERY_THRESHOLD_PERCENT = 50;
 
-    private static final Map<String, String> ROW_TWO_PREREQUISITE_CATEGORY =
-            Map.of(
-                "Spring", "Java",
-                "FastAPI", "Python",
-                "Docker", "Git",
-                "MySQL", "SQL",
-                "Node.js", "Javascript"
-            );
+    // category -> the entry immediately before it in its TIER_CHAINS chain.
+    // Chain heads (Java, Python, Git, SQL, Javascript) have no prerequisite
+    // and so aren't gated - they're always importable.
+    private static final Map<String, String> PREREQUISITE_CATEGORY =
+            TIER_CHAINS.stream()
+                .flatMap(chain -> IntStream.range(1, chain.size())
+                    .mapToObj(i -> new SimpleEntry<>(chain.get(i), chain.get(i - 1))))
+                .collect(Collectors.toUnmodifiableMap(SimpleEntry::getKey, SimpleEntry::getValue));
 
     private final CurrentUserService currentUserService;
     private final MarkdownFileRepository markdownFileRepository;
@@ -110,9 +123,9 @@ public class StarterPackService {
     }
 
     /**
-     * The current user's mastery percent in each starter-pack category (both
-     * rows), for display as a badge on the Starter Pack buttons. A category
-     * the user hasn't imported yet has 0% mastery.
+     * The current user's mastery percent in each starter-pack category
+     * (every row), for display as a badge on the Starter Pack buttons. A
+     * category the user hasn't imported yet has 0% mastery.
      */
     public Map<String, Integer> getMasteryPercentages() {
         return PUBLIC_CATEGORIES.stream()
@@ -123,16 +136,17 @@ public class StarterPackService {
     }
 
     /**
-     * Whether each row 2 category is unlocked for the current user: true once
-     * mastery in its row 1 prerequisite (see {@link
-     * #ROW_TWO_PREREQUISITE_CATEGORY}) reaches {@link
-     * #UNLOCK_MASTERY_THRESHOLD_PERCENT}. A prerequisite the user hasn't
-     * imported yet has 0% mastery, so it starts locked.
+     * Whether each non-chain-head category is unlocked for the current user:
+     * true once mastery in the entry right before it in its {@link
+     * #TIER_CHAINS} chain (see {@link #PREREQUISITE_CATEGORY}) reaches
+     * {@link #UNLOCK_MASTERY_THRESHOLD_PERCENT}. A prerequisite the user
+     * hasn't imported yet has 0% mastery, so it starts locked - which chains
+     * the gate across the whole tier, not just one row.
      */
     public Map<String, Boolean> getUnlockStatus() {
         Map<String, Integer> masteryPercentages = getMasteryPercentages();
 
-        return ROW_TWO_PREREQUISITE_CATEGORY.entrySet().stream()
+        return PREREQUISITE_CATEGORY.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> masteryPercentages.getOrDefault(entry.getValue(), 0)
