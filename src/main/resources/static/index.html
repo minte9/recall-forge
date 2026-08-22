@@ -271,49 +271,72 @@
 
             <h3>Starter Pack</h3>
 
-            <p>Choose a starter pack or <strong>Upload</strong> your own notes.</p>
+            <p>
+              Choose a starter pack or <strong>Upload</strong> your own notes. <br>
+              Reach <strong>{{ starterPackUnlockThreshold }}% mastery</strong> in a category to unlock its match on the next row.
+            </p>
 
             <div class="starter-pack-list">
               <button class="starter-pack-btn" @click="importStarterPack('Java')">
                 Java
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Java'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn" @click="importStarterPack('Python')">
                 Python
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Python'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn" @click="importStarterPack('Git')">
                 Git
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Git'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn" @click="importStarterPack('SQL')">
                 SQL
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['SQL'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn" @click="importStarterPack('Javascript')">
                 Javascript
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Javascript'] || 0 }}%</span>
               </button>
             </div>
 
             <div class="starter-pack-list">
-              <button class="starter-pack-btn" @click="importStarterPack('Spring')">
+              <button class="starter-pack-btn"
+                :disabled="!starterPackUnlockStatus['Spring']"
+                @click="importStarterPack('Spring')">
                 Spring
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Spring'] || 0 }}%</span>
               </button>
 
-              <button class="starter-pack-btn" @click="importStarterPack('FastAPI')">
+              <button class="starter-pack-btn"
+                :disabled="!starterPackUnlockStatus['FastAPI']"
+                @click="importStarterPack('FastAPI')">
                 FastAPI
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['FastAPI'] || 0 }}%</span>
               </button>
 
-              <button class="starter-pack-btn" @click="importStarterPack('Docker')">
+              <button class="starter-pack-btn"
+                :disabled="!starterPackUnlockStatus['Docker']"
+                @click="importStarterPack('Docker')">
                 Docker
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Docker'] || 0 }}%</span>
               </button>
 
-              <button class="starter-pack-btn" @click="importStarterPack('MySQL')">
+              <button class="starter-pack-btn"
+                :disabled="!starterPackUnlockStatus['MySQL']"
+                @click="importStarterPack('MySQL')">
                 MySQL
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['MySQL'] || 0 }}%</span>
               </button>
 
-              <button class="starter-pack-btn" @click="importStarterPack('Node.js')">
+              <button class="starter-pack-btn"
+                :disabled="!starterPackUnlockStatus['Node.js']"
+                @click="importStarterPack('Node.js')">
                 Node.js
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Node.js'] || 0 }}%</span>
               </button>
             </div>
 
@@ -589,69 +612,82 @@
 
             <h3>Starter Pack</h3>
 
-            <p>Choose a starter pack or <strong>Upload</strong> your own notes.</p>
+            <p>
+              Choose a starter pack or <strong>Upload</strong> your own notes. <br>
+              Reach <strong>{{ starterPackUnlockThreshold }}% mastery</strong> in a row above to unlock its match below.
+            </p>
 
             <div class="starter-pack-list">
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'Java')"
                 @click="importStarterPack('Java')">
                 Java
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Java'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'Python')"
                 @click="importStarterPack('Python')">
                 Python
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Python'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'Git')"
                 @click="importStarterPack('Git')">
                 Git
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Git'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'SQL')"
                 @click="importStarterPack('SQL')">
                 SQL
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['SQL'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'Javascript')"
                 @click="importStarterPack('Javascript')">
                 Javascript
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Javascript'] || 0 }}%</span>
               </button>
             </div>
 
             <div class="starter-pack-list">
               <button class="starter-pack-btn"
-                :disabled="categoryOptions.some(o => o.category === 'Spring')"
+                :disabled="categoryOptions.some(o => o.category === 'Spring') || !starterPackUnlockStatus['Spring']"
                 @click="importStarterPack('Spring')">
                 Spring
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Spring'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
-                :disabled="categoryOptions.some(o => o.category === 'FastAPI')"
+                :disabled="categoryOptions.some(o => o.category === 'FastAPI') || !starterPackUnlockStatus['FastAPI']"
                 @click="importStarterPack('FastAPI')">
                 FastAPI
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['FastAPI'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
-                :disabled="categoryOptions.some(o => o.category === 'Docker')"
+                :disabled="categoryOptions.some(o => o.category === 'Docker') || !starterPackUnlockStatus['Docker']"
                 @click="importStarterPack('Docker')">
                 Docker
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Docker'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
-                :disabled="categoryOptions.some(o => o.category === 'MySQL')"
+                :disabled="categoryOptions.some(o => o.category === 'MySQL') || !starterPackUnlockStatus['MySQL']"
                 @click="importStarterPack('MySQL')">
                 MySQL
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['MySQL'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
-                :disabled="categoryOptions.some(o => o.category === 'Node.js')"
+                :disabled="categoryOptions.some(o => o.category === 'Node.js') || !starterPackUnlockStatus['Node.js']"
                 @click="importStarterPack('Node.js')">
                 Node.js
+                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Node.js'] || 0 }}%</span>
               </button>
             </div>
           </div>

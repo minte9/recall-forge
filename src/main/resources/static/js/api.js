@@ -358,4 +358,30 @@ const Api = {
       throw new Error(message || "Could not import starter pack.");
     }
   },
+
+  async loadStarterPackUnlockStatus() {
+    const response = await fetch("/api/starter-packs/unlock-status", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      return {};
+    }
+
+    return await response.json();
+  },
+
+  async loadStarterPackMastery() {
+    const response = await fetch("/api/starter-packs/mastery", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      return {};
+    }
+
+    return await response.json();
+  },
 };

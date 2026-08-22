@@ -1,6 +1,7 @@
 package dev.recallforge.controller;
 
 import dev.recallforge.service.StarterPackService;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,5 +19,15 @@ public class StarterPackController {
     public ResponseEntity<Void> importStarterPack(@PathVariable String category) throws Exception {
         starterPackService.importStarterPack(category);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/unlock-status")
+    public ResponseEntity<Map<String, Boolean>> getUnlockStatus() {
+        return ResponseEntity.ok(starterPackService.getUnlockStatus());
+    }
+
+    @GetMapping("/mastery")
+    public ResponseEntity<Map<String, Integer>> getMasteryPercentages() {
+        return ResponseEntity.ok(starterPackService.getMasteryPercentages());
     }
 }
