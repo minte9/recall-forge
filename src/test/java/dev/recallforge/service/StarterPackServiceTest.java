@@ -2,6 +2,7 @@ package dev.recallforge.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.UserAccount;
+import dev.recallforge.dto.RewardResponse;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.security.CurrentUserService;
 
@@ -31,12 +33,19 @@ class StarterPackServiceTest {
     @Mock
     private MarkdownFileService markdownFileService;
 
+    @Mock
+    private RewardService rewardService;
+
     private StarterPackService starterPackService;
 
     private void setUp() {
         starterPackService = new StarterPackService(
-            currentUserService, markdownFileRepository, markdownFileService
+            currentUserService, markdownFileRepository, markdownFileService, rewardService
         );
+    }
+
+    private static RewardResponse rewardWithMastery(String category, int masteryPercent) {
+        return new RewardResponse(0, 0, false, 0, 0, category, 0, 0, masteryPercent);
     }
 
     private static MarkdownFile templateFile(String content, Integer displayOrder) {
@@ -131,5 +140,44 @@ class StarterPackServiceTest {
         setUp();
 
         assertThat(starterPackService.isPublicCategory(2L, "Java")).isFalse();
+    }
+
+    @Test
+    void getUnlockStatus_prerequisiteAtOrAboveThreshold_isUnlocked() {
+        setUp();
+        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 50));
+
+        assertThat(starterPackService.getUnlockStatus()).containsEntry("Spring", true);
+    }
+
+    @Test
+    void getUnlockStatus_prerequisiteBelowThreshold_isLocked() {
+        setUp();
+        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 49));
+
+        assertThat(starterPackService.getUnlockStatus()).containsEntry("Spring", false);
+    }
+
+    @Test
+    void getUnlockStatus_coversEveryRowTwoCategory() {
+        setUp();
+        when(rewardService.getCurrentUserReward(anyString()))
+            .thenReturn(rewardWithMastery("x", 0));
+
+        assertThat(starterPackService.getUnlockStatus())
+            .containsOnlyKeys("Spring", "FastAPI", "Docker", "MySQL", "Node.js");
+    }
+
+    @Test
+    void getMasteryPercentages_coversEveryPublicCategoryAndForwardsPercent() {
+        setUp();
+        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 73));
+
+        assertThat(starterPackService.getMasteryPercentages())
+            .containsOnlyKeys("Java", "Python", "Git", "SQL", "Javascript", "Spring", "FastAPI", "Docker", "MySQL", "Node.js")
+            .containsEntry("Java", 73);
     }
 }

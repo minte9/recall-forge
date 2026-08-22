@@ -1811,6 +1811,8 @@
   }
 
   .starter-pack-btn {
+    position: relative;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1828,6 +1830,25 @@
 
     cursor: pointer;
     transition: all 0.15s ease;
+  }
+
+  .starter-pack-mastery-badge {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+
+    min-width: 28px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    border: 1px solid #eeeeee;
+
+    background: #ffffff;
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: center;
   }
 
   .starter-pack-btn:hover {

@@ -5,7 +5,9 @@ import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.security.CurrentUserService;
 import dev.recallforge.service.MarkdownFileService;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,18 +39,34 @@ public class StarterPackService {
                 "Spring", "FastAPI", "Docker", "MySQL", "Node.js"
             );
 
+    // Row 2 unlocks once the current user's mastery in its row 1 pair (same
+    // environment - see PUBLIC_CATEGORIES above) crosses this threshold.
+    private static final int UNLOCK_MASTERY_THRESHOLD_PERCENT = 50;
+
+    private static final Map<String, String> ROW_TWO_PREREQUISITE_CATEGORY =
+            Map.of(
+                "Spring", "Java",
+                "FastAPI", "Python",
+                "Docker", "Git",
+                "MySQL", "SQL",
+                "Node.js", "Javascript"
+            );
+
     private final CurrentUserService currentUserService;
     private final MarkdownFileRepository markdownFileRepository;
     private final MarkdownFileService markdownFileService;
+    private final RewardService rewardService;
 
     public StarterPackService(
         CurrentUserService currentUserService,
         MarkdownFileRepository markdownFileRepository,
-        MarkdownFileService markdownFileService
+        MarkdownFileService markdownFileService,
+        RewardService rewardService
     ) {
         this.currentUserService = currentUserService;
         this.markdownFileRepository = markdownFileRepository;
         this.markdownFileService = markdownFileService;
+        this.rewardService = rewardService;
     }
 
     @Transactional
@@ -89,5 +107,36 @@ public class StarterPackService {
 
     private boolean isPublicCategory(String category) {
         return isPublicCategory(TEMPLATE_USER_ID, category);
+    }
+
+    /**
+     * The current user's mastery percent in each starter-pack category (both
+     * rows), for display as a badge on the Starter Pack buttons. A category
+     * the user hasn't imported yet has 0% mastery.
+     */
+    public Map<String, Integer> getMasteryPercentages() {
+        return PUBLIC_CATEGORIES.stream()
+            .collect(Collectors.toMap(
+                category -> category,
+                category -> rewardService.getCurrentUserReward(category).masteryPercent()
+            ));
+    }
+
+    /**
+     * Whether each row 2 category is unlocked for the current user: true once
+     * mastery in its row 1 prerequisite (see {@link
+     * #ROW_TWO_PREREQUISITE_CATEGORY}) reaches {@link
+     * #UNLOCK_MASTERY_THRESHOLD_PERCENT}. A prerequisite the user hasn't
+     * imported yet has 0% mastery, so it starts locked.
+     */
+    public Map<String, Boolean> getUnlockStatus() {
+        Map<String, Integer> masteryPercentages = getMasteryPercentages();
+
+        return ROW_TWO_PREREQUISITE_CATEGORY.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> masteryPercentages.getOrDefault(entry.getValue(), 0)
+                    >= UNLOCK_MASTERY_THRESHOLD_PERCENT
+            ));
     }
 }

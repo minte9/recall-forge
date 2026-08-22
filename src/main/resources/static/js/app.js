@@ -56,6 +56,9 @@ const app = createApp({
       codeChallengeLoading: false,
       adminUsers: [],
       categoryOptions: [],
+      starterPackUnlockStatus: {},
+      starterPackUnlockThreshold: 50,
+      starterPackMastery: {},
       showDangerZone: false,
       topicsInFile: [],
       topicDropdownOpen: false,
@@ -993,6 +996,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       try {
         const options = await Api.loadCategoryOptions();
         this.categoryOptions = options || [];
+        this.starterPackUnlockStatus = await Api.loadStarterPackUnlockStatus();
+        this.starterPackMastery = await Api.loadStarterPackMastery();
 
         const hasCurrentCategory = this.categoryOptions.some(
           option => option.category === this.currentCategory
