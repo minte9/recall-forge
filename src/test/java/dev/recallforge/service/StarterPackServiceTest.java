@@ -121,7 +121,7 @@ class StarterPackServiceTest {
     void isPublicCategory_templateUserNonPublicCategory_returnsFalse() {
         setUp();
 
-        assertThat(starterPackService.isPublicCategory(1L, "Kotlin")).isFalse();
+        assertThat(starterPackService.isPublicCategory(1L, "Rust")).isFalse();
     }
 
     @Test
@@ -133,6 +133,15 @@ class StarterPackServiceTest {
         assertThat(starterPackService.isPublicCategory(1L, "docker")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "mysql")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "node.js")).isTrue();
+    }
+
+    @Test
+    void isPublicCategory_templateUserRowThreeCategoryCaseInsensitive_returnsTrue() {
+        setUp();
+
+        assertThat(starterPackService.isPublicCategory(1L, "kotlin")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "mongodb")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "typescript")).isTrue();
     }
 
     @Test
@@ -161,13 +170,32 @@ class StarterPackServiceTest {
     }
 
     @Test
-    void getUnlockStatus_coversEveryRowTwoCategory() {
+    void getUnlockStatus_coversEveryGatedCategory() {
         setUp();
         when(rewardService.getCurrentUserReward(anyString()))
             .thenReturn(rewardWithMastery("x", 0));
 
         assertThat(starterPackService.getUnlockStatus())
-            .containsOnlyKeys("Spring", "FastAPI", "Docker", "MySQL", "Node.js");
+            .containsOnlyKeys(
+                "Spring", "FastAPI", "Docker", "MySQL", "Node.js",
+                "Kotlin", "MongoDB", "TypeScript"
+            );
+    }
+
+    @Test
+    void getUnlockStatus_rowThreeGatesOnRowTwoNotRowOne() {
+        setUp();
+        // Row 1 (Java) mastered, but row 2 (Spring) isn't yet - row 3 (Kotlin)
+        // should stay locked on Spring's mastery, not Java's.
+        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 100));
+        when(rewardService.getCurrentUserReward("Spring")).thenReturn(rewardWithMastery("Spring", 49));
+
+        assertThat(starterPackService.getUnlockStatus()).containsEntry("Kotlin", false);
+
+        when(rewardService.getCurrentUserReward("Spring")).thenReturn(rewardWithMastery("Spring", 50));
+
+        assertThat(starterPackService.getUnlockStatus()).containsEntry("Kotlin", true);
     }
 
     @Test
@@ -177,7 +205,11 @@ class StarterPackServiceTest {
         when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 73));
 
         assertThat(starterPackService.getMasteryPercentages())
-            .containsOnlyKeys("Java", "Python", "Git", "SQL", "Javascript", "Spring", "FastAPI", "Docker", "MySQL", "Node.js")
+            .containsOnlyKeys(
+                "Java", "Python", "Git", "SQL", "Javascript",
+                "Spring", "FastAPI", "Docker", "MySQL", "Node.js",
+                "Kotlin", "MongoDB", "TypeScript"
+            )
             .containsEntry("Java", 73);
     }
 }
