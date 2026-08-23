@@ -140,8 +140,25 @@ class StarterPackServiceTest {
         setUp();
 
         assertThat(starterPackService.isPublicCategory(1L, "kotlin")).isTrue();
-        assertThat(starterPackService.isPublicCategory(1L, "mongodb")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "typescript")).isTrue();
+    }
+
+    @Test
+    void isPublicCategory_templateUserMongoDb_returnsFalse() {
+        setUp();
+
+        // Private for now, to keep the Starter Pack panel at 4 rows.
+        assertThat(starterPackService.isPublicCategory(1L, "MongoDB")).isFalse();
+    }
+
+    @Test
+    void isPublicCategory_templateUserFullCatalogAdditionsCaseInsensitive_returnsTrue() {
+        setUp();
+
+        assertThat(starterPackService.isPublicCategory(1L, "microservices")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "oracle")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "postgresql")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "vue.js")).isTrue();
     }
 
     @Test
@@ -178,7 +195,8 @@ class StarterPackServiceTest {
         assertThat(starterPackService.getUnlockStatus())
             .containsOnlyKeys(
                 "Spring", "FastAPI", "Docker", "MySQL", "Node.js",
-                "Kotlin", "MongoDB", "TypeScript"
+                "Kotlin", "TypeScript",
+                "Microservices", "Oracle", "PostgreSQL", "Vue.js"
             );
     }
 
@@ -206,7 +224,8 @@ class StarterPackServiceTest {
             .containsOnlyKeys(
                 "Java", "Python", "Git", "SQL", "Javascript",
                 "Spring", "FastAPI", "Docker", "MySQL", "Node.js",
-                "Kotlin", "MongoDB", "TypeScript"
+                "Kotlin", "TypeScript",
+                "Microservices", "Oracle", "PostgreSQL", "Vue.js"
             )
             .containsEntry("Java", 73);
     }
