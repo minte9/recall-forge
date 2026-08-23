@@ -279,27 +279,27 @@
             <div class="starter-pack-list">
               <button class="starter-pack-btn" @click="importStarterPack('Java')">
                 Java
-                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Java'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Java'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Java'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn" @click="importStarterPack('Python')">
                 Python
-                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Python'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Python'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Python'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn" @click="importStarterPack('Git')">
                 Git
-                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Git'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Git'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Git'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn" @click="importStarterPack('SQL')">
                 SQL
-                <span class="starter-pack-mastery-badge">{{ starterPackMastery['SQL'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['SQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['SQL'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn" @click="importStarterPack('Javascript')">
                 Javascript
-                <span class="starter-pack-mastery-badge">{{ starterPackMastery['Javascript'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Javascript'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Javascript'] || 0 }}%</span>
               </button>
             </div>
 
@@ -649,35 +649,35 @@
                 :disabled="categoryOptions.some(o => o.category === 'Java')"
                 @click="importStarterPack('Java')">
                 Java
-                <span v-if="!categoryOptions.some(o => o.category === 'Java')" class="starter-pack-mastery-badge">{{ starterPackMastery['Java'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Java'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Java'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'Python')"
                 @click="importStarterPack('Python')">
                 Python
-                <span v-if="!categoryOptions.some(o => o.category === 'Python')" class="starter-pack-mastery-badge">{{ starterPackMastery['Python'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Python'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Python'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'Git')"
                 @click="importStarterPack('Git')">
                 Git
-                <span v-if="!categoryOptions.some(o => o.category === 'Git')" class="starter-pack-mastery-badge">{{ starterPackMastery['Git'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Git'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Git'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'SQL')"
                 @click="importStarterPack('SQL')">
                 SQL
-                <span v-if="!categoryOptions.some(o => o.category === 'SQL')" class="starter-pack-mastery-badge">{{ starterPackMastery['SQL'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['SQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['SQL'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'Javascript')"
                 @click="importStarterPack('Javascript')">
                 Javascript
-                <span v-if="!categoryOptions.some(o => o.category === 'Javascript')" class="starter-pack-mastery-badge">{{ starterPackMastery['Javascript'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Javascript'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Javascript'] || 0 }}%</span>
               </button>
             </div>
 
@@ -686,35 +686,35 @@
                 :disabled="categoryOptions.some(o => o.category === 'Spring') || !starterPackUnlockStatus['Spring']"
                 @click="importStarterPack('Spring')">
                 Spring
-                <span v-if="!categoryOptions.some(o => o.category === 'Spring') && starterPackUnlockStatus['Spring'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Spring'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Spring'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Spring'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'FastAPI') || !starterPackUnlockStatus['FastAPI']"
                 @click="importStarterPack('FastAPI')">
                 FastAPI
-                <span v-if="!categoryOptions.some(o => o.category === 'FastAPI') && starterPackUnlockStatus['FastAPI'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['FastAPI'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['FastAPI'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['FastAPI'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'Docker') || !starterPackUnlockStatus['Docker']"
                 @click="importStarterPack('Docker')">
                 Docker
-                <span v-if="!categoryOptions.some(o => o.category === 'Docker') && starterPackUnlockStatus['Docker'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Docker'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Docker'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Docker'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'MySQL') || !starterPackUnlockStatus['MySQL']"
                 @click="importStarterPack('MySQL')">
                 MySQL
-                <span v-if="!categoryOptions.some(o => o.category === 'MySQL') && starterPackUnlockStatus['MySQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['MySQL'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['MySQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['MySQL'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'Node.js') || !starterPackUnlockStatus['Node.js']"
                 @click="importStarterPack('Node.js')">
                 Node.js
-                <span v-if="!categoryOptions.some(o => o.category === 'Node.js') && starterPackUnlockStatus['Node.js'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Node.js'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Node.js'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Node.js'] || 0 }}%</span>
               </button>
             </div>
 
@@ -723,7 +723,7 @@
                 :disabled="categoryOptions.some(o => o.category === 'Kotlin') || !starterPackUnlockStatus['Kotlin']"
                 @click="importStarterPack('Kotlin')">
                 Kotlin
-                <span v-if="!categoryOptions.some(o => o.category === 'Kotlin') && starterPackUnlockStatus['Kotlin'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Kotlin'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['Kotlin'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['Kotlin'] || 0 }}%</span>
               </button>
 
               <span class="starter-pack-btn starter-pack-btn-spacer" aria-hidden="true">Python</span>
@@ -734,14 +734,14 @@
                 :disabled="categoryOptions.some(o => o.category === 'MongoDB') || !starterPackUnlockStatus['MongoDB']"
                 @click="importStarterPack('MongoDB')">
                 MongoDB
-                <span v-if="!categoryOptions.some(o => o.category === 'MongoDB') && starterPackUnlockStatus['MongoDB'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['MongoDB'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['MongoDB'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['MongoDB'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
                 :disabled="categoryOptions.some(o => o.category === 'TypeScript') || !starterPackUnlockStatus['TypeScript']"
                 @click="importStarterPack('TypeScript')">
                 TypeScript
-                <span v-if="!categoryOptions.some(o => o.category === 'TypeScript') && starterPackUnlockStatus['TypeScript'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['TypeScript'] || 0 }}%</span>
+                <span v-if="starterPackUnlockStatus['TypeScript'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['TypeScript'] || 0 }}%</span>
               </button>
             </div>
           </div>

@@ -183,19 +183,17 @@ class StarterPackServiceTest {
     }
 
     @Test
-    void getUnlockStatus_rowThreeGatesOnRowTwoNotRowOne() {
+    void getUnlockStatus_allDependentsOfALevelOneCategoryUnlockTogetherOnItsMasteryAlone() {
         setUp();
-        // Row 1 (Java) mastered, but row 2 (Spring) isn't yet - row 3 (Kotlin)
-        // should stay locked on Spring's mastery, not Java's.
+        // Java mastered, Spring never touched (0% mastery) - Kotlin still
+        // unlocks alongside Spring, since both gate directly on Java, not on
+        // each other.
         when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
-        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 100));
-        when(rewardService.getCurrentUserReward("Spring")).thenReturn(rewardWithMastery("Spring", 49));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 50));
 
-        assertThat(starterPackService.getUnlockStatus()).containsEntry("Kotlin", false);
-
-        when(rewardService.getCurrentUserReward("Spring")).thenReturn(rewardWithMastery("Spring", 50));
-
-        assertThat(starterPackService.getUnlockStatus()).containsEntry("Kotlin", true);
+        assertThat(starterPackService.getUnlockStatus())
+            .containsEntry("Spring", true)
+            .containsEntry("Kotlin", true);
     }
 
     @Test
