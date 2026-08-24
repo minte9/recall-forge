@@ -312,10 +312,10 @@
               </button>
 
               <button class="starter-pack-btn"
-                :disabled="!starterPackUnlockStatus['MySQL']"
-                @click="importStarterPack('MySQL')">
-                MySQL
-                <span v-if="starterPackUnlockStatus['MySQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['MySQL'] || 0 }}%</span>
+                :disabled="!starterPackUnlockStatus['PostgreSQL']"
+                @click="importStarterPack('PostgreSQL')">
+                PostgreSQL
+                <span v-if="starterPackUnlockStatus['PostgreSQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['PostgreSQL'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
@@ -361,10 +361,6 @@
                 TypeScript
                 <span v-if="starterPackUnlockStatus['TypeScript'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['TypeScript'] || 0 }}%</span>
               </button>
-
-              <span class="starter-pack-btn starter-pack-btn-spacer" aria-hidden="true">Python</span>
-
-              <span class="starter-pack-btn starter-pack-btn-spacer" aria-hidden="true">Python</span>
             </div>
 
             <div class="starter-pack-list">
@@ -376,10 +372,10 @@
               </button>
 
               <button class="starter-pack-btn"
-                :disabled="!starterPackUnlockStatus['PostgreSQL']"
-                @click="importStarterPack('PostgreSQL')">
-                PostgreSQL
-                <span v-if="starterPackUnlockStatus['PostgreSQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['PostgreSQL'] || 0 }}%</span>
+                :disabled="!starterPackUnlockStatus['MySQL']"
+                @click="importStarterPack('MySQL')">
+                MySQL
+                <span v-if="starterPackUnlockStatus['MySQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['MySQL'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
@@ -713,10 +709,10 @@
               </button>
 
               <button class="starter-pack-btn"
-                :disabled="categoryOptions.some(o => o.category === 'MySQL') || !starterPackUnlockStatus['MySQL']"
-                @click="importStarterPack('MySQL')">
-                MySQL
-                <span v-if="starterPackUnlockStatus['MySQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['MySQL'] || 0 }}%</span>
+                :disabled="categoryOptions.some(o => o.category === 'PostgreSQL') || !starterPackUnlockStatus['PostgreSQL']"
+                @click="importStarterPack('PostgreSQL')">
+                PostgreSQL
+                <span v-if="starterPackUnlockStatus['PostgreSQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['PostgreSQL'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
@@ -762,10 +758,6 @@
                 TypeScript
                 <span v-if="starterPackUnlockStatus['TypeScript'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['TypeScript'] || 0 }}%</span>
               </button>
-
-              <span class="starter-pack-btn starter-pack-btn-spacer" aria-hidden="true">Python</span>
-
-              <span class="starter-pack-btn starter-pack-btn-spacer" aria-hidden="true">Python</span>
             </div>
 
             <div class="starter-pack-list">
@@ -777,10 +769,10 @@
               </button>
 
               <button class="starter-pack-btn"
-                :disabled="categoryOptions.some(o => o.category === 'PostgreSQL') || !starterPackUnlockStatus['PostgreSQL']"
-                @click="importStarterPack('PostgreSQL')">
-                PostgreSQL
-                <span v-if="starterPackUnlockStatus['PostgreSQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['PostgreSQL'] || 0 }}%</span>
+                :disabled="categoryOptions.some(o => o.category === 'MySQL') || !starterPackUnlockStatus['MySQL']"
+                @click="importStarterPack('MySQL')">
+                MySQL
+                <span v-if="starterPackUnlockStatus['MySQL'] !== false" class="starter-pack-mastery-badge">{{ starterPackMastery['MySQL'] || 0 }}%</span>
               </button>
 
               <button class="starter-pack-btn"
