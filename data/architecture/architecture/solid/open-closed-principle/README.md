@@ -1,4 +1,4 @@
-## JVM / Java / SOLID / Open/Closed Principle
+## Architecture / Architecture / SOLID / Open/Closed Principle
 
 ### 1. Open/Close Principle (OCP)
 

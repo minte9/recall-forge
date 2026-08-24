@@ -1,4 +1,4 @@
-## JVM / Java / Design Patterns / Strategy
+## Architecture / Architecture / Design Patterns / Strategy
 
 ### 1. Strategy Basics
 

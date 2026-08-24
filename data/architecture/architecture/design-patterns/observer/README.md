@@ -1,4 +1,4 @@
-## JVM / Java / Design Patterns / Observer
+## Architecture / Architecture / Design Patterns / Observer
 
 ### 1. Observer Basics
 

@@ -1,4 +1,4 @@
-## JVM / Java / SOLID / Interface Segregation Principle
+## Architecture / Architecture / SOLID / Interface Segregation Principle
 
 ### 1. Interface Segregation Principle (ISP)
 
