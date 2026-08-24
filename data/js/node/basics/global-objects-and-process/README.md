@@ -1,4 +1,4 @@
-## JS / Node.js / Basics / Global Objects & process
+## JS / Node / Basics / Global Objects & process
 
 ### 1. global
 

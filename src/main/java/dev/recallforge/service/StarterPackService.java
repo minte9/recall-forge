@@ -40,11 +40,11 @@ public class StarterPackService {
     // ever see as "public"; everything else defaults to private.
     private static final Map<String, List<String>> DEPENDENTS_BY_LEVEL_ONE_CATEGORY =
             Map.of(
-                "Java", List.of("Spring", "Microservices", "Kotlin"),
-                "Python", List.of("Algorithms", "FastAPI"),
+                "Java", List.of("Spring", "Kotlin"),
+                "Python", List.of("Algorithms"),
                 "Git", List.of("Docker"),
-                "SQL", List.of("PostgreSQL", "Oracle", "MySQL"),
-                "Javascript", List.of("Node.js", "TypeScript", "Vue.js")
+                "SQL", List.of("PostgreSQL", "Oracle"),
+                "Javascript", List.of("Node", "TypeScript")
             );
 
     private static final Set<String> PUBLIC_CATEGORIES =

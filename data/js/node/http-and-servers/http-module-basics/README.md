@@ -1,4 +1,4 @@
-## JS / Node.js / HTTP & Servers / HTTP Module Basics
+## JS / Node / HTTP & Servers / HTTP Module Basics
 
 ### 1. Creating a Server
 

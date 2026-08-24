@@ -1,4 +1,4 @@
-## JS / Node.js / Error Handling / Error Handling in Node
+## JS / Node / Error Handling / Error Handling in Node
 
 ### 1. Error-First Callbacks
 

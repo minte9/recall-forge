@@ -1,4 +1,4 @@
-## JS / Node.js / ES Modules & Interop / ES Modules in Node
+## JS / Node / ES Modules & Interop / ES Modules in Node
 
 ### 1. import & export in Node
 

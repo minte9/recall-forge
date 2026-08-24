@@ -1,4 +1,4 @@
-## JS / Node.js / Basics / CommonJS Modules
+## JS / Node / Basics / CommonJS Modules
 
 ### 1. require & module.exports
 

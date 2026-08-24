@@ -129,10 +129,8 @@ class StarterPackServiceTest {
         setUp();
 
         assertThat(starterPackService.isPublicCategory(1L, "spring")).isTrue();
-        assertThat(starterPackService.isPublicCategory(1L, "fastapi")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "docker")).isTrue();
-        assertThat(starterPackService.isPublicCategory(1L, "mysql")).isTrue();
-        assertThat(starterPackService.isPublicCategory(1L, "node.js")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "node")).isTrue();
     }
 
     @Test
@@ -155,10 +153,18 @@ class StarterPackServiceTest {
     void isPublicCategory_templateUserFullCatalogAdditionsCaseInsensitive_returnsTrue() {
         setUp();
 
-        assertThat(starterPackService.isPublicCategory(1L, "microservices")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "oracle")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "postgresql")).isTrue();
-        assertThat(starterPackService.isPublicCategory(1L, "vue.js")).isTrue();
+    }
+
+    @Test
+    void isPublicCategory_templateUserMicroservicesMySqlVueJsFastApi_returnsFalse() {
+        setUp();
+
+        assertThat(starterPackService.isPublicCategory(1L, "microservices")).isFalse();
+        assertThat(starterPackService.isPublicCategory(1L, "mysql")).isFalse();
+        assertThat(starterPackService.isPublicCategory(1L, "vue.js")).isFalse();
+        assertThat(starterPackService.isPublicCategory(1L, "fastapi")).isFalse();
     }
 
     @Test
@@ -194,16 +200,16 @@ class StarterPackServiceTest {
 
         assertThat(starterPackService.getUnlockStatus())
             .containsOnlyKeys(
-                "Spring", "Algorithms", "FastAPI", "Docker", "MySQL", "Node.js",
+                "Spring", "Algorithms", "Docker", "Node",
                 "Kotlin", "TypeScript",
-                "Microservices", "Oracle", "PostgreSQL", "Vue.js"
+                "Oracle", "PostgreSQL"
             );
     }
 
     @Test
     void getUnlockStatus_allDependentsOfALevelOneCategoryUnlockTogetherOnItsMasteryAlone() {
         setUp();
-        // Java mastered, Spring never touched (0% mastery) - Kotlin still
+        // Java mastered, Kotlin never touched (0% mastery) - it still
         // unlocks alongside Spring, since both gate directly on Java, not on
         // each other.
         when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
@@ -223,9 +229,9 @@ class StarterPackServiceTest {
         assertThat(starterPackService.getMasteryPercentages())
             .containsOnlyKeys(
                 "Java", "Python", "Git", "SQL", "Javascript",
-                "Spring", "Algorithms", "FastAPI", "Docker", "MySQL", "Node.js",
+                "Spring", "Algorithms", "Docker", "Node",
                 "Kotlin", "TypeScript",
-                "Microservices", "Oracle", "PostgreSQL", "Vue.js"
+                "Oracle", "PostgreSQL"
             )
             .containsEntry("Java", 73);
     }

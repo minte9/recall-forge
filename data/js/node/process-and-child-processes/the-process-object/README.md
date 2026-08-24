@@ -1,4 +1,4 @@
-## JS / Node.js / Process & Child Processes / The process Object
+## JS / Node / Process & Child Processes / The process Object
 
 ### 1. process Lifecycle Events
 

@@ -1,4 +1,4 @@
-## JS / Node.js / Testing / Testing in Node
+## JS / Node / Testing / Testing in Node
 
 ### 1. Node's Built-in Test Runner
 

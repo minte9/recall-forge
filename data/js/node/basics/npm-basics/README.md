@@ -1,4 +1,4 @@
-## JS / Node.js / Basics / npm Basics
+## JS / Node / Basics / npm Basics
 
 ### 1. package.json
 
