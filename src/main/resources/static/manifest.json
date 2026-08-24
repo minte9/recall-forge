@@ -1,0 +1,15 @@
+{
+  "name": "Recall Forge",
+  "short_name": "Recall Forge",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/recall-forge.png",
+      "sizes": "200x200",
+      "type": "image/png"
+    }
+  ]
+}
