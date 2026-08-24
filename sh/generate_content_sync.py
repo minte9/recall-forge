@@ -79,14 +79,14 @@ def emit_file_block(out, index, f, file_topics):
     out.append(f"  IF {var} IS NULL THEN")
     out.append("    INSERT INTO markdown_files")
     out.append("      (filename, content, content_hash, uploaded_at, environment,")
-    out.append("       category, subcategory, topic_group, visibility, user_id, display_order)")
+    out.append("       category, subcategory, topic_group, user_id, display_order)")
     out.append("    VALUES")
     out.append(f"      ({sql_str(f['filename'])},")
     out.append(f"       {dollar_quote(f['content'], f'mf{index}')},")
     out.append(f"       {sql_str(f['content_hash'])}, now(),")
     out.append(f"       {sql_str(f['environment'])}, {sql_str(f['category'])},")
     out.append(f"       {sql_str(f['subcategory'])}, {sql_str(f['topic_group'])},")
-    out.append(f"       {sql_str(f['visibility'])}, {TEMPLATE_USER_ID}, {sql_order(f['display_order'])})")
+    out.append(f"       {TEMPLATE_USER_ID}, {sql_order(f['display_order'])})")
     out.append(f"    RETURNING id INTO {var};")
     out.append(f"    RAISE NOTICE 'created file: % / % / % (id %)',")
     out.append(f"      {sql_str(f['category'])}, {sql_str(f['subcategory'])}, {sql_str(f['topic_group'])}, {var};")
@@ -94,7 +94,6 @@ def emit_file_block(out, index, f, file_topics):
     out.append("    UPDATE markdown_files SET")
     out.append(f"      content = {dollar_quote(f['content'], f'mf{index}')},")
     out.append(f"      content_hash = {sql_str(f['content_hash'])},")
-    out.append(f"      visibility = {sql_str(f['visibility'])},")
     out.append(f"      display_order = {sql_order(f['display_order'])}")
     out.append(f"    WHERE id = {var};")
     out.append("  END IF;")
@@ -111,7 +110,6 @@ def emit_file_block(out, index, f, file_topics):
         out.append(f"      category = {sql_str(t['category'])},")
         out.append(f"      subcategory = {sql_str(t['subcategory'])},")
         out.append(f"      file_title = {sql_str(t['file_title'])},")
-        out.append(f"      visibility = {sql_str(t['visibility'])},")
         out.append("      updated_at = now()")
         out.append(f"    WHERE markdown_file_id = {var} AND title = {sql_str(t['title'])}")
         out.append(f"      AND user_id = {TEMPLATE_USER_ID};")
@@ -119,13 +117,13 @@ def emit_file_block(out, index, f, file_topics):
         out.append("    INSERT INTO topics")
         out.append("      (title, content, memory_score, next_review_at, created_at, updated_at,")
         out.append("       environment, category, subcategory, file_title, markdown_file_id,")
-        out.append("       user_id, visibility)")
+        out.append("       user_id)")
         out.append("    VALUES")
         out.append(f"      ({sql_str(t['title'])}, {dollar_quote(t['content'], f'tc{index}_{j}')},")
         out.append("       0.6, now(), now(), now(),")
         out.append(f"       {sql_str(t['environment'])}, {sql_str(t['category'])},")
         out.append(f"       {sql_str(t['subcategory'])}, {sql_str(t['file_title'])}, {var},")
-        out.append(f"       {TEMPLATE_USER_ID}, {sql_str(t['visibility'])});")
+        out.append(f"       {TEMPLATE_USER_ID});")
         out.append("  END IF;")
         out.append("")
 
@@ -143,8 +141,7 @@ def main():
     files = query_json(f"""
         SELECT json_agg(row_to_json(m)) FROM (
             SELECT id, filename, content, content_hash, environment,
-                   category, subcategory, topic_group, display_order,
-                   visibility
+                   category, subcategory, topic_group, display_order
             FROM markdown_files WHERE user_id = {TEMPLATE_USER_ID}
             ORDER BY id
         ) m;
@@ -152,7 +149,7 @@ def main():
     topics = query_json(f"""
         SELECT json_agg(row_to_json(t)) FROM (
             SELECT markdown_file_id, title, content, environment,
-                   category, subcategory, file_title, visibility
+                   category, subcategory, file_title
             FROM topics WHERE user_id = {TEMPLATE_USER_ID}
             ORDER BY markdown_file_id, id
         ) t;
