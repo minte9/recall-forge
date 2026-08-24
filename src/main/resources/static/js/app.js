@@ -1567,6 +1567,25 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
+    isStarterPackImported(category) {
+      return this.categoryOptions.some(o => o.category === category);
+    },
+
+    isStarterPackLocked(category) {
+      return this.starterPackUnlockStatus[category] === false;
+    },
+
+    async openImportedCategory(category) {
+      this.error = null;
+      this.success = null;
+      this.mobilePageTitle = "Markdowns";
+      this.leftPanel = "markdowns";
+      this.mobileView = "markdown";
+      this.markdownEditing = false;
+
+      await this.selectEnvironment(category);
+    },
+
     showMarkdownExample() {
       this.error = null;
       this.success = null;
