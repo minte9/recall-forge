@@ -1567,14 +1567,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
-    isStarterPackImported(category) {
-      return this.categoryOptions.some(o => o.category === category);
-    },
-
-    isStarterPackLocked(category) {
-      return this.starterPackUnlockStatus[category] === false;
-    },
-
     async openImportedCategory(category) {
       this.error = null;
       this.success = null;
@@ -1673,6 +1665,59 @@ app.component("icon", {
   data() {
     return { ICONS };
   }
+});
+
+// Reusable Starter Pack row: <starter-pack-list :categories="['Java', 'Spring']"
+//   :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+//   :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+// Owns the per-button disabled/badge/tooltip logic so every mounting point (the
+// empty-state welcome screen, the standalone Starter Pack page) shares one copy
+// instead of duplicating a button block per category.
+app.component("starter-pack-list", {
+  props: {
+    categories: { type: Array, required: true },
+    categoryOptions: { type: Array, default: () => [] },
+    unlockStatus: { type: Object, default: () => ({}) },
+    mastery: { type: Object, default: () => ({}) }
+  },
+  emits: ["import", "open"],
+  methods: {
+    isImported(category) {
+      return this.categoryOptions.some(o => o.category === category);
+    },
+    isLocked(category) {
+      return this.unlockStatus[category] === false;
+    },
+    tooltip(category) {
+      if (this.isLocked(category)) {
+        return "Category locked";
+      }
+
+      return this.isImported(category) ? "Go to category" : "Import category";
+    },
+    masteryClass(category) {
+      const percent = this.mastery[category] || 0;
+
+      if (percent >= 70) {
+        return "starter-pack-btn-mastered";
+      }
+
+      return percent > 0 ? "starter-pack-btn-practicing" : "";
+    },
+    onClick(category) {
+      this.$emit(this.isImported(category) ? "open" : "import", category);
+    }
+  },
+  template: `
+    <div class="starter-pack-list">
+      <button v-for="category in categories" :key="category" class="starter-pack-btn"
+        :class="masteryClass(category)"
+        :disabled="isLocked(category)" :title="tooltip(category)" @click="onClick(category)">
+        {{ category }}
+        <span v-if="isImported(category) || !isLocked(category)" class="starter-pack-mastery-badge">{{ mastery[category] || 0 }}%</span>
+      </button>
+    </div>
+  `
 });
 
 app.mount("#app");
