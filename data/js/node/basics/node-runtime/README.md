@@ -1,4 +1,4 @@
-## JS / Node.js / Basics / Node Runtime
+## JS / Node / Basics / Node Runtime
 
 ### 1. What Node.js Is
 

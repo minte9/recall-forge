@@ -1,4 +1,4 @@
-## JS / Node.js / File System / fs.promises & Directories
+## JS / Node / File System / fs.promises & Directories
 
 ### 1. fs.promises API
 

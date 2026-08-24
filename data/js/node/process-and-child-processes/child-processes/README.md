@@ -1,4 +1,4 @@
-## JS / Node.js / Process & Child Processes / Child Processes
+## JS / Node / Process & Child Processes / Child Processes
 
 ### 1. spawn vs exec
 

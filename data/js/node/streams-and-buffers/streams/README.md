@@ -1,4 +1,4 @@
-## JS / Node.js / Streams & Buffers / Streams
+## JS / Node / Streams & Buffers / Streams
 
 ### 1. Readable & Writable Streams
 

@@ -1,4 +1,4 @@
-## JS / Node.js / HTTP & Servers / Express Fundamentals
+## JS / Node / HTTP & Servers / Express Fundamentals
 
 ### 1. App & Routes
 

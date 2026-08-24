@@ -1,4 +1,4 @@
-## JS / Node.js / Streams & Buffers / Buffers
+## JS / Node / Streams & Buffers / Buffers
 
 ### 1. Buffer Basics
 

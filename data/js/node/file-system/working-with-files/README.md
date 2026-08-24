@@ -1,4 +1,4 @@
-## JS / Node.js / File System / Working with Files
+## JS / Node / File System / Working with Files
 
 ### 1. Sync vs Async fs
 

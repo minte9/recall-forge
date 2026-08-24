@@ -1,4 +1,4 @@
-## JS / Node.js / Event Loop & Async / EventEmitter
+## JS / Node / Event Loop & Async / EventEmitter
 
 ### 1. EventEmitter Basics
 

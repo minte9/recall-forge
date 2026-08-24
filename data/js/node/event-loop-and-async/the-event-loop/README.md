@@ -1,4 +1,4 @@
-## JS / Node.js / Event Loop & Async / The Event Loop
+## JS / Node / Event Loop & Async / The Event Loop
 
 ### 1. libuv & Event Loop Phases
 
