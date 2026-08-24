@@ -1,4 +1,4 @@
-## JVM / Java / Design Patterns / Builder
+## Architecture / Architecture / Design Patterns / Builder
 
 ### 1. Telescoping Constructors
 

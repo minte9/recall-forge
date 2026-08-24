@@ -1,4 +1,4 @@
-## JVM / Java / Design Patterns / Decorator
+## Architecture / Architecture / Design Patterns / Decorator
 
 ### 1. Decorator Basics
 

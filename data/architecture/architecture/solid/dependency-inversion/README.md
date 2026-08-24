@@ -1,4 +1,4 @@
-## JVM / Java / SOLID / Dependency Inversion
+## Architecture / Architecture / SOLID / Dependency Inversion
 
 ### 1. Dependency Inversion Principle (DIP)
 

@@ -1,4 +1,4 @@
-## JVM / Java / Design Patterns / Singleton
+## Architecture / Architecture / Design Patterns / Singleton
 
 ### 1. Classic Singleton
 

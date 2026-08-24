@@ -1,4 +1,4 @@
-## JVM / Java / Design Patterns / Factory Method
+## Architecture / Architecture / Design Patterns / Factory Method
 
 ### 1. Coupling to Concrete Classes
 

@@ -1,4 +1,4 @@
-## JVM / Java / SOLID / Single Responsibility Principle
+## Architecture / Architecture / SOLID / Single Responsibility Principle
 
 ### 1. Single Responsibility Principle (SRP)
 

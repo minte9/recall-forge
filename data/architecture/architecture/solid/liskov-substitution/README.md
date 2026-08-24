@@ -1,4 +1,4 @@
-## JVM / Java / SOLID / Liskov Substitution
+## Architecture / Architecture / SOLID / Liskov Substitution
 
 ### 1. Liskov Substitution Principle (LSP)
 
