@@ -230,7 +230,7 @@ class StarterPackServiceTest {
             .containsOnlyKeys(
                 "Java", "Python", "Git", "SQL", "Javascript",
                 "Spring", "Algorithms", "Docker", "Node",
-                "Kotlin", "TypeScript",
+                "Kotlin", "TypeScript", "Security",
                 "Oracle", "PostgreSQL"
             )
             .containsEntry("Java", 73);
