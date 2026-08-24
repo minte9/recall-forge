@@ -43,7 +43,7 @@ public class StarterPackService {
                 "Java", List.of("Spring", "Kotlin", "Microservices"),
                 "Python", List.of("FastAPI"),
                 "Git", List.of("Docker"),
-                "SQL", List.of("MySQL", "Oracle", "PostgreSQL"),
+                "SQL", List.of("PostgreSQL", "Oracle", "MySQL"),
                 "Javascript", List.of("Node.js", "TypeScript", "Vue.js")
             );
 
