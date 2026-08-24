@@ -44,7 +44,8 @@ public class StarterPackService {
                 "Python", List.of("Algorithms"),
                 "Git", List.of("Docker"),
                 "SQL", List.of("PostgreSQL", "Oracle"),
-                "Javascript", List.of("Node", "TypeScript")
+                "Javascript", List.of("Node", "TypeScript"),
+                "Security", List.of()
             );
 
     private static final Set<String> PUBLIC_CATEGORIES =
