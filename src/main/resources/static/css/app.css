@@ -1872,6 +1872,28 @@
     border-color: #e2e8f0;
   }
 
+  /* Same color codes as the answer-feedback boxes (.feedback--high-score /
+     .feedback--low-score), reusing the same >= 70% mastery threshold. */
+  .starter-pack-btn.starter-pack-btn-mastered {
+    background: #ecfdf5;
+    border-color: #10b981;
+  }
+
+  .starter-pack-btn.starter-pack-btn-mastered:hover {
+    background: #d1fae5;
+    border-color: #10b981;
+  }
+
+  .starter-pack-btn.starter-pack-btn-practicing {
+    background: #fffbeb;
+    border-color: #f59e0b;
+  }
+
+  .starter-pack-btn.starter-pack-btn-practicing:hover {
+    background: #fef3c7;
+    border-color: #f59e0b;
+  }
+
   .starter-pack-btn svg {
     width: 18px;
     height: 18px;

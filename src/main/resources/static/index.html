@@ -276,133 +276,30 @@
               Reach <strong>{{ starterPackUnlockThreshold }}% mastery</strong> in the first category to unlock the related categories.
             </p>
 
-            <div class="starter-pack-list">
+            <starter-pack-list :categories="['Java', 'Spring', 'Microservices', 'Kotlin']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
 
-              <!-- Java -->
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Java')"
-                @click="isStarterPackImported('Java') ? openImportedCategory('Java') : importStarterPack('Java')">
-                Java
-                <span v-if="isStarterPackImported('Java') || !isStarterPackLocked('Java')" class="starter-pack-mastery-badge">{{ starterPackMastery['Java'] || 0 }}%</span>
-              </button>
+            <starter-pack-list :categories="['SQL', 'PostgreSQL', 'Oracle', 'MySQL']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
 
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Spring')"
-                @click="isStarterPackImported('Spring') ? openImportedCategory('Spring') : importStarterPack('Spring')">
-                Spring
-                <span v-if="isStarterPackImported('Spring') || !isStarterPackLocked('Spring')" class="starter-pack-mastery-badge">{{ starterPackMastery['Spring'] || 0 }}%</span>
-              </button>
+            <starter-pack-list :categories="['Javascript', 'Node.js', 'TypeScript', 'Vue.js']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
 
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Microservices')"
-                @click="isStarterPackImported('Microservices') ? openImportedCategory('Microservices') : importStarterPack('Microservices')">
-                Microservices
-                <span v-if="isStarterPackImported('Microservices') || !isStarterPackLocked('Microservices')" class="starter-pack-mastery-badge">{{ starterPackMastery['Microservices'] || 0 }}%</span>
-              </button>
+            <starter-pack-list :categories="['Python', 'FastAPI']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
 
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Kotlin')"
-                @click="isStarterPackImported('Kotlin') ? openImportedCategory('Kotlin') : importStarterPack('Kotlin')">
-                Kotlin
-                <span v-if="isStarterPackImported('Kotlin') || !isStarterPackLocked('Kotlin')" class="starter-pack-mastery-badge">{{ starterPackMastery['Kotlin'] || 0 }}%</span>
-              </button>
-            </div>
-
-            <div class="starter-pack-list"> 
-              <!-- SQL-->
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('SQL')"
-                @click="isStarterPackImported('SQL') ? openImportedCategory('SQL') : importStarterPack('SQL')">
-                SQL
-                <span v-if="isStarterPackImported('SQL') || !isStarterPackLocked('SQL')" class="starter-pack-mastery-badge">{{ starterPackMastery['SQL'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('PostgreSQL')"
-                @click="isStarterPackImported('PostgreSQL') ? openImportedCategory('PostgreSQL') : importStarterPack('PostgreSQL')">
-                PostgreSQL
-                <span v-if="isStarterPackImported('PostgreSQL') || !isStarterPackLocked('PostgreSQL')" class="starter-pack-mastery-badge">{{ starterPackMastery['PostgreSQL'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Oracle')"
-                @click="isStarterPackImported('Oracle') ? openImportedCategory('Oracle') : importStarterPack('Oracle')">
-                Oracle
-                <span v-if="isStarterPackImported('Oracle') || !isStarterPackLocked('Oracle')" class="starter-pack-mastery-badge">{{ starterPackMastery['Oracle'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('MySQL')"
-                @click="isStarterPackImported('MySQL') ? openImportedCategory('MySQL') : importStarterPack('MySQL')">
-                MySQL
-                <span v-if="isStarterPackImported('MySQL') || !isStarterPackLocked('MySQL')" class="starter-pack-mastery-badge">{{ starterPackMastery['MySQL'] || 0 }}%</span>
-              </button>
-            </div>
-
-            <div class="starter-pack-list">
-              <!-- Javascript -->
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Javascript')"
-                @click="isStarterPackImported('Javascript') ? openImportedCategory('Javascript') : importStarterPack('Javascript')">
-                Javascript
-                <span v-if="isStarterPackImported('Javascript') || !isStarterPackLocked('Javascript')" class="starter-pack-mastery-badge">{{ starterPackMastery['Javascript'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Node.js')"
-                @click="isStarterPackImported('Node.js') ? openImportedCategory('Node.js') : importStarterPack('Node.js')">
-                Node.js
-                <span v-if="isStarterPackImported('Node.js') || !isStarterPackLocked('Node.js')" class="starter-pack-mastery-badge">{{ starterPackMastery['Node.js'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('TypeScript')"
-                @click="isStarterPackImported('TypeScript') ? openImportedCategory('TypeScript') : importStarterPack('TypeScript')">
-                TypeScript
-                <span v-if="isStarterPackImported('TypeScript') || !isStarterPackLocked('TypeScript')" class="starter-pack-mastery-badge">{{ starterPackMastery['TypeScript'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Vue.js')"
-                @click="isStarterPackImported('Vue.js') ? openImportedCategory('Vue.js') : importStarterPack('Vue.js')">
-                Vue.js
-                <span v-if="isStarterPackImported('Vue.js') || !isStarterPackLocked('Vue.js')" class="starter-pack-mastery-badge">{{ starterPackMastery['Vue.js'] || 0 }}%</span>
-              </button>
-            </div>
-
-            <div class="starter-pack-list">
-              <!-- Python -->
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Python')"
-                @click="isStarterPackImported('Python') ? openImportedCategory('Python') : importStarterPack('Python')">
-                Python
-                <span v-if="isStarterPackImported('Python') || !isStarterPackLocked('Python')" class="starter-pack-mastery-badge">{{ starterPackMastery['Python'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('FastAPI')"
-                @click="isStarterPackImported('FastAPI') ? openImportedCategory('FastAPI') : importStarterPack('FastAPI')">
-                FastAPI
-                <span v-if="isStarterPackImported('FastAPI') || !isStarterPackLocked('FastAPI')" class="starter-pack-mastery-badge">{{ starterPackMastery['FastAPI'] || 0 }}%</span>
-              </button>
-            </div>
-
-            <div class="starter-pack-list">
-              <!-- Git -->
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Git')"
-                @click="isStarterPackImported('Git') ? openImportedCategory('Git') : importStarterPack('Git')">
-                Git
-                <span v-if="isStarterPackImported('Git') || !isStarterPackLocked('Git')" class="starter-pack-mastery-badge">{{ starterPackMastery['Git'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Docker')"
-                @click="isStarterPackImported('Docker') ? openImportedCategory('Docker') : importStarterPack('Docker')">
-                Docker
-                <span v-if="isStarterPackImported('Docker') || !isStarterPackLocked('Docker')" class="starter-pack-mastery-badge">{{ starterPackMastery['Docker'] || 0 }}%</span>
-              </button>
-            </div>
+            <starter-pack-list :categories="['Git', 'Docker']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
 
           </div>
 
@@ -681,127 +578,30 @@
               Reach <strong>{{ starterPackUnlockThreshold }}% mastery</strong> in the first category of a row to unlock the rest of it.
             </p>
 
-            <div class="starter-pack-list">
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Java')"
-                @click="isStarterPackImported('Java') ? openImportedCategory('Java') : importStarterPack('Java')">
-                Java
-                <span v-if="isStarterPackImported('Java') || !isStarterPackLocked('Java')" class="starter-pack-mastery-badge">{{ starterPackMastery['Java'] || 0 }}%</span>
-              </button>
+            <starter-pack-list :categories="['Java', 'Spring', 'Microservices', 'Kotlin']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
 
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Spring')"
-                @click="isStarterPackImported('Spring') ? openImportedCategory('Spring') : importStarterPack('Spring')">
-                Spring
-                <span v-if="isStarterPackImported('Spring') || !isStarterPackLocked('Spring')" class="starter-pack-mastery-badge">{{ starterPackMastery['Spring'] || 0 }}%</span>
-              </button>
+            <starter-pack-list :categories="['SQL', 'PostgreSQL', 'Oracle', 'MySQL']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
 
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Microservices')"
-                @click="isStarterPackImported('Microservices') ? openImportedCategory('Microservices') : importStarterPack('Microservices')">
-                Microservices
-                <span v-if="isStarterPackImported('Microservices') || !isStarterPackLocked('Microservices')" class="starter-pack-mastery-badge">{{ starterPackMastery['Microservices'] || 0 }}%</span>
-              </button>
+            <starter-pack-list :categories="['Javascript', 'Node.js', 'TypeScript', 'Vue.js']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
 
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Kotlin')"
-                @click="isStarterPackImported('Kotlin') ? openImportedCategory('Kotlin') : importStarterPack('Kotlin')">
-                Kotlin
-                <span v-if="isStarterPackImported('Kotlin') || !isStarterPackLocked('Kotlin')" class="starter-pack-mastery-badge">{{ starterPackMastery['Kotlin'] || 0 }}%</span>
-              </button>
-            </div>
+            <starter-pack-list :categories="['Python', 'FastAPI']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
 
-            <div class="starter-pack-list">
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('SQL')"
-                @click="isStarterPackImported('SQL') ? openImportedCategory('SQL') : importStarterPack('SQL')">
-                SQL
-                <span v-if="isStarterPackImported('SQL') || !isStarterPackLocked('SQL')" class="starter-pack-mastery-badge">{{ starterPackMastery['SQL'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('PostgreSQL')"
-                @click="isStarterPackImported('PostgreSQL') ? openImportedCategory('PostgreSQL') : importStarterPack('PostgreSQL')">
-                PostgreSQL
-                <span v-if="isStarterPackImported('PostgreSQL') || !isStarterPackLocked('PostgreSQL')" class="starter-pack-mastery-badge">{{ starterPackMastery['PostgreSQL'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Oracle')"
-                @click="isStarterPackImported('Oracle') ? openImportedCategory('Oracle') : importStarterPack('Oracle')">
-                Oracle
-                <span v-if="isStarterPackImported('Oracle') || !isStarterPackLocked('Oracle')" class="starter-pack-mastery-badge">{{ starterPackMastery['Oracle'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('MySQL')"
-                @click="isStarterPackImported('MySQL') ? openImportedCategory('MySQL') : importStarterPack('MySQL')">
-                MySQL
-                <span v-if="isStarterPackImported('MySQL') || !isStarterPackLocked('MySQL')" class="starter-pack-mastery-badge">{{ starterPackMastery['MySQL'] || 0 }}%</span>
-              </button>
-            </div>
-
-            <div class="starter-pack-list">
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Javascript')"
-                @click="isStarterPackImported('Javascript') ? openImportedCategory('Javascript') : importStarterPack('Javascript')">
-                Javascript
-                <span v-if="isStarterPackImported('Javascript') || !isStarterPackLocked('Javascript')" class="starter-pack-mastery-badge">{{ starterPackMastery['Javascript'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Node.js')"
-                @click="isStarterPackImported('Node.js') ? openImportedCategory('Node.js') : importStarterPack('Node.js')">
-                Node.js
-                <span v-if="isStarterPackImported('Node.js') || !isStarterPackLocked('Node.js')" class="starter-pack-mastery-badge">{{ starterPackMastery['Node.js'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('TypeScript')"
-                @click="isStarterPackImported('TypeScript') ? openImportedCategory('TypeScript') : importStarterPack('TypeScript')">
-                TypeScript
-                <span v-if="isStarterPackImported('TypeScript') || !isStarterPackLocked('TypeScript')" class="starter-pack-mastery-badge">{{ starterPackMastery['TypeScript'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Vue.js')"
-                @click="isStarterPackImported('Vue.js') ? openImportedCategory('Vue.js') : importStarterPack('Vue.js')">
-                Vue.js
-                <span v-if="isStarterPackImported('Vue.js') || !isStarterPackLocked('Vue.js')" class="starter-pack-mastery-badge">{{ starterPackMastery['Vue.js'] || 0 }}%</span>
-              </button>
-            </div>
-
-            <div class="starter-pack-list">
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Python')"
-                @click="isStarterPackImported('Python') ? openImportedCategory('Python') : importStarterPack('Python')">
-                Python
-                <span v-if="isStarterPackImported('Python') || !isStarterPackLocked('Python')" class="starter-pack-mastery-badge">{{ starterPackMastery['Python'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('FastAPI')"
-                @click="isStarterPackImported('FastAPI') ? openImportedCategory('FastAPI') : importStarterPack('FastAPI')">
-                FastAPI
-                <span v-if="isStarterPackImported('FastAPI') || !isStarterPackLocked('FastAPI')" class="starter-pack-mastery-badge">{{ starterPackMastery['FastAPI'] || 0 }}%</span>
-              </button>
-            </div>
-
-            <div class="starter-pack-list">
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Git')"
-                @click="isStarterPackImported('Git') ? openImportedCategory('Git') : importStarterPack('Git')">
-                Git
-                <span v-if="isStarterPackImported('Git') || !isStarterPackLocked('Git')" class="starter-pack-mastery-badge">{{ starterPackMastery['Git'] || 0 }}%</span>
-              </button>
-
-              <button class="starter-pack-btn"
-                :disabled="isStarterPackLocked('Docker')"
-                @click="isStarterPackImported('Docker') ? openImportedCategory('Docker') : importStarterPack('Docker')">
-                Docker
-                <span v-if="isStarterPackImported('Docker') || !isStarterPackLocked('Docker')" class="starter-pack-mastery-badge">{{ starterPackMastery['Docker'] || 0 }}%</span>
-              </button>
-            </div>
+            <starter-pack-list :categories="['Git', 'Docker']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
           </div>
 
         </div>
