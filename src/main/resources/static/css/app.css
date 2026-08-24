@@ -1832,16 +1832,6 @@
     transition: all 0.15s ease;
   }
 
-  /* Invisible placeholder button - same box model/text as a real
-     starter-pack-btn so it reserves exactly that button's width, keeping a
-     shorter row's remaining buttons column-aligned with the rows above it
-     (e.g. row 3 has no PVM/DevOps entry, so a hidden "Python"-sized button
-     holds that column's place). */
-  .starter-pack-btn-spacer {
-    visibility: hidden;
-    pointer-events: none;
-  }
-
   .starter-pack-mastery-badge {
     position: absolute;
     bottom: -8px;
