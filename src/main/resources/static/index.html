@@ -306,7 +306,9 @@
                 Kotlin
                 <span v-if="isStarterPackImported('Kotlin') || !isStarterPackLocked('Kotlin')" class="starter-pack-mastery-badge">{{ starterPackMastery['Kotlin'] || 0 }}%</span>
               </button>
-              
+            </div>
+
+            <div class="starter-pack-list">
               <!-- SQL-->
               <button class="starter-pack-btn"
                 :disabled="isStarterPackLocked('SQL')"
@@ -335,7 +337,9 @@
                 MySQL
                 <span v-if="isStarterPackImported('MySQL') || !isStarterPackLocked('MySQL')" class="starter-pack-mastery-badge">{{ starterPackMastery['MySQL'] || 0 }}%</span>
               </button>
-            
+            </div>
+
+            <div class="starter-pack-list">
               <!-- Javascript -->
               <button class="starter-pack-btn"
                 :disabled="isStarterPackLocked('Javascript')"
@@ -364,7 +368,9 @@
                 Vue.js
                 <span v-if="isStarterPackImported('Vue.js') || !isStarterPackLocked('Vue.js')" class="starter-pack-mastery-badge">{{ starterPackMastery['Vue.js'] || 0 }}%</span>
               </button>
-              
+            </div>
+
+            <div class="starter-pack-list">
               <!-- Python -->
               <button class="starter-pack-btn"
                 :disabled="isStarterPackLocked('Python')"
@@ -379,7 +385,9 @@
                 FastAPI
                 <span v-if="isStarterPackImported('FastAPI') || !isStarterPackLocked('FastAPI')" class="starter-pack-mastery-badge">{{ starterPackMastery['FastAPI'] || 0 }}%</span>
               </button>
-              
+            </div>
+
+            <div class="starter-pack-list">
               <!-- Git -->
               <button class="starter-pack-btn"
                 :disabled="isStarterPackLocked('Git')"
