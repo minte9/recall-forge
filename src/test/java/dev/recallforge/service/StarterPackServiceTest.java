@@ -194,7 +194,7 @@ class StarterPackServiceTest {
 
         assertThat(starterPackService.getUnlockStatus())
             .containsOnlyKeys(
-                "Spring", "FastAPI", "Docker", "MySQL", "Node.js",
+                "Spring", "Algorithms", "FastAPI", "Docker", "MySQL", "Node.js",
                 "Kotlin", "TypeScript",
                 "Microservices", "Oracle", "PostgreSQL", "Vue.js"
             );
@@ -223,7 +223,7 @@ class StarterPackServiceTest {
         assertThat(starterPackService.getMasteryPercentages())
             .containsOnlyKeys(
                 "Java", "Python", "Git", "SQL", "Javascript",
-                "Spring", "FastAPI", "Docker", "MySQL", "Node.js",
+                "Spring", "Algorithms", "FastAPI", "Docker", "MySQL", "Node.js",
                 "Kotlin", "TypeScript",
                 "Microservices", "Oracle", "PostgreSQL", "Vue.js"
             )

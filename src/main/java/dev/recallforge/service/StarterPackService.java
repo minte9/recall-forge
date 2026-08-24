@@ -41,7 +41,7 @@ public class StarterPackService {
     private static final Map<String, List<String>> DEPENDENTS_BY_LEVEL_ONE_CATEGORY =
             Map.of(
                 "Java", List.of("Spring", "Microservices", "Kotlin"),
-                "Python", List.of("FastAPI"),
+                "Python", List.of("Algorithms", "FastAPI"),
                 "Git", List.of("Docker"),
                 "SQL", List.of("PostgreSQL", "Oracle", "MySQL"),
                 "Javascript", List.of("Node.js", "TypeScript", "Vue.js")
