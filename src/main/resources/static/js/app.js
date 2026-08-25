@@ -1714,7 +1714,7 @@ app.component("starter-pack-list", {
         :class="masteryClass(category)"
         :disabled="isLocked(category)" :title="tooltip(category)" @click="onClick(category)">
         {{ category }}
-        <span v-if="isImported(category) || !isLocked(category)" class="starter-pack-mastery-badge">{{ mastery[category] || 0 }}%</span>
+        <span v-if="mastery[category] > 0" class="starter-pack-mastery-badge">{{ mastery[category] || 0 }}%</span>
       </button>
     </div>
   `
