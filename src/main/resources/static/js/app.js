@@ -1590,22 +1590,22 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.markdown = `
 <h3>File Example Pattern</h3>
 
-<pre>## Environment / Category / Subcategory / File Title
+<pre># Environment / Category / Subcategory / File Title
 
-### 1. Topic
+## 1. Topic
 Content...
 
-### 2. Topic
+## 2. Topic
 Content...</pre>
 
 <h3>Example: threads_theory.md</h3>
 
-<pre>## JVM / Java / Threads / Theory
+<pre># JVM / Java / Threads / Theory
 
-### 1. Creating Threads
+## 1. Creating Threads
 Thread creation basics...
 
-### 2. Implementing Runnable
+## 2. Implementing Runnable
 Java supports single inheritance...</pre>
 `;
     },

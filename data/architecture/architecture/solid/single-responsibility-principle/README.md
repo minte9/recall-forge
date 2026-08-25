@@ -1,21 +1,21 @@
-## Architecture / Architecture / SOLID / Single Responsibility Principle
+# Architecture / Architecture / SOLID / Single Responsibility Principle
 
-### 1. Single Responsibility Principle (SRP)
+## 1. Single Responsibility Principle (SRP)
 
 The Single Responsibility Principle states that a class should have only one reason to change. This does not mean a class can have only one method or perform only one task. Instead, all of its responsibilities should belong to the same business concern or actor.
 
-~~~java
+```java
 class Employee {
     double calculateSalary() { ... }
     double calculateBonus() { ... }
 }
-~~~
+```
 
-### 2. Bad Implementation (violates SRP)
+## 2. Bad Implementation (violates SRP)
 
 A class violates SRP when it mixes responsibilities that belong to different concerns. In this example, Employee contains business logic, reporting, and database persistence, so changes requested by different teams all affect the same class. 
 
-~~~java
+```java
 /**
  * SRP - Non complient example
  * ===========================
@@ -59,13 +59,13 @@ class Employee {
        
     }
 }
-~~~
+```
 
-### 3. SRP-compliant Implementation
+## 3. SRP-compliant Implementation
 
 A better design separates each responsibility into its own class. The Employee class contains only employee-related business logic, while reporting and persistence are handled by dedicated services. This keeps each class focused on a single reason to change.
 
-~~~java
+```java
 /**
  * SRP - Compliant design
  * ======================
@@ -122,13 +122,13 @@ class EmployeeRepository {
         System.out.println("Saving employee to DB: " + employee.getName());
     }
 }
-~~~
+```
 
-### 4. Key Insights (SRP)
+## 4. Key Insights (SRP)
 
 SRP is about responsibilities, not class size. A class may contain many methods as long as they all support the same business responsibility. When evaluating a design, think about who requests changes and whether those changes belong to the same business concern. 
 
-~~~java
+```java
 // Good: same responsibility
 calculateSalary();
 calculateBonus();
@@ -136,4 +136,4 @@ calculateBonus();
 // Different responsibilities
 generateReport();
 saveToDatabase();
-~~~
+```

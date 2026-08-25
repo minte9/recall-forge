@@ -1,24 +1,24 @@
-## JVM / Spring / Framework / Inversion of Control
+# JVM / Spring / Framework / Inversion of Control
 
-### 1. Inversion of Control (IoC)
+## 1. Inversion of Control (IoC)
 
 Inversion of Control (IoC) means an external container creates and wires your objects, instead of your code doing it with `new`. In Spring, that container is the `ApplicationContext` — it manages beans and their dependencies for you.
 
-~~~java
+```java
 ApplicationContext context =
     new AnnotationConfigApplicationContext(AppConfig.class);
 
 // Ask the container for the bean, instead of building it yourself
 MessageService service =
     context.getBean(MessageService.class);
-~~~
+```
 
 
-### 2. Manual creation (objects)
+## 2. Manual creation (objects)
 
 Without a framework, you create objects yourself with `new` and pass dependencies by hand. This works for small programs, but wiring grows painful as the object graph gets bigger.
 
-~~~java
+```java
 public class ManualCreationApp {
     public static void main(String[] args) {
 
@@ -47,14 +47,14 @@ class NotificationController {
         System.out.println(messageService.getMessage());
     }
 }
-~~~
+```
 
 
-### 3. Factory pattern
+## 3. Factory pattern
 
 A Factory class centralizes `new` calls in one place instead of scattering them everywhere. It's more organized than manual creation, but your code is still the one doing the wiring -- Spring isn't involved yet.
 
-~~~java
+```java
 public class FactoryPatternApp {
     public static void main(String[] args) {
 
@@ -88,14 +88,14 @@ class MessageService {
         return "Hello from Service / Factory Pattern";
     }
 }
-~~~
+```
 
 
-### 4. Spring IoC
+## 4. Spring IoC
 
 With Spring, the container takes over: it creates beans, resolves their dependencies, and wires everything together. Your code just asks the `ApplicationContext` for a bean -- it no longer builds the object graph itself.
 
-~~~java
+```java
 // Maven/Gradle: add spring-context as a dependency
 
 import org.springframework.context.ApplicationContext;
@@ -147,14 +147,14 @@ class NotificationController {
         System.out.println(messageService.getMessage());
     }
 }
-~~~
+```
 
 
-### 5. Spring Boot
+## 5. Spring Boot
 
 Spring Boot builds on top of Spring Framework and auto-configures common components for you. It still uses the same `ApplicationContext` underneath, but needs far less manual setup to get an app running.
 
-~~~java
+```java
 // Maven/Gradle: add spring-boot-starter as a dependency
 
 import org.springframework.boot.SpringApplication;
@@ -196,4 +196,4 @@ class NotificationController {
         System.out.println(messageService.getMessage());
     }
 }
-~~~
+```

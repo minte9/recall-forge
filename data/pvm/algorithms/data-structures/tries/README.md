@@ -1,22 +1,22 @@
-## Python / Algorithms / Data Structures / Tries
+# Python / Algorithms / Data Structures / Tries
 
-### 1. Trie Structure
+## 1. Trie Structure
 
 A trie is a tree specialized for strings, where each node holds a dict of child nodes keyed by character -- words sharing a prefix share the same path through the tree. This makes it a natural fit for autocomplete.
 
-~~~py
+```py
 class TrieNode:
     def __init__(self):
         self.children = {}
         self.is_word = False
-~~~
+```
 
 
-### 2. Insert and Search
+## 2. Insert and Search
 
 Insert walks the word character by character, creating a child node whenever one doesn't already exist for that character. Search follows the same path -- if any character is missing along the way, the word (or prefix) isn't in the trie.
 
-~~~py
+```py
 def insert(root, word):
     node = root
     for ch in word:
@@ -30,14 +30,14 @@ def search(root, word):
             return None
         node = node.children[ch]
     return node
-~~~
+```
 
 
-### 3. Autocomplete from a Prefix Node
+## 3. Autocomplete from a Prefix Node
 
 Autocomplete finds the node for a given prefix, then recursively collects every word reachable below it -- the prefix lookup is the same `search` used above, only the endpoint changes from "return the node" to "collect everything under it."
 
-~~~py
+```py
 def collect_words(node, prefix, words):
     if node.is_word:
         words.append(prefix)
@@ -48,4 +48,4 @@ def collect_words(node, prefix, words):
 def autocomplete(root, prefix):
     node = search(root, prefix)
     return collect_words(node, prefix, []) if node else []
-~~~
+```

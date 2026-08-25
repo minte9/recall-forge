@@ -1,10 +1,10 @@
-## JVM / Java / Collections / Framework
+# JVM / Java / Collections / Framework
 
-### 1. Java Collections Framework (JCF)
+## 1. Java Collections Framework (JCF)
 
 In Java, Collections are a full arhitecture of interfaces, classes, utilities. They are part of the Java Collection Framework (JCF), located in java.util package. The JCF provides interfaces (List, Set, Map, Queue), implementations (ArrayList, HashSet, HashMap, LinkedList) and algorithms (sorting, searching).
 
-~~~sh
+```sh
                Iterable
                   |
               Collection
@@ -19,13 +19,13 @@ In Java, Collections are a full arhitecture of interfaces, classes, utilities. T
                  |
               HashMap
               TreeMap
-~~~
+```
 
-### 2. Collection Interface
+## 2. Collection Interface
 
 The Collectioin Interface represents a group of objects (like a bag). List subinterfaces are ordered, have indexed access and have implemntations like ArrayList and LinkedList. Sets have no duplicates and  have implementation like HashSet (unordered), TreeSet (ordered). Queue and Deque are FIFO/LIFO and have implementations like LinkedList, ArrayDeque.
 
-~~~java
+```java
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -46,13 +46,13 @@ public class CollectionExample {
         System.out.println(set);  // [Java]
     }
 }
-~~~
+```
 
-### 3. Map Interace
+## 3. Map Interace
 
 Map is NOT a subtype of Collection. It stores key-value pairs and have implementations like HashMap, LinkedHashMap and TreeMap.
 
-~~~java
+```java
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,13 +69,13 @@ public class MapExample {
         System.out.println(ages.containsKey("Maria")); // true
     }
 }
-~~~
+```
 
-### 4. Collections vs Arrays
+## 4. Collections vs Arrays
 
 Arrays are fixed size, can store primitives, have no built-in utilities and are hard to manipulate. Collections have dynamic size, store objects (but wrappers allow primitives), are rich in functionality and it is easy to add/remove/find items.
 
-~~~java
+```java
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -124,4 +124,4 @@ public class JCF {
         }
     }
 }
-~~~
+```

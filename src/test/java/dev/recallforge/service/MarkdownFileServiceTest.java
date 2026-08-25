@@ -104,7 +104,7 @@ class MarkdownFileServiceTest {
     void upload_nonMdExtension_throwsIllegalArgumentException() {
         setUp();
         MockMultipartFile file = new MockMultipartFile(
-            "file", "notes.txt", "text/plain", "### Topic\ncontent".getBytes(StandardCharsets.UTF_8)
+            "file", "notes.txt", "text/plain", "## Topic\ncontent".getBytes(StandardCharsets.UTF_8)
         );
 
         assertThatThrownBy(() -> markdownFileService.upload(file))
@@ -167,7 +167,7 @@ class MarkdownFileServiceTest {
     @Test
     void upload_newFile_createsMarkdownFileWithCorrectHashAndSanitizedFilename() throws Exception {
         setUp();
-        String content = "### Java Basics\nSome content.";
+        String content = "## Java Basics\nSome content.";
         MockMultipartFile file = new MockMultipartFile(
             "file", "../etc/notes.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
         );
@@ -214,7 +214,7 @@ class MarkdownFileServiceTest {
     @Test
     void upload_newFile_assignsDisplayOrderAfterExistingMaxInSameCategoryAndSubcategory() throws Exception {
         setUp();
-        String content = "### Java Basics\nSome content.";
+        String content = "## Java Basics\nSome content.";
         MockMultipartFile file = new MockMultipartFile(
             "file", "notes.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
         );
@@ -246,7 +246,7 @@ class MarkdownFileServiceTest {
     @Test
     void upload_existingMarkdownFile_doesNotRecomputeDisplayOrderOnEdit() throws Exception {
         setUp();
-        String newContent = "### Java Basics\nUpdated content.";
+        String newContent = "## Java Basics\nUpdated content.";
         MockMultipartFile file = new MockMultipartFile(
             "file", "notes.md", "text/markdown", newContent.getBytes(StandardCharsets.UTF_8)
         );
@@ -280,7 +280,7 @@ class MarkdownFileServiceTest {
     @Test
     void upload_existingMarkdownFileFoundByMetadata_updatesInPlaceInsteadOfCreatingNew() throws Exception {
         setUp();
-        String newContent = "### Java Basics\nUpdated content.";
+        String newContent = "## Java Basics\nUpdated content.";
         MockMultipartFile file = new MockMultipartFile(
             "file", "notes.md", "text/markdown", newContent.getBytes(StandardCharsets.UTF_8)
         );
@@ -315,7 +315,7 @@ class MarkdownFileServiceTest {
     @Test
     void upload_existingTopicForMarkdownFile_updatesInPlaceInsteadOfCreatingNew() throws Exception {
         setUp();
-        String content = "### Java Basics\nUpdated content.";
+        String content = "## Java Basics\nUpdated content.";
         MockMultipartFile file = new MockMultipartFile(
             "file", "notes.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
         );
@@ -351,7 +351,7 @@ class MarkdownFileServiceTest {
     @Test
     void upload_topicRenamed_deletesOldTopicAndItsReviews() throws Exception {
         setUp();
-        String content = "### New Title\nUpdated content.";
+        String content = "## New Title\nUpdated content.";
         MockMultipartFile file = new MockMultipartFile(
             "file", "notes.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
         );
@@ -403,7 +403,7 @@ class MarkdownFileServiceTest {
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(markdownFileRepository.findByIdAndUserId(5L, 1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> markdownFileService.update(5L, "### Topic\ncontent"))
+        assertThatThrownBy(() -> markdownFileService.update(5L, "## Topic\ncontent"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Markdown file not found: 5");
     }
@@ -453,7 +453,7 @@ class MarkdownFileServiceTest {
     @Test
     void update_duplicateContentInDifferentFile_throwsMarkdownAlreadyImportedException() throws Exception {
         setUp();
-        String newContent = "### Java Basics\nDuplicate content.";
+        String newContent = "## Java Basics\nDuplicate content.";
         UserAccount user = new UserAccount();
         MarkdownFile existingMarkdownFile = new MarkdownFile(
             "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
@@ -479,7 +479,7 @@ class MarkdownFileServiceTest {
     @Test
     void update_happyPath_updatesContentHashAndSyncsExistingTopic() throws Exception {
         setUp();
-        String newContent = "### Java Basics\nUpdated content.";
+        String newContent = "## Java Basics\nUpdated content.";
         UserAccount user = new UserAccount();
         MarkdownFile existingMarkdownFile = new MarkdownFile(
             "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
@@ -516,7 +516,7 @@ class MarkdownFileServiceTest {
     @Test
     void update_headerChanged_syncsMarkdownFileMetadata() throws Exception {
         setUp();
-        String newContent = "## Programming / Java / Collections / Java Basics\n### Java Basics\nUpdated content.";
+        String newContent = "# Programming / Java / Collections / Java Basics\n## Java Basics\nUpdated content.";
         UserAccount user = new UserAccount();
         MarkdownFile existingMarkdownFile = new MarkdownFile(
             "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
@@ -550,7 +550,7 @@ class MarkdownFileServiceTest {
     @Test
     void update_contentUnchanged_skipsDuplicateHashLookup() throws Exception {
         setUp();
-        String content = "### Java Basics\nSame content.";
+        String content = "## Java Basics\nSame content.";
         UserAccount user = new UserAccount();
         MarkdownFile existingMarkdownFile = new MarkdownFile(
             "notes.md", content, sha256(content), "Programming", "Java", "Core", "Java Basics", user
@@ -714,7 +714,7 @@ class MarkdownFileServiceTest {
         doThrow(new AccessDeniedException("Admin access required"))
             .when(currentUserService).requireAdmin();
 
-        assertThatThrownBy(() -> markdownFileService.optimize("### Topic\ncontent"))
+        assertThatThrownBy(() -> markdownFileService.optimize("## Topic\ncontent"))
             .isInstanceOf(AccessDeniedException.class);
 
         verify(markdownTopicImporter, never()).parseMarkdown(any());
@@ -743,9 +743,9 @@ class MarkdownFileServiceTest {
     @Test
     void optimize_structuredContent_preservesOriginalTitlesAndHeader() {
         setUp();
-        String content = "## Programming / Java / Core / Java Basics\n"
-            + "### Variables\nOld variables content.\n"
-            + "### Loops\nOld loops content.";
+        String content = "# Programming / Java / Core / Java Basics\n"
+            + "## Variables\nOld variables content.\n"
+            + "## Loops\nOld loops content.";
 
         MarkdownTopicImporter.ParsedTopic variablesTopic = new MarkdownTopicImporter.ParsedTopic(
             "Programming", "Java", "Core", "Java Basics", "Variables", "Old variables content."
@@ -756,8 +756,8 @@ class MarkdownFileServiceTest {
 
         when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(variablesTopic, loopsTopic));
 
-        String aiResponse = "### Variables\nNew tighter variables content.\n\n"
-            + "### Loops\nNew tighter loops content.";
+        String aiResponse = "## Variables\nNew tighter variables content.\n\n"
+            + "## Loops\nNew tighter loops content.";
 
         when(openAiService.optimizeTopicBodies(any())).thenReturn(aiResponse);
 
@@ -775,17 +775,17 @@ class MarkdownFileServiceTest {
 
         String result = markdownFileService.optimize(content);
 
-        assertThat(result).startsWith("## Programming / Java / Core / Java Basics");
-        assertThat(result).contains("### Variables\nNew tighter variables content.");
-        assertThat(result).contains("### Loops\nNew tighter loops content.");
+        assertThat(result).startsWith("# Programming / Java / Core / Java Basics");
+        assertThat(result).contains("## Variables\nNew tighter variables content.");
+        assertThat(result).contains("## Loops\nNew tighter loops content.");
     }
 
     @Test
     void optimize_structuredContent_aiDropsATitle_throwsIllegalStateException() {
         setUp();
-        String content = "## Programming / Java / Core / Java Basics\n"
-            + "### Variables\nOld content.\n"
-            + "### Loops\nOld loops content.";
+        String content = "# Programming / Java / Core / Java Basics\n"
+            + "## Variables\nOld content.\n"
+            + "## Loops\nOld loops content.";
 
         MarkdownTopicImporter.ParsedTopic variablesTopic = new MarkdownTopicImporter.ParsedTopic(
             "Programming", "Java", "Core", "Java Basics", "Variables", "Old content."
@@ -796,7 +796,7 @@ class MarkdownFileServiceTest {
 
         when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(variablesTopic, loopsTopic));
 
-        String aiResponse = "### Variable Basics\nRenamed title, not allowed.";
+        String aiResponse = "## Variable Basics\nRenamed title, not allowed.";
 
         when(openAiService.optimizeTopicBodies(any())).thenReturn(aiResponse);
 
@@ -826,8 +826,8 @@ class MarkdownFileServiceTest {
         AllowedEnvironment jvmEnvironment = new AllowedEnvironment("JVM", "Java, Kotlin, Scala, Spring", 1);
         when(allowedEnvironmentRepository.findAllByOrderByDisplayOrderAsc()).thenReturn(List.of(jvmEnvironment));
 
-        String aiResponse = "## JVM / Java / Streams / Streams Basics\n"
-            + "### Stream Creation\nContent about streams.";
+        String aiResponse = "# JVM / Java / Streams / Streams Basics\n"
+            + "## Stream Creation\nContent about streams.";
 
         when(openAiService.generateStructuredMarkdown(eq(content), any())).thenReturn(aiResponse);
 
@@ -854,7 +854,7 @@ class MarkdownFileServiceTest {
         when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(fallbackTopic));
         when(allowedEnvironmentRepository.findAllByOrderByDisplayOrderAsc()).thenReturn(List.of());
 
-        String aiResponse = "### Just a topic\nNo header line here.";
+        String aiResponse = "## Just a topic\nNo header line here.";
 
         when(openAiService.generateStructuredMarkdown(eq(content), any())).thenReturn(aiResponse);
 

@@ -1,10 +1,10 @@
-## JVM / Java / Collections / Arrays
+# JVM / Java / Collections / Arrays
 
-### 1. Array Basics
+## 1. Array Basics
 
 Arrays in Java have fixed size. They can store either primitives or objects (wrappers unboxing). As low-level structures they are very fast but are are less flexible than ArrayList. They are not part of the Collections framework, they belongs to the the java.util package.
 
-~~~java
+```java
 package collections.arrays;
 
 import java.util.Arrays;
@@ -83,13 +83,13 @@ public class ArrayBasics {
         System.out.println(matrix[1][2]);  // 6
     }
 }
-~~~
+```
 
-### 2. Array Examples
+## 2. Array Examples
 
 Once an array is created, its size cannot be changed. Elements are accessed using their index, which starts at 0. The following examples demonstrate two common uses of arrays: storing a fixed set of exam grades and representing the seven days of the week.
 
-~~~java
+```java
 package collections.arrays;
 
 public class ArrayExamples {
@@ -121,4 +121,4 @@ public class ArrayExamples {
         }
     }
 }
-~~~~
+```~

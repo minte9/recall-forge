@@ -1,10 +1,10 @@
-## JVM / Java / OOP / Polymorphism
+# JVM / Java / OOP / Polymorphism
 
-### 1. Storage Service Application
+## 1. Storage Service Application
 
 Polymorphism means that the same method call can produce different behavior depending on the object's actual type at runtime. Code works with a common interface rather than concrete implementations, making it easier to extend and maintain.
 
-~~~java
+```java
 /**
  * A storage service can work with different storage providers
  * through the same interface.
@@ -71,28 +71,28 @@ class FileService {
         storage.storage(fileName);  // Same method call, different runtime behavior
     }
 }
-~~~
+```
 
 
-### 2. Dependency Injection
+## 2. Dependency Injection
 
 Dependency Injection -- receiving a dependency from outside instead of creating it -- is what makes `FileService` work with any `StorageProvider` implementation without changes. See the dedicated Spring / Framework subcategory for DI in a full framework context.
 
-~~~java
+```java
 class FileService {
     private StorageProvider storage;
     public FileService(StorageProvider storage) { // injected, not created internally
         this.storage = storage;
     }
 }
-~~~
+```
 
 
-### 3. Final Keyword
+## 3. Final Keyword
 
 Declaring a field as final means its reference can be assigned only once. This helps create immutable object relationships by preventing dependencies from being replaced after construction, while still allowing the referenced object itself to change if it is mutable.
 
-~~~java
+```java
 class StorageProvider {
     private String bucket;
 
@@ -120,14 +120,14 @@ class FileService {
         // storage = new StorageProvider(); // Compilation error
     }
 }
-~~~
+```
 
 
-### 4. Static Keyword
+## 4. Static Keyword
 
 The static keyword declares members that belong to the class rather than to individual objects. Static fields are shared by all instances and are commonly used for counters, constants, and utility methods.
 
-~~~java
+```java
 class FileService {
 
     public static int totalUploads = 0;  // shared by all instances
@@ -142,4 +142,4 @@ class FileService {
         totalUploads++;  // Look Here
     }
 }
-~~~
+```

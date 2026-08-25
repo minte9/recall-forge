@@ -1,10 +1,10 @@
-## JVM / Spring / Framework / Dependency Injection
+# JVM / Spring / Framework / Dependency Injection
 
-### 1. Dependency Injection (DI)
+## 1. Dependency Injection (DI)
 
 Dependency Injection (DI) means an object receives its dependencies from outside instead of creating them itself. This lowers coupling and makes testing easier, since you can swap in a fake dependency. In Spring, DI is how IoC actually gets implemented.
 
-~~~java
+```java
 class NotificationController {
     private final MessageService service;
 
@@ -21,14 +21,14 @@ class NotificationControllerInjected {
         this.service = service;
     }
 }
-~~~
+```
 
 
-### 2. Types of DI
+## 2. Types of DI
 
 Spring supports constructor, field, and setter injection. Constructor injection is recommended: it makes dependencies explicit, allows `final` fields, and is easy to test. Field injection (`@Autowired` on a field) is more common in tutorials but hides dependencies and complicates testing.
 
-~~~java
+```java
 class MessageService {
     public String getMessage() {
         return "Hello DI";
@@ -46,14 +46,14 @@ class NotificationController {
         System.out.println(messageService.getMessage());
     }
 }
-~~~
+```
 
 
-### 3. IoC using DI
+## 3. IoC using DI
 
 Spring ties IoC and DI together through the `ApplicationContext`: it creates beans, figures out what each one needs, and injects those dependencies automatically. Your classes just declare what they need in the constructor -- Spring supplies it.
 
-~~~java
+```java
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -102,4 +102,4 @@ class OrderService {
         System.out.println("Order processed.");
     }
 }
-~~~
+```

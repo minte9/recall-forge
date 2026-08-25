@@ -1,10 +1,10 @@
-## JVM / Java / Collections / Sets
+# JVM / Java / Collections / Sets
 
-### 1. Set Basics
+## 1. Set Basics
 
 A Set is a collection that stores unique elements, meaning duplicates are not allowed. Unlike a List, a Set does not provide indexed access, so elements cannot be retrieved by position. The most common implementation is HashSet, which offers very fast insertion, removal, and lookup operations.  
 
-~~~java
+```java
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,14 +40,14 @@ public class SetBasics {
         }
     }
 }
-~~~
+```
 
 
-### 2. HashSet Example
+## 2. HashSet Example
 
 HashSet is the most widely used implementation of the Set interface. It stores elements in an unordered collection and prevents duplicates by using the equals() and hashCode() methods. For custom classes, these methods should be overridden so that logically equal objects are treated as duplicates.
 
-~~~java
+```java
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -92,14 +92,14 @@ class Song { // implements Object implicit
         return Objects.hash(title, artist);
     }
 }
-~~~
+```
 
 
-### 3. TreeSet Example
+## 3. TreeSet Example
 
 TreeSet is a Set implementation that automatically keeps its elements in sorted order. Unlike HashSet, it uses the natural ordering of elements (or a custom Comparator) to organize and compare them. Operations like add(), remove() run in O(log n).  
 
-~~~java
+```java
 package collections.sets;
 
 import java.util.TreeSet;
@@ -139,4 +139,4 @@ class Item implements Comparable<Item> {
         return title + ":" + artist;
     }
 }
-~~~
+```

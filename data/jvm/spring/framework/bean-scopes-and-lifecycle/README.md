@@ -1,10 +1,10 @@
-## JVM / Spring / Framework / Bean Scopes and Lifecycle
+# JVM / Spring / Framework / Bean Scopes and Lifecycle
 
-### 1. Singleton vs Prototype Scope
+## 1. Singleton vs Prototype Scope
 
 By default every bean is a singleton -- one shared instance for the whole app. `@Scope("prototype")` makes Spring create a new instance every time it's requested. Singletons must be stateless/thread-safe since they're shared; prototypes can hold per-use state, but Spring stops managing them after creation (no destroy callbacks).
 
-~~~java
+```java
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -46,14 +46,14 @@ public class ScopeExample {
         System.out.println(c == d);  // false -- new instance each time
     }
 }
-~~~
+```
 
 
-### 2. @PostConstruct and @PreDestroy
+## 2. @PostConstruct and @PreDestroy
 
 `@PostConstruct` runs right after a bean's dependencies are injected -- the standard place for init logic like opening a connection. `@PreDestroy` runs just before a singleton bean is destroyed, for cleanup like closing resources; it never fires for prototype beans. These replace the older `InitializingBean`/`DisposableBean` interfaces, which coupled your code to Spring's API.
 
-~~~java
+```java
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.context.annotation.Bean;
@@ -88,4 +88,4 @@ public class LifecycleAnnotationsExample {
         // Connection pool closed
     }
 }
-~~~
+```

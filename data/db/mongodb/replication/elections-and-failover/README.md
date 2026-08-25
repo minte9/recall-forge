@@ -1,6 +1,6 @@
-## DB / MongoDB / Replication / Elections & Failover
+# DB / MongoDB / Replication / Elections & Failover
 
-### 1. Primary Election
+## 1. Primary Election
 
 When the current primary becomes unreachable, the remaining members hold
 an election and vote for a new primary among themselves -- a member with
@@ -8,11 +8,11 @@ higher `priority`, or more up-to-date oplog data, is favored. This
 typically completes in a few seconds, during which the replica set can't
 accept writes.
 
-~~~javascript
+```javascript
 rs.conf().members  // shows each member's priority and votes
-~~~
+```
 
-### 2. Read Preference
+## 2. Read Preference
 
 Read preference controls which member type a read is routed to:
 `primary` (default, always current), `primaryPreferred`, `secondary`
@@ -20,6 +20,6 @@ Read preference controls which member type a read is routed to:
 `nearest` (lowest latency, regardless of role) -- a per-query or
 per-connection choice between consistency and read scalability.
 
-~~~javascript
+```javascript
 db.orders.find({ status: 'PAID' }).readPref('secondary')
-~~~
+```

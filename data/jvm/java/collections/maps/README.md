@@ -1,10 +1,10 @@
-## JVM / Java / Collections / Maps
+# JVM / Java / Collections / Maps
 
-### 1. Key-value pairs
+## 1. Key-value pairs
 
 A Map stores data as key-value pairs, where each key is unique and maps to a single value. The most common implementation is HashMap, which uses hashing to provide very fast insertion and lookup operations. If a key already exists, calling put() replaces its associated value with the new one.
 
-~~~java
+```java
 package collections.maps;
 
 import java.util.HashMap;
@@ -23,14 +23,14 @@ public class HashMapExample {
         System.out.println(scores.get("John"));  // 20
     }
 }
-~~~
+```
 
 
-### 2. Map Iteration
+## 2. Map Iteration
 
 Maps can be traversed by iterating over their keys, values, or key-value pairs. The keySet(), values(), and entrySet() methods provide efficient ways to access the information stored in a map, depending on what your code needs.
 
-~~~java
+```java
 /**
  * Java does not support Javascript style object literals.
  *      let map = { a:1, b:2 }  // ? NOT valid in Java
@@ -75,4 +75,4 @@ public class MapLoop {
         }
     }
 }
-~~~
+```

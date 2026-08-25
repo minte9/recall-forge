@@ -1,10 +1,10 @@
-## JVM / Spring / Framework / Configuration via Annotations
+# JVM / Spring / Framework / Configuration via Annotations
 
-### 1. Annotations
+## 1. Annotations
 
 Annotations are metadata attached to code with `@`. They don't change behavior by themselves -- Spring reads them at runtime to configure beans. Common ones: `@Configuration`, `@Bean`, `@Component`, `@Service`.
 
-~~~java
+```java
 @Configuration // marks this class as a source of bean definitions
 class AppConfig {
 
@@ -13,14 +13,14 @@ class AppConfig {
         return new MessageService();
     }
 }
-~~~
+```
 
 
-### 2. IoC using annotations
+## 2. IoC using annotations
 
 Instead of writing `@Bean` methods by hand, Spring can scan the classpath and find components automatically. Any class annotated `@Component` becomes a managed bean, and its dependencies get injected without extra config.
 
-~~~java
+```java
 @Component // discovered automatically by component scanning
 class MessageService {
 }
@@ -31,14 +31,14 @@ class NotificationController {
     public NotificationController(MessageService service) {
     }
 }
-~~~
+```
 
 
-### 3. Annotations Example App
+## 3. Annotations Example App
 
 A complete annotation-only Spring app: `@ComponentScan` finds the components, `ApplicationContext` creates the beans, and constructor injection wires them together -- no `@Bean` methods needed.
 
-~~~java
+```java
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -84,4 +84,4 @@ class NotificationController {
         System.out.println(messageService.getMessage());
     }
 }
-~~~
+```

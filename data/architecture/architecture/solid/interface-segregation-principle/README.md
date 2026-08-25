@@ -1,10 +1,10 @@
-## Architecture / Architecture / SOLID / Interface Segregation Principle
+# Architecture / Architecture / SOLID / Interface Segregation Principle
 
-### 1. Interface Segregation Principle (ISP)
+## 1. Interface Segregation Principle (ISP)
 
 The Interface Segregation Principle states that clients should not be forced to depend on methods they do not use. Instead of creating one large interface, split it into smaller, focused interfaces that represent specific capabilities.
 
-~~~java
+```java
 interface Refundable {
     void refund(String id, double amount);
 }
@@ -12,14 +12,14 @@ interface Refundable {
 interface Invoicable {
     void generateInvoice(String id);
 }
-~~~
+```
 
 
-### 2. Bad Implementation (violates ISP)
+## 2. Bad Implementation (violates ISP)
 
 A design violates ISP when a single interface forces implementations to provide methods that are meaningless for them. This often results in empty methods or UnsupportedOperationException, making the code harder to maintain.
 
-~~~java
+```java
 package solid.isp.non_compliant;
 
 public class BadProviderApplication {
@@ -96,13 +96,13 @@ class CashOnDeliveryPaymentProvider implements PaymentProvider {
         System.out.println("Invoice generated for cash payment");
     }
 }
-~~~
+```
 
-### 3. ISP-compliant Implementation
+## 3. ISP-compliant Implementation
 
 A better design separates unrelated capabilities into independent interfaces. Each implementation chooses only the interfaces that make sense, while clients depend only on the capabilities they actually require.
 
-~~~java
+```java
 package solid.isp;
 
 public class ProviderApplication {
@@ -207,13 +207,13 @@ class CheckoutService {
         capturer.capturePayment("auth-id");
     }
 }
-~~~
+```
 
-### 4. Spring Projects (ISP)
+## 4. Spring Projects (ISP)
 
 In Spring applications, ISP naturally works with dependency injection. A single bean can implement multiple interfaces, and each service receives only the capability it needs rather than depending on the entire implementation.
 
-~~~java
+```java
 @Component
 public class StripePaymentProvider
         implements PaymentAuthorizer,
@@ -235,18 +235,18 @@ public class CheckoutService {
         this.capturer = capturer;
     }
 }
-~~~
+```
 
 Spring will inject the same bean instance (StripePaymentProvider)  
 into different constructor parameters by role, not by class.  
 
 
 
-### 5. Crucial Conceptual Point (ISP)
+## 5. Crucial Conceptual Point (ISP)
 
 ISP is about clients, not objects. A single object may implement multiple interfaces, but each client should depend only on the capability it actually uses. This keeps dependencies focused and reduces unnecessary coupling.
 
-~~~java
+```java
 PaymentAuthorizer authorizer = new StripePaymentProvider();
 authorizer.authorizePayment(100);
-~~~
+```

@@ -184,7 +184,7 @@ public class MarkdownFileService {
      * anything - the caller previews it and submits separately through
      * {@link #update} or {@link #createFromContent} if they want to keep it.
      *
-     * If {@code content} already has a "##" header, the header/topic titles
+     * If {@code content} already has a "#" header, the header/topic titles
      * were a deliberate choice and are never sent to the AI to rewrite -
      * only topic bodies are optimized, and the response is validated to
      * still contain exactly those titles before anything from it is used.
@@ -232,7 +232,7 @@ public class MarkdownFileService {
         MarkdownTopicImporter.ParsedTopic firstTopic = parsedTopics.get(0);
 
         StringBuilder result = new StringBuilder();
-        result.append("## %s / %s / %s / %s\n\n".formatted(
+        result.append("# %s / %s / %s / %s\n\n".formatted(
                 firstTopic.environment(),
                 firstTopic.category(),
                 firstTopic.subcategory(),
@@ -247,7 +247,7 @@ public class MarkdownFileService {
                         "AI response did not preserve the existing topic titles. Please try again.");
             }
 
-            result.append("### %s\n%s\n\n".formatted(original.title(), rewrittenBody));
+            result.append("## %s\n%s\n\n".formatted(original.title(), rewrittenBody));
         }
 
         return result.toString().trim();
@@ -279,7 +279,7 @@ public class MarkdownFileService {
     }
 
     private boolean hasPathHeading(String content) {
-        return content.lines().anyMatch(line -> line.matches("^##\\s+.+"));
+        return content.lines().anyMatch(line -> line.matches("^#\\s+.+"));
     }
 
     private MarkdownUploadResponse importMarkdown(String content, String filename) throws Exception {

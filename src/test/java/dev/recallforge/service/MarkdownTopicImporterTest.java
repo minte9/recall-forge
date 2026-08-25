@@ -14,7 +14,7 @@ class MarkdownTopicImporterTest {
 
     @Test
     void singleTopicHeading_usesItsOwnTitleAsFileTitleAndDefaultsRest() {
-        String markdown = "### Java Basics\nSome content here.";
+        String markdown = "## Java Basics\nSome content here.";
 
         List<ParsedTopic> topics = importer.parseMarkdown(markdown);
 
@@ -30,7 +30,7 @@ class MarkdownTopicImporterTest {
 
     @Test
     void pathHeading_assignsEnvironmentCategorySubcategoryAndFileTitle() {
-        String markdown = "## Programming / Java / Core / Basics\n### Variables\nContent about variables.";
+        String markdown = "# Programming / Java / Core / Basics\n## Variables\nContent about variables.";
 
         List<ParsedTopic> topics = importer.parseMarkdown(markdown);
 
@@ -45,7 +45,7 @@ class MarkdownTopicImporterTest {
 
     @Test
     void pathHeadingWithFewerParts_fallsBackToDefaultsAndUsesFirstTopicTitleAsFileTitle() {
-        String markdown = "## Programming\n### Loops\nLoop content.";
+        String markdown = "# Programming\n## Loops\nLoop content.";
 
         List<ParsedTopic> topics = importer.parseMarkdown(markdown);
 
@@ -59,7 +59,7 @@ class MarkdownTopicImporterTest {
 
     @Test
     void multipleTopicsUnderSamePath_shareTheFirstTopicsTitleAsFileTitle() {
-        String markdown = "## Programming / Java\n### First Topic\nFirst content.\n### Second Topic\nSecond content.";
+        String markdown = "# Programming / Java\n## First Topic\nFirst content.\n## Second Topic\nSecond content.";
 
         List<ParsedTopic> topics = importer.parseMarkdown(markdown);
 
@@ -85,11 +85,69 @@ class MarkdownTopicImporterTest {
 
     @Test
     void topicHeadingWithBlankContent_isSkipped() {
-        String markdown = "### Empty Topic\n\n### Real Topic\nActual content.";
+        String markdown = "## Empty Topic\n\n## Real Topic\nActual content.";
 
         List<ParsedTopic> topics = importer.parseMarkdown(markdown);
 
         assertThat(topics).hasSize(1);
         assertThat(topics.get(0).title()).isEqualTo("Real Topic");
+    }
+
+    @Test
+    void hashCommentInsideFencedCodeBlock_isNotMisparsedAsPathHeadingAndIsKeptInContent() {
+        String markdown = "# Programming / Python / Basics / Comments\n"
+            + "## First Topic\n"
+            + "Explanation.\n"
+            + "```python\n"
+            + "# a plain comment, not a heading\n"
+            + "x = 1\n"
+            + "```\n"
+            + "## Second Topic\n"
+            + "Second content.";
+
+        List<ParsedTopic> topics = importer.parseMarkdown(markdown);
+
+        assertThat(topics).hasSize(2);
+        assertThat(topics.get(0).title()).isEqualTo("First Topic");
+        assertThat(topics.get(0).content()).contains("# a plain comment, not a heading");
+        assertThat(topics.get(0).environment()).isEqualTo("Programming");
+        assertThat(topics.get(1).title()).isEqualTo("Second Topic");
+        assertThat(topics.get(1).environment()).isEqualTo("Programming");
+        assertThat(topics.get(1).category()).isEqualTo("Python");
+    }
+
+    @Test
+    void doubleHashCommentInsideFencedCodeBlock_isNotMisparsedAsTopicHeading() {
+        String markdown = "# Programming / Perl / Basics / Comments\n"
+            + "## Only Topic\n"
+            + "Explanation.\n"
+            + "```perl\n"
+            + "## a loud comment, not a heading\n"
+            + "my $x = 1;\n"
+            + "```\n"
+            + "Trailing content after the fence.";
+
+        List<ParsedTopic> topics = importer.parseMarkdown(markdown);
+
+        assertThat(topics).hasSize(1);
+        assertThat(topics.get(0).title()).isEqualTo("Only Topic");
+        assertThat(topics.get(0).content()).contains("## a loud comment, not a heading");
+        assertThat(topics.get(0).content()).contains("Trailing content after the fence.");
+    }
+
+    @Test
+    void tildeFence_alsoSuppressesHeadingDetectionInsideIt() {
+        String markdown = "# Programming / Bash / Basics / Comments\n"
+            + "## Only Topic\n"
+            + "Explanation.\n"
+            + "~~~bash\n"
+            + "# not a heading either\n"
+            + "echo hi\n"
+            + "~~~";
+
+        List<ParsedTopic> topics = importer.parseMarkdown(markdown);
+
+        assertThat(topics).hasSize(1);
+        assertThat(topics.get(0).content()).contains("# not a heading either");
     }
 }

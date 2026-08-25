@@ -1,6 +1,6 @@
-## DB / MySQL / SQL Dialect & Syntax / LIMIT & OFFSET Pagination Syntax
+# DB / MySQL / SQL Dialect & Syntax / LIMIT & OFFSET Pagination Syntax
 
-### 1. LIMIT/OFFSET Syntax
+## 1. LIMIT/OFFSET Syntax
 
 MySQL uses `LIMIT count OFFSET start` (or the shorthand `LIMIT start,
 count`) instead of the ANSI standard `OFFSET ... FETCH FIRST ... ROWS
@@ -8,12 +8,12 @@ ONLY` -- functionally equivalent, but the syntax doesn't transfer
 directly if you're used to standard SQL or another engine that only
 supports the standard form.
 
-~~~sql
+```sql
 SELECT * FROM orders ORDER BY id LIMIT 20 OFFSET 40;
 SELECT * FROM orders ORDER BY id LIMIT 40, 20;  -- same result, MySQL shorthand
-~~~
+```
 
-### 2. AUTO_INCREMENT vs Sequences
+## 2. AUTO_INCREMENT vs Sequences
 
 MySQL has no standalone `CREATE SEQUENCE` object -- auto-incrementing
 values are tied directly to a column via `AUTO_INCREMENT`, one per table.
@@ -21,8 +21,8 @@ values are tied directly to a column via `AUTO_INCREMENT`, one per table.
 in the current session, the MySQL equivalent of `RETURNING id` or a
 sequence's `CURRVAL`.
 
-~~~sql
+```sql
 CREATE TABLE orders (id INT AUTO_INCREMENT PRIMARY KEY, total NUMERIC);
 INSERT INTO orders (total) VALUES (99.90);
 SELECT LAST_INSERT_ID();
-~~~
+```

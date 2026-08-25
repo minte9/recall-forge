@@ -95,9 +95,9 @@ class StarterPackServiceTest {
     @Test
     void importStarterPack_forwardsEachTemplateFilesContentAndDisplayOrder() throws Exception {
         setUp();
-        MarkdownFile first = templateFile("### Topic 1\ncontent", 1);
-        MarkdownFile second = templateFile("### Topic 2\ncontent", 2);
-        MarkdownFile withoutOrder = templateFile("### Topic 3\ncontent", null);
+        MarkdownFile first = templateFile("## Topic 1\ncontent", 1);
+        MarkdownFile second = templateFile("## Topic 2\ncontent", 2);
+        MarkdownFile withoutOrder = templateFile("## Topic 3\ncontent", null);
 
         when(currentUserService.currentUserId()).thenReturn(2L);
         when(markdownFileRepository.findByUserIdAndCategory(1L, "Java"))
@@ -105,9 +105,9 @@ class StarterPackServiceTest {
 
         starterPackService.importStarterPack("Java");
 
-        verify(markdownFileService).importMarkdown("### Topic 1\ncontent", 1);
-        verify(markdownFileService).importMarkdown("### Topic 2\ncontent", 2);
-        verify(markdownFileService).importMarkdown("### Topic 3\ncontent", null);
+        verify(markdownFileService).importMarkdown("## Topic 1\ncontent", 1);
+        verify(markdownFileService).importMarkdown("## Topic 2\ncontent", 2);
+        verify(markdownFileService).importMarkdown("## Topic 3\ncontent", null);
     }
 
     @Test
