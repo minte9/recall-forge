@@ -165,11 +165,26 @@ class RewardServiceTest {
         when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
             .thenReturn(List.of());
         when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any()))
-            .thenReturn(activityOnOneDay(3, 0.3, RetryType.CODE_CHALLENGE));
+            .thenReturn(activityOnOneDay(3, 1.0, RetryType.CODE_CHALLENGE));
 
         RewardResponse response = rewardService.getCurrentUserReward("java");
 
         assertThat(response.goalDaysThisMonth()).isEqualTo(1);
+    }
+
+    @Test
+    void getCurrentUserReward_goalDaysIgnoresCodeChallengesScoringLessThanPerfect() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
+            .thenReturn(List.of());
+        when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any()))
+            .thenReturn(activityOnOneDay(3, 0.5, RetryType.CODE_CHALLENGE));
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.goalDaysThisMonth()).isZero();
     }
 
     @Test
@@ -195,7 +210,7 @@ class RewardServiceTest {
         when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
             .thenReturn(List.of());
         when(reviewRepository.findGoalActivityByUserIdAndCategorySince(eq(1L), eq("java"), any()))
-            .thenReturn(activityOnDay(LocalDateTime.now(), 3, 0.3, RetryType.CODE_CHALLENGE));
+            .thenReturn(activityOnDay(LocalDateTime.now(), 3, 1.0, RetryType.CODE_CHALLENGE));
 
         RewardResponse response = rewardService.getCurrentUserReward("java");
 
