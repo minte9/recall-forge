@@ -1,10 +1,10 @@
-## JVM / Java / Collections / Queues
+# JVM / Java / Collections / Queues
 
-### 1. Queue Basics
+## 1. Queue Basics
 
 A Queue stores elements in First In, First Out (FIFO) order, where the first element added is the first one removed. It is commonly used to model waiting lines, task scheduling, and message processing. Java provides pairs of methods (offer/add, poll/remove, peek/element) that perform the same operations but differ in how they handle failures.
 
-~~~java
+```java
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -41,14 +41,14 @@ public class QueueBasics {
         }
     }
 }
-~~~
+```
 
 
-### 2. Deque Example
+## 2. Deque Example
 
 A Deque (double-ended queue) allows elements to be inserted and removed from both the front and the back of the collection. This makes it suitable for implementing both queues (FIFO) and stacks (LIFO). In most cases, ArrayDeque is the preferred implementation because it is faster than LinkedList for deque operations. 
 
-~~~java
+```java
 package collections.queues;
 
 import java.util.ArrayDeque;
@@ -84,4 +84,4 @@ public class DequeExample {
         System.out.println("Peek last: " + deque.peekLast());  // Charlie
     }
 }
-~~~
+```

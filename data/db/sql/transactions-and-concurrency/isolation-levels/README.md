@@ -1,6 +1,6 @@
-## DB / SQL / Transactions & Concurrency / Isolation Levels
+# DB / SQL / Transactions & Concurrency / Isolation Levels
 
-### 1. Isolation Levels
+## 1. Isolation Levels
 
 The SQL standard defines four levels, each preventing more anomalies at
 the cost of concurrency: `READ UNCOMMITTED` (prevents nothing),
@@ -8,11 +8,11 @@ the cost of concurrency: `READ UNCOMMITTED` (prevents nothing),
 non-repeatable reads), `SERIALIZABLE` (no anomalies at all, transactions
 behave as if run one at a time). Most engines default to `READ COMMITTED`.
 
-~~~sql
+```sql
 SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
-~~~
+```
 
-### 2. Read Anomalies (Dirty/Non-Repeatable/Phantom)
+## 2. Read Anomalies (Dirty/Non-Repeatable/Phantom)
 
 A dirty read sees another transaction's uncommitted change. A
 non-repeatable read sees a row's value change between two reads in the
@@ -21,9 +21,9 @@ phantom read sees new rows appear on a re-run query because another
 transaction inserted rows matching the same filter -- `REPEATABLE READ`
 stops the first two but not always phantoms, depending on the engine.
 
-~~~sql
+```sql
 -- non-repeatable read: same SELECT, different result, same tx
 SELECT balance FROM accounts WHERE id = 1;  -- reads 100
 -- (another tx commits balance = 50 here)
 SELECT balance FROM accounts WHERE id = 1;  -- reads 50
-~~~
+```

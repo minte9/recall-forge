@@ -1,10 +1,10 @@
-## Python / Algorithms / Algorithms / Divide & Conquer
+# Python / Algorithms / Algorithms / Divide & Conquer
 
-### 1. Merge Sort
+## 1. Merge Sort
 
 Merge sort recursively splits the list in half down to single elements (the base case), then merges pairs of already-sorted halves back together in order as the recursion unwinds. Splitting is O(log n) deep, and merging each level takes O(n), giving O(n log n) overall -- better than the O(n^2) comparison sorts.
 
-~~~py
+```py
 def merge_sort(items):
     if len(items) <= 1:  # base case
         return items
@@ -38,14 +38,14 @@ print(merge_sort(data))
 """
     [2, 3, 4, 5, 6, 7, 8, 9]
 """
-~~~
+```
 
 
-### 2. Quicksort
+## 2. Quicksort
 
 Quicksort picks a pivot (here, the last element) and partitions the list around it in one pass: everything smaller ends up to its left, everything larger to its right, and the pivot lands in its final sorted position. It then recursively sorts the left and right partitions -- O(n log n) on average, but O(n^2) worst case if the data is already sorted (a bad pivot choice every time).
 
-~~~py
+```py
 def quicksort(items, i=0, j=None):
     if j is None:
         j = len(items) - 1
@@ -71,14 +71,14 @@ print("Sorted:", data)
 """
     Sorted: [2, 4, 8, 10, 18]
 """
-~~~
+```
 
 
-### 3. Binary Search
+## 3. Binary Search
 
 Binary search is the canonical divide-and-conquer search: repeatedly narrow the search to whichever half of a sorted list could still contain the target, discarding the other half entirely. A linear scan of 100 items takes up to 100 steps; binary search takes about 7 -- the gap widens dramatically as the list grows, which is why the timed comparison below runs against a 123-million-item list. This is a different code example from the one in `Data Structures / Time Complexity` -- same idea, different implementation and framing (efficiency vs. linear search, not step-by-step complexity).
 
-~~~py
+```py
 import time
 
 def timer(func):
@@ -127,4 +127,4 @@ lst = generate_data()
 k1 = binary_search(123456780, lst)
 k2 = linear_search(123456780, lst)
 assert k1 == k2
-~~~
+```

@@ -1,21 +1,21 @@
-## Architecture / Architecture / SOLID / Open/Closed Principle
+# Architecture / Architecture / SOLID / Open/Closed Principle
 
-### 1. Open/Close Principle (OCP)
+## 1. Open/Close Principle (OCP)
 
 The Open/Closed Principle states that software should be open for extension but closed for modification. New behavior should be added through new classes or implementations instead of changing stable, existing code.
 
-~~~java
+```java
 interface Notification {
     void send(String message);
 }
-~~~
+```
 
 
-### 2. Bad Implementation (violates OCP)
+## 2. Bad Implementation (violates OCP)
 
 A design violates OCP when adding a new type requires modifying existing conditional logic. Each new notification channel forces changes to the service class, increasing the risk of breaking behavior that already works.
 
-~~~java
+```java
 /**
  * OCP - Non compliant example
  * ============================
@@ -47,13 +47,13 @@ class Bad_NotificationService {
 
     }
 }
-~~~
+```
 
-### 3. OCP-compliant Implementation
+## 3. OCP-compliant Implementation
 
 An OCP-compliant design depends on an abstraction and uses polymorphism to support new behavior. Adding another notification type requires only a new implementation, while the existing service remains unchanged.
 
-~~~java
+```java
 /**
  * OCP - Open/Closed Principle
  * ======================
@@ -111,14 +111,14 @@ class PushNotification implements Notification {
         System.out.println("Sending PUSH: " + message);
     }
 }
-~~~
+```
 
 
-### 4. Why interfaces are perfect for OCP?  
+## 4. Why interfaces are perfect for OCP?  
 
 Interfaces define a stable contract while allowing many independent implementations. The calling code works with the abstraction, so implementations can be added, replaced, or selected at runtime without modifying the existing workflow.
 
-~~~java
+```java
 Notification notification = new EmailNotification();
 notification.send("Welcome!");
-~~~
+```

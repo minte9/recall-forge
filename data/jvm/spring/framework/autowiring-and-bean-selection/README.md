@@ -1,10 +1,10 @@
-## JVM / Spring / Framework / Autowiring and Bean Selection
+# JVM / Spring / Framework / Autowiring and Bean Selection
 
-### 1. @Autowired Basics
+## 1. @Autowired Basics
 
 `@Autowired` tells Spring to find a matching bean by type and inject it automatically. It can go on a constructor (recommended), a field, or a setter. When exactly one bean of that type exists, Spring resolves it with no extra config needed.
 
-~~~java
+```java
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -39,14 +39,14 @@ public class AutowiredBasicsExample {
         // Hello, autowired!
     }
 }
-~~~
+```
 
 
-### 2. Resolving Ambiguity with @Qualifier
+## 2. Resolving Ambiguity with @Qualifier
 
 When two+ beans implement the same type, plain `@Autowired` is ambiguous -- Spring throws `NoUniqueBeanDefinitionException` at startup. `@Qualifier("beanName")` fixes this by naming exactly which bean to inject, using either its default name (lowercased class name) or an explicit one.
 
-~~~java
+```java
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -77,14 +77,14 @@ class CheckoutService {
     void checkout(int amount) { gateway.charge(amount); }
 }
 // Stripe charged 100
-~~~
+```
 
 
-### 3. @Primary as a Default Candidate
+## 3. @Primary as a Default Candidate
 
 `@Primary` marks one implementation as the default pick whenever autowiring by type is ambiguous -- no need to `@Qualifier` every injection point. If both are present, `@Qualifier` wins. Use `@Primary` for the usual choice, `@Qualifier` for the occasional exception.
 
-~~~java
+```java
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -116,4 +116,4 @@ class AlertService {
     void alert(String message) { notifier.send(message); }
 }
 // Email: Server down
-~~~
+```

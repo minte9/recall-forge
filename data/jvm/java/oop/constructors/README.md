@@ -1,10 +1,10 @@
-## JVM / Java / OOP / Constructors
+# JVM / Java / OOP / Constructors
 
-### 1. Multiple constructors
+## 1. Multiple constructors
 
 A class can define multiple constructors, each with a different parameter list. This is known as constructor overloading and allows objects to be initialized in different ways depending on the available information.
 
-~~~java
+```java
 package oop.constructors;
 
 public class MultipleConstructors {
@@ -33,14 +33,14 @@ class A {
         System.out.println("Constructor 2 used: " + n);
     }
 }
-~~~
+```
 
 
-### 2. This method
+## 2. This method
 
 The this() constructor call invokes another constructor in the same class. It is commonly used to reuse initialization logic and avoid duplicating code. When used, it must be the first statement in the constructor.
 
-~~~java
+```java
 package oop.constructors;
 
 public class ThisMethod {
@@ -83,14 +83,14 @@ class Rectangle {
         );
     }
 }
-~~~
+```
 
 
-### 3. Super method
+## 3. Super method
 
 The super() constructor call invokes a constructor from the parent class. It is used to initialize the inherited part of an object before the subclass performs its own initialization. Like this(), it must be the first statement in the constructor. 
 
-~~~java
+```java
 package oop.constructors;
 
 public class SuperMethod {
@@ -117,4 +117,4 @@ class MainClass extends BaseClass {
         }
     */
 }
-~~~
+```

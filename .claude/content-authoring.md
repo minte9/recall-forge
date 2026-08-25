@@ -19,28 +19,28 @@ files under `data/`) and importing it into the database.
 
 ## 2. Markdown format
 
-```
-## <Environment> / <Category> / <Subcategory> / <FileTitle>
+~~~
+# <Environment> / <Category> / <Subcategory> / <FileTitle>
 
-### 1. <Topic Title>
+## 1. <Topic Title>
 
 2-3 sentences, ~45-60 words. This is a spaced-repetition recall app, not a
 knowledgebase article — the paragraph needs to be readable in one glance,
 not teach the topic from scratch.
 
-~~~java
+```java
 // short, focused example with inline comments explaining WHY, not WHAT
-~~~
-
-### 2. <Next Topic Title>
-...
 ```
 
-- The importer (`MarkdownTopicImporter`) parses the `##` line by splitting on
+## 2. <Next Topic Title>
+...
+~~~
+
+- The importer (`MarkdownTopicImporter`) parses the `#` line by splitting on
   `/` into exactly 4 parts (Environment/Category/Subcategory/FileTitle) — the
   header line is the single source of truth for where content lands in the
   DB. The folder path is cosmetic/organizational only.
-- Each `###` line starts a new topic; everything until the next `###` or `##`
+- Each `##` line starts a new topic; everything until the next `##` or `#`
   is that topic's content.
 - **Topic count: 2-5 per file, no fixed number.** Only include topics that
   are genuinely important. Don't pad to hit 3 "because that's what other

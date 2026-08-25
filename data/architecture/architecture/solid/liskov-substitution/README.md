@@ -1,23 +1,23 @@
-## Architecture / Architecture / SOLID / Liskov Substitution
+# Architecture / Architecture / SOLID / Liskov Substitution
 
-### 1. Liskov Substitution Principle (LSP)
+## 1. Liskov Substitution Principle (LSP)
 
 The Liskov Substitution Principle states that objects of a subclass should be usable wherever objects of the base type are expected. A subtype must preserve the behavior promised by the base contract and should not surprise its clients by imposing stronger restrictions or changing expected behavior.
 
-~~~java
+```java
 PaymentMethod payment = new CreditCardPayment();
 payment.pay(100);   // Works as expected
 
 payment = new PayPalPayment();
 payment.pay(100);   // Same contract, different implementation
-~~~
+```
 
 
-### 2. Bad Implemenation (violates LSP)
+## 2. Bad Implemenation (violates LSP)
 
 A subtype violates LSP when it cannot honor the contract defined by its base type. In this example, FreeTrialPayment introduces an additional restriction that is not part of the PaymentMethod contract, causing code that works with the base type to fail unexpectedly.
 
-~~~java
+```java
 /**
  * LSB - Non compliant example
  * ===========================
@@ -69,13 +69,13 @@ class FreeTrialPayment implements PaymentMethod {
         System.out.println("Free trial payment processed: $" + amount);
     }
 }
-~~~
+```
 
-### 3. LSB-compliant Implementation
+## 3. LSB-compliant Implementation
 
 An LSP-compliant design ensures that every implementation behaves consistently with the base contract. Clients can work with the abstraction without needing to know which concrete implementation is being used.
 
-~~~java
+```java
 /**
  * LSP - Liskov Substitution Principle
  * ====================================
@@ -121,4 +121,4 @@ class PayPalPayment extends BasePayment {
         System.out.println("Paid $" + amount + " using PayPal");
     }
 }
-~~~
+```

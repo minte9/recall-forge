@@ -1,11 +1,11 @@
-## JS / Javascript / Error Handling / Errors & Exceptions
+# JS / Javascript / Error Handling / Errors & Exceptions
 
-### 1. try/catch/finally
+## 1. try/catch/finally
 
 Code that might throw goes in `try`; `catch` handles the error; `finally`
 always runs, whether or not an error occurred — useful for cleanup.
 
-~~~javascript
+```javascript
 try {
   riskyOperation();
 } catch (err) {
@@ -13,35 +13,35 @@ try {
 } finally {
   cleanup();   // always runs
 }
-~~~
+```
 
 
-### 2. Error Object & Types
+## 2. Error Object & Types
 
 `Error` and its built-in subtypes (`TypeError`, `RangeError`,
 `SyntaxError`) carry a `message` and `stack`; catching lets you branch on
 `err instanceof TypeError` for specific handling.
 
-~~~javascript
+```javascript
 try {
   null.foo;
 } catch (err) {
   err instanceof TypeError;   // true
   err.message;                 // "Cannot read properties of null..."
 }
-~~~
+```
 
 
-### 3. Custom Errors
+## 3. Custom Errors
 
 Extending `Error` creates domain-specific error types; remember to call
 `super(message)` so `.message` and `.stack` still work correctly.
 
-~~~javascript
+```javascript
 class ValidationError extends Error {
   constructor(field) {
     super(`Invalid field: ${field}`);
     this.name = "ValidationError";
   }
 }
-~~~
+```

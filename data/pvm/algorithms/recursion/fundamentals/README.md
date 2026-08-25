@@ -1,24 +1,24 @@
-## Python / Algorithms / Recursion / Fundamentals
+# Python / Algorithms / Recursion / Fundamentals
 
-### 1. Call Stack and Base Case
+## 1. Call Stack and Base Case
 
 Each recursive call pushes a new frame onto the call stack; when a call returns, its frame pops and execution resumes at the caller. Every recursive function needs a base case that stops new calls -- without one, Python raises `RecursionError` once it hits the default ~1000-frame limit.
 
-~~~python
+```python
 def countdown(n):
     if n == 0:          # base case -- stops the recursion
         print("done")
         return
     print(n)
     countdown(n - 1)    # smaller subproblem, one new frame per call
-~~~
+```
 
 
-### 2. Recursion vs Iteration
+## 2. Recursion vs Iteration
 
 A recursive solution can mirror a mathematical definition closely, but each call costs a stack frame -- deep recursion (e.g. factorial of a few thousand) hits the recursion limit where an equivalent loop would not. Loops also tend to be faster in Python since they avoid function-call overhead entirely.
 
-~~~python
+```python
 def pow_recursive(x, n):
     if n == 0:
         return 1
@@ -29,16 +29,16 @@ def pow_iterative(x, n):
     for _ in range(1, n):
         res *= x                        # one frame, no depth limit
     return res
-~~~
+```
 
 
-### 3. Mental Checklist for Writing Recursive Functions
+## 3. Mental Checklist for Writing Recursive Functions
 
 Before coding, answer: what's the smallest input (base case)? What does the function return there? How does each call shrink the problem toward that base case? What return type must every branch produce? Tracing one small example by hand (e.g. `sum_to(3)`) catches missing base cases before they become infinite recursion.
 
-~~~python
+```python
 def sum_to(n):
     if n == 1:              # smallest input
         return 1             # base case return value
     return n + sum_to(n - 1) # shrinks toward the base case, same return type
-~~~
+```

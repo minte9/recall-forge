@@ -1,10 +1,10 @@
-## JVM / Java / OOP / Composition
+# JVM / Java / OOP / Composition
 
-### 1. Notification Service Application
+## 1. Notification Service Application
 
 Composition models a has-a relationship by building a class from other objects instead of inheriting from them. In this example, NotificationService has a MessageSender, allowing it to work with different notification channels through the same interface. This makes the application flexible and easy to extend.
 
-~~~java
+```java
 package com.minte9.oop.composition;
 
 public class NotificationServiceApp {
@@ -52,25 +52,25 @@ class NotificationService {
         sender.send(message);
     }
 }
-~~~
+```
 
 
-### 2. Dependency Inversion
+## 2. Dependency Inversion
 
 The Dependency Inversion Principle -- high-level code should depend on abstractions, not concrete implementations -- is exactly why `NotificationService` depends on the `MessageSender` interface instead of a concrete `EmailSender`. See the dedicated SOLID subcategory for the full principle.
 
-~~~java
+```java
 class NotificationService {
     private MessageSender sender; // depends on the abstraction, not EmailSender directly
 }
-~~~
+```
 
 
-### 3. Default Method
+## 3. Default Method
 
 A default method is a method with an implementation declared inside an interface. Introduced in Java 8, it allows new behavior to be added to an interface without requiring every existing implementation to change. Implementing classes may either inherit the default implementation or override it.
 
-~~~java
+```java
 package com.minte9.oop.composition.default_note;
 
 public class DefaultMethods {
@@ -130,4 +130,4 @@ class NotificationService {
         sender.log(message);
     }
 }
-~~~
+```

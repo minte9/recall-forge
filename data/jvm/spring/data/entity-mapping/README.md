@@ -1,10 +1,10 @@
-## JVM / Spring / Data / Entity Mapping
+# JVM / Spring / Data / Entity Mapping
 
-### 1. @Entity, @Id, @GeneratedValue
+## 1. @Entity, @Id, @GeneratedValue
 
 @Entity marks a class as a JPA-managed table mapping; @Id marks its primary key field; @GeneratedValue(strategy = GenerationType.IDENTITY) delegates ID generation to the database's own auto-increment column, the most common strategy with Postgres/MySQL. Every entity needs exactly one @Id field.
 
-~~~java
+```java
 @Entity
 @Table(name = "users")
 class User {
@@ -14,14 +14,14 @@ class User {
 
     private String email;
 }
-~~~
+```
 
 
-### 2. @Column and Nullable Constraints
+## 2. @Column and Nullable Constraints
 
 @Column customizes how a field maps to its database column -- name, nullable, unique, length -- though a field with no annotation still maps using sensible defaults (the field name, nullable). nullable = false enforces a NOT NULL constraint at the schema level, not just in application code.
 
-~~~java
+```java
 @Entity
 class User {
     @Column(nullable = false, unique = true)
@@ -30,14 +30,14 @@ class User {
     @Column(name = "display_name", length = 100)
     private String displayName;
 }
-~~~
+```
 
 
-### 3. Relationships (@ManyToOne, @OneToMany)
+## 3. Relationships (@ManyToOne, @OneToMany)
 
 @ManyToOne marks the "many" side of a relationship (many Topics belong to one MarkdownFile) and owns the foreign key column via @JoinColumn. @OneToMany marks the inverse "one" side and is usually mappedBy the other side's field name -- getting this direction right (and defaulting to LAZY fetch) matters a lot for query performance.
 
-~~~java
+```java
 @Entity
 class Topic {
     @ManyToOne(fetch = FetchType.LAZY) // many Topics -> one MarkdownFile
@@ -50,4 +50,4 @@ class MarkdownFile {
     @OneToMany(mappedBy = "markdownFile") // inverse side, no extra column
     private List<Topic> topics;
 }
-~~~
+```

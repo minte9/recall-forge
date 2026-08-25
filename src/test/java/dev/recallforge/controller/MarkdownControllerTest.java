@@ -47,10 +47,10 @@ class MarkdownControllerTest {
     @Test
     void uploadMarkdown_delegatesToServiceAndReturnsResponse() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
-            "file", "notes.md", "text/markdown", "### Topic\ncontent".getBytes()
+            "file", "notes.md", "text/markdown", "## Topic\ncontent".getBytes()
         );
         when(markdownFileService.upload(any())).thenReturn(
-            new MarkdownUploadResponse(1L, "notes.md", "### Topic\ncontent")
+            new MarkdownUploadResponse(1L, "notes.md", "## Topic\ncontent")
         );
 
         mockMvcTester.post().uri("/api/markdown/upload").multipart().file(file)
@@ -61,7 +61,7 @@ class MarkdownControllerTest {
                 {
                   "markdownFileId": 1,
                   "filename": "notes.md",
-                  "content": "### Topic\\ncontent"
+                  "content": "## Topic\\ncontent"
                 }
                 """);
 
@@ -70,15 +70,15 @@ class MarkdownControllerTest {
 
     @Test
     void updateMarkdown_validRequest_delegatesToServiceAndReturnsResponse() throws Exception {
-        when(markdownFileService.update(1L, "### Topic\nupdated content")).thenReturn(
-            new MarkdownUploadResponse(1L, "notes.md", "### Topic\nupdated content")
+        when(markdownFileService.update(1L, "## Topic\nupdated content")).thenReturn(
+            new MarkdownUploadResponse(1L, "notes.md", "## Topic\nupdated content")
         );
 
         mockMvcTester.put().uri("/api/markdown/1")
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
-                  "content": "### Topic\\nupdated content"
+                  "content": "## Topic\\nupdated content"
                 }
                 """)
             .assertThat()
@@ -88,11 +88,11 @@ class MarkdownControllerTest {
                 {
                   "markdownFileId": 1,
                   "filename": "notes.md",
-                  "content": "### Topic\\nupdated content"
+                  "content": "## Topic\\nupdated content"
                 }
                 """);
 
-        verify(markdownFileService).update(1L, "### Topic\nupdated content");
+        verify(markdownFileService).update(1L, "## Topic\nupdated content");
     }
 
     @Test

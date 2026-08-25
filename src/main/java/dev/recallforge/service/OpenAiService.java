@@ -291,7 +291,7 @@ public class OpenAiService {
     /**
      * Rewrites topic bodies only. Titles are never sent for the model to
      * echo back with room for drift - the caller matches the response's
-     * "### " headings against its own known titles and splices bodies back
+     * "## " headings against its own known titles and splices bodies back
      * under them, so this only needs to instruct the model to keep them
      * unchanged and in place.
      */
@@ -300,7 +300,7 @@ public class OpenAiService {
 
         for (TopicToOptimize topic : topics) {
             topicsBlock
-                .append("### ").append(topic.title()).append("\n")
+                .append("## ").append(topic.title()).append("\n")
                 .append(trimTopicContent(topic.content()))
                 .append("\n\n");
         }
@@ -317,11 +317,11 @@ public class OpenAiService {
           characters.
         - Trim boilerplate (imports, full class ceremony) unless it is the
           point of the topic.
-        - Do not change the topic titles below (the "### " heading lines) -
+        - Do not change the topic titles below (the "## " heading lines) -
           copy each one back exactly as given, character for character.
         - Do not add, remove, split, or merge topics - return exactly the
           same number of topics, in the same order.
-        - Return the result in the same "### <title>" format shown below,
+        - Return the result in the same "## <title>" format shown below,
           one topic per section, nothing else before or after.
 
         Topics:
@@ -349,21 +349,21 @@ public class OpenAiService {
         for a spaced-repetition recall app.
 
         Format exactly:
-        ## <Environment> / <Category> / <Subcategory> / <File Title>
+        # <Environment> / <Category> / <Subcategory> / <File Title>
 
-        ### 1. <Topic 1 Title>
+        ## 1. <Topic 1 Title>
         <2-3 sentence explanation, ~45-60 words>
-        ~~~<language>
+        ```<language>
         <short, focused code example, comments explain WHY not WHAT,
         lines under 80 characters>
-        ~~~
+        ```
 
-        ### 2. <Topic 2 Title>
+        ## 2. <Topic 2 Title>
         ...
 
         Rules:
         - Number each topic title, starting at 1, in the order they
-          appear ("### 1. <Title>", "### 2. <Title>", etc.) - the number
+          appear ("## 1. <Title>", "## 2. <Title>", etc.) - the number
           is part of the heading text itself, not separate from it.
         - 2 to 5 topics total. Only include topics that are genuinely
           important - do not pad to hit a target count.

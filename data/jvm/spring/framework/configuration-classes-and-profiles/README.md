@@ -1,10 +1,10 @@
-## JVM / Spring / Framework / Configuration Classes and Profiles
+# JVM / Spring / Framework / Configuration Classes and Profiles
 
-### 1. @Import and Modularizing Configuration
+## 1. @Import and Modularizing Configuration
 
 One `@Configuration` class doesn't have to declare every bean. `@Import(OtherConfig.class)` pulls in another class's bean definitions, letting you split config into focused pieces (datasource, security, messaging...) instead of one giant class. Libraries can also ship a `@Configuration` class for consumers to simply `@Import`.
 
-~~~java
+```java
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -29,14 +29,14 @@ class SecurityConfig {
 @Import({DataSourceConfig.class, SecurityConfig.class}) // composes both into one root config
 class AppConfig {
 }
-~~~
+```
 
 
-### 2. @Profile for Environment-Specific Beans
+## 2. @Profile for Environment-Specific Beans
 
 `@Profile("name")` activates a bean only when that profile is enabled -- e.g. a real payment gateway under "prod", a fake one under "test". No code changes needed, just the active profile. Profiles are set externally via `spring.profiles.active` (property, env var, or command-line arg).
 
-~~~java
+```java
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -62,14 +62,14 @@ class PaymentConfig {
 }
 
 // Activated via: spring.profiles.active=test
-~~~
+```
 
 
-### 3. @Value and @ConfigurationProperties
+## 3. @Value and @ConfigurationProperties
 
 `@Value("${name}")` injects one property value, optionally with a default (`${name:default}`). `@ConfigurationProperties(prefix = "...")` instead binds a whole group of related settings onto a plain class's fields, giving you a typed, autocompletable config object instead of scattered `@Value` fields.
 
-~~~java
+```java
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -96,4 +96,4 @@ class RetryProperties {
     public int getDelayMs() { return delayMs; }
     public void setDelayMs(int delayMs) { this.delayMs = delayMs; }
 }
-~~~
+```

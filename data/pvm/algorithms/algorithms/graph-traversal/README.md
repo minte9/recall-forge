@@ -1,10 +1,10 @@
-## Python / Algorithms / Algorithms / Graph Traversal
+# Python / Algorithms / Algorithms / Graph Traversal
 
-### 1. Depth-First Search (Graphs)
+## 1. Depth-First Search (Graphs)
 
 Unlike a tree, a graph can have cycles, so DFS must track visited vertices to avoid looping forever. It follows one path as deep as possible via recursion, backtracking once a vertex's neighbors are all visited or already seen.
 
-~~~py
+```py
 class Vertex:
     def __init__(self, name):
         self.value = name
@@ -48,14 +48,14 @@ print(dfs_traverse(f, visited=[]))
     ['Alice', 'Bob', 'Candy', 'Derek', 'Elaine', 'Fred', 'Helen', 'Gina', 'Irena']
     ['Fred', 'Bob', 'Helen', 'Alice', 'Candy', 'Derek', 'Elaine', 'Gina', 'Irena']
 """
-~~~
+```
 
 
-### 2. Breadth-First Search (Graphs)
+## 2. Breadth-First Search (Graphs)
 
 BFS explores level by level instead of following one path deep: it uses a queue instead of recursion, visiting all of a vertex's neighbors before moving further out. It reaches nearby vertices first, which makes it the right choice when you want to stay close to the starting point rather than jump far away quickly (DFS's strength).
 
-~~~py
+```py
 from collections import deque
 
 def bfs_traverse(starting_vertex):
@@ -79,14 +79,14 @@ print(bfs_traverse(a))
 """
     ['Alice', 'Bob', 'Candy', 'Derek', 'Elaine', 'Fred', 'Helen', 'Gina', 'Irena']
 """
-~~~
+```
 
 
-### 3. Flood Fill
+## 3. Flood Fill
 
 Flood fill starts at one cell and recursively spreads to its four neighbors (north, east, south, west) as long as they match the target condition (here, a blank space) -- the same pattern as DFS, just applied to a 2D grid instead of a vertex graph. It's the algorithm behind a paint bucket tool: click one pixel and the fill spreads until it hits a border.
 
-~~~py
+```py
 A = [
     list('||||||||||||||||||||||||||||||'),
     list('||                  ||     |||'),
@@ -125,4 +125,4 @@ for row in A:
     ||||||||000000000000||||||||||
     ||||||||||||||||||||||||||||||
 """
-~~~
+```

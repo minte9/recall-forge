@@ -1,10 +1,10 @@
-## JVM / Java / OOP / Inheritance 
+# JVM / Java / OOP / Inheritance 
 
-### 1. Payment Processing System
+## 1. Payment Processing System
 
 “Prefer composition and interfaces over inheritance” is good advice in many situations. However, inheritance is still appropriate when there is a genuine is-a relationship, shared state, and common behavior that should be reused by multiple subclasses. 
 
-~~~java
+```java
 // Different payment methods share the same general workflow: 
 // validate the payment, execute it, and send a receipt.
 
@@ -80,14 +80,14 @@ class PayPalPayment extends Payment {
         System.out.println("Processing PayPal payment...");
     }
 }
-~~~
+```
 
 
-### 2. Why inheritance is the right choise here?
+## 2. Why inheritance is the right choise here?
 
 Inheritance is appropriate because CreditCardPayment and PayPalPayment are specialized types of Payment. They share the same amount field, validation logic, receipt logic, and processing sequence.
 
-~~~java
+```java
 Payment p1 = new CreditCardPayment(100); 
 Payment p2 = new PayPalPayment(200);
 
@@ -99,14 +99,14 @@ public final void processPayment() {
     execute(); 
     sendReceipt(); 
 }
-~~~
+```
 
 
-### 3. Why not use interfaces?
+## 3. Why not use interfaces?
 
 An interface can define required behavior, but it does not naturally provide shared instance state such as amount. Using only an interface may also cause each implementation to repeat the same validation and receipt logic.
 
-~~~java
+```java
 // You could use interface:
 
 interface Payment() {
@@ -125,13 +125,13 @@ abstract class Payment {
        sendReceipt(); 
     }
 }
-~~~
+```
 
-### 4. Rule of thumb
+## 4. Rule of thumb
 
 Use inheritance when classes form a true hierarchy, share state and behavior, and differ only in specific parts of an algorithm. Inheritance should represent specialization rather than simply being used for code reuse. Use interfaces when defining capabilities or roles that unrelated classes may implement. Common examples include Runnable, Comparable, and Serializable.
 
-~~~java
+```java
 class CreditCardPayment extends Payment {
     // CreditCardPayment is a Payment
 }
@@ -142,13 +142,13 @@ class PaymentTask implements Runnable {
         System.out.println("Processing payment...");
     }
 }
-~~~
+```
 
-### 5. Payment system (done wrong)
+## 5. Payment system (done wrong)
 
 Using only an interface in this example causes every payment implementation to repeat the same fields and workflow logic. This increases maintenance costs and makes inconsistencies more likely. Nothing forces every implementation to follow the correct sequence. A developer could accidentally execute the payment before validation or forget to send the receipt.
 
-~~~java
+```java
 public class PaymentWrongApp {
     public static void main(String[] args) {
         Payment p1 = new CreditCardPayment(100);
@@ -202,13 +202,13 @@ class PayPalPayment implements Payment {
         System.out.println("Sending receipt...\n");
     }
 }
-~~~
+```
 
-### 6. Abstract Keyword
+## 6. Abstract Keyword
 
 An abstract class represents an incomplete concept that should not be instantiated directly. It may contain fields, constructors, concrete methods, and abstract methods that subclasses are required to implement. A concrete subclass provides the missing implementation and can then be instantiated normally.
 
-~~~java
+```java
 public class AbstractKeyword {
 
     public static void main(String[] args) {
@@ -237,14 +237,14 @@ class CreditCardPayment extends Payment {
         System.out.println("Processing credit card payment of $" + amount);
     }
 }
-~~~
+```
 
 
-### 7. Override Annotation
+## 7. Override Annotation
 
 The @Override annotation tells the compiler that a method is intended to replace an inherited method. It detects spelling mistakes, incorrect parameters, and incompatible return types during compilation. Without @Override, a misspelled method may be treated as a completely new method rather than an override. Using the annotation consistently makes inheritance safer and easier to maintain.
 
-~~~java
+```java
 package com.minte9.oop.inheritance.override_note;
 
 public class OverrideAnnotation {
@@ -274,4 +274,4 @@ class CreditCardPayment extends Payment {
         System.out.println("Wrong method called!");
     }
 }
-~~~
+```
