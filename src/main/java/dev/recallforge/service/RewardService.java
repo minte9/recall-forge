@@ -37,13 +37,15 @@ public class RewardService {
     private static final double MASTERY_MEMORY_SCORE = 0.7;
 
     // A "goal day" is hit either by grading enough fresh reviews well, or by
-    // doing enough code-challenge attempts (which aren't held to the score
-    // bar - completing the harder task is the point). The score bar itself
-    // isn't user-configurable (unlike the review/code-challenge counts,
-    // via AppGoalProperties) - kept separate from MASTERY_MEMORY_SCORE even
-    // though the value matches today, since the two thresholds represent
-    // different concepts and may diverge later.
+    // getting enough code-challenge attempts fully correct (score == 1 -
+    // partial credit doesn't count, since the challenge either works or it
+    // doesn't). The score bars themselves aren't user-configurable (unlike
+    // the review/code-challenge counts, via AppGoalProperties) -
+    // GOAL_REVIEW_SCORE_THRESHOLD is kept separate from MASTERY_MEMORY_SCORE
+    // even though the value matches today, since the two thresholds
+    // represent different concepts and may diverge later.
     private static final double GOAL_REVIEW_SCORE_THRESHOLD = 0.7;
+    private static final double GOAL_CODE_CHALLENGE_SCORE_THRESHOLD = 1.0;
 
     private final UserRewardRepository userRewardRepository;
     private final CurrentUserService currentUserService;
@@ -172,7 +174,8 @@ public class RewardService {
     // Count of days this calendar month (in this category) that hit the
     // daily goal: goalProperties.reviews() fresh reviews scoring at least
     // GOAL_REVIEW_SCORE_THRESHOLD, or goalProperties.codeChallenges()
-    // code-challenge attempts. Resets on the 1st of each month rather than
+    // code-challenge attempts scoring at least
+    // GOAL_CODE_CHALLENGE_SCORE_THRESHOLD. Resets on the 1st of each month rather than
     // accumulating forever, so the number stays meaningful instead of just
     // climbing - unlike the streak, a missed day doesn't zero it out, it
     // just doesn't add to it. Computed live from review history so it stays
@@ -193,7 +196,9 @@ public class RewardService {
             LocalDate day = row.getReviewedAt().toLocalDate();
 
             if (row.getRetryType() == RetryType.CODE_CHALLENGE) {
-                codeChallengeCountByDay.merge(day, 1, Integer::sum);
+                if (row.getScore() >= GOAL_CODE_CHALLENGE_SCORE_THRESHOLD) {
+                    codeChallengeCountByDay.merge(day, 1, Integer::sum);
+                }
             } else if (row.getScore() >= GOAL_REVIEW_SCORE_THRESHOLD) {
                 highScoreReviewCountByDay.merge(day, 1, Integer::sum);
             }
