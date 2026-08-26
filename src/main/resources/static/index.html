@@ -311,6 +311,11 @@
               :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
+            <starter-pack-list :categories="['Architecture']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
+
           </div>
 
           <details v-for="(group, groupName, index) in filteredMarkdownGroups" :key="groupName" class="markdown-group"
@@ -614,6 +619,11 @@
             </starter-pack-list>
 
             <starter-pack-list :categories="['Security']"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
+
+            <starter-pack-list :categories="['Architecture']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
               :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
