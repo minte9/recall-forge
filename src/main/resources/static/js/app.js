@@ -53,6 +53,7 @@ const app = createApp({
       selectedEnvironment: null,
       environmentMenuOpen: false,
       retryMenuOpen: false,
+      uploadMenuOpen: false,
       codeChallengeLoading: false,
       adminUsers: [],
       categoryOptions: [],
@@ -889,6 +890,66 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       } catch (err) {
         this.error = err.message || "Could not upload markdown file.";
+      } finally {
+        this.loading = false;
+        event.target.value = "";
+      }
+    },
+
+    toggleUploadMenu() {
+      this.uploadMenuOpen = !this.uploadMenuOpen;
+    },
+
+    triggerSingleFileUpload() {
+      this.uploadMenuOpen = false;
+      this.$refs.singleFileInput.click();
+    },
+
+    triggerVaultUpload() {
+      this.uploadMenuOpen = false;
+      this.$refs.vaultFolderInput.click();
+    },
+
+    // Admin-only. event.target.files is every file under the selected
+    // folder (webkitdirectory) - each File carries a webkitRelativePath
+    // the backend uses to derive Environment/Category/Subcategory/
+    // FileTitle for files that don't already have their own header line.
+    // Non-markdown files (images, .obsidian/ config, etc.) are filtered
+    // out here rather than sent and skipped server-side.
+    async uploadVaultFiles(event) {
+      const files = Array.from(event.target.files || [])
+        .filter(file => /\.md$/i.test(file.name));
+
+      if (files.length === 0) {
+        this.error = "No .md files found in the selected folder.";
+        event.target.value = "";
+        return;
+      }
+
+      this.mobileView = "dashboard";
+      this.loading = true;
+      this.error = null;
+      this.success = null;
+      this.result = null;
+
+      try {
+        const paths = files.map(file => file.webkitRelativePath || file.name);
+        const response = await Api.uploadVault(files, paths);
+
+        this.showMarkdownSummaries();
+        this.success = `Imported ${response.imported.length} of ${files.length} file` +
+          (files.length === 1 ? "" : "s") + " from the vault.";
+
+        if (response.errors.length > 0) {
+          this.error = response.errors.map(e => `${e.path}: ${e.message}`).join("\n");
+        }
+
+        await this.loadCategoryOptions();
+        await this.loadDashboard();
+        await this.loadMarkdownSummaries(false);
+
+      } catch (err) {
+        this.error = err.message || "Could not upload the vault.";
       } finally {
         this.loading = false;
         event.target.value = "";

@@ -859,7 +859,8 @@
     z-index: 999;
   }
 
-  .retry-menu-dropdown button {
+  .retry-menu-dropdown button,
+  .retry-menu-dropdown label {
     display: block;
     min-width: 0;
     height: auto;
@@ -874,7 +875,8 @@
     cursor: pointer;
   }
 
-  .retry-menu-dropdown button:hover {
+  .retry-menu-dropdown button:hover,
+  .retry-menu-dropdown label:hover {
     background: #f8fafc;
   }
 
@@ -2053,6 +2055,26 @@
 
     .actions-row .upload-btn .btn-icon {
       display: none;
+    }
+
+    /* The generic rules above give both the split button's left segment
+       and its caret "width: 100%", which the browser then has to shrink
+       to fit side by side - the reconciliation leaves a gap instead of a
+       flush join. Pin the caret to a fixed width and let the left segment
+       grow to fill what's left, instead of relying on shrink math. */
+    .actions-row .retry-split-btn {
+      width: 100%;
+    }
+
+    .actions-row .retry-split-btn .retry-btn {
+      flex: 1 1 auto;
+      width: auto;
+      min-width: 0;
+    }
+
+    .actions-row .retry-split-btn .retry-caret {
+      flex: 0 0 32px;
+      width: 32px;
     }
 
     .actions-row .last-score-badge--actions {

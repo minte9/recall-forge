@@ -21,6 +21,7 @@ import dev.recallforge.dto.MarkdownOptimizeResponse;
 import dev.recallforge.dto.MarkdownReviewCountResponse;
 import dev.recallforge.dto.MarkdownUpdateRequest;
 import dev.recallforge.dto.MarkdownUploadResponse;
+import dev.recallforge.dto.MarkdownVaultUploadResponse;
 import dev.recallforge.security.CurrentUserService;
 import dev.recallforge.service.MarkdownFileService;
 import jakarta.validation.Valid;
@@ -40,6 +41,14 @@ public class MarkdownController {
     @PostMapping("/upload")
     public MarkdownUploadResponse uploadMarkdown(@RequestParam("file") MultipartFile file) throws Exception {
         return markdownFileService.upload(file);
+    }
+
+    @PostMapping("/upload-vault")
+    public MarkdownVaultUploadResponse uploadVault(
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam("paths") List<String> paths
+    ) throws Exception {
+        return markdownFileService.uploadVault(files, paths);
     }
 
     @PostMapping

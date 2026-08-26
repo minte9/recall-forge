@@ -56,4 +56,15 @@ public class ApiExceptionHandler {
                 .status(HttpStatus.TOO_MANY_REQUESTS)
                 .body(ex.getMessage());
     }
+
+    // Catch-all for the validation errors MarkdownFileService/
+    // StarterPackService throw (bad upload, bad vault selection, not
+    // found, etc.) - without this they fall through to Spring Boot's
+    // generic error page as a bare 500 with no usable message.
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
+    }
 }

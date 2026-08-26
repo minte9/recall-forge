@@ -1046,11 +1046,37 @@
               {{ loading ? "Loading..." : (aiEnabled ? "Start Review" : "Reviews") }}
             </button>
 
-            <label v-if="aiEnabled" class="upload-btn">
+            <label v-if="aiEnabled && currentUser?.role != 'ADMIN'" class="upload-btn">
               <span class="btn-icon">→</span>
               Upload Markdown
               <input hidden type="file" accept=".md,.markdown,text/plain" @change="uploadMarkdown" />
             </label>
+
+            <div v-else-if="aiEnabled" class="retry-split-btn">
+              <button class="submit-btn retry-btn" @click="triggerSingleFileUpload()" :disabled="loading">
+                <span class="btn-icon">→</span>
+                Upload Markdown
+              </button>
+
+              <button class="submit-btn retry-caret" @click.stop="toggleUploadMenu()" :disabled="loading"
+                title="More upload options">
+                ⌄
+              </button>
+
+              <div v-if="uploadMenuOpen" class="retry-menu-dropdown">
+                <button @click="triggerSingleFileUpload()">
+                  <icon name="file-text" class="menu-icon"></icon>Single File
+                </button>
+                <button @click="triggerVaultUpload()">
+                  <icon name="files" class="menu-icon"></icon>Obsidian Vault
+                </button>
+              </div>
+
+              <input ref="singleFileInput" hidden type="file" accept=".md,.markdown,text/plain"
+                @change="uploadMarkdown" />
+              <input ref="vaultFolderInput" hidden type="file" webkitdirectory multiple
+                @change="uploadVaultFiles" />
+            </div>
 
             <button v-if="aiEnabled" class="add-file-btn" @click="showAddFile" title="Add File">
               +

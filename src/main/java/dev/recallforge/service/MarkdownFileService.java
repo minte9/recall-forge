@@ -2,6 +2,7 @@ package dev.recallforge.service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -18,6 +19,7 @@ import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownUploadResponse;
+import dev.recallforge.dto.MarkdownVaultUploadResponse;
 import dev.recallforge.exception.MarkdownAlreadyImportedException;
 import dev.recallforge.exception.MarkdownFileHasReviewsException;
 import dev.recallforge.repository.AllowedEnvironmentRepository;
@@ -58,6 +60,14 @@ public class MarkdownFileService {
     private static final long MAX_FILE_SIZE = 200 * 1024;  // 200 KB
     private static final int MAX_CONTENT_LENGTH = 200_000;
     private static final int MAX_TOPICS_PER_FILE = 100;
+    private static final int MAX_VAULT_FILES = 300;
+
+    // Obsidian's "Create new vault" dialog suggests this exact name by
+    // default, and many users keep it - if the picked folder is named
+    // this, it's very likely the whole vault got selected instead of a
+    // single environment folder inside it. Not exhaustive (a renamed
+    // vault won't be caught), just the common case.
+    private static final String LIKELY_VAULT_ROOT_NAME = "obsidian vault";
 
     public MarkdownFileService(
             MarkdownFileRepository markdownFileRepository,
@@ -96,6 +106,184 @@ public class MarkdownFileService {
         String content = new String(file.getBytes(), StandardCharsets.UTF_8);
 
         return importMarkdown(content, sanitizeFilename(filename));
+    }
+
+    /**
+     * Admin-only. Imports an Obsidian vault: many files, each with a path
+     * relative to the vault root (as sent by a folder/webkitdirectory file
+     * picker) - {@code paths.get(i)} is the relative path of {@code
+     * files.get(i)}.
+     *
+     * A file whose content already has a "#" header line is imported
+     * exactly like a normal upload - an explicit in-file header always
+     * wins. Otherwise a header is synthesized from the file's folder path
+     * (see {@link #synthesizeHeaderFromPath}) before it's handed to the
+     * same {@link #importMarkdown} used by single-file uploads. Non-{@code
+     * .md} files (images, {@code .obsidian/} config, etc.) are silently
+     * skipped rather than treated as errors.
+     *
+     * One bad markdown file (too large, no topics, too many topics) is
+     * recorded in the response's {@code errors} list and skipped rather
+     * than aborting the rest of the vault.
+     *
+     * The whole request is rejected upfront, before any file is processed,
+     * if the picked folder looks like the whole vault rather than a single
+     * environment folder - see {@link #LIKELY_VAULT_ROOT_NAME}.
+     */
+    @Transactional
+    public MarkdownVaultUploadResponse uploadVault(List<MultipartFile> files, List<String> paths) throws Exception {
+        currentUserService.requireAdmin();
+
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("No files provided.");
+        }
+
+        if (paths == null || paths.size() != files.size()) {
+            throw new IllegalArgumentException("Each file must have a matching relative path.");
+        }
+
+        if (files.size() > MAX_VAULT_FILES) {
+            throw new IllegalArgumentException(
+                    "Too many files in one vault upload. Maximum is " + MAX_VAULT_FILES + ".");
+        }
+
+        String firstRootSegment = firstNonBlankSegment(resolveRelativePath(files.get(0), paths.get(0)));
+
+        if (firstRootSegment != null && LIKELY_VAULT_ROOT_NAME.equalsIgnoreCase(firstRootSegment)) {
+            throw new IllegalArgumentException(
+                    "\"" + firstRootSegment + "\" looks like your whole Obsidian vault, not a single "
+                            + "environment folder. Pick a specific folder inside it (e.g. \"Java\") and "
+                            + "try again.");
+        }
+
+        List<MarkdownUploadResponse> imported = new ArrayList<>();
+        List<MarkdownVaultUploadResponse.VaultFileError> errors = new ArrayList<>();
+
+        for (int i = 0; i < files.size(); i++) {
+            MultipartFile file = files.get(i);
+            String relativePath = resolveRelativePath(file, paths.get(i));
+
+            try {
+                if (file == null || file.isEmpty()) {
+                    continue;
+                }
+
+                String rawFilename = file.getOriginalFilename();
+
+                if (rawFilename == null || !rawFilename.toLowerCase().endsWith(".md")) {
+                    continue;
+                }
+
+                String baseFilename = basename(rawFilename);
+
+                if (file.getSize() > MAX_FILE_SIZE) {
+                    errors.add(new MarkdownVaultUploadResponse.VaultFileError(
+                            relativePath, "File is too large. Maximum size is 200 KB."));
+                    continue;
+                }
+
+                String content = new String(file.getBytes(), StandardCharsets.UTF_8);
+
+                if (!hasPathHeading(content)) {
+                    // A stub file with no "##" topic yet (e.g. an Obsidian
+                    // note created for later) has nothing worth importing.
+                    // Without this check, MarkdownTopicImporter's "no ##
+                    // headings -> save the whole markdown as one topic"
+                    // fallback would save the header line we're about to
+                    // inject as if it were the topic's own content.
+                    if (!hasTopicHeading(content)) {
+                        continue;
+                    }
+
+                    content = synthesizeHeaderFromPath(relativePath) + "\n\n" + content;
+                }
+
+                imported.add(importMarkdown(content, sanitizeFilename(baseFilename)));
+
+            } catch (IllegalArgumentException e) {
+                errors.add(new MarkdownVaultUploadResponse.VaultFileError(relativePath, e.getMessage()));
+            }
+        }
+
+        return new MarkdownVaultUploadResponse(imported, errors);
+    }
+
+    /**
+     * Builds a "# Environment / Category / Subcategory / FileTitle" line
+     * from a file's path relative to the picked folder. The picked folder
+     * itself becomes Environment - vault uploads are expected to scope one
+     * environment at a time (e.g. picking "Java", not the whole vault), so
+     * its name is meaningful rather than a throwaway container to discard.
+     * The next two path segments become Category/Subcategory; anything
+     * deeper is ignored. Segments beyond what the path has are left blank,
+     * which {@link MarkdownTopicImporter#parseMarkdown} already treats the
+     * same as a missing part in a short in-file header (e.g.
+     * "# Programming") - falling back to its usual defaults.
+     */
+    private String synthesizeHeaderFromPath(String relativePath) {
+        List<String> segments = new ArrayList<>();
+
+        for (String segment : relativePath.replace('\\', '/').split("/")) {
+            if (!segment.isBlank()) {
+                segments.add(segment);
+            }
+        }
+
+        if (segments.isEmpty()) {
+            return "# / / / ";
+        }
+
+        String fileTitle = stripExtension(segments.remove(segments.size() - 1));
+
+        String environment = segments.size() > 0 ? segments.get(0) : "";
+        String category = segments.size() > 1 ? segments.get(1) : "";
+        String subcategory = segments.size() > 2 ? segments.get(2) : "";
+
+        return "# %s / %s / %s / %s".formatted(environment, category, subcategory, fileTitle);
+    }
+
+    private String stripExtension(String filename) {
+        int dot = filename.lastIndexOf('.');
+        return dot > 0 ? filename.substring(0, dot) : filename;
+    }
+
+    private String basename(String path) {
+        String normalized = path.replace('\\', '/');
+        int slash = normalized.lastIndexOf('/');
+        return slash >= 0 ? normalized.substring(slash + 1) : normalized;
+    }
+
+    /**
+     * Some browsers (Chrome confirmed) send the file's full path relative
+     * to the picked folder as the multipart filename itself for a
+     * directory/webkitdirectory input, which has proven more reliable
+     * than the client-supplied {@code paths} entry (built from {@code
+     * File.webkitRelativePath}, which doesn't always survive the round
+     * trip the same way) - prefer it whenever it actually looks like a
+     * path.
+     */
+    private String resolveRelativePath(MultipartFile file, String fallbackPath) {
+        String rawFilename = file != null ? file.getOriginalFilename() : null;
+
+        if (rawFilename != null && (rawFilename.contains("/") || rawFilename.contains("\\"))) {
+            return rawFilename;
+        }
+
+        return fallbackPath;
+    }
+
+    private String firstNonBlankSegment(String relativePath) {
+        if (relativePath == null) {
+            return null;
+        }
+
+        for (String segment : relativePath.replace('\\', '/').split("/")) {
+            if (!segment.isBlank()) {
+                return segment;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -279,7 +467,37 @@ public class MarkdownFileService {
     }
 
     private boolean hasPathHeading(String content) {
-        return content.lines().anyMatch(line -> line.matches("^#\\s+.+"));
+        return hasHeadingMatching(content, "^#\\s+.+");
+    }
+
+    private boolean hasTopicHeading(String content) {
+        return hasHeadingMatching(content, "^##\\s+.+");
+    }
+
+    // Mirrors MarkdownTopicImporter's own fence tracking - a "#"/"##" line
+    // inside a fenced code block (e.g. a Python/Bash/YAML comment) must not
+    // count as a real heading here either, or content whose only code
+    // examples contain such comments gets misread as "already has its own
+    // header"/"already has real topics", skipping synthesis or the
+    // stub-file check in uploadVault for content that never actually had
+    // either.
+    private boolean hasHeadingMatching(String content, String headingPattern) {
+        boolean insideFence = false;
+
+        for (String line : content.split("\\R")) {
+            boolean isFenceDelimiter = line.matches("^\\s*(`{3,}|~{3,}).*");
+
+            if (isFenceDelimiter) {
+                insideFence = !insideFence;
+                continue;
+            }
+
+            if (!insideFence && line.matches(headingPattern)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private MarkdownUploadResponse importMarkdown(String content, String filename) throws Exception {
