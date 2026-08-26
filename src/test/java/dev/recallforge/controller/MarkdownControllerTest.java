@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownUploadResponse;
+import dev.recallforge.dto.MarkdownVaultUploadResponse;
 import dev.recallforge.exception.MarkdownFileHasReviewsException;
 import dev.recallforge.security.CurrentUserService;
 import dev.recallforge.service.MarkdownFileService;
@@ -66,6 +67,45 @@ class MarkdownControllerTest {
                 """);
 
         verify(markdownFileService).upload(any());
+    }
+
+    @Test
+    void uploadVault_delegatesToServiceAndReturnsResponse() throws Exception {
+        MockMultipartFile fileA = new MockMultipartFile(
+            "files", "Composition.md", "text/markdown", "## Composition\ncontent".getBytes()
+        );
+        MockMultipartFile fileB = new MockMultipartFile(
+            "files", "Inheritance.md", "text/markdown", "## Inheritance\ncontent".getBytes()
+        );
+
+        when(markdownFileService.uploadVault(any(), any())).thenReturn(
+            new MarkdownVaultUploadResponse(
+                List.of(new MarkdownUploadResponse(1L, "Composition.md", "## Composition\ncontent")),
+                List.of(new MarkdownVaultUploadResponse.VaultFileError(
+                    "MyVault/Java/OOP/Inheritance.md", "File is too large. Maximum size is 200 KB."))
+            )
+        );
+
+        mockMvcTester.post().uri("/api/markdown/upload-vault")
+            .multipart()
+            .file(fileA)
+            .file(fileB)
+            .param("paths", "MyVault/Java/OOP/Composition.md", "MyVault/Java/OOP/Inheritance.md")
+            .assertThat()
+            .hasStatusOk()
+            .bodyJson()
+            .isLenientlyEqualTo("""
+                {
+                  "imported": [
+                    { "markdownFileId": 1, "filename": "Composition.md", "content": "## Composition\\ncontent" }
+                  ],
+                  "errors": [
+                    { "path": "MyVault/Java/OOP/Inheritance.md", "message": "File is too large. Maximum size is 200 KB." }
+                  ]
+                }
+                """);
+
+        verify(markdownFileService).uploadVault(any(), any());
     }
 
     @Test
@@ -178,5 +218,26 @@ class MarkdownControllerTest {
         mockMvcTester.delete().uri("/api/markdown/1")
             .assertThat()
             .hasStatus(409);
+    }
+
+    @Test
+    void uploadVault_serviceThrowsIllegalArgumentException_returnsBadRequestWithMessage() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+            "files", "Notes.md", "text/markdown", "## Topic\ncontent".getBytes()
+        );
+
+        when(markdownFileService.uploadVault(any(), any())).thenThrow(
+            new IllegalArgumentException(
+                "\"Obsidian Vault\" looks like your whole Obsidian vault, not a single "
+                    + "environment folder. Pick a specific folder inside it (e.g. \"Java\") and try again.")
+        );
+
+        mockMvcTester.post().uri("/api/markdown/upload-vault")
+            .multipart()
+            .file(file)
+            .param("paths", "Obsidian Vault/Java/Notes.md")
+            .assertThat()
+            .hasStatus(400)
+            .bodyText().contains("looks like your whole Obsidian vault");
     }
 }

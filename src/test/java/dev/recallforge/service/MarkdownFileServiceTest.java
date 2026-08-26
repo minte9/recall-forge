@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import dev.recallforge.domain.AllowedEnvironment;
 import dev.recallforge.domain.MarkdownFile;
@@ -32,6 +33,7 @@ import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownUploadResponse;
+import dev.recallforge.dto.MarkdownVaultUploadResponse;
 import dev.recallforge.exception.MarkdownFileHasReviewsException;
 import dev.recallforge.repository.AllowedEnvironmentRepository;
 import dev.recallforge.repository.MarkdownFileRepository;
@@ -868,5 +870,352 @@ class MarkdownFileServiceTest {
         assertThatThrownBy(() -> markdownFileService.optimize(content))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("AI response is missing the required header line. Please try again.");
+    }
+
+    @Test
+    void uploadVault_notAdmin_throwsAccessDeniedExceptionWithoutImporting() {
+        setUp();
+        doThrow(new AccessDeniedException("Admin access required"))
+            .when(currentUserService).requireAdmin();
+
+        MultipartFile file = new MockMultipartFile(
+            "files", "Notes.md", "text/markdown", "## Topic\ncontent".getBytes(StandardCharsets.UTF_8)
+        );
+
+        assertThatThrownBy(() -> markdownFileService.uploadVault(List.of(file), List.of("Vault/Notes.md")))
+            .isInstanceOf(AccessDeniedException.class);
+
+        verify(markdownTopicImporter, never()).parseMarkdown(any());
+    }
+
+    @Test
+    void uploadVault_noFiles_throwsIllegalArgumentException() {
+        setUp();
+
+        assertThatThrownBy(() -> markdownFileService.uploadVault(List.of(), List.of()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("No files provided.");
+    }
+
+    @Test
+    void uploadVault_pathCountDoesNotMatchFileCount_throwsIllegalArgumentException() {
+        setUp();
+
+        MultipartFile file = new MockMultipartFile(
+            "files", "Notes.md", "text/markdown", "## Topic\ncontent".getBytes(StandardCharsets.UTF_8)
+        );
+
+        assertThatThrownBy(() -> markdownFileService.uploadVault(List.of(file), List.of()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Each file must have a matching relative path.");
+    }
+
+    @Test
+    void uploadVault_moreThan300Files_throwsIllegalArgumentException() {
+        setUp();
+
+        MultipartFile file = new MockMultipartFile(
+            "files", "Notes.md", "text/markdown", "## Topic\ncontent".getBytes(StandardCharsets.UTF_8)
+        );
+        List<MultipartFile> files = java.util.Collections.nCopies(301, file);
+        List<String> paths = java.util.Collections.nCopies(301, "Vault/Notes.md");
+
+        assertThatThrownBy(() -> markdownFileService.uploadVault(files, paths))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Too many files in one vault upload. Maximum is 300.");
+    }
+
+    @Test
+    void uploadVault_rootFolderLooksLikeWholeVault_throwsIllegalArgumentExceptionBeforeProcessingAnyFile()
+            throws Exception {
+        setUp();
+
+        MultipartFile fileA = new MockMultipartFile(
+            "files", "Notes.md", "text/markdown", "## Topic\ncontent".getBytes(StandardCharsets.UTF_8)
+        );
+        MultipartFile fileB = new MockMultipartFile(
+            "files", "Other.md", "text/markdown", "## Topic\ncontent".getBytes(StandardCharsets.UTF_8)
+        );
+
+        assertThatThrownBy(() -> markdownFileService.uploadVault(
+                List.of(fileA, fileB),
+                List.of("Obsidian Vault/Java/OOP/Notes.md", "Obsidian Vault/AI/Machine Learning/Other.md")
+            ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Obsidian Vault")
+            .hasMessageContaining("single environment folder");
+
+        verify(markdownTopicImporter, never()).parseMarkdown(any());
+        verify(markdownFileRepository, never()).save(any());
+    }
+
+    @Test
+    void uploadVault_nonMdFile_skippedSilentlyWithoutError() throws Exception {
+        setUp();
+
+        MultipartFile image = new MockMultipartFile(
+            "files", "diagram.png", "image/png", new byte[]{1, 2, 3}
+        );
+
+        MarkdownVaultUploadResponse response =
+            markdownFileService.uploadVault(List.of(image), List.of("Vault/Java/diagram.png"));
+
+        assertThat(response.imported()).isEmpty();
+        assertThat(response.errors()).isEmpty();
+        verify(markdownTopicImporter, never()).parseMarkdown(any());
+    }
+
+    @Test
+    void uploadVault_fileLargerThan200Kb_recordedAsErrorAndOtherFilesStillImport() throws Exception {
+        setUp();
+        UserAccount user = new UserAccount();
+
+        MultipartFile oversized = new MockMultipartFile(
+            "files", "Big.md", "text/markdown", new byte[200 * 1024 + 1]
+        );
+
+        String goodContent = "## Topic\ncontent";
+        MultipartFile good = new MockMultipartFile(
+            "files", "Notes.md", "text/markdown", goodContent.getBytes(StandardCharsets.UTF_8)
+        );
+
+        String expectedSynthesized = "# Java / OOP /  / Notes\n\n" + goodContent;
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Java", "OOP", "Uncategorized", "Notes", "Topic", "content"
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(expectedSynthesized)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Java", "OOP", "Uncategorized", "Notes", 1L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("Topic", 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "OOP", "Uncategorized"))
+            .thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Topic"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(oversized, good),
+            List.of("Big.md", "Java/OOP/Notes.md")
+        );
+
+        assertThat(response.errors()).hasSize(1);
+        assertThat(response.errors().get(0).path()).isEqualTo("Big.md");
+        assertThat(response.errors().get(0).message()).isEqualTo("File is too large. Maximum size is 200 KB.");
+        assertThat(response.imported()).hasSize(1);
+    }
+
+    @Test
+    void uploadVault_fileWithoutHeader_synthesizesHeaderFromThreeFolderLevelsOfPickedFolder() throws Exception {
+        setUp();
+        UserAccount user = new UserAccount();
+
+        String rawContent = "## Composition\nExplains composition.";
+        MultipartFile file = new MockMultipartFile(
+            "files", "Notes.md", "text/markdown", rawContent.getBytes(StandardCharsets.UTF_8)
+        );
+
+        String expectedSynthesizedContent = "# Java / OOP / Composition / Notes\n\n" + rawContent;
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Java", "OOP", "Composition", "Notes", "Composition", "Explains composition."
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(expectedSynthesizedContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Java", "OOP", "Composition", "Notes", 1L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("Composition", 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "OOP", "Composition"))
+            .thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Composition"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(file), List.of("Java/OOP/Composition/Notes.md")
+        );
+
+        assertThat(response.errors()).isEmpty();
+        assertThat(response.imported()).hasSize(1);
+
+        ArgumentCaptor<MarkdownFile> markdownFileCaptor = ArgumentCaptor.forClass(MarkdownFile.class);
+        verify(markdownFileRepository).save(markdownFileCaptor.capture());
+        assertThat(markdownFileCaptor.getValue().getEnvironment()).isEqualTo("Java");
+        assertThat(markdownFileCaptor.getValue().getCategory()).isEqualTo("OOP");
+        assertThat(markdownFileCaptor.getValue().getSubcategory()).isEqualTo("Composition");
+    }
+
+    @Test
+    void uploadVault_originalFilenameContainsFullPath_prefersItOverPathsParamAndStripsToBasenameForStoredFilename()
+            throws Exception {
+        setUp();
+        UserAccount user = new UserAccount();
+
+        // Some browsers (Chrome confirmed) send the file's full relative
+        // path as the multipart filename itself for a directory-picked
+        // file, rather than a bare name - the `paths` param below is
+        // deliberately wrong/unhelpful to prove the code prefers the
+        // filename's own path over it.
+        String rawContent = "## KNN\nExplains KNN.";
+        MultipartFile file = new MockMultipartFile(
+            "files", "AI/Machine Learning/Supervised Learning/Knn Classifier.md",
+            "text/markdown", rawContent.getBytes(StandardCharsets.UTF_8)
+        );
+
+        String expectedSynthesizedContent =
+            "# AI / Machine Learning / Supervised Learning / Knn Classifier\n\n" + rawContent;
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "AI", "Machine Learning", "Supervised Learning", "Knn Classifier", "KNN", "Explains KNN."
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(expectedSynthesizedContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "AI", "Machine Learning", "Supervised Learning", "Knn Classifier", 1L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("KNN", 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(
+                1L, "Machine Learning", "Supervised Learning"))
+            .thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("KNN"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(file), List.of("Knn Classifier.md")
+        );
+
+        assertThat(response.errors()).isEmpty();
+        assertThat(response.imported()).hasSize(1);
+
+        ArgumentCaptor<MarkdownFile> markdownFileCaptor = ArgumentCaptor.forClass(MarkdownFile.class);
+        verify(markdownFileRepository).save(markdownFileCaptor.capture());
+        assertThat(markdownFileCaptor.getValue().getEnvironment()).isEqualTo("AI");
+        assertThat(markdownFileCaptor.getValue().getCategory()).isEqualTo("Machine Learning");
+        assertThat(markdownFileCaptor.getValue().getSubcategory()).isEqualTo("Supervised Learning");
+        assertThat(markdownFileCaptor.getValue().getFilename()).isEqualTo("Knn Classifier.md");
+    }
+
+    @Test
+    void uploadVault_fileWithHashCommentsInFencedCodeBlock_stillSynthesizesHeader() throws Exception {
+        setUp();
+        UserAccount user = new UserAccount();
+
+        // A single "#" comment line inside a fenced code block (e.g. a
+        // Python example) must not be mistaken for the file's own path
+        // header - the file genuinely has none, and should still get one
+        // synthesized from its path.
+        String rawContent = "## KNN\nExplains KNN.\n\n"
+            + "```python\n# Training dataset\nX = [[0, 0]]\n```\n";
+        MultipartFile file = new MockMultipartFile(
+            "files", "Knn Classifier.md", "text/markdown", rawContent.getBytes(StandardCharsets.UTF_8)
+        );
+
+        String expectedSynthesizedContent =
+            "# AI / Machine Learning / Supervised Learning / Knn Classifier\n\n" + rawContent;
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "AI", "Machine Learning", "Supervised Learning", "Knn Classifier", "KNN", "Explains KNN."
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(expectedSynthesizedContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "AI", "Machine Learning", "Supervised Learning", "Knn Classifier", 1L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("KNN", 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(
+                1L, "Machine Learning", "Supervised Learning"))
+            .thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("KNN"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(file), List.of("AI/Machine Learning/Supervised Learning/Knn Classifier.md")
+        );
+
+        assertThat(response.errors()).isEmpty();
+        assertThat(response.imported()).hasSize(1);
+
+        ArgumentCaptor<MarkdownFile> markdownFileCaptor = ArgumentCaptor.forClass(MarkdownFile.class);
+        verify(markdownFileRepository).save(markdownFileCaptor.capture());
+        assertThat(markdownFileCaptor.getValue().getEnvironment()).isEqualTo("AI");
+        assertThat(markdownFileCaptor.getValue().getCategory()).isEqualTo("Machine Learning");
+        assertThat(markdownFileCaptor.getValue().getSubcategory()).isEqualTo("Supervised Learning");
+    }
+
+    @Test
+    void uploadVault_stubFileWithNoTopicHeadingAndNoOwnHeader_isSkippedNotImportedAsJunkTopic() throws Exception {
+        setUp();
+
+        // A placeholder note (e.g. created in Obsidian for later) - no "##"
+        // topic heading, no "#" header of its own. Must not fall into
+        // MarkdownTopicImporter's no-headings fallback, which would
+        // otherwise save the synthesized header line as bogus topic
+        // content instead of skipping the file.
+        MultipartFile stub = new MockMultipartFile(
+            "files", "Someday.md", "text/markdown", "\n".getBytes(StandardCharsets.UTF_8)
+        );
+
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(stub), List.of("MyVault/Java/OOP/Someday.md")
+        );
+
+        assertThat(response.imported()).isEmpty();
+        assertThat(response.errors()).isEmpty();
+        verify(markdownTopicImporter, never()).parseMarkdown(any());
+    }
+
+    @Test
+    void uploadVault_fileWithExistingHeader_headerIsNotOverriddenByPath() throws Exception {
+        setUp();
+        UserAccount user = new UserAccount();
+
+        String content = "# Explicit / Header / Line / Title\n\n## Topic\ncontent";
+        MultipartFile file = new MockMultipartFile(
+            "files", "Notes.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
+        );
+
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Explicit", "Header", "Line", "Title", "Topic", "content"
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Explicit", "Header", "Line", "Title", 1L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("Topic", 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "Header", "Line"))
+            .thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Topic"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        // Path implies Vault/Some/Other/Folder/Notes.md, which would map to
+        // completely different metadata than the file's own header - the
+        // explicit header must win, so parseMarkdown must see the content
+        // unmodified (asserted implicitly: the stub above is only matched
+        // for the exact unmodified `content` string).
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(file), List.of("MyVault/Some/Other/Folder/Notes.md")
+        );
+
+        assertThat(response.errors()).isEmpty();
+        assertThat(response.imported()).hasSize(1);
+
+        ArgumentCaptor<MarkdownFile> markdownFileCaptor = ArgumentCaptor.forClass(MarkdownFile.class);
+        verify(markdownFileRepository).save(markdownFileCaptor.capture());
+        assertThat(markdownFileCaptor.getValue().getEnvironment()).isEqualTo("Explicit");
+        assertThat(markdownFileCaptor.getValue().getCategory()).isEqualTo("Header");
+        assertThat(markdownFileCaptor.getValue().getSubcategory()).isEqualTo("Line");
     }
 }

@@ -98,6 +98,29 @@ const Api = {
     return await response.json();
   },
 
+  // files[i] must correspond to paths[i] - the file's path relative to the
+  // vault root, used by the backend to derive Environment/Category/
+  // Subcategory/FileTitle for files that don't already have their own
+  // header line.
+  async uploadVault(files, paths) {
+    const formData = new FormData();
+    files.forEach(file => formData.append("files", file));
+    paths.forEach(path => formData.append("paths", path));
+
+    const response = await fetch("/api/markdown/upload-vault", {
+      method: "POST",
+      body: formData,
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not upload the vault.");
+    }
+
+    return await response.json();
+  },
+
   async createMarkdown(content) {
     const response = await fetch("/api/markdown", {
       method: "POST",
