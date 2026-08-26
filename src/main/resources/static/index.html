@@ -196,15 +196,6 @@
 
               <div class="menu-divider"></div>
 
-              <div v-if="currentUser?.role == 'ADMIN'" class="menu-group">
-                <div class="menu-group-title">Admin</div>
-                <button @click="openAdminUsers(); menuOpen = false">
-                  <icon name="people" class="menu-icon"></icon>Users
-                </button>
-              </div>
-
-              <div class="menu-divider"></div>
-
               <div class="menu-group-title">Account</div>
               <button @click="showAccountDetails(); menuOpen = false">
                 <icon name="person" class="menu-icon"></icon>Account Details
@@ -213,6 +204,15 @@
                 <icon name="exclamation-triangle" class="menu-icon"></icon>Danger zone
               </button>
               <a href="/logout"><icon name="box-arrow-right" class="menu-icon"></icon>Logout</a>
+
+              <div class="menu-divider"></div>
+
+              <div v-if="currentUser?.role == 'ADMIN'" class="menu-group">
+                <div class="menu-group-title">Admin</div>
+                <button @click="openAdminUsers(); menuOpen = false">
+                  <icon name="people" class="menu-icon"></icon>Users
+                </button>
+              </div>
 
             </div>
           </div>
@@ -928,7 +928,7 @@
                 <span>Total</span>
               </div>
 
-              <div class="review-stat stat-green total-stat">
+              <div class="review-stat stat-green total-stat clickable" @click="showStarterPack()" title="View markdown files">
                 <div class="stat-icon green">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 3 3 8l9 5 9-5-9-5z" />
