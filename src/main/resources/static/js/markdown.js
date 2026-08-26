@@ -12,6 +12,9 @@ const Markdown = {
 `
     );
 
-    return html;
+    // Stored content can come from an uploaded file or a starter-pack copy of
+    // another user's content — never trust it. Strip any raw HTML/script the
+    // markdown source carries before it's injected into the DOM via v-html.
+    return DOMPurify.sanitize(html);
   }
 };
