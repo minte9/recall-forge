@@ -548,6 +548,21 @@
 
           </div>
 
+          <div v-if="leftPanel === 'account' && currentUser?.role == 'ADMIN'" class="account-panel">
+            <h3>Premium Features</h3>
+            
+            <div class="account-row">
+              <span>Optimize markdowns for reviewing</span>
+              <strong>Yes</strong>
+            </div>
+
+            <div class="account-row">
+              <span>Obsidian Vault uploads</span>
+              <strong>Yes</strong>
+            </div>
+
+          </div>
+
           <div v-if="leftPanel === 'danger-zone'" class="account-panel">
             <h3>Danger Zone</h3>
 
