@@ -340,6 +340,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     onTitleClick() {
       if (this.mobilePageTitle === "Dashboard") {
         this.showMarkdownSummaries();
+      } else
+      if (this.mobilePageTitle === "Markdowns") {
+        this.showStarterPack();
       } else {
         this.showDashboard();
       }
