@@ -2,11 +2,18 @@ package dev.recallforge.config;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.core.endpoint.PkceParameterNames;
+import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -43,11 +50,58 @@ public class SecurityConfig {
         this.databaseOidcUserService = databaseOidcUserService;
     }
 
+    /**
+     * Works around two gaps in LinkedIn's "Sign In with LinkedIn using OpenID
+     * Connect" implementation, for the {@code linkedin} registration only —
+     * Google and GitHub are untouched:
+     *
+     * <ul>
+     *   <li><b>PKCE</b> — Spring Security adds PKCE to every
+     *   {@code authorization_code} request by default
+     *   ({@code DefaultOAuth2AuthorizationRequestResolver.DEFAULT_PKCE_APPLIER},
+     *   which runs before this customizer). LinkedIn's token endpoint responds
+     *   {@code invalid_client} when a token request carries a {@code code_verifier}
+     *   alongside {@code client_secret_post} authentication.</li>
+     *   <li><b>Nonce</b> — for {@code openid} scope Spring sends a {@code nonce}
+     *   and requires it back in the ID token; LinkedIn's ID token does not carry
+     *   it, which fails as {@code invalid_nonce}. Removing the {@code nonce}
+     *   request attribute makes {@code OidcAuthorizationCodeAuthenticationProvider}
+     *   skip that check (the ID token is still signature/issuer/exp validated via
+     *   {@code jwk-set-uri}).</li>
+     * </ul>
+     *
+     * <p>Built inline (rather than as a bean) so the login-disabled filter chain,
+     * which runs without an OAuth2 client auto-configuration and therefore without
+     * a {@link ClientRegistrationRepository}, still loads.
+     */
+    private static OAuth2AuthorizationRequestResolver linkedInCompatResolver(
+            ClientRegistrationRepository clientRegistrationRepository) {
+
+        DefaultOAuth2AuthorizationRequestResolver resolver =
+            new DefaultOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository, "/oauth2/authorization");
+
+        resolver.setAuthorizationRequestCustomizer(builder -> builder.attributes(attrs -> {
+            if ("linkedin".equals(attrs.get(OAuth2ParameterNames.REGISTRATION_ID))) {
+                attrs.remove(PkceParameterNames.CODE_VERIFIER);
+                attrs.remove(OidcParameterNames.NONCE);
+                builder.additionalParameters(params -> {
+                    params.remove(PkceParameterNames.CODE_CHALLENGE);
+                    params.remove(PkceParameterNames.CODE_CHALLENGE_METHOD);
+                    params.remove(OidcParameterNames.NONCE);
+                });
+            }
+        }));
+
+        return resolver;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             AppSecurityProperties props,
-            AppLoginProperties loginProperties
+            AppLoginProperties loginProperties,
+            ObjectProvider<ClientRegistrationRepository> clientRegistrationRepository
     ) throws Exception {
 
         // CSRF tokens are unnecessary here: the session cookie (see application.yml)
@@ -121,6 +175,11 @@ public class SecurityConfig {
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/login")
                 .defaultSuccessUrl("/", true)
+                .authorizationEndpoint(endpoint -> endpoint
+                    .authorizationRequestResolver(
+                        linkedInCompatResolver(clientRegistrationRepository.getObject())
+                    )
+                )
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(databaseOAuth2UserService)     // GitHub
                     .oidcUserService(databaseOidcUserService)   // Google

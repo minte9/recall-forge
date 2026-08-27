@@ -85,6 +85,67 @@ h1 {
     color: #0f172a;
 }
 
+/* Split button: Google is the primary action, the caret opens a menu with
+   the remaining providers (GitHub, LinkedIn). Mirrors the .retry-split-btn
+   pattern used by the "Upload Markdown" / "Try Again" buttons in the app. */
+.login-split {
+    position: relative;
+    display: flex;
+    margin-bottom: 14px;
+}
+
+.login-split__primary {
+    flex: 1;
+    margin-bottom: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.login-split__caret {
+    width: 46px;
+    margin-bottom: 0;
+    padding: 14px 0;
+    border: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* Keep the two segments visually joined - no independent hover lift. */
+.login-split__primary:hover,
+.login-split__caret:hover {
+    transform: none;
+}
+
+.login-split__menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 10;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+}
+
+.login-split__menu a {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #0f172a;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login-split__menu a:hover {
+    background: #f8fafc;
+}
+
 .footer {
     margin-top: 10px;
     color: #94a3b8;

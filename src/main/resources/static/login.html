@@ -29,13 +29,20 @@
             Build long-term knowledge through AI-powered spaced repetition.
         </p>
 
-        <a class="button google" href="/oauth2/authorization/google">
-            Continue with Google
-        </a>
+        <div class="login-split">
+            <a class="button google login-split__primary" href="/oauth2/authorization/google">
+                Continue with Google
+            </a>
 
-        <a class="button github" href="/oauth2/authorization/github">
-            Continue with GitHub
-        </a>
+            <button type="button" class="button google login-split__caret"
+                    aria-haspopup="true" aria-expanded="false"
+                    aria-controls="login-more" aria-label="More sign-in options">⌄</button>
+
+            <div class="login-split__menu" id="login-more" hidden>
+                <a href="/oauth2/authorization/github">Continue with GitHub</a>
+                <a href="/oauth2/authorization/linkedin">Continue with LinkedIn</a>
+            </div>
+        </div>
 
         <div class="footer">
             Sign in to access your topics, reviews, and progress.<br><br>
@@ -241,6 +248,32 @@
         window.addEventListener('scroll', function () {
             hint.classList.toggle('is-hidden', window.scrollY > 80);
         }, { passive: true });
+    })();
+
+    (function () {
+        var split = document.querySelector('.login-split');
+        if (!split) return;
+
+        var caret = split.querySelector('.login-split__caret');
+        var menu = split.querySelector('.login-split__menu');
+
+        function setOpen(open) {
+            menu.hidden = !open;
+            caret.setAttribute('aria-expanded', String(open));
+        }
+
+        caret.addEventListener('click', function (event) {
+            event.stopPropagation();
+            setOpen(menu.hidden);
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!split.contains(event.target)) setOpen(false);
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') setOpen(false);
+        });
     })();
 </script>
 </body>
