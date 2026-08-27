@@ -517,6 +517,11 @@
               <strong>{{ currentUser.username || "-" }}</strong>
             </div>
 
+            <div class="account-row">
+              <span>Provider</span>
+              <strong>{{ currentUser.provider || "-" }}</strong>
+            </div>
+
             <div class="account-row" v-if="currentUser?.role == 'ADMIN'">
               <span>Role</span>
               <strong>{{ currentUser.role || "-" }}</strong>
