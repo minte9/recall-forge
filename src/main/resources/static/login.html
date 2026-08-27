@@ -21,10 +21,8 @@
         }
 
         body {
-            max-width: 1400px;
             min-height: 100vh;
-            margin: 0 auto;
-            background: #f8fafc;
+            background: #ffffff;
             color: #0f172a;
             font-family: Inter, Arial, sans-serif;
         }
@@ -35,14 +33,11 @@
             align-items: start;
             gap: 16px;
             max-width: 1300px;
-            min-height: 100vh;
             margin: 0 auto;
             padding: 16px;
         }
 
         .login-card {
-            position: sticky;
-            top: 16px;
             display: flex;
             flex-direction: column;
             align-self: start;
@@ -96,7 +91,7 @@
         }
 
         .google {
-            background: #3b82f6;
+            background: #e85800;
             color: #ffffff;
         }
 
@@ -147,7 +142,7 @@
 
         .features-card {
             padding: 28px 28px;
-            background: #ffffff;
+            background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 14px;
         }
@@ -169,7 +164,7 @@
             height: 20px;
 
             border-radius: 10px;
-            background: #ffffff;
+            /* background: #ffffff; */
             color: #ffb703;
             font-weight: 800;
             font-size: 1.8rem;
@@ -210,8 +205,47 @@
             line-height: 1.45;
         }
 
-        .features-card + .section-header {
-            margin-top: 44px;
+        .packs-chapter {
+            background: #0f172a;
+        }
+
+        .packs-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            align-items: start;
+            gap: 16px;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 16px 16px 64px;
+        }
+
+        .packs-chapter .section-label {
+            color: #fb923c;
+        }
+
+        .packs-chapter .section-header h2 {
+            color: #f1f5f9;
+        }
+
+        .packs-chapter .section-header p {
+            color: #94a3b8;
+        }
+
+        .packs-chapter .features-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .packs-chapter .starter-pack-chip {
+            background: #0f172a;
+            border-color: #444444;
+            color: #e2e8f0;
+        }
+
+        .packs-chapter .starter-pack-chip--locked {
+            background: #1e293b;
+            border-color: #334155;
+            color: #64748b;
         }
 
         .starter-pack-row {
@@ -278,11 +312,20 @@
         @media (max-width: 980px) {
             .page {
                 grid-template-columns: 1fr;
+                min-height: 100vh;
                 padding: 20px;
             }
 
+            .packs-grid {
+                grid-template-columns: 1fr;
+                padding: 20px 20px 40px;
+            }
+
+            .packs-spacer {
+                display: none;
+            }
+
             .login-card {
-                position: static;
                 margin-bottom: 200px;
                 padding-top: 100px;
             }
@@ -342,12 +385,13 @@
                 padding: 10px;
             }
 
-            .content-card {
-                padding: 16px;
+            .packs-grid {
+                gap: 10px;
+                padding: 10px 10px 32px;
             }
 
-            .features-card + .section-header {
-                margin-top: 28px;
+            .content-card {
+                padding: 16px;
             }
 
             .section-header {
@@ -480,64 +524,6 @@
                 </div>
             </article>
         </section>
-        
-
-        <header class="section-header">
-            <br>
-            
-            <div class="section-label">Starter packs</div>
-
-            <h2>Start with a ready-made pack</h2>
-
-            <p>
-                Reach 50% mastery in the first category of a row to unlock the others.
-            </p>
-        </header>
-
-        <section class="features-card" aria-label="Available starter packs">
-            <div class="starter-pack-row">
-                <span class="starter-pack-chip">Java<span class="starter-pack-mastery-badge">0%</span></span>
-                <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Spring</span>
-                <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Kotlin</span>
-            </div>
-
-            <div class="starter-pack-row">
-                <span class="starter-pack-chip">SQL<span class="starter-pack-mastery-badge">0%</span></span>
-                <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">PostgreSQL</span>
-                <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Oracle</span>
-            </div>
-
-            <div class="starter-pack-row">
-                <span class="starter-pack-chip">Javascript<span class="starter-pack-mastery-badge">0%</span></span>
-                <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Node</span>
-                <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">TypeScript</span>
-            </div>
-
-            <div class="starter-pack-row">
-                <span class="starter-pack-chip">Python<span class="starter-pack-mastery-badge">0%</span></span>
-                <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Algorithms</span>
-            </div>
-
-            <div class="starter-pack-row">
-                <span class="starter-pack-chip">Git<span class="starter-pack-mastery-badge">0%</span></span>
-                <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Docker</span>
-            </div>
-
-            <div class="starter-pack-row">
-                <span class="starter-pack-chip">Security<span class="starter-pack-mastery-badge">0%</span></span>
-                <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">HTTPS</span>
-                <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">OAuth2</span>
-            </div>
-
-            <div class="starter-pack-row">
-                <span class="starter-pack-chip">Architecture<span class="starter-pack-mastery-badge">0%</span></span>
-                <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">API</span>
-            </div>
-
-            <!-- <p class="starter-pack-hint">
-                Sign in with Google or GitHub to import a pack and begin reviewing.
-            </p> -->
-        </section>
 
         <!-- <div class="free-message">
             <div class="free-badge">Free</div>
@@ -552,6 +538,66 @@
         </div> -->
     </main>
 </div>
+
+<section class="packs-chapter" id="starter-packs">
+    <div class="packs-grid">
+        <div class="packs-spacer" aria-hidden="true"></div>
+
+        <section class="content-card">
+            <header class="section-header">
+                <div class="section-label">Starter packs</div>
+
+                <h2>Start with a ready-made pack</h2>
+
+                <p>
+                    Every pack is a curated set of developer topics you can import in one click after signing in. <br>
+                    Reach 50% mastery in the first category of a row to unlock the others.
+                </p>
+            </header>
+
+            <section class="features-card" aria-label="Available starter packs">
+                <div class="starter-pack-row">
+                    <span class="starter-pack-chip">Java</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Spring</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Kotlin</span>
+                </div>
+
+                <div class="starter-pack-row">
+                    <span class="starter-pack-chip">SQL</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">PostgreSQL</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Oracle</span>
+                </div>
+
+                <div class="starter-pack-row">
+                    <span class="starter-pack-chip">Javascript</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Node</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">TypeScript</span>
+                </div>
+
+                <div class="starter-pack-row">
+                    <span class="starter-pack-chip">Python</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Algorithms</span>
+                </div>
+
+                <div class="starter-pack-row">
+                    <span class="starter-pack-chip">Git</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Docker</span>
+                </div>
+
+                <div class="starter-pack-row">
+                    <span class="starter-pack-chip">Security</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">HTTPS</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">OAuth2</span>
+                </div>
+
+                <div class="starter-pack-row">
+                    <span class="starter-pack-chip">Architecture</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">API</span>
+                </div>
+            </section>
+        </section>
+    </div>
+</section>
 
 <a href="#content" class="scroll-hint" aria-label="Scroll down for more">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
