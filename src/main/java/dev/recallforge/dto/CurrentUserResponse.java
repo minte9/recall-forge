@@ -6,6 +6,7 @@ public record CurrentUserResponse(
     boolean admin,
     String displayName,
     String role,
+    String provider,
     String avatarUrl,
     int dailyReviewLimit,
     int dailyQuestionLimit,

@@ -40,6 +40,7 @@ public class CurrentUserController {
             user.isAdmin(),
             user.getDisplayName(),
             user.getRole().name(),
+            user.getProvider(),
             user.getAvatarUrl(),
             reviewLimitProperties.dailyLimit(),
             reviewLimitProperties.dailyQuestionLimit(),
