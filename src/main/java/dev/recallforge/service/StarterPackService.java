@@ -45,7 +45,7 @@ public class StarterPackService {
                 "Git", List.of("Docker"),
                 "SQL", List.of("PostgreSQL", "Oracle"),
                 "Javascript", List.of("Node", "TypeScript"),
-                "Security", List.of(),
+                "Security", List.of("HTTPS"),
                 "Architecture", List.of("API")
             );
 
