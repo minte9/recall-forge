@@ -203,7 +203,7 @@ class StarterPackServiceTest {
                 "Spring", "Algorithms", "Docker", "Node",
                 "Kotlin", "TypeScript",
                 "Oracle", "PostgreSQL",
-                "API"
+                "API", "HTTPS"
             );
     }
 
@@ -232,7 +232,7 @@ class StarterPackServiceTest {
                 "Java", "Python", "Git", "SQL", "Javascript",
                 "Spring", "Algorithms", "Docker", "Node",
                 "Kotlin", "TypeScript", "Security",
-                "Oracle", "PostgreSQL", "Architecture", "API"
+                "Oracle", "PostgreSQL", "Architecture", "API", "HTTPS"
             )
             .containsEntry("Java", 73);
     }
