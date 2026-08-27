@@ -372,7 +372,7 @@ h1 {
     }
 
     .login-card {
-        margin-bottom: 200px;
+        margin-bottom: 280px;
         padding-top: 100px;
     }
 
@@ -395,7 +395,7 @@ h1 {
         justify-content: center;
         position: fixed;
         left: 50%;
-        bottom: 60px;
+        bottom: 150px;
         z-index: 10;
         width: 40px;
         height: 40px;
