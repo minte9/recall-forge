@@ -202,7 +202,8 @@ class StarterPackServiceTest {
             .containsOnlyKeys(
                 "Spring", "Algorithms", "Docker", "Node",
                 "Kotlin", "TypeScript",
-                "Oracle", "PostgreSQL"
+                "Oracle", "PostgreSQL",
+                "API"
             );
     }
 
@@ -231,7 +232,7 @@ class StarterPackServiceTest {
                 "Java", "Python", "Git", "SQL", "Javascript",
                 "Spring", "Algorithms", "Docker", "Node",
                 "Kotlin", "TypeScript", "Security",
-                "Oracle", "PostgreSQL"
+                "Oracle", "PostgreSQL", "Architecture", "API"
             )
             .containsEntry("Java", 73);
     }
