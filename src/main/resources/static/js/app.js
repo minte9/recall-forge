@@ -993,6 +993,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         await this.loadMarkdownSummaries(false);
         await this.loadFeedbackHistory(this.review.topicId);
 
+        // Retries and code challenges don't move memoryScore, so mastery
+        // can only change on a real graded answer.
+        if (!this.isRetry) {
+          await this.loadStarterPackStatus();
+        }
+
         if (!this.review) {
           this.showMarkdownSummaries();
         }
@@ -1060,8 +1066,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       try {
         const options = await Api.loadCategoryOptions();
         this.categoryOptions = options || [];
-        this.starterPackUnlockStatus = await Api.loadStarterPackUnlockStatus();
-        this.starterPackMastery = await Api.loadStarterPackMastery();
+        await this.loadStarterPackStatus();
 
         const hasCurrentCategory = this.categoryOptions.some(
           option => option.category === this.currentCategory
@@ -1084,6 +1089,22 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       } catch (err) {
         console.error("Could not load category options", err);
+      }
+    },
+
+    // Starter Pack button badges (per-category mastery %) and the unlock
+    // state of dependent categories. Both are computed live on the backend
+    // from review history, so re-fetching after every graded answer keeps
+    // the badges current without a page refresh. Kept separate from
+    // loadCategoryOptions so callers that only need fresh starter-pack
+    // numbers don't also trigger the category-options fetch and its
+    // fallback-category side effects.
+    async loadStarterPackStatus() {
+      try {
+        this.starterPackUnlockStatus = await Api.loadStarterPackUnlockStatus();
+        this.starterPackMastery = await Api.loadStarterPackMastery();
+      } catch (err) {
+        console.error("Could not load starter pack status", err);
       }
     },
 
@@ -1237,13 +1258,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       await this.loadDashboard();
     },
 
-    showStarterPack() {
+    async showStarterPack() {
       this.error = null;
       this.success = null;
       this.mobilePageTitle = "Starter Pack";
       this.leftPanel = "starter-pack";
       this.mobileView = "markdown";
       this.markdownEditing = false;
+      await this.loadStarterPackStatus();
     },
 
     async showDashboard() {
