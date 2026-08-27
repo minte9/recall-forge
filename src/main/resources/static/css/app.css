@@ -1087,6 +1087,10 @@
     text-align: right;
   }
 
+  .account-row strong.account-provider {
+    text-transform: capitalize;
+  }
+
   .account-logout {
     display: inline-block;
     margin-top: 16px;
