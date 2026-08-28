@@ -1056,19 +1056,19 @@
             <button v-if="aiEnabled || currentMarkdownFileId" class="review-btn" @click="startReviewFromDashboard()"
               :disabled="loading || (aiEnabled && (dailyLimitReached || (!currentMarkdownFileId && (!dashboard || dashboard.dueNow === 0))))"
               :title="aiEnabled && dailyLimitReached ? 'Daily review limit reached' : null">
-              <span class="btn-icon">►</span>
+              <span class="btn-icon" v-if="isDesktop">►</span>
               {{ loading ? "Loading..." : (aiEnabled ? "Start Review" : "Reviews") }}
             </button>
 
             <label v-if="aiEnabled && currentUser?.role != 'ADMIN'" class="upload-btn">
-              <span class="btn-icon">→</span>
+              <span class="btn-icon" v-if="isDesktop">→</span>
               Upload Markdown
               <input hidden type="file" accept=".md,.markdown,text/plain" @change="uploadMarkdown" />
             </label>
 
             <div v-else-if="aiEnabled" class="retry-split-btn">
               <button class="submit-btn retry-btn" @click="triggerSingleFileUpload()" :disabled="loading">
-                <span class="btn-icon">→</span>
+                <span class="btn-icon" v-if="isDesktop">→</span>
                 Upload Markdown
               </button>
 
