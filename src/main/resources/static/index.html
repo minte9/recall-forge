@@ -1065,7 +1065,8 @@
                 {{ loading ? "Loading..." : "Start Review" }}
               </button>
 
-              <button class="review-btn retry-caret" @click.stop="toggleDashboardActionMenu()" :disabled="loading"
+              <button class="review-btn retry-caret" @click.stop="toggleDashboardActionMenu()"
+                :disabled="loading || categoryOptions.length === 0"
                 title="More options">
                 ⌄
               </button>
