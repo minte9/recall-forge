@@ -1106,7 +1106,10 @@
 
               <div v-if="uploadMenuOpen" class="retry-menu-dropdown">
                 <button @click="triggerSingleFileUpload()">
-                  <icon name="file-text" class="menu-icon"></icon>Single File
+                  <icon name="file-text" class="menu-icon"></icon>Upload File
+                </button>
+                <button @click="showAddFile()">
+                  <icon name="file-text" class="menu-icon"></icon>Add File
                 </button>
                 <button @click="triggerVaultUpload()">
                   <icon name="files" class="menu-icon"></icon>Obsidian Vault
@@ -1119,9 +1122,9 @@
                 @change="uploadVaultFiles" />
             </div>
 
-            <button v-if="aiEnabled" class="add-file-btn" @click="showAddFile" title="Add File">
+            <!-- <button v-if="aiEnabled" class="add-file-btn" @click="showAddFile" title="Add File">
               +
-            </button>
+            </button> -->
 
           </div>
 
