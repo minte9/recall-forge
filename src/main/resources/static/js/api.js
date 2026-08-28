@@ -80,6 +80,28 @@ const Api = {
     return await response.json();
   },
 
+  async startCategoryCodeChallenge(category) {
+    const params = new URLSearchParams();
+    params.set("category", category || "Java");
+
+    const response = await fetch("/api/reviews/code-challenge?" + params.toString(), {
+      method: "POST",
+      credentials: "same-origin"
+    });
+
+    if (response.redirected || response.url.includes("/login")) {
+      window.location.href = "/login";
+      return;
+    }
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not start code challenge.");
+    }
+
+    return await response.json();
+  },
+
   async uploadMarkdown(file) {
     const formData = new FormData();
     formData.append("file", file);

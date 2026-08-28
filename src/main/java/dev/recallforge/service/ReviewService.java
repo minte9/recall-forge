@@ -156,6 +156,32 @@ public class ReviewService {
         Long userId = currentUserService.currentUserId();
         Topic topic = topicService.getTopic(topicId, userId);
 
+        return generateCodeChallengeForTopic(topic, userId);
+    }
+
+    /**
+     * Same practice-only Code Challenge as {@link #startCodeChallenge(Long)},
+     * but started from the dashboard instead of from inside a review: the
+     * topic is chosen automatically via
+     * {@link TopicService#selectNextCodeChallengeTopic} - the least-challenged
+     * topic in the category, in the document order of the markdown list - so
+     * the user gets a challenge from a rarely-visited file without navigating
+     * to it. Falls back to the "nothing to do" response only if the category
+     * has no topics at all.
+     */
+    public ReviewQuestionResponse startCategoryCodeChallenge(String category) {
+        if (!aiProperties.enabled()) {
+            throw new AiDisabledException();
+        }
+
+        Long userId = currentUserService.currentUserId();
+
+        return topicService.selectNextCodeChallengeTopic(userId, category)
+                .map(topic -> generateCodeChallengeForTopic(topic, userId))
+                .orElseGet(ReviewQuestionResponse::noReviewsDue);
+    }
+
+    private ReviewQuestionResponse generateCodeChallengeForTopic(Topic topic, Long userId) {
         long questionsToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
                 userId, topic.getCategory(), LocalDate.now().atStartOfDay());
 

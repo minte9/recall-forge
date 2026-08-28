@@ -19,6 +19,7 @@ import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
+import dev.recallforge.repository.TopicCodeChallengeCountProjection;
 import dev.recallforge.repository.TopicRepository;
 
 /**
@@ -159,6 +160,51 @@ public class TopicService {
                     .thenComparingLong(topic -> leadingTitleNumber(topic.getTitle()))
                     .thenComparing(Topic::getMemoryScore)
                     .thenComparing(Topic::getNextReviewAt, Comparator.nullsFirst(Comparator.naturalOrder()))
+            )
+            .findFirst();
+    }
+
+    /**
+     * Dashboard "Code Challenge" flow — picks the topic to challenge next
+     * across the whole category, regardless of due date or review history:
+     *
+     *  1. fewest completed code challenges first (a never-challenged topic
+     *     always outranks one that's been challenged, even in a later file)
+     *  2. subcategory display order
+     *  3. subcategory name
+     *  4. markdown file displayOrder
+     *  5. the leading number parsed out of the topic title ("1." before "2.")
+     *  6. topic id (final stable tie-break)
+     *
+     * Keys 2-6 are the same document order the markdown list shows, so once
+     * code-challenge counts tie, the earliest topic the user can see wins.
+     * Empty only when the category has no topics at all.
+     */
+    public Optional<Topic> selectNextCodeChallengeTopic(Long userId, String category) {
+        List<Topic> topics = topicRepository.findByUserIdAndCategoryIgnoreCase(userId, category);
+
+        if (topics.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Map<String, Integer> subcategoryOrder = subcategoryOrderRepository.findByCategoryIgnoreCase(category)
+            .stream()
+            .collect(Collectors.toMap(SubcategoryOrder::getSubcategory, SubcategoryOrder::getDisplayOrder));
+
+        Map<Long, Long> codeChallengeCounts = reviewRepository.countCodeChallengesByTopic(userId, category)
+            .stream()
+            .collect(Collectors.toMap(
+                TopicCodeChallengeCountProjection::getTopicId,
+                TopicCodeChallengeCountProjection::getCodeChallengeCount));
+
+        return topics.stream()
+            .sorted(
+                Comparator.<Topic>comparingLong(topic -> codeChallengeCounts.getOrDefault(topic.getId(), 0L))
+                    .thenComparing(topic -> subcategoryDisplayOrder(topic, subcategoryOrder))
+                    .thenComparing(Topic::getSubcategory, String.CASE_INSENSITIVE_ORDER)
+                    .thenComparing(TopicService::markdownFileDisplayOrder, Comparator.nullsLast(Comparator.naturalOrder()))
+                    .thenComparingLong(topic -> leadingTitleNumber(topic.getTitle()))
+                    .thenComparing(Topic::getId)
             )
             .findFirst();
     }

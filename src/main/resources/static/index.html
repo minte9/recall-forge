@@ -703,7 +703,10 @@
             </h3>
 
             <template v-if="aiEnabled && review">
-              <p>{{ review.question }}</p>
+              <p>{{ review.question }}<span class="question-type-badge"
+                  :title="review.codeChallenge ? 'Code Challenge' : 'Review'">
+                  <icon :name="review.codeChallenge ? 'code' : 'arrow-repeat'"></icon>
+                </span></p>
 
               <textarea v-model="userAnswer" placeholder="Write your answer here..."
                 @keydown.ctrl.enter="submitAnswer">
@@ -1054,11 +1057,33 @@
           </div>
 
           <div class="actions-row">
-            <button v-if="aiEnabled || currentMarkdownFileId" class="review-btn" @click="startReviewFromDashboard()"
-              :disabled="loading || (aiEnabled && (dailyLimitReached || (!currentMarkdownFileId && (!dashboard || dashboard.dueNow === 0))))"
-              :title="aiEnabled && dailyLimitReached ? 'Daily review limit reached' : null">
+            <div v-if="aiEnabled" class="retry-split-btn">
+              <button class="review-btn retry-btn" @click="startReviewFromDashboard()"
+                :disabled="loading || dailyLimitReached || (!currentMarkdownFileId && (!dashboard || dashboard.dueNow === 0))"
+                :title="dailyLimitReached ? 'Daily review limit reached' : null">
+                <span class="btn-icon" v-if="isDesktop">►</span>
+                {{ loading ? "Loading..." : "Start Review" }}
+              </button>
+
+              <button class="review-btn retry-caret" @click.stop="toggleDashboardActionMenu()" :disabled="loading"
+                title="More options">
+                ⌄
+              </button>
+
+              <div v-if="dashboardActionMenuOpen" class="retry-menu-dropdown">
+                <button @click="dashboardActionMenuOpen = false; startReviewFromDashboard()">
+                  <icon name="arrow-repeat" class="menu-icon"></icon>Start Review
+                </button>
+                <button @click="startDashboardCodeChallenge()" :disabled="dailyLimitReached">
+                  <icon name="code" class="menu-icon"></icon>Code Challenge
+                </button>
+              </div>
+            </div>
+
+            <button v-else-if="currentMarkdownFileId" class="review-btn" @click="startReviewFromDashboard()"
+              :disabled="loading">
               <span class="btn-icon" v-if="isDesktop">►</span>
-              {{ loading ? "Loading..." : (aiEnabled ? "Start Review" : "Reviews") }}
+              {{ loading ? "Loading..." : "Reviews" }}
             </button>
 
             <label v-if="aiEnabled && currentUser?.role != 'ADMIN'" class="upload-btn">

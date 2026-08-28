@@ -57,6 +57,18 @@ public class ReviewController {
     }
 
     /**
+     * Starts a Code Challenge from the dashboard, picking the topic
+     * automatically: the least-challenged topic in the category, in the
+     * order the markdown list shows its files. Same practice-only behavior
+     * as {@link #startCodeChallenge(Long)}.
+     */
+    @PostMapping("/code-challenge")
+    public ReviewQuestionResponse startCategoryCodeChallenge(
+            @RequestParam(required = false, defaultValue = "Java") String category) {
+        return reviewService.startCategoryCodeChallenge(category);
+    }
+
+    /**
      * Skips the given topic for today without answering it.
      *
      * Pushes the topic's next review out by a day (no memoryScore change,
