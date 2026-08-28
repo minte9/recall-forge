@@ -128,6 +128,25 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Param("category") String category
     );
 
+    // Per-topic sibling of countCodeChallengesByMarkdownFile, used by the
+    // dashboard "Code Challenge" picker to rank topics by how little they've
+    // been challenged. Topics with no code-challenge rows simply don't appear
+    // here (the caller treats a missing entry as 0).
+    @Query("""
+        select
+            r.topic.id as topicId,
+            count(distinct r.question) as codeChallengeCount
+        from Review r
+        where r.user.id = :userId
+        and lower(r.topic.category) = lower(:category)
+        and r.retryType = dev.recallforge.domain.RetryType.CODE_CHALLENGE
+        group by r.topic.id
+    """)
+    List<TopicCodeChallengeCountProjection> countCodeChallengesByTopic(
+        @Param("userId") Long userId,
+        @Param("category") String category
+    );
+
     // Fresh reviews (isRetry = false) plus code-challenge attempts, the two
     // activity kinds that count toward a "goal day" - plain Try Again retries
     // (isRetry = true, retryType = REVIEW) are excluded. Returned as raw rows

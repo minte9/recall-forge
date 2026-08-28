@@ -327,6 +327,58 @@ class ReviewServiceTest {
     }
 
     @Test
+    void startCategoryCodeChallenge_picksTopicViaTopicServiceAndGeneratesChallenge() {
+        setUp();
+        Topic topic = topicWithId(30L, null);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.selectNextCodeChallengeTopic(1L, "java")).thenReturn(Optional.of(topic));
+        when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("Uncategorized"), any()))
+            .thenReturn(10L);
+        when(openAiService.generateCodeChallenge("Uncategorized", "Title", "Content body", 0.6, List.of()))
+            .thenReturn("Write a function that reverses a string.");
+
+        ReviewQuestionResponse response = reviewService.startCategoryCodeChallenge("java");
+
+        assertThat(response.question()).isEqualTo("Write a function that reverses a string.");
+        assertThat(response.topicId()).isEqualTo(30L);
+        assertThat(response.codeChallenge()).isTrue();
+        assertThat(response.forcePractice()).isTrue();
+        verify(questionGenerationRepository).save(any());
+    }
+
+    @Test
+    void startCategoryCodeChallenge_noTopicsInCategory_returnsNoReviewsDueAndSkipsGeneration() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.selectNextCodeChallengeTopic(1L, "java")).thenReturn(Optional.empty());
+
+        ReviewQuestionResponse response = reviewService.startCategoryCodeChallenge("java");
+
+        assertThat(response.done()).isTrue();
+        assertThat(response.message()).isEqualTo("All reviews are done for now. Come back later.");
+        verify(openAiService, never()).generateCodeChallenge(any(), any(), any(), anyDouble(), any());
+        verify(questionGenerationRepository, never()).save(any());
+    }
+
+    @Test
+    void startCategoryCodeChallenge_dailyQuestionLimitReached_throwsAndSkipsGeneration() {
+        setUp();
+        Topic topic = topicWithId(30L, null);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.selectNextCodeChallengeTopic(1L, "java")).thenReturn(Optional.of(topic));
+        when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("Uncategorized"), any()))
+            .thenReturn(50L);
+
+        assertThatThrownBy(() -> reviewService.startCategoryCodeChallenge("java"))
+            .isInstanceOf(DailyQuestionLimitExceededException.class);
+
+        verify(openAiService, never()).generateCodeChallenge(any(), any(), any(), anyDouble(), any());
+        verify(questionGenerationRepository, never()).save(any());
+    }
+
+    @Test
     void skipTopic_pushesNextReviewAtOneDayWithoutChangingMemoryScoreOrWritingReview() {
         setUp();
         Topic topic = topicWithId(20L, null);

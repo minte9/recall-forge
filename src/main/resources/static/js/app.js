@@ -54,6 +54,7 @@ const app = createApp({
       environmentMenuOpen: false,
       retryMenuOpen: false,
       uploadMenuOpen: false,
+      dashboardActionMenuOpen: false,
       codeChallengeLoading: false,
       adminUsers: [],
       categoryOptions: [],
@@ -613,7 +614,11 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.mobileView = "review";
 
         if (this.review.forcePractice) {
-          this.answerSubmitted = true;
+          // A code challenge (started from the dashboard) is forcePractice
+          // too, but the user still has to write and submit the challenge
+          // answer - so it starts unsubmitted, unlike a not-due/already-done
+          // topic which opens straight into the "Try Again" state.
+          this.answerSubmitted = !this.review.codeChallenge;
           this.isRetry = true;
         }
 
@@ -750,6 +755,23 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       } else {
         await this.startReview();
       }
+    },
+
+    toggleDashboardActionMenu() {
+      this.dashboardActionMenuOpen = !this.dashboardActionMenuOpen;
+    },
+
+    // Dashboard "Code Challenge" option: the backend picks the least-
+    // challenged topic in the category (in markdown-list order), so the user
+    // gets a challenge from a rarely-visited file without opening it. Routed
+    // through loadReviewQuestion so the panel transition, markdown load and
+    // follow-up fetches match a normal Start Review.
+    async startDashboardCodeChallenge() {
+      this.dashboardActionMenuOpen = false;
+      await this.loadReviewQuestion(
+        () => Api.startCategoryCodeChallenge(this.currentCategory),
+        false
+      );
     },
 
     async loadTopicsInFile(markdownFileId) {

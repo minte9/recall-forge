@@ -23,6 +23,7 @@ import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
+import dev.recallforge.repository.TopicCodeChallengeCountProjection;
 import dev.recallforge.repository.TopicRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -289,6 +290,79 @@ class TopicServiceTest {
 
         assertThat(topicService.selectNextTopicByMarkdownFileId(7L, 1L)).isEmpty();
         verify(topicRepository, never()).findTopicsByMarkdownFileId(any(), any());
+    }
+
+    private Topic codeChallengeTopic(long id, String subcategory, String title, Integer fileDisplayOrder) {
+        Topic topic = topicWithSubcategoryTitleAndFileOrder(subcategory, title, fileDisplayOrder);
+        org.springframework.test.util.ReflectionTestUtils.setField(topic, "id", id);
+        return topic;
+    }
+
+    private TopicCodeChallengeCountProjection challengeCount(long topicId, long count) {
+        return new TopicCodeChallengeCountProjection() {
+            @Override
+            public Long getTopicId() {
+                return topicId;
+            }
+
+            @Override
+            public long getCodeChallengeCount() {
+                return count;
+            }
+        };
+    }
+
+    @Test
+    void selectNextCodeChallengeTopic_prefersTopicWithFewestCodeChallenges() {
+        setUp();
+        // "1. Alpha" comes first in the markdown list but has already been
+        // challenged 5 times; the never-challenged "2. Beta" (no count row,
+        // treated as 0) should win despite its later document position.
+        Topic alpha = codeChallengeTopic(1L, "Basics", "1. Alpha", 1);
+        Topic beta = codeChallengeTopic(2L, "Basics", "2. Beta", 2);
+        when(topicRepository.findByUserIdAndCategoryIgnoreCase(1L, "java")).thenReturn(List.of(alpha, beta));
+        when(reviewRepository.countCodeChallengesByTopic(1L, "java"))
+            .thenReturn(List.of(challengeCount(1L, 5L)));
+
+        assertThat(topicService.selectNextCodeChallengeTopic(1L, "java")).contains(beta);
+    }
+
+    @Test
+    void selectNextCodeChallengeTopic_tiedCount_prefersEarlierFileInList() {
+        setUp();
+        // Both never challenged and both titled "1."; the file the user sees
+        // first (lower display order) decides.
+        Topic fromThirdFile = codeChallengeTopic(1L, "Basics", "1. Topic", 3);
+        Topic fromFirstFile = codeChallengeTopic(2L, "Basics", "1. Topic", 1);
+        when(topicRepository.findByUserIdAndCategoryIgnoreCase(1L, "java"))
+            .thenReturn(List.of(fromThirdFile, fromFirstFile));
+        when(reviewRepository.countCodeChallengesByTopic(1L, "java")).thenReturn(List.of());
+
+        assertThat(topicService.selectNextCodeChallengeTopic(1L, "java")).contains(fromFirstFile);
+    }
+
+    @Test
+    void selectNextCodeChallengeTopic_tiedCountAndFile_prefersLowerTitleNumber() {
+        setUp();
+        // Same file, same (equal) challenge count - fall through to the
+        // "1." before "2." numbering, even when everything's been challenged.
+        Topic second = codeChallengeTopic(1L, "Basics", "2. Beta", 1);
+        Topic first = codeChallengeTopic(2L, "Basics", "1. Alpha", 1);
+        when(topicRepository.findByUserIdAndCategoryIgnoreCase(1L, "java"))
+            .thenReturn(List.of(second, first));
+        when(reviewRepository.countCodeChallengesByTopic(1L, "java"))
+            .thenReturn(List.of(challengeCount(1L, 3L), challengeCount(2L, 3L)));
+
+        assertThat(topicService.selectNextCodeChallengeTopic(1L, "java")).contains(first);
+    }
+
+    @Test
+    void selectNextCodeChallengeTopic_noTopicsInCategory_returnsEmptyWithoutQueryingCounts() {
+        setUp();
+        when(topicRepository.findByUserIdAndCategoryIgnoreCase(1L, "java")).thenReturn(List.of());
+
+        assertThat(topicService.selectNextCodeChallengeTopic(1L, "java")).isEmpty();
+        verify(reviewRepository, never()).countCodeChallengesByTopic(any(), any());
     }
 
     @Test

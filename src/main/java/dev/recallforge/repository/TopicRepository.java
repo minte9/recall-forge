@@ -52,6 +52,21 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         @Param("now") LocalDateTime now
     );
 
+    // Every topic in a category regardless of due date - the dashboard
+    // "Code Challenge" picker ranks the full set by code-challenge count and
+    // display order itself, so it needs them all, not just the due ones.
+    // Returned in id order so the caller's stable sort has a deterministic base.
+    @Query("""
+        select t from Topic t
+        where t.user.id = :userId
+            and lower(t.category) = lower(:category)
+        order by t.id asc
+    """)
+    List<Topic> findByUserIdAndCategoryIgnoreCase(
+        @Param("userId") Long userId,
+        @Param("category") String category
+    );
+
     @Query("""
         select t from Topic t
         where t.user.id = :userId

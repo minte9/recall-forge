@@ -1520,6 +1520,15 @@
     flex-shrink: 0;
   }
 
+  /* Trailing marker on the question so the user can tell a Code Challenge
+     from a normal Review at a glance. */
+  .question-type-badge {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 8px;
+    color: #94a3b8;
+  }
+
   .review-title {
     display: flex;
     justify-content: space-between;
