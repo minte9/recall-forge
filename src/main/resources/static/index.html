@@ -843,18 +843,12 @@
                       {{ item.question || "No question saved for this review." }}
                     </div>
 
-                    <details class="feedback-answer-block">
-                      <summary>show answer</summary>
-                      <div class="feedback-qa-section">
-                        <div class="feedback-qa-text feedback-answer-text">
-                          {{ item.userAnswer || "No answer saved." }}
-                        </div>
-                        <br>
-                        <div class="feedback-qa-text">
-                          {{ item.feedback }}
-                        </div>
-                      </div>
-                    </details>
+                    <div class="feedback-history-answer feedback-qa-text feedback-answer-text">
+                      {{ item.userAnswer || "No answer saved." }}
+                    </div>
+                    <div class="feedback-history-feedback feedback-qa-text">
+                      {{ item.feedback }}
+                    </div>
                   </div>
 
                 </details>

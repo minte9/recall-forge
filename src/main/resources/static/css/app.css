@@ -1372,10 +1372,12 @@
 
   .feedback-history-item--high-score {
     border-left: 4px solid #10b981;
+    margin-bottom: 2px;
   }
 
   .feedback-history-item--low-score {
     border-left: 4px solid #f59e0b;
+    margin-bottom: 2px;
   }
 
   .feedback-history-summary {
@@ -1460,15 +1462,12 @@
     background: #ffffff;
   }
 
-  .feedback-qa-section {
-    margin-top: 12px;
-    border-radius: 10px;
+  .feedback-history-answer {
     margin-bottom: 12px;
-    padding: 0px 12px 0px 12px;
   }
 
-  .feedback-qa-section:first-child {
-    margin-top: 0;
+  .feedback-history-feedback {
+    margin-bottom: 20px;
   }
 
   .feedback-qa-label {
@@ -1487,26 +1486,6 @@
     white-space: pre-wrap;
     font-family: Consolas, monospace;
     font-size: 13px;
-  }
-
-  .feedback-answer-block {
-    margin: 10px 0 4px;
-    border: 1px solid #ececec;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 30px;
-  }
-
-  .feedback-answer-block summary {
-    padding: 8px 12px;
-    cursor: pointer;
-    font-weight: 300;
-    color: #374151;
-    background: #f7f7f7;
-  }
-
-  .feedback-answer-block .feedback-qa-section {
-    padding: 0px 12px 8px 12px;
   }
 
   .muted {
