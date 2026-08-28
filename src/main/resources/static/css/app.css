@@ -915,6 +915,14 @@
     border-left: 4px solid #f59e0b;
   }
 
+  /* Green check shown on the feedback card when a subcategory has no
+     due topics left for the day (result.dueInSubcategory === 0). */
+  .subcat-done-check {
+    color: var(--green);
+    vertical-align: -2px;
+    margin-right: 4px;
+  }
+
   .success {
     background: #ecfdf5;
     color: #065f46;

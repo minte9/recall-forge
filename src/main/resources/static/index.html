@@ -889,6 +889,7 @@
                   </span>
                 </p>
                 <p>
+                  <icon v-if="result.dueInSubcategory === 0" name="check-circle-fill" class="subcat-done-check"></icon>
                   <strong>{{ formatSubcategory(result.subcategory) }} due topics:</strong> {{ result.dueInSubcategory }}
                 </p>
               </template>
