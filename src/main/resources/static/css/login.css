@@ -96,10 +96,21 @@ h1 {
 }
 
 .login-split__primary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     flex: 1;
     margin-bottom: 0;
+    text-align: left;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
+}
+
+.login-split__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
 }
 
 .login-split__caret {
@@ -135,11 +146,14 @@ h1 {
 }
 
 .login-split__menu a {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 10px 12px;
     border-radius: 8px;
     color: #0f172a;
     font-weight: 700;
+    text-align: left;
     text-decoration: none;
 }
 
