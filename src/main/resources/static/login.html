@@ -14,6 +14,113 @@
     <meta name="apple-mobile-web-app-title" content="Recall Forge">
 
     <link rel="stylesheet" href="css/login.css">
+
+    <style>
+        .feature-showcase {
+            border: 1px solid #d8e0ec;
+            border-radius: 10px;
+            overflow: hidden;
+            /* background: #f8fafc; */
+        }
+
+        .feature-showcase__visual {
+            position: relative;
+            height: 230px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 22px 4px;
+        }
+
+        .feature-showcase__visual img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            cursor: pointer;
+        }
+
+        .feature-showcase__content {
+            padding: 0px 20px 20px 8px;
+            border-top: 0px solid #e5eaf2;
+        }
+
+        .feature-showcase__text {
+            width: fit-content;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .feature-showcase__topline {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .feature-showcase__content h3 {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .feature-showcase__content p {
+            margin: 5px 0 11px;
+            color: #6780a5;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .feature-showcase__arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.15);
+            color: #64748b;
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .feature-showcase__arrow--prev {
+            left: 10px;
+        }
+
+        .feature-showcase__arrow--next {
+            right: 10px;
+        }
+
+        .feature-showcase__arrow:hover {
+            background: #fff;
+            color: #0f172a;
+        }
+
+        .feature-showcase__arrow:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        @media (max-width: 720px) {
+            .feature-showcase__visual {
+                height: 190px;
+                padding: 10px 14px 2px;
+            }
+
+            .feature-showcase__content {
+                padding: 18px 14px 10px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .feature-showcase__visual img {
+                transition: none !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -56,83 +163,37 @@
         <header class="section-header">
             <div class="section-label">Built for developers</div>
 
-            <h2>Turn Markdown notes into lasting knowledge</h2>
+            <h2>Turn your notes into lasting knowledge</h2>
 
             <p>
                 Recall Forge transforms your existing notes into adaptive review sessions.
             </p>
         </header>
 
-        <section class="features-card" aria-label="Features">
-            <article class="feature-item">
-                <div class="feature-icon" aria-hidden="true">✓</div>
+        <section class="feature-showcase" aria-label="Recall Forge features">
+            <div class="feature-showcase__visual">
+                <button type="button" class="feature-showcase__arrow feature-showcase__arrow--prev" id="feature-prev"
+                        aria-label="Previous feature">‹</button>
 
-                <div>
-                    <h3>Markdown uploads</h3>
-                    <p>
-                        Import your existing Markdown notes and turn them into
-                        structured review topics.
+                <img id="feature-showcase-image"
+                     src="images/features/markdown-uploads.png"
+                     alt="Markdown notes being turned into Recall Forge review topics">
+
+                <button type="button" class="feature-showcase__arrow feature-showcase__arrow--next" id="feature-next"
+                        aria-label="Next feature">›</button>
+            </div>
+
+            <div class="feature-showcase__content" aria-live="polite">
+                <div class="feature-showcase__text">
+                    <div class="feature-showcase__topline">
+                        <h3 id="feature-showcase-title">Markdown uploads</h3>
+                    </div>
+
+                    <p id="feature-showcase-description">
+                        Import your existing Markdown notes and turn them into structured review topics.
                     </p>
                 </div>
-            </article>
-
-            <article class="feature-item">
-                <div class="feature-icon" aria-hidden="true">✓</div>
-
-                <div>
-                    <h3>Starter Packs</h3>
-                    <p>
-                        Begin immediately with ready-made collections of
-                        developer topics.
-                    </p>
-                </div>
-            </article>
-
-            <article class="feature-item">
-                <div class="feature-icon" aria-hidden="true">✓</div>
-
-                <div>
-                    <h3>Adaptive questions</h3>
-                    <p>
-                        Receive questions adapted to your previous scores and
-                        current level of recall.
-                    </p>
-                </div>
-            </article>
-
-            <article class="feature-item">
-                <div class="feature-icon" aria-hidden="true">✓</div>
-
-                <div>
-                    <h3>Answer feedback</h3>
-                    <p>
-                        Get a score and useful feedback after each submitted
-                        answer.
-                    </p>
-                </div>
-            </article>
-
-            <article class="feature-item">
-                <div class="feature-icon" aria-hidden="true">✓</div>
-
-                <div>
-                    <h3>Review Dashboard</h3>
-                    <p>
-                        See due reviews, mastery progress and learning streaks.
-                    </p>
-                </div>
-            </article>
-
-            <article class="feature-item">
-                <div class="feature-icon" aria-hidden="true">✓</div>
-
-                <div>
-                    <h3>Code Challenge</h3>
-                    <p>
-                        Request code challenges on topic and receive feedback on your solutions.
-                    </p>
-                </div>
-            </article>
+            </div>
         </section>
 
         <!-- <div class="free-message">
@@ -248,6 +309,113 @@
         window.addEventListener('scroll', function () {
             hint.classList.toggle('is-hidden', window.scrollY > 80);
         }, { passive: true });
+    })();
+
+
+    (function () {
+        var features = [
+            {
+                title: 'Markdown Uploads',
+                description: 'Import your existing Markdown notes and turn them into structured review topics.',
+                image: 'images/features/markdown-uploads.png',
+                alt: 'Markdown notes being turned into Recall Forge review topics'
+            },
+            {
+                title: 'Adaptive Questions',
+                description: 'Receive questions adapted to your previous scores and current level of recall.',
+                image: 'images/features/adaptive-questions.png',
+                alt: 'Recall Forge adapting a review question to the learner'
+            },
+            {
+                title: 'Answer Feedback',
+                description: 'Get a score and useful feedback after each submitted answer.',
+                image: 'images/features/answer-feedback.png',
+                alt: 'A learner receiving a score and feedback for an answer'
+            },
+            {
+                title: 'Review Dashboard',
+                description: 'See due reviews, mastery progress and learning streaks.',
+                image: 'images/features/review-dashboard.png',
+                alt: 'Recall Forge dashboard showing reviews, mastery and streak progress'
+            },
+            {
+                title: 'Code Challenge',
+                description: 'Request code challenges on topic and receive feedback on your solutions.',
+                image: 'images/features/code-challenge.png',
+                alt: 'A learner solving a Recall Forge coding challenge'
+            },
+            {
+                title: 'Starter Packs',
+                description: 'Begin immediately with ready-made collections of developer topics.',
+                image: 'images/features/starter-packs.png',
+                alt: 'A learner opening a Recall Forge starter pack of developer topics'
+            },
+        ];
+
+        var image = document.getElementById('feature-showcase-image');
+        var title = document.getElementById('feature-showcase-title');
+        var description = document.getElementById('feature-showcase-description');
+        var previous = document.getElementById('feature-prev');
+        var next = document.getElementById('feature-next');
+
+        if (!image || !title || !description || !previous || !next) {
+            return;
+        }
+
+        var current = 0;
+        var timer = null;
+        var interval = 6000;
+
+        function render(index) {
+            current = (index + features.length) % features.length;
+            var feature = features[current];
+
+            image.src = feature.image;
+            image.alt = feature.alt;
+            title.textContent = feature.title;
+            description.textContent = feature.description;
+        }
+
+        function restartTimer() {
+            if (timer) window.clearInterval(timer);
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            timer = window.setInterval(function () {
+                render(current + 1);
+            }, interval);
+        }
+
+        previous.addEventListener('click', function () {
+            render(current - 1);
+            restartTimer();
+        });
+
+        next.addEventListener('click', function () {
+            render(current + 1);
+            restartTimer();
+        });
+
+        image.addEventListener('click', function () {
+            render(current + 1);
+            restartTimer();
+        });
+
+        var showcase = document.querySelector('.feature-showcase');
+        showcase.addEventListener('mouseenter', function () {
+            if (timer) window.clearInterval(timer);
+        });
+
+        showcase.addEventListener('mouseleave', restartTimer);
+        showcase.addEventListener('focusin', function () {
+            if (timer) window.clearInterval(timer);
+        });
+
+        showcase.addEventListener('focusout', function (event) {
+            if (!showcase.contains(event.relatedTarget)) restartTimer();
+        });
+
+        render(0);
+        restartTimer();
     })();
 
     (function () {
