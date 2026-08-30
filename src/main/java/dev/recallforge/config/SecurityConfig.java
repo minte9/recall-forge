@@ -134,7 +134,8 @@ public class SecurityConfig {
                         "/privacy.html",
                         "/recall-forge.png",
                         "/css/**",
-                        "/js/**"
+                        "/js/**",
+                        "/images/**"
                     ).permitAll()
                     .anyRequest().authenticated()
                 )
@@ -165,7 +166,8 @@ public class SecurityConfig {
                     "/login/oauth2/**",
                     "/recall-forge.png", // icon
                     "/css/**",
-                    "/js/**"
+                    "/js/**",
+                     "/images/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
