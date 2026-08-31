@@ -188,6 +188,28 @@ h1 {
     text-transform: uppercase;
 }
 
+.section-label__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.section-label__row .section-label {
+    margin-bottom: 0;
+}
+
+.section-label__badge {
+    padding: 2px 12px;
+    border: 1px solid #f45b00;
+    border-radius: 999px;
+    color: #f45b00;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
 .section-header h2 {
     margin-bottom: 8px;
     font-size: 1.8rem;
