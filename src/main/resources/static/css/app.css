@@ -734,6 +734,22 @@
     height: 100%;
   }
 
+  /* The ring doubles as the "what counts as mastery" tooltip trigger
+     (hover on desktop, tap-to-focus on mobile) - reset the icon-sized box
+     .info-tooltip assumes and anchor the bubble to the ring's left edge so
+     the wide bubble can't clip off the card. */
+  .reward-ring.info-tooltip {
+    display: block;
+    margin-left: 0;
+    color: inherit;
+    cursor: help;
+  }
+
+  .reward-ring.info-tooltip::after {
+    left: 0;
+    transform: none;
+  }
+
   .reward-ring-track {
     fill: none;
     stroke: #e5e7eb;
@@ -875,8 +891,11 @@
     color: var(--text);
   }
 
-  /* Streak/goal boxes sit at the right card edge, so the default centered
-     bubble (left: 50%) would run off-screen - anchor it to the right edge. */
+  /* On desktop the streak + goal boxes are stacked at the card's right
+     edge, so both bubbles anchor to the right edge to stay on-card. (On
+     mobile the two sit side by side and the left one flips - see the
+     media query.) */
+  .reward-streak-left::after,
   .reward-streak-right::after {
     left: auto;
     right: 0;
@@ -2161,6 +2180,14 @@
       gap: 8px;
     }
 
+    /* Trim the roomy desktop padding a bit so mastery + attention fit side
+       by side on a narrow screen instead of wrapping. */
+    .reward-stat-box,
+    .reward-mastery-box,
+    .reward-attention-box {
+      padding: 22px;
+    }
+
     .reward-mini-stack {
       flex: 1 1 100%;
       flex-direction: row;
@@ -2168,6 +2195,14 @@
 
     .reward-mini-box {
       padding: 16px;
+    }
+
+    /* Streak + goal are side by side here; the left (streak) box's bubble
+       would run off the card if it kept anchoring right, so flip it to the
+       left edge. Goal (right box) keeps the right anchor. */
+    .reward-streak-left::after {
+      left: 0;
+      right: auto;
     }
 
     .reward-ring {

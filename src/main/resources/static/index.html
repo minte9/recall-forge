@@ -1013,13 +1013,10 @@
               <div class="reward-stat-box reward-mastery-box">
                 <span class="reward-mastery-title">
                   {{ categoryOptions.length > 0 ? dashboard.reward.masteryScope + " Mastery" : "Mastery" }}
-                  <span class="info-tooltip" tabindex="0"
-                    data-tooltip="Topics with an average memory score of at least 0.7 that aren't currently due for review.">
-                    <icon name="question-circle"></icon>
-                  </span>
                 </span>
 
-                <div class="reward-ring" role="img"
+                <div class="reward-ring info-tooltip" role="img" tabindex="0"
+                  data-tooltip="Topics with an average memory score of at least 0.7 that aren't currently due for review."
                   :aria-label="`${dashboard.reward.masteryPercent}% mastery`">
                   <svg viewBox="0 0 120 120">
                     <circle class="reward-ring-track" cx="60" cy="60" r="52" pathLength="100"></circle>
@@ -1051,7 +1048,7 @@
               </div>
 
               <div class="reward-mini-stack">
-                <div class="reward-stat-box reward-mini-box info-tooltip reward-streak-right" tabindex="0"
+                <div class="reward-stat-box reward-mini-box info-tooltip reward-streak-left" tabindex="0"
                   data-tooltip="Consecutive days with at least one review, ending today or yesterday. Missing a day resets it to zero.">
                   <span class="reward-combined-icon">🔥</span>
                   <span class="reward-combined-text">
