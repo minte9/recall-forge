@@ -971,16 +971,6 @@
             </div>
           </div>
 
-          <div v-if="dashboard && dashboard.showKnowledgeInsights && dashboard.weakAreas && dashboard.weakAreas.length" class="dashboard-card">
-
-            <div v-for="area in dashboard.weakAreas" :key="area.environment + area.category + area.subcategory"
-              class="attention-row">
-              <icon name="exclamation-triangle" class="attention-icon"></icon>
-              <span>{{ formatSubcategory(area.subcategory) }}</span>
-              <span class="attention-due">{{ area.dueCount }} due</span>
-            </div>
-          </div>
-
           <div v-if="dashboard && dashboard.showKnowledgeInsights" class="knowledge-grid">
             <div v-if="dashboard && dashboard.strongAreas && dashboard.strongAreas.length"
               class="knowledge-card strong">
@@ -1019,39 +1009,66 @@
           </div>
 
           <div v-if="dashboard && dashboard.reward" class="reward-card">
-            <div class="reward-top">
-
-              <span class="reward-label">
-                {{ categoryOptions.length > 0 ? dashboard.reward.masteryScope + " Mastery" : "Mastery" }}: {{ dashboard.reward.masteryPercent }}%
-                <span class="info-tooltip" tabindex="0"
-                  data-tooltip="Topics with an average memory score of at least 0.7 that aren't currently due for review.">
-                  <icon name="question-circle"></icon>
+            <div class="reward-progress-row">
+              <div class="reward-stat-box reward-mastery-box">
+                <span class="reward-mastery-title">
+                  {{ categoryOptions.length > 0 ? dashboard.reward.masteryScope + " Mastery" : "Mastery" }}
+                  <span class="info-tooltip" tabindex="0"
+                    data-tooltip="Topics with an average memory score of at least 0.7 that aren't currently due for review.">
+                    <icon name="question-circle"></icon>
+                  </span>
                 </span>
-              </span>
 
-              <span>
-                {{ dashboard.reward.masteredTopics }}
-                /
-                {{ dashboard.reward.totalTopicsInScope }}
-                topics
-              </span>
-            </div>
-
-            <div class="reward-bar">
-              <div class="reward-bar-fill" :style="{ width: rewardProgress + '%' }">
+                <div class="reward-ring" role="img"
+                  :aria-label="`${dashboard.reward.masteryPercent}% mastery`">
+                  <svg viewBox="0 0 120 120">
+                    <circle class="reward-ring-track" cx="60" cy="60" r="52" pathLength="100"></circle>
+                    <circle class="reward-ring-fill" cx="60" cy="60" r="52" pathLength="100"
+                      stroke-dasharray="100"
+                      :stroke-dashoffset="100 - rewardProgress"></circle>
+                  </svg>
+                  <div class="reward-ring-label">
+                    <span class="reward-ring-percent">{{ dashboard.reward.masteryPercent }}%</span>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div class="reward-streak">
-              <span class="info-tooltip reward-streak-left" tabindex="0"
-                data-tooltip="Consecutive days with at least one review, ending today or yesterday. Missing a day resets it to zero.">
-                🔥 Streak: {{ dashboard.reward.streakDays }} day<span v-if="dashboard.reward.streakDays !== 1">s</span>
-              </span>
+              <div class="reward-stat-box reward-attention-box">
+                <div class="reward-attention-total">
+                  <span class="reward-attention-count">{{ dashboard.dueNow }}</span> due now
+                </div>
 
-              <span class="info-tooltip reward-streak-right" tabindex="0"
-                :data-tooltip="`A day where you log at least ${dashboard.reward.goalReviewsPerDay} green reviews (score of at least 0.7) or ${dashboard.reward.goalCodeChallengesPerDay} code challenges. Resets on the 1st of each month.`">
-                🎯 Goal: {{ dashboard.reward.goalDaysThisMonth }} days
-              </span>
+                <div v-if="dashboard.showKnowledgeInsights && dashboard.weakAreas && dashboard.weakAreas.length"
+                  class="reward-attention-list">
+                  <div v-for="area in dashboard.weakAreas"
+                    :key="area.environment + area.category + area.subcategory"
+                    class="attention-row">
+                    <icon name="exclamation-triangle" class="attention-icon"></icon>
+                    <span>{{ formatSubcategory(area.subcategory) }}</span>
+                    <span class="attention-due">{{ area.dueCount }} due</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="reward-mini-stack">
+                <div class="reward-stat-box reward-mini-box info-tooltip reward-streak-right" tabindex="0"
+                  data-tooltip="Consecutive days with at least one review, ending today or yesterday. Missing a day resets it to zero.">
+                  <span class="reward-combined-icon">🔥</span>
+                  <span class="reward-combined-text">
+                    <span class="reward-combined-label">Streak:</span>
+                    <span class="reward-combined-value">{{ dashboard.reward.streakDays }} day<span v-if="dashboard.reward.streakDays !== 1">s</span></span>
+                  </span>
+                </div>
+
+                <div class="reward-stat-box reward-mini-box info-tooltip reward-streak-right" tabindex="0"
+                  :data-tooltip="`A day where you log at least ${dashboard.reward.goalReviewsPerDay} green reviews (score of at least 0.7) or ${dashboard.reward.goalCodeChallengesPerDay} code challenges. Resets on the 1st of each month.`">
+                  <span class="reward-combined-icon">🎯</span>
+                  <span class="reward-combined-text">
+                    <span class="reward-combined-label">Goal:</span>
+                    <span class="reward-combined-value">{{ dashboard.reward.goalDaysThisMonth }} days</span>
+                  </span>
+                </div>
+              </div>
             </div>
 
           </div>

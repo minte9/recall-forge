@@ -87,6 +87,15 @@ class DashboardServiceTest {
         return projection;
     }
 
+    // Stubs only getSubcategory(): used for a weak area expected to be cut
+    // by the top-3 limit, so its other getters are never read (avoids
+    // Mockito's unnecessary-stubbing check flagging unused stubs).
+    private WeakAreaProjection weakAreaSubcategoryOnly(String subcategory) {
+        WeakAreaProjection projection = mock(WeakAreaProjection.class);
+        when(projection.getSubcategory()).thenReturn(subcategory);
+        return projection;
+    }
+
     private KnowledgeAreaProjection knowledgeArea(String title, double averageMemoryScore) {
         KnowledgeAreaProjection projection = mock(KnowledgeAreaProjection.class);
         when(projection.getTitle()).thenReturn(title);
@@ -125,17 +134,17 @@ class DashboardServiceTest {
     }
 
     @Test
-    void getDashboard_limitsWeakAreasToTopThreeByDueCountAndMapsFieldsCorrectly() {
+    void getDashboard_limitsWeakAreasToFirstThreeInSubcategoryOrderAndMapsFieldsCorrectly() {
         setUp();
         // No SubcategoryOrder configured, so display order falls back to
-        // alphabetical - subcategory names are distinct here so the
-        // selection (top 3 by due count) can be checked without the display
-        // reordering (covered separately below) affecting which 3 land.
+        // alphabetical. The list is taken in that order and capped at 3, so
+        // "Zebra" is dropped despite having by far the most due topics -
+        // selection follows document order, not due count.
         List<WeakAreaProjection> weakAreas = List.of(
             weakArea("Programming", "Java", "Core", 5L, 0.3),
             weakArea("Programming", "Python", "Testing", 4L, 0.4),
             weakArea("Math", "Algebra", "Basics", 3L, 0.5),
-            mock(WeakAreaProjection.class) // beyond the top-3 limit; its fields are never read
+            weakAreaSubcategoryOnly("Zebra") // last alphabetically; cut by the top-3 limit
         );
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(weakAreas);
         when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
@@ -145,26 +154,25 @@ class DashboardServiceTest {
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
-        assertThat(dashboard.weakAreas()).containsExactlyInAnyOrder(
+        assertThat(dashboard.weakAreas()).containsExactly(
+            new WeakAreaResponse("Math", "Algebra", "Basics", 3L, 0.5),
             new WeakAreaResponse("Programming", "Java", "Core", 5L, 0.3),
-            new WeakAreaResponse("Programming", "Python", "Testing", 4L, 0.4),
-            new WeakAreaResponse("Math", "Algebra", "Basics", 3L, 0.5)
+            new WeakAreaResponse("Programming", "Python", "Testing", 4L, 0.4)
         );
     }
 
     @Test
-    void getDashboard_selectsBusiestThreeWeakAreasButDisplaysThemInSubcategoryOrder() {
+    void getDashboard_selectsFirstThreeWeakAreasInSubcategoryOrder() {
         setUp();
-        // Selection stays due-count-based (findWeakAreas already returns
-        // busiest-first) - "Streams" is beyond the top-3 cutoff and is
-        // correctly left out despite coming first in document order. Once
-        // the busiest 3 are picked, they're displayed in subcategory order
-        // (OOP, Generics, Collections) rather than by due count.
+        // findWeakAreas returns busiest-first, but selection now follows
+        // subcategory display order (the order Start Review reaches them):
+        // Streams(1), OOP(2), Generics(3) are taken and "Collections" is
+        // left out - even though it isn't the least-due of the four.
         List<WeakAreaProjection> weakAreas = List.of(
             weakArea("JVM", "Java", "Generics", 5L, 0.3),
             weakArea("JVM", "Java", "OOP", 4L, 0.4),
-            weakArea("JVM", "Java", "Collections", 3L, 0.5),
-            mock(WeakAreaProjection.class) // "Streams" - beyond the top-3 limit; its fields are never read
+            weakArea("JVM", "Java", "Streams", 2L, 0.6),
+            weakAreaSubcategoryOnly("Collections") // display order 4; cut by the top-3 limit
         );
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(weakAreas);
         when(subcategoryOrderRepository.findByCategoryIgnoreCase("java")).thenReturn(List.of(
@@ -181,7 +189,7 @@ class DashboardServiceTest {
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
         assertThat(dashboard.weakAreas()).extracting(WeakAreaResponse::subcategory)
-            .containsExactly("OOP", "Generics", "Collections");
+            .containsExactly("Streams", "OOP", "Generics");
     }
 
     @Test
