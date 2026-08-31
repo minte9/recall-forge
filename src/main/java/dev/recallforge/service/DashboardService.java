@@ -102,22 +102,24 @@ public class DashboardService {
             .stream()
             .collect(Collectors.toMap(SubcategoryOrder::getSubcategory, SubcategoryOrder::getDisplayOrder));
 
-        // findWeakAreas itself only considers topics that have been reviewed
-        // before (see the query) — a topic due for the very first time isn't
-        // a "weak area," it's just unstarted. Which 3 subcategories make the
-        // cut is still decided by findWeakAreas' own due-count/score
-        // ordering, but once picked, they're displayed in the same
-        // subcategory order as the sidebar and the review queue (same
-        // SubcategoryOrder table/alphabetical fallback as
-        // getMarkdownSummaries) rather than busiest-first, so this list
-        // doesn't jump around independently of what the user will actually
-        // see next.
+        // findWeakAreas only considers subcategories that have a topic which
+        // is both due and reviewed before (see the query) — a topic due for
+        // the very first time isn't a "weak area," it's just unstarted. That
+        // is the same "reviewed-and-due" pool Start Review works through
+        // first, so order these the way Start Review will actually reach
+        // them: by subcategory display order (same SubcategoryOrder
+        // table/alphabetical fallback as getMarkdownSummaries and
+        // TopicService.selectNextTopic), then take the first few. The first
+        // row is the subcategory Start Review picks next — not whichever
+        // subcategory happens to have the most due topics (the query's
+        // busiest-first ordering now only acts as a stable tiebreaker for
+        // subcategories with no configured display order).
         List<WeakAreaResponse> weakAreas = topicRepository.findWeakAreas(userId, category, now)
             .stream()
-            .limit(3)
             .sorted(Comparator.<WeakAreaProjection, Integer>comparing(
                     area -> subcategoryOrder.getOrDefault(area.getSubcategory(), Integer.MAX_VALUE))
                 .thenComparing(WeakAreaProjection::getSubcategory, String.CASE_INSENSITIVE_ORDER))
+            .limit(3)
             .map(area -> new WeakAreaResponse(
                 area.getEnvironment(),
                 area.getCategory(),

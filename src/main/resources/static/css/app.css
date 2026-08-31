@@ -559,6 +559,7 @@
   }
 
   .reward-card {
+    padding: 0;
     border: 0px solid !important;
   }
 
@@ -612,6 +613,11 @@
   .knowledge-card h3 {
     margin: 0;
     font-size: 18px;
+    padding-left: 12px;
+  }
+
+  .knowledge-card {
+    padding-left: 50px;
   }
 
   .attention-link {
@@ -649,7 +655,7 @@
   }
 
   .attention-due {
-    color: var(--orange);
+    color: #64748b;
     font-weight: 700;
     white-space: nowrap;
   }
@@ -705,58 +711,172 @@
     background: var(--red);
   }
 
-  .reward-top {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    color: #334155;
-    font-size: 14px;
-  }
-
   .reward-level {
     text-align: right;
   }
 
-  .reward-bar {
-    height: 8px;
-    background: #e5e7eb;
-    border-radius: 999px;
-    overflow: hidden;
-    margin-top: 10px;
-  }
-
-  .reward-bar-fill {
-    height: 100%;
-    background: var(--green);
-    min-width: 2px;
-  }
-
-  .reward-streak {
+  .reward-progress-row {
     display: flex;
-    justify-content: space-between;
+    align-items: stretch;
     gap: 10px;
-    color: #555;
-    margin-top: 10px;
-    font-size: 14px;
+    margin-top: 12px;
   }
 
-  /* Streak/goal days wrap text, not an icon svg - reset the fixed icon box
-     and muted icon color that .info-tooltip otherwise assumes. */
-  .reward-streak .info-tooltip {
+  .reward-ring {
+    position: relative;
+    flex: 0 0 auto;
+    width: 104px;
+    height: 104px;
+  }
+
+  .reward-ring svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .reward-ring-track {
+    fill: none;
+    stroke: #e5e7eb;
+    stroke-width: 10;
+  }
+
+  .reward-ring-fill {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 0.4s ease;
+  }
+
+  .reward-ring-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .reward-ring-percent {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .reward-stat-box {
+    padding: 12px 24px;
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+    color: #334155;
+  }
+
+  /* Box 1: category title at the top, mastery ring centred in the space
+     below it - keeps the title level with box 2's "N due now" header. */
+  .reward-mastery-box {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 34px;
+  }
+
+  .reward-mastery-box .reward-ring {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  .reward-mastery-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  /* Box 2: "N due now" header (level with the Mastery title), then a gap,
+     then the weak-areas list. */
+  .reward-attention-box {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 14px;
+    padding-right: 50px;
+  }
+
+  .reward-attention-total {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .reward-attention-count {
+    margin-right: 6px;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .reward-attention-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* Right column: streak box stacked above goal box, the pair aligned to
+     the card's right edge and stretched to the mastery/attention height. */
+  .reward-mini-stack {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reward-mini-box {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 24px;
+  }
+
+  /* The box itself is the tooltip trigger - reset the fixed icon-sized
+     box and muted color that .info-tooltip otherwise assumes. */
+  .reward-mini-box.info-tooltip {
     width: auto;
     height: auto;
     margin-left: 0;
     color: inherit;
   }
 
-  /* Both triggers sit near a card edge, so the default centered bubble
-     (left: 50%) runs off-screen either side - anchor each to the edge
-     its trigger is closest to instead. */
-  .reward-streak-left::after {
-    left: 0;
-    transform: none;
+  .reward-combined-icon {
+    font-size: 22px;
+    line-height: 1;
   }
 
+  .reward-combined-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+
+  .reward-combined-label {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .reward-combined-value {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  /* Streak/goal boxes sit at the right card edge, so the default centered
+     bubble (left: 50%) would run off-screen - anchor it to the right edge. */
   .reward-streak-right::after {
     left: auto;
     right: 0;
@@ -2034,8 +2154,25 @@
       font-size: 14px;
     }
 
-    .reward-streak {
-      font-size: 14px;
+    /* Mastery + attention keep sharing the top row (as on desktop); streak
+       + goal drop to their own full-width row, half each. */
+    .reward-progress-row {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .reward-mini-stack {
+      flex: 1 1 100%;
+      flex-direction: row;
+    }
+
+    .reward-mini-box {
+      padding: 16px;
+    }
+
+    .reward-ring {
+      width: 92px;
+      height: 92px;
     }
 
     .actions-row {
@@ -2195,10 +2332,6 @@
 
     .knowledge-grid {
       grid-template-columns: 1fr 1fr;
-    }
-
-    .knowledge-card {
-      padding: 10px;
     }
 
     .knowledge-list {
