@@ -729,7 +729,7 @@
                 </button>
 
                 <div v-else class="retry-split-btn">
-                  <button class="submit-btn retry-btn" @click="retryQuestion" :disabled="loading">
+                  <button class="submit-btn retry-btn" @click="startCodeChallenge()" :disabled="loading">
                     <span class="btn-icon">↻</span>
                      Practice
                   </button>
@@ -780,7 +780,7 @@
                 </button>
 
                 <div class="retry-split-btn">
-                  <button class="submit-btn retry-btn" @click="startPracticeForNotDueTopic()" :disabled="loading">
+                  <button class="submit-btn retry-btn" @click="startCodeChallenge(notDueTopic.topicId)" :disabled="loading">
                     <span class="btn-icon">↻</span>
                      Practice
                   </button>
