@@ -982,6 +982,7 @@
 
   .retry-split-btn .info-tooltip {
     flex-shrink: 0;
+    margin-left: 15px;
   }
 
   .retry-split-btn .retry-btn {
