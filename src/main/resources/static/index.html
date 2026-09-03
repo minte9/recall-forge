@@ -705,10 +705,9 @@
             <template v-if="aiEnabled && review">
               <p>{{ review.question }}<span class="question-type-badge"
                   :title="review.codeChallenge ? 'Code Challenge' : 'Review'">
-                  <icon :name="review.codeChallenge ? 'code' : 'arrow-repeat'"></icon>
                 </span></p>
 
-              <textarea v-model="userAnswer" placeholder="Write your answer here..."
+              <textarea v-model="userAnswer" :placeholder="review.codeChallenge ? 'Paste your code here...' : 'Write your answer here...'"
                 @keydown.ctrl.enter="submitAnswer">
               </textarea>
 
@@ -748,6 +747,11 @@
                       <icon name="code" class="menu-icon"></icon>Code Challenge
                     </button>
                   </div>
+
+                  <span class="info-tooltip" tabindex="0"
+                    data-tooltip="Practice attempt — doesn't change your schedule or streak.">
+                    <icon name="question-circle"></icon>
+                  </span>
                 </div>
 
                 <span v-if="review && review.codeChallenge" class="info-tooltip" tabindex="0"
@@ -794,6 +798,11 @@
                       <icon name="code" class="menu-icon"></icon>Code Challenge
                     </button>
                   </div>
+
+                  <span class="info-tooltip" tabindex="0"
+                    data-tooltip="Practice attempt — doesn't change your schedule or streak.">
+                    <icon name="question-circle"></icon>
+                  </span>
                 </div>
 
                 <span v-if="topicMemoryScore !== null" class="last-score-badge last-score-badge--actions"
