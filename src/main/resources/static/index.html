@@ -1044,7 +1044,7 @@
                   <span class="reward-attention-count">{{ dashboard.dueNow }}</span> due now
                 </div>
 
-                <div v-if="dashboard.showKnowledgeInsights && dashboard.weakAreas && dashboard.weakAreas.length"
+                <div v-if="dashboard.weakAreas && dashboard.weakAreas.length"
                   class="reward-attention-list">
                   <div v-for="area in dashboard.weakAreas"
                     :key="area.environment + area.category + area.subcategory"
