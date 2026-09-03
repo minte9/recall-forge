@@ -1550,36 +1550,60 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     daysAgoLabel(dateString) {
       const days = Math.floor((Date.now() - new Date(dateString).getTime()) / 86400000);
 
-      if (days <= 0) return "today";
+      if (days <= 0) return "Today";
       if (days === 1) return "1 day ago";
       return days + " days ago";
     },
 
     // Assembles all of the current file's code challenges into one HTML
-    // string - each challenge is its own <details>, with the numbered
-    // question as the <summary> so clicking the question itself toggles
-    // the answer open/closed (no separate "show code" label).
+    // string, ordered by the topic's leading number (stable, so same-topic
+    // challenges keep their reviewedAt order). Challenges are grouped by
+    // topic: the topic title (leading "N." stripped) is shown once above
+    // the group. Each challenge is its own <details> with the question as
+    // the <summary> (clicking it toggles the answer open/closed), followed
+    // by a "Reviewed: <n> ago" line.
     codeChallengesMarkdown() {
       const escapeHtml = (s) => s
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
 
+      // Leading "N." of a topic title as a number, e.g. "1. Foo" -> 1, or null.
+      const topicNumber = (title) => {
+        const m = (title || "").match(/^\s*(\d+)\./);
+        return m ? parseInt(m[1], 10) : null;
+      };
+
+      let prevTopicId = null;
+
       const challenges = this.currentMarkdownCodeChallenges
+        .slice()
+        .sort((a, b) => {
+          const na = topicNumber(a.topicTitle), nb = topicNumber(b.topicTitle);
+          if (na !== null && nb !== null && na !== nb) return na - nb;
+          return (a.topicTitle || "").localeCompare(b.topicTitle || "");
+        })
         .map(c => {
           const answer = (c.userAnswer || "").trim();
           const answerBlock = answer
             ? "<pre><code>" + escapeHtml(answer) + "</code></pre>"
             : "<p><em>No answer submitted.</em></p>";
           const reviewedRow = c.reviewedAt
-            ? "<div class=\"challenge-reviewed\">Reviewed: " + this.daysAgoLabel(c.reviewedAt) + "</div>"
+            ? "<div class=\"challenge-reviewed\">" + escapeHtml(this.daysAgoLabel(c.reviewedAt)) + "</div>"  // Reviewed
             : "";
-          return "<div class=\"challenge-item\"><details class=\"code-block\"><summary>" +
+          const newTopic = prevTopicId !== c.topicId;
+          const topicHeading = newTopic
+            ? "<div class=\"challenge-topic\">" +
+                escapeHtml((c.topicTitle || "").replace(/^\s*\d+\.\s*/, "")) + "</div>"
+            : "";
+          prevTopicId = c.topicId;
+          return topicHeading +
+            "<div class=\"challenge-item\"><details class=\"code-block\"><summary>" +
             escapeHtml(c.question) + "</summary>" + answerBlock + "</details>" + reviewedRow + "</div>";
         })
         .join("");
 
-      return "<h2>Code Challenges</h2><br>" + challenges;
+      return "<h2>Code Challenges</h2>" + challenges;
     },
 
     showCodeChallenges() {
