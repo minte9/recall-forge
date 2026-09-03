@@ -224,7 +224,9 @@ public class OpenAiService {
 
         Ignore minor grammatical, spelling, or phrasing errors in the user's
         answer - grade and give feedback based on the correctness of the
-        underlying understanding, not writing quality.
+        underlying understanding, not writing quality. 
+        If the score is below 0.7, include the short correct answer (or a concise hint toward it) 
+        as part of the feedback itself — one sentence, not a separate line.
 
         Return exactly this format:
 
@@ -233,7 +235,7 @@ public class OpenAiService {
         """;
         prompt = prompt.formatted(topicTitle, topicContent, question, trimUserAnswer(userAnswer));
 
-        AiResponse response = ask(prompt, 80);  // answer evaluation
+        AiResponse response = ask(prompt, 120);  // answer evaluation
         return parseEvaluation(response.content(), response.totalTokens());
     }
 
