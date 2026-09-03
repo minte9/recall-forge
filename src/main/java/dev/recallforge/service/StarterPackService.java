@@ -3,7 +3,6 @@ package dev.recallforge.service;
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.security.CurrentUserService;
-import dev.recallforge.service.MarkdownFileService;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +56,7 @@ public class StarterPackService {
 
     // A level 1 category is always importable; everything under it unlocks
     // once the current user's mastery in it crosses this threshold.
-    private static final int UNLOCK_MASTERY_THRESHOLD_PERCENT = 50;
+    private static final int UNLOCK_MASTERY_THRESHOLD_PERCENT = 30;
 
     // dependent category -> its level 1 category (see
     // DEPENDENTS_BY_LEVEL_ONE_CATEGORY above). Level 1 categories themselves
