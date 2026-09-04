@@ -1032,9 +1032,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
-    // Keeps the same question in place instead of fetching a new one, so
-    // the user can attempt it again. Marked as a retry so the backend
-    // grades it but doesn't move memoryScore/nextReviewAt/reviewStreak.
+    // "Try Again" (Code Challenge) / "Review Again" (review): keeps the
+    // same question and the previously typed answer in place instead of
+    // fetching a new one, so the user can tweak and resubmit it (e.g. after
+    // a bad Code Challenge score from an incidental difference like a class
+    // name). Marked as a retry so the backend grades it but doesn't move
+    // memoryScore/nextReviewAt/reviewStreak - for Code Challenges, goal days
+    // and XP are still awarded live off this row if the retry scores a
+    // perfect 1.0, so only the attempt that finally succeeds counts.
     retryQuestion() {
       this.answerSubmitted = false;
       this.isRetry = true;

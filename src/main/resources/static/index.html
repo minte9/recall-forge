@@ -729,7 +729,11 @@
                 </button>
 
                 <div v-else class="retry-split-btn">
-                  <button class="submit-btn retry-btn" @click="startCodeChallenge()" :disabled="loading">
+                  <button v-if="review.codeChallenge" class="submit-btn retry-btn" @click="retryQuestion()" :disabled="loading">
+                    <span class="btn-icon">↻</span>
+                     Try Again
+                  </button>
+                  <button v-else class="submit-btn retry-btn" @click="startCodeChallenge()" :disabled="loading">
                     <span class="btn-icon">↻</span>
                      Practice
                   </button>
@@ -740,12 +744,17 @@
                   </button>
 
                   <div v-if="retryMenuOpen" class="retry-menu-dropdown">
-                    <button @click="startCodeChallenge()">
-                      <icon name="code" class="menu-icon"></icon>Code Challenge
+                    <button v-if="review.codeChallenge" @click="startCodeChallenge()">
+                      <icon name="code" class="menu-icon"></icon>New Code Challenge
                     </button>
-                    <button @click="retryQuestion">
-                      <icon name="arrow-repeat" class="menu-icon"></icon>Review Again
-                    </button>
+                    <template v-else>
+                      <button @click="startCodeChallenge()">
+                        <icon name="code" class="menu-icon"></icon>Code Challenge
+                      </button>
+                      <button @click="retryQuestion">
+                        <icon name="arrow-repeat" class="menu-icon"></icon>Review Again
+                      </button>
+                    </template>
                   </div>
 
                   <span class="info-tooltip" tabindex="0"
