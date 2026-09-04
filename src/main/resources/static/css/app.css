@@ -728,7 +728,6 @@
     display: flex;
     align-items: stretch;
     gap: 10px;
-    margin-top: 12px;
   }
 
   .reward-ring {
@@ -806,7 +805,8 @@
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    padding: 12px 34px;
+    padding: 22px 34px;
+    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.08);
   }
 
   .reward-mastery-box .reward-ring {
@@ -829,7 +829,8 @@
     flex-direction: column;
     justify-content: flex-start;
     gap: 14px;
-    padding-right: 50px;
+    padding: 22px 34px;
+    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.08);
   }
 
   .reward-attention-total {
@@ -916,7 +917,7 @@
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
-    margin-top: 6px;
+    margin-top: 16px;
   }
 
   .actions-row button,
@@ -2200,7 +2201,7 @@
     .reward-stat-box,
     .reward-mastery-box,
     .reward-attention-box {
-      padding: 22px;
+      padding: 14px;
     }
 
     .reward-mini-stack {
