@@ -72,7 +72,8 @@ recallforge:
 
 openai:
   api-key: ${OPENAI_API_KEY}
-  model: gpt-4.1-mini
+  #model: gpt-4.1-mini
+  model: GPT-5.6 Luna
 
 logging:
   level:
