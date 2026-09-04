@@ -244,7 +244,10 @@ public class OpenAiService {
      * interpreter, or engine for the topic's category would: unlike
      * {@link #evaluateAnswer},
      * wording and phrasing are irrelevant - the submitted code must be
-     * exactly correct and compile/run as required.
+     * exactly correct and compile/run as required. Cosmetic naming choices
+     * (variable/method/class/type names) are ignored as long as the logic
+     * is correct and the code compiles/runs, so a challenge isn't marked
+     * wrong over an incidental name difference.
      */
     public EvaluationResult evaluateCodeChallenge(
             String category, String topicTitle, String topicContent, String question, String userAnswer) {
@@ -267,7 +270,10 @@ public class OpenAiService {
 
         Grade from 0 to 1:
         - 1.0 = the code compiles/runs and correctly does exactly what the
-          challenge asked
+          challenge asked. Ignore cosmetic naming choices - variable, method,
+          class, or type names - as long as the logic is correct and the
+          code compiles/runs; only treat a name as wrong if the challenge
+          explicitly required that exact name.
         - 0.5 = compiles/runs but the logic or result is subtly wrong
         - 0.0 = does not compile/run, is not valid %s, or is fundamentally
           wrong
