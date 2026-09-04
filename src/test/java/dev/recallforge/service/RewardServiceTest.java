@@ -65,7 +65,7 @@ class RewardServiceTest {
         when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
             .thenReturn(List.of(LocalDateTime.now()));
 
-        RewardResponse response = rewardService.rewardDefaultUser(0.2, "java", RetryType.REVIEW);
+        RewardResponse response = rewardService.rewardDefaultUser(0.2, "java", RetryType.REVIEW, false);
 
         assertThat(response.streakDays()).isEqualTo(1);
     }
@@ -83,10 +83,27 @@ class RewardServiceTest {
             .thenReturn(1L);
 
         RewardResponse response =
-            rewardService.rewardDefaultUser(1.0, "java", RetryType.CODE_CHALLENGE);
+            rewardService.rewardDefaultUser(1.0, "java", RetryType.CODE_CHALLENGE, false);
 
         assertThat(response.lastXpAwarded()).isEqualTo(CODE_CHALLENGE_XP);
         assertThat(response.xp()).isEqualTo(CODE_CHALLENGE_XP);
+    }
+
+    // A "Try Again" resubmission of an already-perfected challenge must not
+    // add XP, even if it also scores a perfect 1.0 - otherwise repeatedly
+    // retrying one challenge could be farmed for unlimited XP.
+    @Test
+    void rewardDefaultUser_retryOfPerfectCodeChallenge_awardsNoXp() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.countPerfectCodeChallengesByUserIdAndCategory(1L, "java", 1.0))
+            .thenReturn(1L);
+
+        RewardResponse response =
+            rewardService.rewardDefaultUser(1.0, "java", RetryType.CODE_CHALLENGE, true);
+
+        assertThat(response.lastXpAwarded()).isZero();
     }
 
     @Test
@@ -98,7 +115,7 @@ class RewardServiceTest {
             .thenReturn(0L);
 
         RewardResponse response =
-            rewardService.rewardDefaultUser(0.8, "java", RetryType.CODE_CHALLENGE);
+            rewardService.rewardDefaultUser(0.8, "java", RetryType.CODE_CHALLENGE, false);
 
         assertThat(response.lastXpAwarded()).isZero();
         assertThat(response.xp()).isZero();
@@ -113,7 +130,7 @@ class RewardServiceTest {
             .thenReturn(2L);
 
         RewardResponse response =
-            rewardService.rewardDefaultUser(1.0, "java", RetryType.REVIEW);
+            rewardService.rewardDefaultUser(1.0, "java", RetryType.REVIEW, false);
 
         // XP still reflects the 2 earlier code challenges, but this review added nothing
         assertThat(response.xp()).isEqualTo(2 * CODE_CHALLENGE_XP);
@@ -130,7 +147,7 @@ class RewardServiceTest {
             .thenReturn(4L);
 
         RewardResponse response =
-            rewardService.rewardDefaultUser(1.0, "java", RetryType.CODE_CHALLENGE);
+            rewardService.rewardDefaultUser(1.0, "java", RetryType.CODE_CHALLENGE, false);
 
         assertThat(response.xp()).isEqualTo(100);
         assertThat(response.level()).isEqualTo(1);

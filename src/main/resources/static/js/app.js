@@ -649,9 +649,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           // A code challenge (started from the dashboard) is forcePractice
           // too, but the user still has to write and submit the challenge
           // answer - so it starts unsubmitted, unlike a not-due/already-done
-          // topic which opens straight into the "Try Again" state.
+          // topic which opens straight into the "Try Again" state. It's a
+          // fresh, first-attempt challenge though, not a resubmission, so
+          // isRetry stays false (see startCodeChallenge below) - only a
+          // not-due/already-reviewed plain topic is forced into isRetry
+          // practice here.
           this.answerSubmitted = !this.review.codeChallenge;
-          this.isRetry = true;
+          this.isRetry = !this.review.codeChallenge;
         }
 
         if (this.review.markdownContent) {
@@ -1072,14 +1076,19 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     // "Try Again" (Code Challenge) / "Review Again" (review): keeps the
-    // same question and the previously typed answer in place instead of
-    // fetching a new one, so the user can tweak and resubmit it (e.g. after
-    // a bad Code Challenge score from an incidental difference like a class
-    // name). Marked as a retry so the backend grades it but doesn't move
-    // memoryScore/nextReviewAt/reviewStreak - for Code Challenges, goal days
-    // and XP are still awarded live off this row if the retry scores a
-    // perfect 1.0, so only the attempt that finally succeeds counts.
+    // same question in place instead of fetching a new one. A Code
+    // Challenge retry clears the answer field for a fresh attempt; a
+    // review's "Review Again" keeps the previous answer so it can be
+    // tweaked and resubmitted. Marked as a retry so the backend grades it
+    // and saves it to history, but it's pure practice: it never moves
+    // memoryScore/nextReviewAt/reviewStreak, and (unlike the original,
+    // non-retry attempt) never counts toward the streak, goal days, or XP,
+    // no matter how well it scores.
     retryQuestion() {
+      if (this.review && this.review.codeChallenge) {
+        this.userAnswer = "";
+      }
+
       this.answerSubmitted = false;
       this.isRetry = true;
       this.error = null;
@@ -1091,10 +1100,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.retryMenuOpen = !this.retryMenuOpen;
     },
 
-    // Fetches a practice-only Code Challenge for the same topic just
-    // answered: a worded prompt asking the user to write code, graded
-    // strictly. Always submitted as a retry (see retryQuestion above), so
-    // it never moves memoryScore/nextReviewAt/reviewStreak.
+    // Fetches a Code Challenge for the same topic just answered: a worded
+    // prompt asking the user to write code, graded strictly. This is a
+    // fresh, first attempt (isRetry = false) so it's still eligible for
+    // goal days / XP if it scores well - the backend never lets it move
+    // memoryScore/nextReviewAt/reviewStreak regardless, since that's gated
+    // on codeChallenge rather than isRetry. Only resubmitting it via "Try
+    // Again" (retryQuestion above) is a retry.
     // topicId is only passed when starting from the "not due" prompt
     // (see startPracticeForNotDueTopic above), where there's no review
     // loaded yet to read a topicId from.
@@ -1118,7 +1130,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.notDueTopic = null;
         this.userAnswer = "";
         this.answerSubmitted = false;
-        this.isRetry = true;
+        this.isRetry = false;
       } catch (err) {
         this.error = err.message || "Could not start code challenge.";
       } finally {
@@ -1601,9 +1613,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     // Loads one past code challenge from the list back into the review
     // pane so it can be retried from within the list itself: same topic
-    // and question, with a blank answer field for a fresh attempt.
-    // Submitted through the normal answer path (isRetry + codeChallenge),
-    // exactly like the in-review "Try Again" button.
+    // and question, with a blank answer field for a fresh attempt. Marked
+    // as a retry (isRetry = true), so it's pure practice - graded and
+    // saved, but never counts toward the streak, goal days, or XP.
     tryAgainFromList(c) {
       if (this.loading) {
         return;

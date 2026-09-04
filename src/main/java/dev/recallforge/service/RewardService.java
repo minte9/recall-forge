@@ -75,8 +75,14 @@ public class RewardService {
         this.rewardProperties = rewardProperties;
     }
 
+    // isRetry is a Try Again / Review Again resubmission of an already-graded
+    // question, not a fresh attempt - it's still graded and saved, but never
+    // earns XP here, and (via the isRetry = false filters in ReviewRepository)
+    // never counts toward goal days or the daily streak either. Otherwise
+    // resubmitting an already-perfected code challenge could be farmed for
+    // unlimited XP.
     @Transactional
-    public RewardResponse rewardDefaultUser(double score, String category, RetryType retryType) {
+    public RewardResponse rewardDefaultUser(double score, String category, RetryType retryType, boolean isRetry) {
         Long userId = currentUserService.currentUserId();
 
         UserReward reward = userRewardRepository.findByUserId(userId)
@@ -85,7 +91,9 @@ public class RewardService {
         boolean perfect = score >= 0.95;
         reward.addReviewReward(perfect, LocalDate.now());
 
-        long lastXpAwarded = retryType == RetryType.CODE_CHALLENGE && score >= CODE_CHALLENGE_XP_SCORE_THRESHOLD
+        long lastXpAwarded = !isRetry
+                && retryType == RetryType.CODE_CHALLENGE
+                && score >= CODE_CHALLENGE_XP_SCORE_THRESHOLD
             ? rewardProperties.codeChallengeXp()
             : 0;
 
