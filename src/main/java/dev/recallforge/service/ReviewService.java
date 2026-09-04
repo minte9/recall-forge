@@ -291,7 +291,11 @@ public class ReviewService {
 
         UserAccount user = currentUserService.currentUser();
 
-        RetryType retryType = isRetry && codeChallenge ? RetryType.CODE_CHALLENGE : RetryType.REVIEW;
+        // RetryType reflects the KIND of question (review vs. code
+        // challenge), independent of isRetry - a fresh, first-attempt code
+        // challenge is still RetryType.CODE_CHALLENGE even though it isn't
+        // a retry.
+        RetryType retryType = codeChallenge ? RetryType.CODE_CHALLENGE : RetryType.REVIEW;
 
         Review review = new Review(
                 topic,
@@ -314,7 +318,10 @@ public class ReviewService {
         // not an independent, time-separated recall - grade and save it, but
         // don't let it move memoryScore/nextReviewAt/reviewStreak, or repeated
         // retries could inflate the streak or reset it on a single fluky redo.
-        if (!isRetry) {
+        // A code challenge never moves these either, retry or not - it's
+        // practice against the topic's spaced-repetition schedule, not a
+        // scheduled review of it.
+        if (!isRetry && !codeChallenge) {
             updatedMemoryScore = repetitionService.calculateUpdateMemoryScore(
                     topic.getMemoryScore(),
                     evaluation.score());
@@ -331,7 +338,8 @@ public class ReviewService {
             topicService.flush();
         }
 
-        RewardResponse reward = rewardService.rewardDefaultUser(evaluation.score(), topic.getCategory(), retryType);
+        RewardResponse reward = rewardService.rewardDefaultUser(
+                evaluation.score(), topic.getCategory(), retryType, isRetry);
 
         long dueInSubcategory = topicService.countDueTopicsBySubcategory(
                 userId, topic.getCategory(), topic.getSubcategory(), LocalDateTime.now());
