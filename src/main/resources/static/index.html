@@ -427,8 +427,28 @@
             </div>
           </div>
 
-          <div v-else-if="viewingCodeChallenges" class="markdown code-challenges-markdown"
-            v-html="codeChallengesMarkdown()">
+          <div v-else-if="viewingCodeChallenges" class="markdown code-challenges-markdown">
+            <h2>Code Challenges</h2>
+
+            <template v-for="(c, idx) in codeChallengesList" :key="c.topicId + '-' + idx">
+              <div v-if="c.showTopicHeader" class="challenge-topic">{{ c.topicHeading }}</div>
+
+              <div class="challenge-item">
+                <details class="code-block">
+                  <summary>{{ c.question }}</summary>
+                  <pre v-if="(c.userAnswer || '').trim()"><code>{{ c.userAnswer }}</code></pre>
+                  <p v-else><em>No answer submitted.</em></p>
+                </details>
+
+                <div v-if="c.reviewedAt" class="challenge-reviewed">
+                  {{ daysAgoLabel(c.reviewedAt) }} / <span class="challenge-score">Score: {{ formatScore(c.score) }}</span>
+                  <button class="challenge-retry-btn" @click="tryAgainFromList(c)" :disabled="loading"
+                    title="Retry this code challenge">
+                      Retry
+                  </button>
+                </div>
+              </div>
+            </template>
           </div>
 
           <div v-else class="markdown" v-html="renderMarkdown(markdown)"

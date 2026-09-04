@@ -539,6 +539,36 @@
     margin-top: 4px;
   }
 
+  /* Score label shown next to the days-ago text in .challenge-reviewed. */
+  .challenge-score {
+    margin-right: 10px;
+    font-weight: 300;
+    color: #374151;
+  }
+
+  /* Retry button shown next to each challenge's score/days-ago line, so a
+     past challenge can be retried without leaving the list. */
+  .challenge-retry-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    border: 1px solid #eeeeee;
+    border-radius: 5px;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    float: left;
+    margin-bottom: 5px;
+  }
+
+  .challenge-retry-btn:hover {
+    background: #f8fafc;
+  }
+
+  .challenge-retry-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+
   .markdown-loading {
     display: flex;
     align-items: center;

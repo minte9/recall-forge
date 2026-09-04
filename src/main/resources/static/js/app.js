@@ -192,6 +192,38 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         });
 
       return groups;
+    },
+
+    // The current file's code challenges, ordered by the topic's leading
+    // number (stable, so same-topic challenges keep their reviewedAt
+    // order), with a showTopicHeader flag marking the first challenge of
+    // each topic group so the template can show the topic title once above
+    // the group.
+    codeChallengesList() {
+      const topicNumber = (title) => {
+        const m = (title || "").match(/^\s*(\d+)\./);
+        return m ? parseInt(m[1], 10) : null;
+      };
+
+      let prevTopicId = null;
+
+      return this.currentMarkdownCodeChallenges
+        .slice()
+        .sort((a, b) => {
+          const na = topicNumber(a.topicTitle), nb = topicNumber(b.topicTitle);
+          if (na !== null && nb !== null && na !== nb) return na - nb;
+          return (a.topicTitle || "").localeCompare(b.topicTitle || "");
+        })
+        .map(c => {
+          const showTopicHeader = prevTopicId !== c.topicId;
+          prevTopicId = c.topicId;
+
+          return {
+            ...c,
+            showTopicHeader,
+            topicHeading: (c.topicTitle || "").replace(/^\s*\d+\.\s*/, "")
+          };
+        });
     }
   },
 
@@ -1015,6 +1047,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         await this.loadMarkdownSummaries(false);
         await this.loadFeedbackHistory(this.review.topicId);
 
+        // Refresh the Code Challenges list so this attempt's score and
+        // "reviewed" timestamp show immediately, whether or not the list
+        // is currently open.
+        if (this.review.codeChallenge) {
+          await this.loadMarkdownCodeChallenges();
+        }
+
         // Retries and code challenges don't move memoryScore, so mastery
         // can only change on a real graded answer.
         if (!this.isRetry) {
@@ -1560,55 +1599,39 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return days + " days ago";
     },
 
-    // Assembles all of the current file's code challenges into one HTML
-    // string, ordered by the topic's leading number (stable, so same-topic
-    // challenges keep their reviewedAt order). Challenges are grouped by
-    // topic: the topic title (leading "N." stripped) is shown once above
-    // the group. Each challenge is its own <details> with the question as
-    // the <summary> (clicking it toggles the answer open/closed), followed
-    // by a "Reviewed: <n> ago" line.
-    codeChallengesMarkdown() {
-      const escapeHtml = (s) => s
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+    // Loads one past code challenge from the list back into the review
+    // pane so it can be retried from within the list itself: same topic
+    // and question, with a blank answer field for a fresh attempt.
+    // Submitted through the normal answer path (isRetry + codeChallenge),
+    // exactly like the in-review "Try Again" button.
+    tryAgainFromList(c) {
+      if (this.loading) {
+        return;
+      }
 
-      // Leading "N." of a topic title as a number, e.g. "1. Foo" -> 1, or null.
-      const topicNumber = (title) => {
-        const m = (title || "").match(/^\s*(\d+)\./);
-        return m ? parseInt(m[1], 10) : null;
+      this.review = {
+        topicId: c.topicId,
+        topicTitle: c.topicTitle,
+        question: c.question,
+        markdownContent: this.markdown,
+        markdownFileId: this.currentMarkdownFileId,
+        done: false,
+        message: null,
+        forcePractice: true,
+        codeChallenge: true
       };
 
-      let prevTopicId = null;
+      this.notDueTopic = null;
+      this.userAnswer = "";
+      this.answerSubmitted = false;
+      this.isRetry = true;
+      this.error = null;
+      this.success = null;
+      this.result = null;
+      this.viewingCodeChallenges = false;
+      this.mobileView = "review";
 
-      const challenges = this.currentMarkdownCodeChallenges
-        .slice()
-        .sort((a, b) => {
-          const na = topicNumber(a.topicTitle), nb = topicNumber(b.topicTitle);
-          if (na !== null && nb !== null && na !== nb) return na - nb;
-          return (a.topicTitle || "").localeCompare(b.topicTitle || "");
-        })
-        .map(c => {
-          const answer = (c.userAnswer || "").trim();
-          const answerBlock = answer
-            ? "<pre><code>" + escapeHtml(answer) + "</code></pre>"
-            : "<p><em>No answer submitted.</em></p>";
-          const reviewedRow = c.reviewedAt
-            ? "<div class=\"challenge-reviewed\">" + escapeHtml(this.daysAgoLabel(c.reviewedAt)) + "</div>"  // Reviewed
-            : "";
-          const newTopic = prevTopicId !== c.topicId;
-          const topicHeading = newTopic
-            ? "<div class=\"challenge-topic\">" +
-                escapeHtml((c.topicTitle || "").replace(/^\s*\d+\.\s*/, "")) + "</div>"
-            : "";
-          prevTopicId = c.topicId;
-          return topicHeading +
-            "<div class=\"challenge-item\"><details class=\"code-block\"><summary>" +
-            escapeHtml(c.question) + "</summary>" + answerBlock + "</details>" + reviewedRow + "</div>";
-        })
-        .join("");
-
-      return "<h2>Code Challenges</h2>" + challenges;
+      this.$nextTick(() => window.scrollTo(0, 0));
     },
 
     showCodeChallenges() {
