@@ -22,6 +22,9 @@ public class UserReward {
     private int perfectStreak;
     private LocalDate lastReviewDate;
 
+    @Column(nullable = false, columnDefinition = "bigint default 0")
+    private long xp;
+
     public UserReward(Long userId) {
         this.userId = userId;
     }
@@ -47,5 +50,9 @@ public class UserReward {
 
         boolean streakAlive = lastReviewDate.equals(today) || lastReviewDate.equals(today.minusDays(1));
         return streakAlive ? streakDays : 0;
+    }
+
+    public void addXp(long amount) {
+        if (amount > 0) this.xp += amount;
     }
 }

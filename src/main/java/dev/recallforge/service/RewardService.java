@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.recallforge.config.AppGoalProperties;
+import dev.recallforge.config.AppRewardProperties;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
@@ -47,28 +48,35 @@ public class RewardService {
     private static final double GOAL_REVIEW_SCORE_THRESHOLD = 0.7;
     private static final double GOAL_CODE_CHALLENGE_SCORE_THRESHOLD = 1.0;
 
+    // Different from the one above (used for goal day)
+    // This one is used for XP points (levels)
+    private static final double CODE_CHALLENGE_XP_SCORE_THRESHOLD = 1.0;
+
     private final UserRewardRepository userRewardRepository;
     private final CurrentUserService currentUserService;
     private final TopicRepository topicRepository;
     private final ReviewRepository reviewRepository;
     private final AppGoalProperties goalProperties;
+    private final AppRewardProperties rewardProperties;
 
     public RewardService(
         UserRewardRepository userRewardRepository,
         CurrentUserService currentUserService,
         TopicRepository topicRepository,
         ReviewRepository reviewRepository,
-        AppGoalProperties goalProperties
+        AppGoalProperties goalProperties,
+        AppRewardProperties rewardProperties
     ) {
         this.userRewardRepository = userRewardRepository;
         this.currentUserService = currentUserService;
         this.topicRepository = topicRepository;
         this.reviewRepository = reviewRepository;
         this.goalProperties = goalProperties;
+        this.rewardProperties = rewardProperties;
     }
 
     @Transactional
-    public RewardResponse rewardDefaultUser(double score, String category) {
+    public RewardResponse rewardDefaultUser(double score, String category, RetryType retryType) {
         Long userId = currentUserService.currentUserId();
 
         UserReward reward = userRewardRepository.findByUserId(userId)
@@ -77,9 +85,16 @@ public class RewardService {
         boolean perfect = score >= 0.95;
 
         reward.addReviewReward(perfect, LocalDate.now());
-        userRewardRepository.save(reward);
 
-        return toResponse(reward, category);
+        long awarded = retryType == RetryType.CODE_CHALLENGE && score >= CODE_CHALLENGE_XP_SCORE_THRESHOLD
+            ? rewardProperties.codeChallengeXp()
+            : 0;
+
+        reward.addXp(awarded);
+
+        // userRewardRepository.save(reward);  // -- not needed (@Trasactional flushes on commit anyway)
+
+        return toResponse(reward, category, awarded);
     }
 
     @Transactional
@@ -89,12 +104,13 @@ public class RewardService {
         UserReward reward = userRewardRepository.findByUserId(userId)
             .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
 
-        return toResponse(reward, category);
+        return toResponse(reward, category, 0);
     }
 
     private RewardResponse toResponse(
         UserReward reward,
-        String category
+        String category,
+        long lastXpAwarded
     ) {
         Long userId = reward.getUserId();
 
@@ -114,6 +130,14 @@ public class RewardService {
 
         GoalDaysSummary goalDaysSummary = goalDaysThisMonth(userId, category, LocalDate.now());
 
+        // Code challenges XP reward
+        int level = levelForXp(reward.getXp());
+        long floorXp = (long) level * level * 100;
+        long nextXp = (long) (level + 1) * (level + 1) * 100;
+
+        int previousLevel = levelForXp(reward.getXp() - lastXpAwarded);
+        boolean leveledUp = level > previousLevel;
+
         return new RewardResponse(
             categoryStreakDays(userId, category, LocalDate.now()),
             goalDaysSummary.count(),
@@ -124,8 +148,19 @@ public class RewardService {
             category,
             masteredTopics,
             totalTopics,
-            masteryPercent
+            masteryPercent,
+
+            reward.getXp(),
+            level,
+            reward.getXp() - floorXp,
+            nextXp - floorXp,
+            lastXpAwarded,
+            leveledUp
         );
+    }
+
+    private static int levelForXp(long xp) {
+        return (int) Math.floor(Math.sqrt(Math.max(0, xp) / 100.0));
     }
 
     // Consecutive days (ending today or yesterday) with at least one review

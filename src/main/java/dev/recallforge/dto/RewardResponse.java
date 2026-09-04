@@ -10,5 +10,12 @@ public record RewardResponse(
     String masteryScope,
     long masteredTopics,
     long totalTopicsInScope,
-    int masteryPercent
+    int masteryPercent,
+
+    long xp,
+    int level,
+    long xpIntoLevel,
+    long xpForNextLevel,
+    long lastXpAwarded,  // > 0 only on the call that just awarded it; 0 from the dashboard read 
+    boolean leveledUp
 ) {}

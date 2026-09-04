@@ -465,7 +465,7 @@ class ReviewServiceTest {
         Topic topic = topicWithId(7L, null);
         EvaluationResult evaluation = new EvaluationResult(0.8, "Good job", 120);
         LocalDateTime nextReviewAt = LocalDateTime.now().plusDays(7);
-        RewardResponse reward = new RewardResponse(3, 0, false, 10, 3, "Java", 4L, 8L, 50);
+        RewardResponse reward = new RewardResponse(3, 0, false, 10, 3, "Java", 4L, 8L, 50, 0L, 0, 0L, 0L, 0L, false);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(7L, 1L)).thenReturn(topic);
@@ -473,7 +473,7 @@ class ReviewServiceTest {
         when(repetitionService.calculateUpdateMemoryScore(0.6, 0.8)).thenReturn(0.65);
         when(repetitionService.calculateNextReview(0.8, 0))
             .thenReturn(new RepetitionService.RepetitionResult(nextReviewAt, 1));
-        when(rewardService.rewardDefaultUser(0.8, "Uncategorized")).thenReturn(reward);
+        when(rewardService.rewardDefaultUser(0.8, "Uncategorized", RetryType.REVIEW)).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(topicService.countDueTopicsBySubcategory(eq(1L), eq("Uncategorized"), eq("Uncategorized"), any()))
             .thenReturn(5L);
@@ -512,12 +512,12 @@ class ReviewServiceTest {
         Topic topic = topicWithId(7L, null);
         EvaluationResult evaluation = new EvaluationResult(0.9, "Good job", 120);
         LocalDateTime originalNextReviewAt = topic.getNextReviewAt();
-        RewardResponse reward = new RewardResponse(3, 0, false, 10, 3, "Java", 4L, 8L, 50);
+        RewardResponse reward = new RewardResponse(3, 0, false, 10, 3, "Java", 4L, 8L, 50, 0L, 0, 0L, 0L, 0L, false);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(7L, 1L)).thenReturn(topic);
         when(currentUserService.currentUser()).thenReturn(new UserAccount());
-        when(rewardService.rewardDefaultUser(0.9, "Uncategorized")).thenReturn(reward);
+        when(rewardService.rewardDefaultUser(0.9, "Uncategorized", RetryType.REVIEW)).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         AnswerResponse response = reviewService.saveAnswer(7L, "Q?", "My answer", evaluation, true, false);
@@ -562,7 +562,7 @@ class ReviewServiceTest {
         setUp();
         Topic topic = topicWithId(7L, null);
         EvaluationResult evaluation = new EvaluationResult(0.8, "Good job", 120);
-        RewardResponse reward = new RewardResponse(3, 0, false, 10, 3, "Uncategorized", 4L, 8L, 50);
+        RewardResponse reward = new RewardResponse(3, 0, false, 10, 3, "Uncategorized", 4L, 8L, 50, 0L, 0, 0L, 0L, 0L,false);
 
         when(currentUserService.currentUserId()).thenReturn(1L);
         when(topicService.getTopic(7L, 1L)).thenReturn(topic);
@@ -574,7 +574,7 @@ class ReviewServiceTest {
         when(repetitionService.calculateUpdateMemoryScore(0.6, 0.8)).thenReturn(0.65);
         when(repetitionService.calculateNextReview(0.8, 0))
             .thenReturn(new RepetitionService.RepetitionResult(LocalDateTime.now().plusDays(7), 1));
-        when(rewardService.rewardDefaultUser(0.8, "Uncategorized")).thenReturn(reward);
+        when(rewardService.rewardDefaultUser(0.8, "Uncategorized", RetryType.REVIEW)).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         AnswerResponse response = reviewService.answerQuestion(7L, "Q?", "My answer", false, false);
@@ -592,7 +592,7 @@ class ReviewServiceTest {
         setUp();
         Topic topic = topicWithId(7L, null);
         EvaluationResult evaluation = new EvaluationResult(1.0, "Compiles and runs correctly", 120);
-        RewardResponse reward = new RewardResponse(3, 0, false, 10, 3, "Uncategorized", 4L, 8L, 50);
+        RewardResponse reward = new RewardResponse(3, 0, false, 10, 3, "Uncategorized", 4L, 8L, 50, 0L, 0, 0L, 0L, 0L, false);
         LocalDateTime originalNextReviewAt = topic.getNextReviewAt();
 
         when(currentUserService.currentUserId()).thenReturn(1L);
@@ -603,7 +603,7 @@ class ReviewServiceTest {
         when(openAiService.evaluateCodeChallenge("Uncategorized", "Title", "Content body", "Q?", "My code"))
             .thenReturn(evaluation);
         when(currentUserService.currentUser()).thenReturn(new UserAccount());
-        when(rewardService.rewardDefaultUser(1.0, "Uncategorized")).thenReturn(reward);
+        when(rewardService.rewardDefaultUser(1.0, "Uncategorized", RetryType.CODE_CHALLENGE)).thenReturn(reward);
         when(reviewRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         AnswerResponse response = reviewService.answerQuestion(7L, "Q?", "My code", true, true);

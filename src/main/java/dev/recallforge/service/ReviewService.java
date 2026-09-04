@@ -331,7 +331,7 @@ public class ReviewService {
             topicService.flush();
         }
 
-        RewardResponse reward = rewardService.rewardDefaultUser(evaluation.score(), topic.getCategory());
+        RewardResponse reward = rewardService.rewardDefaultUser(evaluation.score(), topic.getCategory(), retryType);
 
         long dueInSubcategory = topicService.countDueTopicsBySubcategory(
                 userId, topic.getCategory(), topic.getSubcategory(), LocalDateTime.now());
