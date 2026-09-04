@@ -878,6 +878,10 @@
                   <icon name="question-circle"></icon>
                 </span>
               </p>
+              <p v-if="result.reward && result.reward.lastXpAwarded > 0">
+                <strong>⚡ +{{ result.reward.lastXpAwarded }} XP</strong> for a perfect code challenge
+                <span v-if="result.reward.leveledUp">— Level {{ result.reward.level }}!</span>
+              </p>
               <template v-if="!isRetry">
                 <p>
                   <strong>Updated memory score:</strong> {{ formatScore(result.updateMemoryScore) }}
@@ -1072,6 +1076,15 @@
                   <span class="reward-combined-text">
                     <span class="reward-combined-label">Goal:</span>
                     <span class="reward-combined-value">{{ dashboard.reward.goalDaysThisMonth }} days</span>
+                  </span>
+                </div>
+
+                <div class="reward-stat-box reward-mini-box info-tooltip reward-streak-left" tabindex="0"
+                  :data-tooltip="`Earn 25 XP for every code challenge you solve perfectly (score 1.0). Level up at 100, 400, 900… XP.`">
+                  <span class="reward-combined-icon">⚡</span>
+                  <span class="reward-combined-text">
+                    <span class="reward-combined-label">Level {{ dashboard.reward.level }}:</span>
+                    <span class="reward-combined-value">{{ dashboard.reward.xp }} XP</span>
                   </span>
                 </div>
               </div>

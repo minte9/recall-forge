@@ -45,7 +45,7 @@ class StarterPackServiceTest {
     }
 
     private static RewardResponse rewardWithMastery(String category, int masteryPercent) {
-        return new RewardResponse(0, 0, false, 0, 0, category, 0, 0, masteryPercent);
+        return new RewardResponse(0, 0, false, 0, 0, category, 0, 0, masteryPercent, 0L, 0, 0L, 0L, 0L, false);
     }
 
     private static MarkdownFile templateFile(String content, Integer displayOrder) {
@@ -178,7 +178,7 @@ class StarterPackServiceTest {
     void getUnlockStatus_prerequisiteAtOrAboveThreshold_isUnlocked() {
         setUp();
         when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
-        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 50));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 30));
 
         assertThat(starterPackService.getUnlockStatus()).containsEntry("Spring", true);
     }
@@ -187,7 +187,7 @@ class StarterPackServiceTest {
     void getUnlockStatus_prerequisiteBelowThreshold_isLocked() {
         setUp();
         when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
-        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 49));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 29));
 
         assertThat(starterPackService.getUnlockStatus()).containsEntry("Spring", false);
     }
@@ -214,7 +214,7 @@ class StarterPackServiceTest {
         // unlocks alongside Spring, since both gate directly on Java, not on
         // each other.
         when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
-        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 50));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 30));
 
         assertThat(starterPackService.getUnlockStatus())
             .containsEntry("Spring", true)

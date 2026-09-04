@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.recallforge.config.AppGoalProperties;
+import dev.recallforge.config.AppRewardProperties;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
@@ -45,10 +46,13 @@ class RewardServiceTest {
 
     private RewardService rewardService;
 
+    private static final int CODE_CHALLENGE_XP = 25;
+
     private void setUp() {
         rewardService = new RewardService(
             userRewardRepository, currentUserService, topicRepository, reviewRepository,
-            new AppGoalProperties(10, 3)
+            new AppGoalProperties(10, 3),
+            new AppRewardProperties(CODE_CHALLENGE_XP)
         );
     }
 
@@ -61,9 +65,74 @@ class RewardServiceTest {
         when(reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(1L, "java"))
             .thenReturn(List.of(LocalDateTime.now()));
 
-        RewardResponse response = rewardService.rewardDefaultUser(0.2, "java");
+        RewardResponse response = rewardService.rewardDefaultUser(0.2, "java", RetryType.REVIEW);
 
         assertThat(response.streakDays()).isEqualTo(1);
+    }
+
+    @Test
+    void rewardDefaultUser_perfectCodeChallenge_awardsCodeChallengeXp() {
+        setUp();
+        UserReward reward = new UserReward(1L);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(reward));
+
+        RewardResponse response =
+            rewardService.rewardDefaultUser(1.0, "java", RetryType.CODE_CHALLENGE);
+
+        assertThat(reward.getXp()).isEqualTo(CODE_CHALLENGE_XP);
+        assertThat(response.xp()).isEqualTo(CODE_CHALLENGE_XP);
+        assertThat(response.lastXpAwarded()).isEqualTo(CODE_CHALLENGE_XP);
+    }
+
+    @Test
+    void rewardDefaultUser_codeChallengeBelowPerfectScore_awardsNoXp() {
+        setUp();
+        UserReward reward = new UserReward(1L);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(reward));
+
+        RewardResponse response =
+            rewardService.rewardDefaultUser(0.8, "java", RetryType.CODE_CHALLENGE);
+
+        assertThat(reward.getXp()).isZero();
+        assertThat(response.xp()).isZero();
+        assertThat(response.lastXpAwarded()).isZero();
+    }
+
+    @Test
+    void rewardDefaultUser_perfectPlainReview_awardsNoXp() {
+        setUp();
+        UserReward reward = new UserReward(1L);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(reward));
+
+        RewardResponse response =
+            rewardService.rewardDefaultUser(1.0, "java", RetryType.REVIEW);
+
+        assertThat(reward.getXp()).isZero();
+        assertThat(response.lastXpAwarded()).isZero();
+    }
+
+    @Test
+    void getCurrentUserReward_reportsXpLevelAndProgress_withoutAwarding() {
+        setUp();
+        UserReward reward = new UserReward(1L);
+        reward.addXp(250);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(reward));
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.xp()).isEqualTo(250);
+        assertThat(response.level()).isEqualTo(1);
+        assertThat(response.xpIntoLevel()).isEqualTo(150);
+        assertThat(response.xpForNextLevel()).isEqualTo(300);
+        assertThat(response.lastXpAwarded()).isZero();
     }
 
     @Test
