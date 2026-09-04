@@ -72,8 +72,10 @@ on it for scoping data to the current user.
 - **AI integration** — `OpenAiService` (prompt building for question
   generation and answer grading, response parsing) + `config/OpenAiConfig`
   (RestClient bean, API key, model).
-- **Rewards / XP** — `RewardService` (XP per solved code challenge, streaks, 
-  level from XP, mastery %) → `domain/UserReward`.
+- **Rewards / XP** — `RewardService`: streaks, goal days, mastery %, and XP
+  (25 × perfect code challenges, with a level derived from it) — all scoped
+  to a category and computed live from review history, no stored counters.
+  `domain/UserReward` only holds the streak's day bookkeeping.
 - **Dashboard / analytics** — `DashboardController` → `DashboardService`
   (due counts, weak/strong knowledge areas, markdown summaries, category
   options, review-limit projections).

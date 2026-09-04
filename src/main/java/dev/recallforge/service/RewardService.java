@@ -83,18 +83,15 @@ public class RewardService {
             .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
 
         boolean perfect = score >= 0.95;
-
         reward.addReviewReward(perfect, LocalDate.now());
 
-        long awarded = retryType == RetryType.CODE_CHALLENGE && score >= CODE_CHALLENGE_XP_SCORE_THRESHOLD
+        long lastXpAwarded = retryType == RetryType.CODE_CHALLENGE && score >= CODE_CHALLENGE_XP_SCORE_THRESHOLD
             ? rewardProperties.codeChallengeXp()
             : 0;
 
-        reward.addXp(awarded);
+        userRewardRepository.save(reward);  // -- explicit, but not needed (@Trasactional flushes on commit anyway)
 
-        // userRewardRepository.save(reward);  // -- not needed (@Trasactional flushes on commit anyway)
-
-        return toResponse(reward, category, awarded);
+        return toResponse(reward, category, lastXpAwarded);
     }
 
     @Transactional
@@ -130,12 +127,18 @@ public class RewardService {
 
         GoalDaysSummary goalDaysSummary = goalDaysThisMonth(userId, category, LocalDate.now());
 
-        // Code challenges XP reward
-        int level = levelForXp(reward.getXp());
+        // Code-challenge XP — computed live per category (like streak and goal
+        // days above), not stored: it's exactly 25 XP per perfect code challenge
+        // in this category, so there's nothing a counter would add but staleness.
+        long perfectChallenges = reviewRepository.countPerfectCodeChallengesByUserIdAndCategory(
+            userId, category, CODE_CHALLENGE_XP_SCORE_THRESHOLD);
+        long xp = perfectChallenges * rewardProperties.codeChallengeXp();
+
+        int level = levelForXp(xp);
         long floorXp = (long) level * level * 100;
         long nextXp = (long) (level + 1) * (level + 1) * 100;
 
-        int previousLevel = levelForXp(reward.getXp() - lastXpAwarded);
+        int previousLevel = levelForXp(xp - lastXpAwarded);
         boolean leveledUp = level > previousLevel;
 
         return new RewardResponse(
@@ -150,9 +153,9 @@ public class RewardService {
             totalTopics,
             masteryPercent,
 
-            reward.getXp(),
+            xp,
             level,
-            reward.getXp() - floorXp,
+            xp - floorXp,
             nextXp - floorXp,
             lastXpAwarded,
             leveledUp
