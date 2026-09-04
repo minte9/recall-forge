@@ -2202,6 +2202,7 @@
     .reward-mastery-box,
     .reward-attention-box {
       padding: 14px;
+      margin-top: 10px;
     }
 
     .reward-mini-stack {
