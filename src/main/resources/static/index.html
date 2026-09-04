@@ -442,7 +442,7 @@
 
                 <div v-if="c.reviewedAt" class="challenge-reviewed">
                   {{ daysAgoLabel(c.reviewedAt) }} / <span class="challenge-score">Score: {{ formatScore(c.score) }}</span>
-                  <button v-if="c.score < 1.0" class="challenge-retry-btn" @click="tryAgainFromList(c)" :disabled="loading"
+                  <button class="challenge-retry-btn" @click="tryAgainFromList(c)" :disabled="loading"
                     title="Retry this code challenge">
                       Retry
                   </button>
