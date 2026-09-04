@@ -170,4 +170,16 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Param("category") String category,
         @Param("since") LocalDateTime since
     );
+
+    @Query("""
+        select count(r) from Review r
+        where r.user.id = :userId
+        and lower(r.topic.category) = lower(:category)
+        and r.retryType = dev.recallforge.domain.RetryType.CODE_CHALLENGE
+        and r.score >= :minScore
+    """)
+    long countPerfectCodeChallengesByUserIdAndCategory(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("minScore") double minScore);
 }

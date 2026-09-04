@@ -70,61 +70,81 @@ class RewardServiceTest {
         assertThat(response.streakDays()).isEqualTo(1);
     }
 
+    // XP is computed live per category: 25 * (perfect code challenges in that
+    // category). rewardDefaultUser still reports lastXpAwarded for the answer
+    // just graded, and leveledUp when that award crossed a level boundary.
     @Test
     void rewardDefaultUser_perfectCodeChallenge_awardsCodeChallengeXp() {
         setUp();
-        UserReward reward = new UserReward(1L);
-
         when(currentUserService.currentUserId()).thenReturn(1L);
-        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(reward));
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        // the challenge just graded is already persisted, so the live count sees it
+        when(reviewRepository.countPerfectCodeChallengesByUserIdAndCategory(1L, "java", 1.0))
+            .thenReturn(1L);
 
         RewardResponse response =
             rewardService.rewardDefaultUser(1.0, "java", RetryType.CODE_CHALLENGE);
 
-        assertThat(reward.getXp()).isEqualTo(CODE_CHALLENGE_XP);
-        assertThat(response.xp()).isEqualTo(CODE_CHALLENGE_XP);
         assertThat(response.lastXpAwarded()).isEqualTo(CODE_CHALLENGE_XP);
+        assertThat(response.xp()).isEqualTo(CODE_CHALLENGE_XP);
     }
 
     @Test
     void rewardDefaultUser_codeChallengeBelowPerfectScore_awardsNoXp() {
         setUp();
-        UserReward reward = new UserReward(1L);
-
         when(currentUserService.currentUserId()).thenReturn(1L);
-        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(reward));
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.countPerfectCodeChallengesByUserIdAndCategory(1L, "java", 1.0))
+            .thenReturn(0L);
 
         RewardResponse response =
             rewardService.rewardDefaultUser(0.8, "java", RetryType.CODE_CHALLENGE);
 
-        assertThat(reward.getXp()).isZero();
-        assertThat(response.xp()).isZero();
         assertThat(response.lastXpAwarded()).isZero();
+        assertThat(response.xp()).isZero();
     }
 
     @Test
     void rewardDefaultUser_perfectPlainReview_awardsNoXp() {
         setUp();
-        UserReward reward = new UserReward(1L);
-
         when(currentUserService.currentUserId()).thenReturn(1L);
-        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(reward));
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(reviewRepository.countPerfectCodeChallengesByUserIdAndCategory(1L, "java", 1.0))
+            .thenReturn(2L);
 
         RewardResponse response =
             rewardService.rewardDefaultUser(1.0, "java", RetryType.REVIEW);
 
-        assertThat(reward.getXp()).isZero();
+        // XP still reflects the 2 earlier code challenges, but this review added nothing
+        assertThat(response.xp()).isEqualTo(2 * CODE_CHALLENGE_XP);
         assertThat(response.lastXpAwarded()).isZero();
+    }
+
+    @Test
+    void rewardDefaultUser_reportsLevelUp_whenTheAwardCrossesALevelBoundary() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        // 4th perfect challenge -> 100 XP total, exactly the level-1 threshold
+        when(reviewRepository.countPerfectCodeChallengesByUserIdAndCategory(1L, "java", 1.0))
+            .thenReturn(4L);
+
+        RewardResponse response =
+            rewardService.rewardDefaultUser(1.0, "java", RetryType.CODE_CHALLENGE);
+
+        assertThat(response.xp()).isEqualTo(100);
+        assertThat(response.level()).isEqualTo(1);
+        assertThat(response.leveledUp()).isTrue();
     }
 
     @Test
     void getCurrentUserReward_reportsXpLevelAndProgress_withoutAwarding() {
         setUp();
-        UserReward reward = new UserReward(1L);
-        reward.addXp(250);
-
         when(currentUserService.currentUserId()).thenReturn(1L);
-        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(reward));
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        // 10 perfect code challenges in this category -> 250 XP
+        when(reviewRepository.countPerfectCodeChallengesByUserIdAndCategory(1L, "java", 1.0))
+            .thenReturn(10L);
 
         RewardResponse response = rewardService.getCurrentUserReward("java");
 
@@ -133,6 +153,7 @@ class RewardServiceTest {
         assertThat(response.xpIntoLevel()).isEqualTo(150);
         assertThat(response.xpForNextLevel()).isEqualTo(300);
         assertThat(response.lastXpAwarded()).isZero();
+        assertThat(response.leveledUp()).isFalse();
     }
 
     @Test
