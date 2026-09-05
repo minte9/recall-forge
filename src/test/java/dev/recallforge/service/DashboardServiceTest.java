@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -438,6 +439,23 @@ class DashboardServiceTest {
 
         assertThat(result).extracting(MarkdownSummaryDto::markdownFileId, MarkdownSummaryDto::codeChallengeCount)
             .containsExactly(tuple(1L, 2L), tuple(2L, 0L));
+    }
+
+    @Test
+    void getMarkdownSummaries_mergesCodeChallengeXpFromRewardService() {
+        setUp();
+        MarkdownSummaryDto fileWithXp =
+            new MarkdownSummaryDto(1L, "Programming", "Java", "Core", "Basics", 5L, 2L, 0.6);
+        MarkdownSummaryDto fileWithoutXp =
+            new MarkdownSummaryDto(2L, "Programming", "Java", "Core", "OOP", 3L, 1L, 0.7);
+        when(topicRepository.findMarkdownSummaries(eq(1L), eq("java"), any()))
+            .thenReturn(List.of(fileWithXp, fileWithoutXp));
+        when(rewardService.getCodeChallengeXpByMarkdownFile("java")).thenReturn(Map.of(1L, 75L));
+
+        List<MarkdownSummaryDto> result = dashboardService.getMarkdownSummaries("java");
+
+        assertThat(result).extracting(MarkdownSummaryDto::markdownFileId, MarkdownSummaryDto::codeChallengeXp)
+            .containsExactly(tuple(1L, 75L), tuple(2L, 0L));
     }
 
     @Test

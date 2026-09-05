@@ -1736,10 +1736,11 @@
     min-width: 0;
   }
 
-  .review-today-badge {
-    font-size: 15px;
+  .topic-xp-badge {
+    font-size: 13px;
     font-weight: 600;
     color: #94a3b8;
+    white-space: nowrap;
   }
 
   .last-score-badge {

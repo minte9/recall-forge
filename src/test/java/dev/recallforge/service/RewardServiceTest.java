@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -23,8 +24,10 @@ import dev.recallforge.config.AppRewardProperties;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.repository.MarkdownFileCodeChallengeCountProjection;
 import dev.recallforge.repository.ReviewGoalActivityProjection;
 import dev.recallforge.repository.ReviewRepository;
+import dev.recallforge.repository.TopicCodeChallengeCountProjection;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
 import dev.recallforge.security.CurrentUserService;
@@ -410,6 +413,77 @@ class RewardServiceTest {
         @Override
         public RetryType getRetryType() {
             return retryTypeValue;
+        }
+    }
+
+    // XP-per-file/topic is a straight multiplication of the perfect,
+    // non-retry code-challenge count by rewardProperties.codeChallengeXp() -
+    // these tests just confirm that wiring, the same way
+    // rewardDefaultUser_perfectCodeChallenge_awardsCodeChallengeXp confirms
+    // it for the category-level total.
+    @Test
+    void getCodeChallengeXpByMarkdownFile_multipliesPerfectCountsByCodeChallengeXp() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(reviewRepository.countPerfectCodeChallengesByMarkdownFile(1L, "java", 1.0))
+            .thenReturn(List.of(
+                new TestMarkdownFileCodeChallengeCount(10L, 3L),
+                new TestMarkdownFileCodeChallengeCount(20L, 1L)
+            ));
+
+        Map<Long, Long> xpByFile = rewardService.getCodeChallengeXpByMarkdownFile("java");
+
+        assertThat(xpByFile)
+            .containsEntry(10L, 3L * CODE_CHALLENGE_XP)
+            .containsEntry(20L, 1L * CODE_CHALLENGE_XP);
+    }
+
+    @Test
+    void getCodeChallengeXpByTopicInMarkdownFile_multipliesPerfectCountsByCodeChallengeXp() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(reviewRepository.countPerfectCodeChallengesByTopicInMarkdownFile(1L, 5L, 1.0))
+            .thenReturn(List.of(
+                new TestTopicCodeChallengeCount(100L, 2L),
+                new TestTopicCodeChallengeCount(200L, 0L)
+            ));
+
+        Map<Long, Long> xpByTopic = rewardService.getCodeChallengeXpByTopicInMarkdownFile(5L);
+
+        assertThat(xpByTopic)
+            .containsEntry(100L, 2L * CODE_CHALLENGE_XP)
+            .containsEntry(200L, 0L);
+    }
+
+    private record TestMarkdownFileCodeChallengeCount(
+        Long markdownFileId,
+        Long codeChallengeCount
+    ) implements MarkdownFileCodeChallengeCountProjection {
+
+        @Override
+        public Long getMarkdownFileId() {
+            return markdownFileId;
+        }
+
+        @Override
+        public Long getCodeChallengeCount() {
+            return codeChallengeCount;
+        }
+    }
+
+    private record TestTopicCodeChallengeCount(
+        Long topicId,
+        long codeChallengeCount
+    ) implements TopicCodeChallengeCountProjection {
+
+        @Override
+        public Long getTopicId() {
+            return topicId;
+        }
+
+        @Override
+        public long getCodeChallengeCount() {
+            return codeChallengeCount;
         }
     }
 }

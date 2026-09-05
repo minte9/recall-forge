@@ -240,13 +240,16 @@ public class DashboardService {
             .stream()
             .collect(Collectors.toMap(SubcategoryOrder::getSubcategory, SubcategoryOrder::getDisplayOrder));
 
+        Map<Long, Long> codeChallengeXpByFile = rewardService.getCodeChallengeXpByMarkdownFile(category);
+
         // Stable sort: subcategories with no explicit order fall back to
         // the alphabetical order the query already returned them in.
         return summaries.stream()
             .map(s -> new MarkdownSummaryDto(
                 s.markdownFileId(), s.environment(), s.category(), s.subcategory(), s.fileTitle(),
                 s.topicCont(), s.dueCount(), s.averageMemoryScore(),
-                codeChallengeCountsByFile.getOrDefault(s.markdownFileId(), 0L)))
+                codeChallengeCountsByFile.getOrDefault(s.markdownFileId(), 0L),
+                codeChallengeXpByFile.getOrDefault(s.markdownFileId(), 0L)))
             .sorted(Comparator.comparingInt(
                 s -> subcategoryOrder.getOrDefault(s.subcategory(), Integer.MAX_VALUE)))
             .toList();

@@ -121,6 +121,18 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return topic ? topic.memoryScore : null;
     },
 
+    // Perfect (score >= 1), non-retry code-challenge XP earned for the
+    // active topic - same lookup pattern as topicMemoryScore, since both
+    // read from topicsInFile rather than the review/history/notDue DTOs.
+    topicCodeChallengeXp() {
+      if (!this.activeTopic) {
+        return 0;
+      }
+
+      const topic = this.topicsInFile.find(t => t.id === this.activeTopic.topicId);
+      return topic ? topic.codeChallengeXp : 0;
+    },
+
     aiEnabled() {
       return this.currentUser ? this.currentUser.aiEnabled !== false : true;
     },

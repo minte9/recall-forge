@@ -1,6 +1,7 @@
 package dev.recallforge.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,25 +12,28 @@ import org.springframework.web.bind.annotation.RestController;
 import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.dto.TopicResponse;
 import dev.recallforge.service.ReviewService;
+import dev.recallforge.service.RewardService;
 import dev.recallforge.service.TopicService;
 import dev.recallforge.security.CurrentUserService;
 
 @RestController
 @RequestMapping("/api/topics")
 public class TopicController {
- 
+
     private final TopicService topicService;
     private final ReviewService reviewService;
     private final CurrentUserService currentUserService;
+    private final RewardService rewardService;
 
     public TopicController(
-        TopicService topicService, 
-        ReviewService reviewService,
-        CurrentUserService currentUserService
-    ) {
+            TopicService topicService,
+            ReviewService reviewService,
+            CurrentUserService currentUserService,
+            RewardService rewardService) {
         this.topicService = topicService;
         this.reviewService = reviewService;
         this.currentUserService = currentUserService;
+        this.rewardService = rewardService;
     }
 
     /**
@@ -47,8 +51,7 @@ public class TopicController {
 
     @GetMapping("{topicId}/reviews")
     public List<ReviewHistoryResponse> gReviewHistory(
-        @PathVariable Long topicId
-    ) {
+            @PathVariable Long topicId) {
         return reviewService.getReviewHistoryForTopic(topicId);
     }
 
@@ -64,15 +67,17 @@ public class TopicController {
     }
 
     /**
-     * List all topics belonging to a markdown file, in document order, for manual topic selection.
+     * List all topics belonging to a markdown file, in document order, for manual
+     * topic selection.
      */
     @GetMapping("/by-markdown-file/{markdownFileId}")
     public List<TopicResponse> getTopicsByMarkdownFile(@PathVariable Long markdownFileId) {
         Long userId = currentUserService.currentUserId();
+        Map<Long, Long> xpByTopic = rewardService.getCodeChallengeXpByTopicInMarkdownFile(markdownFileId);
 
         return topicService.getTopicsByMarkdownFileId(markdownFileId, userId)
                 .stream()
-                .map(TopicResponse::from)
+                .map(topic -> TopicResponse.from(topic, xpByTopic.getOrDefault(topic.getId(), 0L)))
                 .toList();
     }
 }

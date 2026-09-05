@@ -9,7 +9,8 @@ public record MarkdownSummaryDto(
     Long topicCont,
     Long dueCount,
     Double averageMemoryScore,
-    Long codeChallengeCount
+    Long codeChallengeCount,
+    Long codeChallengeXp
 ) {
     // Matches TopicRepository.findMarkdownSummaries' JPQL constructor
     // expression, which doesn't join into reviews - codeChallengeCount is
@@ -25,6 +26,6 @@ public record MarkdownSummaryDto(
         Double averageMemoryScore
     ) {
         this(markdownFileId, environment, category, subcategory, fileTitle, topicCont, dueCount,
-            averageMemoryScore, 0L);
+            averageMemoryScore, 0L, 0L);
     }
 }
