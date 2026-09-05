@@ -1635,6 +1635,12 @@
     margin-left: 0px;
   }
 
+  .feedback-history-retrytype-badge--code {
+    color: #1e40af;
+    background: #dbeafe;
+    border-color: #bfdbfe;
+  }
+
   .feedback-history-score {
     flex: 0 0 auto;
     font-size: 12px;
