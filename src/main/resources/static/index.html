@@ -386,7 +386,7 @@
 
                     <template v-if="file.codeChallengeXp > 0">
                       •
-                      {{ file.codeChallengeXp }} XP
+                      <span class="xp-icon">⚡</span>{{ file.codeChallengeXp }} XP
                     </template>
 
                   </div>
@@ -705,7 +705,9 @@
                     <span class="group-arrow topic-select-arrow" :class="{ open: topicDropdownOpen }">
                       ⌄
                     </span>
-                    <span v-if="topicCodeChallengeXp > 0" class="topic-xp-badge">{{ topicCodeChallengeXp }} XP</span>
+                    <span v-if="topicCodeChallengeXp > 0" class="topic-xp-badge">
+                      <span class="xp-icon">⚡</span>{{ topicCodeChallengeXp }} XP
+                    </span>
                   </span>
 
                   <div v-if="topicDropdownOpen" class="topic-select-dropdown" :class="{ 'align-right': topicDropdownAlignRight }">
