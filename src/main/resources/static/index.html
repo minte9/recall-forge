@@ -1123,8 +1123,8 @@
                 </div>
               </div>
 
-              <div class="reward-mini-stack">
-                <div class="reward-stat-box reward-mini-box info-tooltip reward-streak-left" tabindex="0"
+              <div class="reward-stat-box reward-combined-card">
+                <div class="reward-combined-row info-tooltip reward-streak-left" tabindex="0"
                   data-tooltip="Consecutive days with at least one review, ending today or yesterday. Missing a day resets it to zero.">
                   <span class="reward-combined-icon">🔥</span>
                   <span class="reward-combined-text">
@@ -1133,7 +1133,7 @@
                   </span>
                 </div>
 
-                <div class="reward-stat-box reward-mini-box info-tooltip reward-streak-right" tabindex="0"
+                <div class="reward-combined-row info-tooltip reward-streak-right" tabindex="0"
                   :data-tooltip="`A day where you log at least ${dashboard.reward.goalReviewsPerDay} green reviews (score of at least 0.7) or ${dashboard.reward.goalCodeChallengesPerDay} code challenges. Resets on the 1st of each month.`">
                   <span class="reward-combined-icon">🎯</span>
                   <span class="reward-combined-text">
@@ -1142,7 +1142,7 @@
                   </span>
                 </div>
 
-                <div class="reward-stat-box reward-mini-box info-tooltip reward-streak-left" tabindex="0"
+                <div class="reward-combined-row info-tooltip reward-streak-left" tabindex="0"
                   :data-tooltip="`Earn 25 XP for every code challenge you solve. Level up at 100, 400, 900… XP. Earn ${dashboard.reward.xpForNextLevel - dashboard.reward.xpIntoLevel} XP to reach Level ${dashboard.reward.level + 1}.`">
                   <span class="reward-combined-icon">⚡</span>
                   <span class="reward-combined-text">

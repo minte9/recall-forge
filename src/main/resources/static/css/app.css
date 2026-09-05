@@ -727,6 +727,7 @@
     gap: 12px;
     text-align: center;
     width: 172px;
+    padding-left: 10px;
   }
 
   .knowledge-card.coverage .reward-ring {
@@ -905,27 +906,30 @@
     gap: 2px;
   }
 
-  /* Right column: streak box stacked above goal box, the pair aligned to
-     the card's right edge and stretched to the mastery/attention height. */
-  .reward-mini-stack {
+  /* Right column: streak / goal / level combined into one card - stacked
+     rows on desktop, top-aligned so this column no longer stretches to the
+     mastery/attention height and the row can sit shorter. On mobile it
+     becomes a single side-by-side row (see media query). */
+  .reward-combined-card {
     flex: 0 0 auto;
+    align-self: flex-start;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    padding: 6px 24px 6px 16px;
+    background: #fff;
+    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.08);
   }
 
-  .reward-mini-box {
-    flex: 1 1 0;
+  .reward-combined-row {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 10px;
-    padding: 12px 20px 12px 12px;
+    padding: 12px 0;
   }
 
-  /* The box itself is the tooltip trigger - reset the fixed icon-sized
+  /* The row itself is the tooltip trigger - reset the fixed icon-sized
      box and muted color that .info-tooltip otherwise assumes. */
-  .reward-mini-box.info-tooltip {
+  .reward-combined-row.info-tooltip {
     width: auto;
     height: auto;
     margin-left: 0;
@@ -2266,8 +2270,8 @@
       font-size: 14px;
     }
 
-    /* Mastery + attention keep sharing the top row (as on desktop); streak
-       + goal drop to their own full-width row, half each. */
+    /* Mastery + attention keep sharing the top row (as on desktop); the
+       streak / goal / level card drops to its own full-width row. */
     .reward-progress-row {
       flex-wrap: wrap;
       gap: 8px;
@@ -2281,18 +2285,22 @@
       padding: 14px;
     }
 
-    .reward-mini-stack {
+    .reward-combined-card {
       flex: 1 1 100%;
+      align-self: auto;
       flex-direction: row;
+      padding: 4px 12px;
     }
 
-    .reward-mini-box {
-      padding: 12px;
+    .reward-combined-row {
+      flex: 1 1 0;
+      justify-content: center;
+      padding: 10px 6px;
     }
 
-    /* Streak + goal are side by side here; the left (streak) box's bubble
+    /* The three boxes are side by side here; the left (streak) box's bubble
        would run off the card if it kept anchoring right, so flip it to the
-       left edge. Goal (right box) keeps the right anchor. */
+       left edge. Goal (middle box) keeps the right anchor. */
     .reward-streak-left::after {
       left: 0;
       right: auto;
