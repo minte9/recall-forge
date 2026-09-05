@@ -866,10 +866,12 @@
                       <div class="feedback-history-title">
                         <span class="feedback-history-icon">💬</span> 
                         <span class="feedback-history-date">{{ formatShortDate(item.createdAt) }}</span>
-                        <span v-if="item.isRetry" class="feedback-history-practice-badge" :title="item.id">Practice</span>
-                        <span v-if="item.isRetry && item.retryType" class="feedback-history-retrytype-badge" title="Code Challenge">
+                        <span class="feedback-history-retrytype-badge"
+                          :class="{ 'feedback-history-retrytype-badge--code': item.retryType === 'CODE_CHALLENGE' }"
+                          :title="item.retryType === 'CODE_CHALLENGE' ? 'Code Challenge' : 'Review'">
                           {{ item.retryType === "CODE_CHALLENGE" ? "C" : "R" }}
                         </span>
+                        <span v-if="item.isRetry" class="feedback-history-practice-badge" :title="item.id">Practice</span>
                       </div>
 
                       <div class="feedback-history-score">
