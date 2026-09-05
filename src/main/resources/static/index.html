@@ -1013,8 +1013,12 @@
             </div>
           </div>
 
-          <div v-if="dashboard && dashboard.showKnowledgeInsights" class="knowledge-grid">
-            <div v-if="dashboard && dashboard.strongAreas && dashboard.strongAreas.length"
+          <div v-if="!dashboard" class="knowledge-card">
+            Loading...
+          </div>
+
+          <div v-else-if="dashboard.showKnowledgeInsights" class="knowledge-grid">
+            <div v-if="dashboard.strongAreas && dashboard.strongAreas.length"
               class="knowledge-card strong">
               <div class="knowledge-header">
                 <h3>Strong</h3>
@@ -1028,7 +1032,7 @@
               </div>
             </div>
 
-            <div v-if="dashboard && dashboard.weakKnowledgeAreas && dashboard.weakKnowledgeAreas.length"
+            <div v-if="dashboard.weakKnowledgeAreas && dashboard.weakKnowledgeAreas.length"
               class="knowledge-card weak">
               <div class="knowledge-header">
                 <h3>Weak</h3>
@@ -1121,7 +1125,7 @@
 
           </div>
 
-          <div class="actions-row">
+          <div v-if="dashboard" class="actions-row">
             <div v-if="aiEnabled" class="retry-split-btn">
               <button class="review-btn retry-btn" @click="startReviewFromDashboard()"
                 :disabled="loading || dailyLimitReached || (!currentMarkdownFileId && (!dashboard || dashboard.dueNow === 0))"
