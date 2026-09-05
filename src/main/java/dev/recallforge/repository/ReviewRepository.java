@@ -150,6 +150,44 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Param("category") String category
     );
 
+    @Query("""
+        select
+            r.topic.markdownFile.id as markdownFileId,
+            count(r) as codeChallengeCount
+        from Review r
+        where r.user.id = :userId
+        and lower(r.topic.category) = lower(:category)
+        and r.retryType = dev.recallforge.domain.RetryType.CODE_CHALLENGE
+        and r.score >= :minScore
+        and r.isRetry = false
+        group by r.topic.markdownFile.id
+
+    """)
+    List<MarkdownFileCodeChallengeCountProjection> countPerfectCodeChallengesByMarkdownFile(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("minScore") double minScore
+    );
+
+    @Query("""
+        select
+            r.topic.id as topicId,
+            count(r) as codeChallengeCount
+        from Review r
+        where r.user.id = :userId
+        and r.topic.markdownFile.id = :markdownFileId
+        and r.retryType = dev.recallforge.domain.RetryType.CODE_CHALLENGE
+        and r.score >= :minScore
+        and r.isRetry = false
+        group by r.topic.id
+
+    """)
+    List<TopicCodeChallengeCountProjection> countPerfectCodeChallengesByTopicInMarkdownFile (
+        @Param("userId") Long userId,
+        @Param("markdownFileId") Long markdownFileId,
+        @Param("minScore") double minScore
+    );
+
     // Fresh reviews and fresh code-challenge attempts (isRetry = false), the
     // two activity kinds that count toward a "goal day" - a Try Again /
     // Review Again resubmission (isRetry = true) never does, for either kind,

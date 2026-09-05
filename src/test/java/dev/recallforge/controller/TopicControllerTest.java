@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import dev.recallforge.domain.UserAccount;
 import dev.recallforge.dto.ReviewHistoryResponse;
 import dev.recallforge.security.CurrentUserService;
 import dev.recallforge.service.ReviewService;
+import dev.recallforge.service.RewardService;
 import dev.recallforge.service.TopicService;
 
 @WebMvcTest(
@@ -44,6 +46,9 @@ class TopicControllerTest {
 
     @MockitoBean
     private CurrentUserService currentUserService;
+
+    @MockitoBean
+    private RewardService rewardService;
 
     private static Topic topicFixture(long id, String title, double memoryScore, LocalDateTime nextReviewAt) {
         Topic topic = new Topic(
@@ -137,6 +142,9 @@ class TopicControllerTest {
             topicFixture(1L, "Topic One", 0.75, LocalDateTime.of(2026, 7, 10, 9, 0)),
             topicFixture(2L, "Topic Two", 0.3, LocalDateTime.of(2026, 7, 5, 8, 30))
         ));
+        // Topic 1 has earned code-challenge XP; topic 2 has none, so it's
+        // simply absent from the map (the controller treats that as 0).
+        when(rewardService.getCodeChallengeXpByTopicInMarkdownFile(3L)).thenReturn(Map.of(1L, 50L));
 
         mockMvcTester.get().uri("/api/topics/by-markdown-file/3")
             .assertThat()
@@ -148,18 +156,21 @@ class TopicControllerTest {
                     "id": 1,
                     "title": "Topic One",
                     "memoryScore": 0.75,
-                    "nextReviewAt": "2026-07-10T09:00:00Z"
+                    "nextReviewAt": "2026-07-10T09:00:00Z",
+                    "codeChallengeXp": 50
                   },
                   {
                     "id": 2,
                     "title": "Topic Two",
                     "memoryScore": 0.3,
-                    "nextReviewAt": "2026-07-05T08:30:00Z"
+                    "nextReviewAt": "2026-07-05T08:30:00Z",
+                    "codeChallengeXp": 0
                   }
                 ]
                 """);
 
         verify(topicService).getTopicsByMarkdownFileId(3L, 7L);
+        verify(rewardService).getCodeChallengeXpByTopicInMarkdownFile(3L);
     }
 
     @Test

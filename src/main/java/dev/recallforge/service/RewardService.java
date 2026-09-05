@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +18,10 @@ import dev.recallforge.config.AppRewardProperties;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.UserReward;
 import dev.recallforge.dto.RewardResponse;
+import dev.recallforge.repository.MarkdownFileCodeChallengeCountProjection;
 import dev.recallforge.repository.ReviewGoalActivityProjection;
 import dev.recallforge.repository.ReviewRepository;
+import dev.recallforge.repository.TopicCodeChallengeCountProjection;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.repository.UserRewardRepository;
 import dev.recallforge.security.CurrentUserService;
@@ -60,13 +63,12 @@ public class RewardService {
     private final AppRewardProperties rewardProperties;
 
     public RewardService(
-        UserRewardRepository userRewardRepository,
-        CurrentUserService currentUserService,
-        TopicRepository topicRepository,
-        ReviewRepository reviewRepository,
-        AppGoalProperties goalProperties,
-        AppRewardProperties rewardProperties
-    ) {
+            UserRewardRepository userRewardRepository,
+            CurrentUserService currentUserService,
+            TopicRepository topicRepository,
+            ReviewRepository reviewRepository,
+            AppGoalProperties goalProperties,
+            AppRewardProperties rewardProperties) {
         this.userRewardRepository = userRewardRepository;
         this.currentUserService = currentUserService;
         this.topicRepository = topicRepository;
@@ -86,7 +88,7 @@ public class RewardService {
         Long userId = currentUserService.currentUserId();
 
         UserReward reward = userRewardRepository.findByUserId(userId)
-            .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
+                .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
 
         boolean perfect = score >= 0.95;
         reward.addReviewReward(perfect, LocalDate.now());
@@ -94,10 +96,10 @@ public class RewardService {
         long lastXpAwarded = !isRetry
                 && retryType == RetryType.CODE_CHALLENGE
                 && score >= CODE_CHALLENGE_XP_SCORE_THRESHOLD
-            ? rewardProperties.codeChallengeXp()
-            : 0;
+                        ? rewardProperties.codeChallengeXp()
+                        : 0;
 
-        userRewardRepository.save(reward);  // -- explicit, but not needed (@Trasactional flushes on commit anyway)
+        userRewardRepository.save(reward); // -- explicit, but not needed (@Trasactional flushes on commit anyway)
 
         return toResponse(reward, category, lastXpAwarded);
     }
@@ -107,31 +109,28 @@ public class RewardService {
         Long userId = currentUserService.currentUserId();
 
         UserReward reward = userRewardRepository.findByUserId(userId)
-            .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
+                .orElseGet(() -> userRewardRepository.save(new UserReward(userId)));
 
         return toResponse(reward, category, 0);
     }
 
     private RewardResponse toResponse(
-        UserReward reward,
-        String category,
-        long lastXpAwarded
-    ) {
+            UserReward reward,
+            String category,
+            long lastXpAwarded) {
         Long userId = reward.getUserId();
 
         long totalTopics = topicRepository.countByUserIdAndCategory(userId, category);
 
-        long masteredTopics =
-            topicRepository.countMasteredByUserIdAndCategory(
+        long masteredTopics = topicRepository.countMasteredByUserIdAndCategory(
                 userId,
                 category,
                 MASTERY_MEMORY_SCORE,
-                LocalDateTime.now()
-            );
+                LocalDateTime.now());
 
         int masteryPercent = totalTopics == 0
-            ? 0
-            : (int) Math.round(masteredTopics * 100.0 / totalTopics);
+                ? 0
+                : (int) Math.round(masteredTopics * 100.0 / totalTopics);
 
         GoalDaysSummary goalDaysSummary = goalDaysThisMonth(userId, category, LocalDate.now());
 
@@ -139,7 +138,7 @@ public class RewardService {
         // days above), not stored: it's exactly 25 XP per perfect code challenge
         // in this category, so there's nothing a counter would add but staleness.
         long perfectChallenges = reviewRepository.countPerfectCodeChallengesByUserIdAndCategory(
-            userId, category, CODE_CHALLENGE_XP_SCORE_THRESHOLD);
+                userId, category, CODE_CHALLENGE_XP_SCORE_THRESHOLD);
         long xp = perfectChallenges * rewardProperties.codeChallengeXp();
 
         int level = levelForXp(xp);
@@ -150,24 +149,23 @@ public class RewardService {
         boolean leveledUp = level > previousLevel;
 
         return new RewardResponse(
-            categoryStreakDays(userId, category, LocalDate.now()),
-            goalDaysSummary.count(),
-            goalDaysSummary.reachedToday(),
-            goalProperties.reviews(),
-            goalProperties.codeChallenges(),
+                categoryStreakDays(userId, category, LocalDate.now()),
+                goalDaysSummary.count(),
+                goalDaysSummary.reachedToday(),
+                goalProperties.reviews(),
+                goalProperties.codeChallenges(),
 
-            category,
-            masteredTopics,
-            totalTopics,
-            masteryPercent,
+                category,
+                masteredTopics,
+                totalTopics,
+                masteryPercent,
 
-            xp,
-            level,
-            xp - floorXp,
-            nextXp - floorXp,
-            lastXpAwarded,
-            leveledUp
-        );
+                xp,
+                level,
+                xp - floorXp,
+                nextXp - floorXp,
+                lastXpAwarded,
+                leveledUp);
     }
 
     private static int levelForXp(long xp) {
@@ -178,8 +176,8 @@ public class RewardService {
     // in this category. Computed live from review history rather than a
     // stored counter, so it's correct per category with no staleness.
     private int categoryStreakDays(Long userId, String category, LocalDate today) {
-        List<LocalDateTime> reviewedAt =
-            reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(userId, category);
+        List<LocalDateTime> reviewedAt = reviewRepository.findReviewedAtByUserIdAndCategoryOrderByReviewedAtDesc(userId,
+                category);
 
         Set<LocalDate> distinctDatesDesc = new LinkedHashSet<>();
 
@@ -221,7 +219,8 @@ public class RewardService {
     // daily goal: goalProperties.reviews() fresh reviews scoring at least
     // GOAL_REVIEW_SCORE_THRESHOLD, or goalProperties.codeChallenges()
     // code-challenge attempts scoring at least
-    // GOAL_CODE_CHALLENGE_SCORE_THRESHOLD. Resets on the 1st of each month rather than
+    // GOAL_CODE_CHALLENGE_SCORE_THRESHOLD. Resets on the 1st of each month rather
+    // than
     // accumulating forever, so the number stays meaningful instead of just
     // climbing - unlike the streak, a missed day doesn't zero it out, it
     // just doesn't add to it. Computed live from review history so it stays
@@ -232,8 +231,8 @@ public class RewardService {
     private GoalDaysSummary goalDaysThisMonth(Long userId, String category, LocalDate today) {
         LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
 
-        List<ReviewGoalActivityProjection> activity =
-            reviewRepository.findGoalActivityByUserIdAndCategorySince(userId, category, startOfMonth);
+        List<ReviewGoalActivityProjection> activity = reviewRepository.findGoalActivityByUserIdAndCategorySince(userId,
+                category, startOfMonth);
 
         Map<LocalDate, Integer> highScoreReviewCountByDay = new HashMap<>();
         Map<LocalDate, Integer> codeChallengeCountByDay = new HashMap<>();
@@ -268,5 +267,27 @@ public class RewardService {
     }
 
     private record GoalDaysSummary(int count, boolean reachedToday) {
+    }
+
+    public Map<Long, Long> getCodeChallengeXpByMarkdownFile(String category) {
+        Long userId = currentUserService.currentUserId();
+
+        return reviewRepository.countPerfectCodeChallengesByMarkdownFile(
+                userId, category, CODE_CHALLENGE_XP_SCORE_THRESHOLD)
+            .stream()
+            .collect(Collectors.toMap(
+                MarkdownFileCodeChallengeCountProjection::getMarkdownFileId,
+                p -> p.getCodeChallengeCount() * rewardProperties.codeChallengeXp()));
+    }
+
+    public Map<Long, Long> getCodeChallengeXpByTopicInMarkdownFile(Long markdownFileId) {
+        Long userId = currentUserService.currentUserId();
+
+        return reviewRepository.countPerfectCodeChallengesByTopicInMarkdownFile(
+                userId, markdownFileId, CODE_CHALLENGE_XP_SCORE_THRESHOLD)
+            .stream()
+            .collect(Collectors.toMap(
+                TopicCodeChallengeCountProjection::getTopicId,
+                p -> p.getCodeChallengeCount() * rewardProperties.codeChallengeXp()));
     }
 }

@@ -384,6 +384,11 @@
                       {{ file.codeChallengeCount }} code
                     </template>
 
+                    <template v-if="file.codeChallengeXp > 0">
+                      •
+                      {{ file.codeChallengeXp }} XP
+                    </template>
+
                   </div>
                 </div>
               </div>
@@ -700,6 +705,7 @@
                     <span class="group-arrow topic-select-arrow" :class="{ open: topicDropdownOpen }">
                       ⌄
                     </span>
+                    <span v-if="topicCodeChallengeXp > 0" class="topic-xp-badge">{{ topicCodeChallengeXp }} XP</span>
                   </span>
 
                   <div v-if="topicDropdownOpen" class="topic-select-dropdown" :class="{ 'align-right': topicDropdownAlignRight }">
@@ -713,10 +719,6 @@
                       {{ topic.title }}
                     </button>
                   </div>
-                </span>
-
-                <span v-if="dashboard" class="review-today-badge" title="Today's reviews / daily limit">
-                  {{ dashboard.reviewsToday }}<font color='gray'>/</font>{{ dashboard.todayReviewLimit }}
                 </span>
               </span>
 
