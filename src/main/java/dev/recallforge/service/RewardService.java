@@ -132,6 +132,13 @@ public class RewardService {
                 ? 0
                 : (int) Math.round(masteredTopics * 100.0 / totalTopics);
 
+        long coveredTopics = reviewRepository.countCoveredTopicsByUserIdAndCategory(
+                userId, category, CODE_CHALLENGE_XP_SCORE_THRESHOLD);
+
+        int codeCoveragePercent = totalTopics == 0
+                ? 0
+                : (int) Math.round(coveredTopics * 100.0 / totalTopics);
+
         GoalDaysSummary goalDaysSummary = goalDaysThisMonth(userId, category, LocalDate.now());
 
         // Code-challenge XP — computed live per category (like streak and goal
@@ -159,6 +166,9 @@ public class RewardService {
                 masteredTopics,
                 totalTopics,
                 masteryPercent,
+
+                coveredTopics,
+                codeCoveragePercent,
 
                 xp,
                 level,

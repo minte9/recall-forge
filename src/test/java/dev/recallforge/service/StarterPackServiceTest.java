@@ -45,7 +45,7 @@ class StarterPackServiceTest {
     }
 
     private static RewardResponse rewardWithMastery(String category, int masteryPercent) {
-        return new RewardResponse(0, 0, false, 0, 0, category, 0, 0, masteryPercent, 0L, 0, 0L, 0L, 0L, false);
+        return new RewardResponse(0, 0, false, 0, 0, category, 0, 0, masteryPercent, 0L, 0, 0L, 0, 0L, 0L, 0L, false);
     }
 
     private static MarkdownFile templateFile(String content, Integer displayOrder) {
