@@ -644,7 +644,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
 
   .attention-header h3,
@@ -724,7 +724,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 12px;
     text-align: center;
     width: 172px;
   }
@@ -1160,6 +1160,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding-left: 10px;
   }
 
   .card-title-row h3 {
