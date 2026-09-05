@@ -188,6 +188,26 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Param("minScore") double minScore
     );
 
+    // "Code coverage" sibling of countMasteredByUserIdAndCategory - a topic
+    // counts as covered once it has at least one perfect, non-retry code
+    // challenge, regardless of how many it's had since (RewardService turns
+    // this into codeCoveragePercent the same way masteredTopics becomes
+    // masteryPercent).
+    @Query("""
+        select count(distinct r.topic.id)
+        from Review r
+        where r.user.id = :userId
+        and lower(r.topic.category) = lower(:category)
+        and r.retryType = dev.recallforge.domain.RetryType.CODE_CHALLENGE
+        and r.score >= :minScore
+        and r.isRetry = false
+    """)
+    long countCoveredTopicsByUserIdAndCategory(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("minScore") double minScore
+    );
+
     // Fresh reviews and fresh code-challenge attempts (isRetry = false), the
     // two activity kinds that count toward a "goal day" - a Try Again /
     // Review Again resubmission (isRetry = true) never does, for either kind,

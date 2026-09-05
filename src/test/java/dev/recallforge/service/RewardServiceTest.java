@@ -157,6 +157,35 @@ class RewardServiceTest {
         assertThat(response.leveledUp()).isTrue();
     }
 
+    // "Code coverage" is masteryPercent's sibling: same totalTopics
+    // denominator, but the numerator is topics with a perfect, non-retry
+    // code challenge instead of a high memory score.
+    @Test
+    void getCurrentUserReward_computesCodeCoveragePercentFromCoveredTopics() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(topicRepository.countByUserIdAndCategory(1L, "java")).thenReturn(10L);
+        when(reviewRepository.countCoveredTopicsByUserIdAndCategory(1L, "java", 1.0)).thenReturn(3L);
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.coveredTopics()).isEqualTo(3L);
+        assertThat(response.codeCoveragePercent()).isEqualTo(30);
+    }
+
+    @Test
+    void getCurrentUserReward_codeCoveragePercentIsZero_whenCategoryHasNoTopics() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.coveredTopics()).isZero();
+        assertThat(response.codeCoveragePercent()).isZero();
+    }
+
     @Test
     void getCurrentUserReward_reportsXpLevelAndProgress_withoutAwarding() {
         setUp();

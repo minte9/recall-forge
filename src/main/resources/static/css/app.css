@@ -591,10 +591,9 @@
   .reward-card {
     background: white;
     border-radius: var(--radius);
-    padding: 14px;
+    padding: 18px 14px 14px 14px;
     box-shadow: none;
     border: 1px solid #eef2f7;
-    margin-top: 3px;
   }
 
   .reward-card {
@@ -645,7 +644,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 6px;
+    margin-bottom: 16px;
   }
 
   .attention-header h3,
@@ -653,10 +652,6 @@
     margin: 0;
     font-size: 18px;
     /* padding-left: 12px; */
-  }
-
-  .knowledge-card {
-    padding-left: 50px;
   }
 
   .attention-link {
@@ -701,12 +696,13 @@
 
   .knowledge-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: auto 1fr 1fr;
     gap: 10px;
   }
 
   .knowledge-card {
     min-height: auto;
+    padding-left: 30px;
   }
 
   .knowledge-card.strong h3 {
@@ -717,6 +713,33 @@
   .knowledge-card.weak h3 {
     color: var(--black);
     font-size: 16px !important;
+  }
+
+  .knowledge-card-wide {
+    grid-column: span 2;
+  }
+
+  .knowledge-card.coverage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    width: 172px;
+  }
+
+  .knowledge-card.coverage .reward-ring {
+    width: 72px;
+    height: 72px;
+  }
+
+  .knowledge-card.coverage .reward-ring-percent {
+    font-size: 16px;
+  }
+
+  .knowledge-card.coverage .reward-ring-fill {
+    stroke: var(--yellow);
   }
 
   .knowledge-list {
@@ -2213,7 +2236,7 @@
     }
 
     .knowledge-card {
-      padding-left: 30px;
+      padding-left: 14px;
     }
 
     .attention-row {
@@ -2227,8 +2250,15 @@
     }
 
     .knowledge-grid {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: auto 1fr 1fr;
       gap: 8px;
+    }
+
+    /* The desktop coverage card is pinned to the mastery box's width, but
+       that's too wide next to two more 1fr columns on a narrow phone -
+       let it shrink back to fit its (already-small) ring instead. */
+    .knowledge-card.coverage {
+      width: auto;
     }
 
     .knowledge-item {
@@ -2248,7 +2278,6 @@
     .reward-mastery-box,
     .reward-attention-box {
       padding: 14px;
-      margin-top: 10px;
     }
 
     .reward-mini-stack {
@@ -2429,7 +2458,7 @@
     }
 
     .knowledge-grid {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: auto 1fr 1fr;
     }
 
     .knowledge-list {

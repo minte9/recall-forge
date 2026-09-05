@@ -88,6 +88,17 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       );
     },
 
+    codeCoverageProgress() {
+      if (!this.dashboard || !this.dashboard.reward) {
+        return 0;
+      }
+
+      return Math.max(
+        0,
+        Math.min(100, this.dashboard.reward.codeCoveragePercent || 0)
+      );
+    },
+
     isDesktop() {
       return window.innerWidth > 900;
     },

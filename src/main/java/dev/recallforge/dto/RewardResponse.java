@@ -12,6 +12,9 @@ public record RewardResponse(
     long totalTopicsInScope,
     int masteryPercent,
 
+    long coveredTopics,
+    int codeCoveragePercent,
+
     long xp,
     int level,
     long xpIntoLevel,
