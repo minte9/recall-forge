@@ -1743,6 +1743,11 @@
     white-space: nowrap;
   }
 
+  .xp-icon {
+    font-size: 12px;
+    margin-right: 3px;
+  }
+
   .last-score-badge {
     padding: 8px 20px;
     border-radius: 10px;
