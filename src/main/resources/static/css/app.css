@@ -839,7 +839,7 @@
   }
 
   .reward-ring-percent {
-    font-size: 22px;
+    font-size: 16px;
     font-weight: 800;
     color: var(--text);
   }
@@ -859,16 +859,21 @@
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    padding: 22px 34px;
+    width: 172px;
+    padding: 22px 20px;
     box-shadow: 0 8px 26px rgba(15, 23, 42, 0.08);
   }
 
   .reward-mastery-box .reward-ring {
+    width: 72px;
+    height: 72px;
     margin-top: auto;
     margin-bottom: auto;
   }
 
   .reward-mastery-title {
+    align-self: stretch;
+    text-align: center;
     font-size: 14px;
     font-weight: 700;
     color: #334155;
@@ -906,6 +911,10 @@
     gap: 2px;
   }
 
+  .reward-attention-list .attention-row {
+    font-size: 14px;
+  }
+
   /* Right column: streak / goal / level combined into one card - stacked
      rows on desktop, top-aligned so this column no longer stretches to the
      mastery/attention height and the row can sit shorter. On mobile it
@@ -924,7 +933,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 0;
+    padding: 8px 0;
   }
 
   /* The row itself is the tooltip trigger - reset the fixed icon-sized
@@ -953,7 +962,7 @@
   }
 
   .reward-combined-value {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--text);
   }
@@ -2259,11 +2268,12 @@
       gap: 8px;
     }
 
-    /* The desktop coverage card is pinned to the mastery box's width, but
-       that's too wide next to two more 1fr columns on a narrow phone -
-       let it shrink back to fit its (already-small) ring instead. */
+    /* Keep the coverage card the same width as the mastery box on mobile
+       (both hold a 72px ring), so the left edge lines up down the page. */
     .knowledge-card.coverage {
-      width: auto;
+      width: 100px;
+      padding-left: 14px;
+      padding-right: 14px;
     }
 
     .knowledge-item {
@@ -2283,6 +2293,11 @@
     .reward-mastery-box,
     .reward-attention-box {
       padding: 14px;
+    }
+
+    /* Match the coverage card's width exactly (72px ring + 14px padding). */
+    .reward-mastery-box {
+      width: 100px;
     }
 
     .reward-combined-card {

@@ -957,7 +957,7 @@
 
             <div class="card-title-row">
               <h3 v-if="currentCategory">
-                {{ currentCategory }} Reviews
+                {{ currentCategory }} Mastery
               </h3>
 
               <h3 v-else>
@@ -1021,7 +1021,7 @@
 
           <div class="knowledge-grid">
             <div v-if="dashboard && dashboard.reward" class="knowledge-card coverage">
-              <span class="reward-mastery-title">Code Coverage</span>
+              <span class="reward-mastery-title">Code</span>
 
               <div class="reward-ring info-tooltip" role="img" tabindex="0"
                 data-tooltip="Topics with at least one perfect (score of 1) code challenge."
@@ -1088,7 +1088,8 @@
             <div class="reward-progress-row">
               <div class="reward-stat-box reward-mastery-box">
                 <span class="reward-mastery-title">
-                  {{ categoryOptions.length > 0 ? dashboard.reward.masteryScope + " Mastery" : "Mastery" }}
+                  <!-- {{ categoryOptions.length > 0 ? dashboard.reward.masteryScope + " Mastery" : "Mastery" }} -->
+                    Reviews
                 </span>
 
                 <div class="reward-ring info-tooltip" role="img" tabindex="0"
