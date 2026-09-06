@@ -705,7 +705,8 @@
                     <span class="group-arrow topic-select-arrow" :class="{ open: topicDropdownOpen }">
                       ⌄
                     </span>
-                    <span v-if="topicCodeChallengeXp > 0" class="topic-xp-badge">
+                    <span v-if="topicCodeChallengeXp > 0" class="topic-xp-badge"
+                      title="View code challenges" @click.stop="showCodeChallenges()">
                       <span class="xp-icon">⚡</span>{{ topicCodeChallengeXp }} xp
                     </span>
                   </span>

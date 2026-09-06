@@ -1675,6 +1675,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
 
       this.markdownEditing = false;
+      this.leftPanel = "markdown";
       this.viewingCodeChallenges = true;
     },
 
