@@ -946,7 +946,7 @@
   }
 
   .reward-combined-icon {
-    font-size: 22px;
+    font-size: 20px;
     line-height: 1;
   }
 
@@ -2306,12 +2306,17 @@
       align-self: auto;
       flex-direction: row;
       padding: 4px 12px;
+      min-width: 0;
     }
 
+    /* min-width: 0 lets each of the three boxes shrink/wrap its text
+       instead of forcing the row (and the page) wider than the screen -
+       flex items default to min-width: auto, which blocked that. */
     .reward-combined-row {
       flex: 1 1 0;
       justify-content: center;
       padding: 10px 6px;
+      min-width: 0;
     }
 
     /* The three boxes are side by side here; the left (streak) box's bubble
