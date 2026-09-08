@@ -1720,6 +1720,7 @@
 
   .feedback-answer-text {
     white-space: pre-wrap;
+    overflow-wrap: anywhere;
     font-family: Consolas, monospace;
     font-size: 13px;
   }
@@ -2139,6 +2140,18 @@
 
 
   @media (max-width: 900px) {
+    /* Safety net: some piece of content (a long unbroken line of pasted
+       code, a stray fixed-width element) can end up wider than the screen.
+       Without this, mobile browsers respond by silently widening the whole
+       layout viewport to fit it instead of just clipping/scrolling that one
+       element - and since this is an SPA, that wider viewport sticks around
+       across view changes until the user manually pinch-zooms. Clip at the
+       document level so a future overflow can't do that again. */
+    html,
+    body {
+      overflow-x: hidden;
+    }
+
     body {
       background: #f5f7fa;
       font-size: 16px;
