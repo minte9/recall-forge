@@ -244,7 +244,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           return {
             ...c,
             showTopicHeader,
-            topicHeading: (c.topicTitle || "").replace(/^\s*\d+\.\s*/, "")
+            // topicHeading: (c.topicTitle || "").replace(/^\s*\d+\.\s*/, "")
+            topicHeading: (c.topicTitle || "")
           };
         });
     }
