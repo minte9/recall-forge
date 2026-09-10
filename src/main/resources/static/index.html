@@ -1168,13 +1168,14 @@
               </button>
 
               <button class="review-btn retry-caret" @click.stop="toggleDashboardActionMenu()"
-                :disabled="loading || categoryOptions.length === 0"
-                title="More options">
+                :disabled="loading || categoryOptions.length === 0 || dailyLimitReached"
+                :title="dailyLimitReached ? 'Daily review limit reached' : 'More options'">
                 ⌄
               </button>
 
               <div v-if="dashboardActionMenuOpen" class="retry-menu-dropdown">
-                <button @click="dashboardActionMenuOpen = false; startReviewFromDashboard()">
+                <button @click="dashboardActionMenuOpen = false; startReviewFromDashboard()"
+                  :disabled="dailyLimitReached">
                   <icon name="arrow-repeat" class="menu-icon"></icon>Start Review
                 </button>
                 <button @click="startDashboardCodeChallenge()" :disabled="dailyLimitReached">
