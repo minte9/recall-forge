@@ -88,13 +88,6 @@ public class OpenAiService {
           same concept before moving to another - use the recently asked questions
           listed above (most recent first) to judge which concept to continue or move
           on from.
-        - Use the recent scores and feedback above to calibrate difficulty on this
-          concept, on top of the overall proficiency guidance: if the last question
-          on this concept scored high (0.8+), make the next one a notch harder -
-          a subtler distinction, edge case, or link to another point in the content
-          above - rather than repeating something equally easy. If it scored low,
-          keep this question at a similar difficulty and target the specific gap
-          named in the feedback, instead of making it easier or harder at random.
         - Do not include the answer.
         """;
         prompt = prompt.formatted(
