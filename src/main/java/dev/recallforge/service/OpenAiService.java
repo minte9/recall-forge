@@ -76,8 +76,11 @@ public class OpenAiService {
         - The question must be answerable using only facts, reasoning, or explanations
           that are explicitly stated above, in either the paragraph or the code's comments.
           Do not require outside knowledge or reasoning that isn't spelled out there.
-        - Before asking "why" or "how", confirm the content above actually explains that
-          reason or mechanism. If it doesn't, ask a "what" or "when" question instead.
+        - Only ask "why" or "how" when the content above explicitly explains that
+          reason or mechanism. Otherwise, pick whichever of these fits what the
+          content actually supports: "what", "which", "where", "what happens
+          when/if...", or "what's the difference between...". Vary the shape
+          across questions instead of defaulting to the same one or two every time.
         - Phrase the question so its meaning is clear on first read - plain, direct
           wording over clever or layered phrasing. The user should spend their effort
           answering, not figuring out what is being asked.
@@ -85,6 +88,13 @@ public class OpenAiService {
           same concept before moving to another - use the recently asked questions
           listed above (most recent first) to judge which concept to continue or move
           on from.
+        - Use the recent scores and feedback above to calibrate difficulty on this
+          concept, on top of the overall proficiency guidance: if the last question
+          on this concept scored high (0.8+), make the next one a notch harder -
+          a subtler distinction, edge case, or link to another point in the content
+          above - rather than repeating something equally easy. If it scored low,
+          keep this question at a similar difficulty and target the specific gap
+          named in the feedback, instead of making it easier or harder at random.
         - Do not include the answer.
         """;
         prompt = prompt.formatted(
