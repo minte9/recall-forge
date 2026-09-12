@@ -887,16 +887,13 @@
                     <div class="feedback-history-card-header">
                       <div class="feedback-history-title">
                         <span class="feedback-history-icon">💬</span> 
-                        <span class="feedback-history-date">{{ formatShortDate(item.createdAt) }}</span>
-                        <span class="feedback-history-retrytype-badge"
-                          :class="{ 'feedback-history-retrytype-badge--code': item.retryType === 'CODE_CHALLENGE' }"
-                          :title="item.retryType === 'CODE_CHALLENGE' ? 'Code Challenge' : 'Review'">
-                          {{ item.retryType === "CODE_CHALLENGE" ? "C" : "R" }}
-                        </span>
-                        <span v-if="item.isRetry" class="feedback-history-practice-badge" :title="item.id">Practice</span>
+                        <span class="feedback-history-date" 
+                          :title="item.isRetry ? 'Practice' : null">{{ formatShortDate(item.createdAt) }}</span>
                       </div>
 
                       <div class="feedback-history-score">
+                        {{ item.isRetry ? 'P -- ' : null }}
+                        {{ item.retryType === "CODE_CHALLENGE" ? "C" : "R" }} / 
                         Score {{ formatScore(item.score) }}
                       </div>
                     </div>
