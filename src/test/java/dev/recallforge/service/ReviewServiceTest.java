@@ -145,6 +145,32 @@ class ReviewServiceTest {
         assertThat(response.markdownFileId()).isEqualTo(99L);
     }
 
+    // Regression test for the AI badge not showing when a review is started
+    // directly (Start Review) instead of via previewMarkdownFile - the
+    // response must carry the file's own optimized/aiGenerated/original
+    // state, not just its content/id.
+    @Test
+    void startReview_topicWithOptimizedMarkdownFile_carriesOptimizationMetadata() {
+        setUp();
+        MarkdownFile markdownFile = new MarkdownFile(
+            "file.md", "# File content", "hash", "General",
+            "Uncategorized", "Uncategorized", "group", new UserAccount()
+        );
+        markdownFile.markAiGenerated();
+        markdownFile.markOptimized("# Original content");
+        Topic topic = topicWithId(11L, markdownFile);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
+        when(openAiService.generateQuestion(any(), any(), anyDouble(), any())).thenReturn("Q");
+
+        ReviewQuestionResponse response = reviewService.startReview(null, "java", null);
+
+        assertThat(response.optimized()).isTrue();
+        assertThat(response.aiGenerated()).isTrue();
+        assertThat(response.originalContent()).isEqualTo("# Original content");
+    }
+
     @Test
     void startReview_withMarkdownFileId_selectsNextTopicScopedToThatFile() {
         setUp();

@@ -899,6 +899,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           this.markdown = this.review.markdownContent;
         }
 
+        // Keeps the AI badges correct while reviewing, not just when
+        // browsing the file via previewMarkdownFile - also resets them for
+        // an ad-hoc topic with no backing file (review.optimized/aiGenerated
+        // come back false/null from the backend in that case).
+        this.currentMarkdownOptimized = !!this.review.optimized;
+        this.currentMarkdownAiGenerated = !!this.review.aiGenerated;
+        this.currentMarkdownOriginalContent = this.review.originalContent || null;
+
         this.$nextTick(() => window.scrollTo(0, 0));
 
         await this.loadDashboard();

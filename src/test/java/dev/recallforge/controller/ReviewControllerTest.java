@@ -48,7 +48,8 @@ class ReviewControllerTest {
     @Test
     void startReview_withMarkdownFileId_delegatesToServiceAndReturnsQuestion() {
         ReviewQuestionResponse response = new ReviewQuestionResponse(
-            1L, "Topic One", "What is X?", "# markdown content", 7L, false, null, false, false
+            1L, "Topic One", "What is X?", "# markdown content", 7L, false, null, false, false,
+            false, false, null
         );
         when(reviewService.startReview(7L, "Java", null)).thenReturn(response);
 
@@ -97,7 +98,8 @@ class ReviewControllerTest {
     @Test
     void startReview_withTopicId_passesItThroughToService() {
         ReviewQuestionResponse response = new ReviewQuestionResponse(
-            42L, "Topic Forty-Two", "What is Y?", "# markdown content", 7L, false, null, false, false
+            42L, "Topic Forty-Two", "What is Y?", "# markdown content", 7L, false, null, false, false,
+            false, false, null
         );
         when(reviewService.startReview(7L, "Java", 42L)).thenReturn(response);
 
@@ -186,7 +188,8 @@ class ReviewControllerTest {
     void startCodeChallenge_delegatesToServiceAndReturnsQuestion() {
         ReviewQuestionResponse response = new ReviewQuestionResponse(
             1L, "Topic One", "Write a function that reverses a string.",
-            "# markdown content", 7L, false, null, true, true
+            "# markdown content", 7L, false, null, true, true,
+            false, false, null
         );
         when(reviewService.startCodeChallenge(1L)).thenReturn(response);
 
