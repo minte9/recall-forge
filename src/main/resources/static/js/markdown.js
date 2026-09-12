@@ -1,11 +1,15 @@
 const Markdown = {
-  render(md) {
+  // openCode: true expands code blocks by default (the original file view -
+  // meant for reference/detail, not recall) instead of the usual collapsed
+  // "show code" (the main markdown view and code challenges, where hiding
+  // code supports the review/practice purpose).
+  render(md, { openCode = false } = {}) {
     let html = marked.parse(md || "");
 
     html = html.replace(
       /<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g,
 `
-<details class="code-block">
+<details class="code-block"${openCode ? " open" : ""}>
 <summary>show code</summary>
 <pre><code>$1</code></pre>
 </details>

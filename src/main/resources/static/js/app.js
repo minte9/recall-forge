@@ -45,6 +45,17 @@ const app = createApp({
       optimizingSeconds: 0,
       optimizingIntervalId: null,
       optimizeFinalized: false,
+      // { kind: "STRUCTURED" | "GENERATED", originalContent } set once an
+      // Optimize preview is accepted, cleared the moment the box is edited
+      // again (alongside optimizeFinalized) - tells Submit whether/what to
+      // record via AppliedOptimization.
+      pendingOptimization: null,
+      currentMarkdownOptimized: false,
+      currentMarkdownAiGenerated: false,
+      currentMarkdownOriginalContent: null,
+      viewingOriginal: false,
+      editingOriginalMarkdown: false,
+      originalMarkdownDraft: "",
       feedbackHistory: [],
       feedbackHistoryVisible: false,
       feedbackHistoryLoading: false,
@@ -113,6 +124,32 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     isLibraryMode() {
       return this.leftPanel !== "markdown";
+    },
+
+    // Single Edit/Show menu slot, aware of which content is on screen - it
+    // edits/shows the original while viewingOriginal, otherwise the main
+    // markdown, so there's one toggle instead of two unrelated ones.
+    editToggleLabel() {
+      if (this.viewingOriginal) {
+        return this.editingOriginalMarkdown ? "Show Original" : "Edit Original";
+      }
+
+      return this.markdownEditing ? "Show Markdown" : "Edit Markdown";
+    },
+
+    // "Show Markdown" gets the AI badge instead of the eye once the file is
+    // optimized - what you're about to see is the AI-optimized version,
+    // versus "Show Original" (see index.html) which stays a plain eye.
+    editToggleIcon() {
+      if (this.viewingOriginal) {
+        return this.editingOriginalMarkdown ? "eye" : "pencil";
+      }
+
+      if (this.markdownEditing) {
+        return this.currentMarkdownOptimized ? "ai-badge" : "eye";
+      }
+
+      return "pencil";
     },
 
     // The topic's actual spaced-repetition memory score (30% old / 70% new
@@ -437,8 +474,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
-    renderMarkdown(md) {
-      return Markdown.render(md);
+    renderMarkdown(md, options) {
+      return Markdown.render(md, options);
     },
 
     onMarkdownClick(event) {
@@ -451,13 +488,53 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
+    // Original's counterpart to onMarkdownClick - admin-gated since editing
+    // the original itself is (see updateOriginal on the backend).
+    onOriginalMarkdownClick(event) {
+      if (event.target.closest(".code-block")) {
+        return;
+      }
+
+      if (this.currentMarkdownFileId && this.currentUser?.role === "ADMIN") {
+        this.editOriginalMarkdown();
+      }
+    },
+
+    // Backs the single Edit/Show menu button (see editToggleLabel/Icon) -
+    // operates on the original while viewingOriginal, otherwise the main
+    // markdown. Editing the original is admin-only (the button itself is
+    // already hidden from non-admins in that state - see index.html - this
+    // is just a backstop against triggering it some other way).
+    toggleEdit() {
+      if (this.viewingOriginal) {
+        if (this.currentUser?.role !== "ADMIN") {
+          return;
+        }
+
+        if (this.editingOriginalMarkdown) {
+          this.editingOriginalMarkdown = false;
+        } else {
+          this.editOriginalMarkdown();
+        }
+        return;
+      }
+
+      if (this.markdownEditing) {
+        this.showMarkdown();
+      } else {
+        this.editMarkdown();
+      }
+    },
+
     editMarkdown() {
       const scrollY = window.scrollY;
 
       this.leftPanel = "markdown";
       this.markdownEditing = true;
       this.viewingCodeChallenges = false;
+      this.viewingOriginal = false;
       this.optimizeFinalized = false;
+      this.pendingOptimization = null;
 
       this.$nextTick(() => {
         this.resizeMarkdownEditor();
@@ -474,6 +551,87 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.$nextTick(() => {
         window.scrollTo(0, scrollY);
       });
+    },
+
+    // Views the original snapshot captured the first time this file was
+    // optimized - independent of (and never overwritten by) the current
+    // `content`. No-op for a file that was never optimized.
+    showOriginal() {
+      if (!this.currentMarkdownOptimized) {
+        return;
+      }
+
+      const scrollY = window.scrollY;
+
+      this.markdownEditing = false;
+      this.viewingCodeChallenges = false;
+      this.editingOriginalMarkdown = false;
+      this.viewingOriginal = true;
+
+      this.$nextTick(() => {
+        window.scrollTo(0, scrollY);
+      });
+    },
+
+    hideOriginal() {
+      const scrollY = window.scrollY;
+
+      this.viewingOriginal = false;
+      this.editingOriginalMarkdown = false;
+
+      this.$nextTick(() => {
+        window.scrollTo(0, scrollY);
+      });
+    },
+
+    // Original's own edit form - saves through updateOriginalMarkdown,
+    // completely separate from submitMarkdownEdit, so it can never affect
+    // the current (optimized) `content`. Also doubles as "Add Original" for
+    // a file that has none yet (currentMarkdownOriginalContent is null, so
+    // the draft just starts empty) - callable from the main markdown view,
+    // not just from within Show Original, hence forcing viewingOriginal.
+    editOriginalMarkdown() {
+      const scrollY = window.scrollY;
+
+      this.viewingOriginal = true;
+      this.originalMarkdownDraft = this.currentMarkdownOriginalContent || "";
+      this.editingOriginalMarkdown = true;
+
+      this.$nextTick(() => {
+        this.resizeMarkdownEditor("originalMarkdownEditor");
+        this.$refs.originalMarkdownEditor?.focus({ preventScroll: true });
+        window.scrollTo(0, scrollY);
+      });
+    },
+
+    async submitOriginalMarkdownEdit() {
+      if (!this.currentMarkdownFileId) {
+        return;
+      }
+
+      const scrollY = window.scrollY;
+
+      this.loading = true;
+      this.error = null;
+      this.success = null;
+
+      try {
+        const updated = await Api.updateOriginalMarkdown(this.currentMarkdownFileId, this.originalMarkdownDraft);
+
+        this.currentMarkdownOriginalContent = updated.originalContent || null;
+        this.currentMarkdownOptimized = !!updated.optimized;
+        this.success = "Original markdown saved.";
+        this.editingOriginalMarkdown = false;
+
+        this.$nextTick(() => {
+          window.scrollTo(0, scrollY);
+        });
+
+      } catch (err) {
+        this.error = err.message || "Could not save the original markdown.";
+      } finally {
+        this.loading = false;
+      }
     },
 
     resizeMarkdownEditor(refName = "markdownEditor") {
@@ -501,10 +659,24 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.error = null;
       this.success = null;
 
+      // Only carry the optimization forward if the box still holds exactly
+      // what Optimize returned - any edit since resets optimizeFinalized
+      // (and pendingOptimization) to null, so a tweaked AI draft saves as a
+      // plain manual edit instead of falsely claiming AI provenance.
+      const appliedOptimization =
+        this.optimizeFinalized && this.pendingOptimization ? this.pendingOptimization.kind : null;
+      const originalContentSnapshot =
+        appliedOptimization === "STRUCTURED" ? this.pendingOptimization.originalContent : null;
+
       try {
-        const updated = await Api.updateMarkdown(this.currentMarkdownFileId, this.markdown);
+        const updated = await Api.updateMarkdown(
+          this.currentMarkdownFileId, this.markdown, appliedOptimization, originalContentSnapshot);
 
         this.markdown = updated.content;
+        this.currentMarkdownOptimized = !!updated.optimized;
+        this.currentMarkdownAiGenerated = !!updated.aiGenerated;
+        this.currentMarkdownOriginalContent = updated.originalContent || null;
+        this.pendingOptimization = null;
         this.success = "Markdown saved.";
         this.markdownEditing = false;
 
@@ -571,6 +743,15 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       try {
         const optimized = await Api.optimizeMarkdown(content);
+
+        // content (the pre-optimize text) is captured now, before it's
+        // overwritten below - it's the snapshot Submit will store as the
+        // original, only for the STRUCTURED branch (see submitMarkdownEdit/
+        // submitAddFile).
+        this.pendingOptimization = {
+          kind: optimized.structured ? "STRUCTURED" : "GENERATED",
+          originalContent: content
+        };
 
         if (isAddFile) {
           this.newMarkdownContent = optimized.content;
@@ -821,6 +1002,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.success = null;
       this.markdownEditing = false;
       this.viewingCodeChallenges = false;
+      this.viewingOriginal = false;
+      this.editingOriginalMarkdown = false;
       this.leftPanel = "markdown";
       this.mobilePageTitle = "Markdown";
       this.mobileView = "markdown";
@@ -829,6 +1012,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       try {
         const data = await Api.getMarkdown(markdownFileId);
         this.markdown = data.content;
+        this.currentMarkdownOptimized = !!data.optimized;
+        this.currentMarkdownAiGenerated = !!data.aiGenerated;
+        this.currentMarkdownOriginalContent = data.originalContent || null;
       } catch (err) {
         this.error = err.message || "Could not load markdown file.";
       } finally {
@@ -1710,6 +1896,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.markdownEditing = false;
       this.leftPanel = "markdown";
       this.viewingCodeChallenges = true;
+      this.viewingOriginal = false;
+      this.editingOriginalMarkdown = false;
     },
 
     hideCodeChallenges() {
@@ -1847,6 +2035,7 @@ Java supports single inheritance...</pre>
       this.mobileView = "markdown";
       this.newMarkdownContent = "";
       this.optimizeFinalized = false;
+      this.pendingOptimization = null;
     },
 
     async submitAddFile() {
@@ -1859,11 +2048,21 @@ Java supports single inheritance...</pre>
       this.success = null;
       this.result = null;
 
+      const appliedOptimization =
+        this.optimizeFinalized && this.pendingOptimization ? this.pendingOptimization.kind : null;
+      const originalContentSnapshot =
+        appliedOptimization === "STRUCTURED" ? this.pendingOptimization.originalContent : null;
+
       try {
-        const created = await Api.createMarkdown(this.newMarkdownContent);
+        const created = await Api.createMarkdown(
+          this.newMarkdownContent, appliedOptimization, originalContentSnapshot);
 
         this.currentMarkdownFileId = created.markdownFileId;
         this.markdown = created.content;
+        this.currentMarkdownOptimized = !!created.optimized;
+        this.currentMarkdownAiGenerated = !!created.aiGenerated;
+        this.currentMarkdownOriginalContent = created.originalContent || null;
+        this.pendingOptimization = null;
         this.newMarkdownContent = "";
         this.leftPanel = "markdown";
         this.mobileView = "review"; // show markdown + right panel on mobile

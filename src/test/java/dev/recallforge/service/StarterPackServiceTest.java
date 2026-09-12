@@ -105,9 +105,9 @@ class StarterPackServiceTest {
 
         starterPackService.importStarterPack("Java");
 
-        verify(markdownFileService).importMarkdown("## Topic 1\ncontent", 1);
-        verify(markdownFileService).importMarkdown("## Topic 2\ncontent", 2);
-        verify(markdownFileService).importMarkdown("## Topic 3\ncontent", null);
+        verify(markdownFileService).importMarkdown("## Topic 1\ncontent", 1, first);
+        verify(markdownFileService).importMarkdown("## Topic 2\ncontent", 2, second);
+        verify(markdownFileService).importMarkdown("## Topic 3\ncontent", null, withoutOrder);
     }
 
     @Test

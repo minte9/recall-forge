@@ -31,6 +31,7 @@ import dev.recallforge.domain.Review;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
+import dev.recallforge.dto.AppliedOptimization;
 import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.dto.MarkdownVaultUploadResponse;
@@ -516,6 +517,217 @@ class MarkdownFileServiceTest {
     }
 
     @Test
+    void update_appliedOptimizationStructured_firstTime_setsOptimizedAndCapturesOriginal() throws Exception {
+        setUp();
+        String oldContent = "## Java Basics\nOld content.";
+        String newContent = "## Java Basics\nTightened content.";
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", oldContent, "oldhash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Java Basics", "Tightened content."
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownTopicImporter.parseMarkdown(newContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByContentHashAndUserId(sha256(newContent), 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Java Basics"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        MarkdownUploadResponse response = markdownFileService.update(
+            1L, newContent, AppliedOptimization.STRUCTURED, oldContent);
+
+        verify(currentUserService).requireAdmin();
+        assertThat(response.optimized()).isTrue();
+        assertThat(response.originalContent()).isEqualTo(oldContent);
+        assertThat(existingMarkdownFile.isOptimized()).isTrue();
+        assertThat(existingMarkdownFile.getOriginalContent()).isEqualTo(oldContent);
+    }
+
+    @Test
+    void update_appliedOptimizationStructured_alreadyOptimized_doesNotOverwriteOriginal() throws Exception {
+        setUp();
+        String firstOriginal = "## Java Basics\nVery first content.";
+        String newContent = "## Java Basics\nAnother AI pass.";
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "## Java Basics\nPrevious optimized content.", "oldhash",
+            "Programming", "Java", "Core", "Java Basics", user
+        );
+        existingMarkdownFile.markOptimized(firstOriginal);
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Java Basics", "Another AI pass."
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownTopicImporter.parseMarkdown(newContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByContentHashAndUserId(sha256(newContent), 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Java Basics"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        // A second optimize/submit cycle on an already-optimized file must not
+        // touch the original snapshot captured the first time.
+        MarkdownUploadResponse response = markdownFileService.update(
+            1L, newContent, AppliedOptimization.STRUCTURED, "## Java Basics\nPrevious optimized content.");
+
+        assertThat(response.originalContent()).isEqualTo(firstOriginal);
+        assertThat(existingMarkdownFile.getOriginalContent()).isEqualTo(firstOriginal);
+    }
+
+    @Test
+    void update_appliedOptimizationGenerated_setsAiGeneratedWithoutOriginal() throws Exception {
+        setUp();
+        String newContent = "# JVM / Java / Streams / Basics\n## Stream Creation\nAI-generated content.";
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "JVM", "Java", "Streams", "Basics", "Stream Creation", "AI-generated content."
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownTopicImporter.parseMarkdown(newContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByContentHashAndUserId(sha256(newContent), 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Stream Creation"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        MarkdownUploadResponse response = markdownFileService.update(
+            1L, newContent, AppliedOptimization.GENERATED, null);
+
+        assertThat(response.aiGenerated()).isTrue();
+        assertThat(response.optimized()).isFalse();
+        assertThat(response.originalContent()).isNull();
+    }
+
+    @Test
+    void updateOriginal_notAdmin_throwsAccessDeniedExceptionWithoutSaving() {
+        setUp();
+        doThrow(new AccessDeniedException("Admin access required"))
+            .when(currentUserService).requireAdmin();
+
+        assertThatThrownBy(() -> markdownFileService.updateOriginal(1L, "new original"))
+            .isInstanceOf(AccessDeniedException.class);
+
+        verify(markdownFileRepository, never()).save(any());
+    }
+
+    @Test
+    void updateOriginal_fileNotOptimized_addsOriginalAndMarksFileOptimized() {
+        setUp();
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "content", "hash", "Programming", "Java", "Core", "Java Basics", user
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        MarkdownUploadResponse response = markdownFileService.updateOriginal(1L, "manually added original");
+
+        assertThat(response.optimized()).isTrue();
+        assertThat(response.originalContent()).isEqualTo("manually added original");
+        assertThat(existingMarkdownFile.isOptimized()).isTrue();
+    }
+
+    @Test
+    void updateOriginal_happyPath_updatesOriginalIndependentlyOfContent() {
+        setUp();
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "current optimized content", "hash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        existingMarkdownFile.markOptimized("first captured original");
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        MarkdownUploadResponse response = markdownFileService.updateOriginal(1L, "hand-edited original");
+
+        assertThat(response.originalContent()).isEqualTo("hand-edited original");
+        assertThat(response.content()).isEqualTo("current optimized content");
+        assertThat(existingMarkdownFile.getContent()).isEqualTo("current optimized content");
+    }
+
+    @Test
+    void importMarkdown_withOptimizedTemplateFile_clonesOptimizedFlagAndOriginalContent() throws Exception {
+        setUp();
+        String content = "## Java Basics\nTemplate content.";
+        UserAccount user = new UserAccount();
+        MarkdownFile templateFile = new MarkdownFile(
+            "notes.md", content, "hash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        templateFile.markOptimized("Template's original content.");
+
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Java Basics", "Template content."
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(2L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Programming", "Java", "Core", "Java Basics", 2L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("Java Basics", 2L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Java Basics"), eq(2L)))
+            .thenReturn(Optional.empty());
+
+        MarkdownUploadResponse response = markdownFileService.importMarkdown(content, 3, templateFile);
+
+        assertThat(response.optimized()).isTrue();
+        assertThat(response.originalContent()).isEqualTo("Template's original content.");
+        // Cloning copies existing, already-trusted template data - it's not
+        // user-submitted input, so it isn't admin-gated like a live optimize.
+        verify(currentUserService, never()).requireAdmin();
+    }
+
+    @Test
+    void importMarkdown_withAiGeneratedTemplateFile_clonesAiGeneratedFlagWithoutOriginal() throws Exception {
+        setUp();
+        String content = "## Stream Basics\nTemplate content.";
+        UserAccount user = new UserAccount();
+        MarkdownFile templateFile = new MarkdownFile(
+            "notes.md", content, "hash", "JVM", "Java", "Streams", "Stream Basics", user
+        );
+        templateFile.markAiGenerated();
+
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "JVM", "Java", "Streams", "Stream Basics", "Stream Basics", "Template content."
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(2L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "JVM", "Java", "Streams", "Stream Basics", 2L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("Stream Basics", 2L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Stream Basics"), eq(2L)))
+            .thenReturn(Optional.empty());
+
+        MarkdownUploadResponse response = markdownFileService.importMarkdown(content, null, templateFile);
+
+        assertThat(response.aiGenerated()).isTrue();
+        assertThat(response.optimized()).isFalse();
+        assertThat(response.originalContent()).isNull();
+    }
+
+    @Test
     void update_headerChanged_syncsMarkdownFileMetadata() throws Exception {
         setUp();
         String newContent = "# Programming / Java / Collections / Java Basics\n## Java Basics\nUpdated content.";
@@ -775,11 +987,12 @@ class MarkdownFileServiceTest {
         when(markdownTopicImporter.parseMarkdown(aiResponse))
             .thenReturn(List.of(rewrittenVariables, rewrittenLoops));
 
-        String result = markdownFileService.optimize(content);
+        OptimizeResult result = markdownFileService.optimize(content);
 
-        assertThat(result).startsWith("# Programming / Java / Core / Java Basics");
-        assertThat(result).contains("## Variables\nNew tighter variables content.");
-        assertThat(result).contains("## Loops\nNew tighter loops content.");
+        assertThat(result.structured()).isTrue();
+        assertThat(result.content()).startsWith("# Programming / Java / Core / Java Basics");
+        assertThat(result.content()).contains("## Variables\nNew tighter variables content.");
+        assertThat(result.content()).contains("## Loops\nNew tighter loops content.");
     }
 
     @Test
@@ -839,9 +1052,10 @@ class MarkdownFileServiceTest {
 
         when(markdownTopicImporter.parseMarkdown(aiResponse)).thenReturn(List.of(generatedTopic));
 
-        String result = markdownFileService.optimize(content);
+        OptimizeResult result = markdownFileService.optimize(content);
 
-        assertThat(result).isEqualTo(aiResponse);
+        assertThat(result.structured()).isFalse();
+        assertThat(result.content()).isEqualTo(aiResponse);
     }
 
     @Test
