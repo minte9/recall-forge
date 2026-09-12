@@ -152,6 +152,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return 0;
       }
 
+      if (this.result && this.result.topicId === this.activeTopic.topicId) {
+        return this.result.reviewStreak;
+      }
+
       const topic = this.topicsInFile.find(t => t.id === this.activeTopic.topicId);
       return topic ? topic.reviewStreak : 0;
     },
