@@ -794,9 +794,17 @@
                   <icon name="question-circle"></icon>
                 </span>
 
-                <span v-if="topicMemoryScore !== null" class="last-score-badge last-score-badge--actions"
+                <span v-if="topicMemoryScore !== null" class="mastery-ring mastery-ring--actions"
+                  :class="topicMemoryScore >= 0.7 ? 'mastery-ring--high-score' : 'mastery-ring--low-score'"
                   title="Memory Score - Show feedback history" @click="toggleFeedbackHistory">
-                  Score: {{ formatScore(topicMemoryScore) }}
+                  <svg viewBox="0 0 56 56" class="mastery-ring-svg" aria-hidden="true">
+                    <circle class="mastery-ring-track" cx="28" cy="28" r="23"></circle>
+                    <circle class="mastery-ring-progress" cx="28" cy="28" r="23"
+                      :style="{ strokeDashoffset: masteryRingOffset(topicMemoryScore) }"></circle>
+                  </svg>
+                  <span class="mastery-ring-label">{{ formatScore(topicMemoryScore) }}</span>
+                  <span v-if="topicReviewStreak >= 2" class="mastery-ring-streak"
+                    :title="`${topicReviewStreak} reviews in a row`">{{ topicReviewStreak }}</span>
                 </span>
 
               </div>
@@ -840,9 +848,17 @@
                   </span>
                 </div>
 
-                <span v-if="topicMemoryScore !== null" class="last-score-badge last-score-badge--actions"
+                <span v-if="topicMemoryScore !== null" class="mastery-ring mastery-ring--actions"
+                  :class="topicMemoryScore >= 0.7 ? 'mastery-ring--high-score' : 'mastery-ring--low-score'"
                   title="Memory Score - Show feedback history" @click="toggleFeedbackHistory">
-                  Score: {{ formatScore(topicMemoryScore) }}
+                  <svg viewBox="0 0 56 56" class="mastery-ring-svg" aria-hidden="true">
+                    <circle class="mastery-ring-track" cx="28" cy="28" r="23"></circle>
+                    <circle class="mastery-ring-progress" cx="28" cy="28" r="23"
+                      :style="{ strokeDashoffset: masteryRingOffset(topicMemoryScore) }"></circle>
+                  </svg>
+                  <span class="mastery-ring-label">{{ formatScore(topicMemoryScore) }}</span>
+                  <span v-if="topicReviewStreak >= 2" class="mastery-ring-streak"
+                    :title="`${topicReviewStreak} reviews in a row`">{{ topicReviewStreak }}</span>
                 </span>
 
               </div>

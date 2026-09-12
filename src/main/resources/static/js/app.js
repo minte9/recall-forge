@@ -144,6 +144,18 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return topic ? topic.codeChallengeXp : 0;
     },
 
+    // Consecutive successful reviews for the active topic - same lookup
+    // pattern as topicMemoryScore/topicCodeChallengeXp. Drives the small
+    // streak badge on the mastery ring.
+    topicReviewStreak() {
+      if (!this.activeTopic) {
+        return 0;
+      }
+
+      const topic = this.topicsInFile.find(t => t.id === this.activeTopic.topicId);
+      return topic ? topic.reviewStreak : 0;
+    },
+
     aiEnabled() {
       return this.currentUser ? this.currentUser.aiEnabled !== false : true;
     },
@@ -275,6 +287,15 @@ When you click <strong>Start Review</strong>, this panel will be updated.
   methods: {
     formatScore(score) {
       return Number(score).toFixed(2);
+    },
+
+    // Dash offset for the mastery ring's progress circle - r=23 matches
+    // the <circle> radius in the ring markup, so this stays in sync with
+    // .mastery-ring-progress's stroke-dasharray in app.css.
+    masteryRingOffset(score) {
+      const circumference = 2 * Math.PI * 23;
+      const clamped = Math.max(0, Math.min(1, Number(score) || 0));
+      return circumference * (1 - clamped);
     },
 
     formatTokenCount(value) {
