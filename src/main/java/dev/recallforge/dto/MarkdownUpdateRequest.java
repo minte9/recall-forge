@@ -4,6 +4,15 @@ import jakarta.validation.constraints.NotBlank;
 
 public record MarkdownUpdateRequest(
     @NotBlank
-    String content
+    String content,
+
+    // Set only when this submit follows an accepted Optimize preview,
+    // unchanged since - null for a plain manual edit.
+    AppliedOptimization appliedOptimization,
+
+    // The pre-optimize content, required only when appliedOptimization is
+    // STRUCTURED (ignored otherwise) - stored as the original snapshot the
+    // first time this file is optimized.
+    String originalContent
 ) {
 }

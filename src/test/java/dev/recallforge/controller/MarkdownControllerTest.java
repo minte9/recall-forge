@@ -51,7 +51,7 @@ class MarkdownControllerTest {
             "file", "notes.md", "text/markdown", "## Topic\ncontent".getBytes()
         );
         when(markdownFileService.upload(any())).thenReturn(
-            new MarkdownUploadResponse(1L, "notes.md", "## Topic\ncontent")
+            new MarkdownUploadResponse(1L, "notes.md", "## Topic\ncontent", null, false, false)
         );
 
         mockMvcTester.post().uri("/api/markdown/upload").multipart().file(file)
@@ -80,7 +80,7 @@ class MarkdownControllerTest {
 
         when(markdownFileService.uploadVault(any(), any())).thenReturn(
             new MarkdownVaultUploadResponse(
-                List.of(new MarkdownUploadResponse(1L, "Composition.md", "## Composition\ncontent")),
+                List.of(new MarkdownUploadResponse(1L, "Composition.md", "## Composition\ncontent", null, false, false)),
                 List.of(new MarkdownVaultUploadResponse.VaultFileError(
                     "MyVault/Java/OOP/Inheritance.md", "File is too large. Maximum size is 200 KB."))
             )
@@ -110,8 +110,8 @@ class MarkdownControllerTest {
 
     @Test
     void updateMarkdown_validRequest_delegatesToServiceAndReturnsResponse() throws Exception {
-        when(markdownFileService.update(1L, "## Topic\nupdated content")).thenReturn(
-            new MarkdownUploadResponse(1L, "notes.md", "## Topic\nupdated content")
+        when(markdownFileService.update(1L, "## Topic\nupdated content", null, null)).thenReturn(
+            new MarkdownUploadResponse(1L, "notes.md", "## Topic\nupdated content", null, false, false)
         );
 
         mockMvcTester.put().uri("/api/markdown/1")
@@ -132,7 +132,7 @@ class MarkdownControllerTest {
                 }
                 """);
 
-        verify(markdownFileService).update(1L, "## Topic\nupdated content");
+        verify(markdownFileService).update(1L, "## Topic\nupdated content", null, null);
     }
 
     @Test
@@ -147,7 +147,7 @@ class MarkdownControllerTest {
             .assertThat()
             .hasStatus4xxClientError();
 
-        verify(markdownFileService, never()).update(any(), any());
+        verify(markdownFileService, never()).update(any(), any(), any(), any());
     }
 
     @Test

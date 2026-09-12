@@ -266,8 +266,88 @@
 
 .markdown-file-actions {
     display: flex;
+    align-items: center;
     gap: 10px;
     margin-top: 20px;
+}
+
+.ai-badge {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    color: #b0b7c3;
+    cursor: help;
+    flex-shrink: 0;
+}
+
+/* The icon's star(s) read --ai-star-color (see icons.js), falling back to
+   yellow where neither variant class applies (e.g. the plain menu icons).
+   Optimized uses the two-star "ai-badge-optimized" icon variant instead of
+   a different color to stand apart from AI-generated. */
+.ai-badge-optimized {
+    --ai-star-color: #facc15;
+}
+
+.ai-badge-generated {
+    --ai-star-color: #facc15;
+}
+
+/* :first-of-type/:last-of-type match by tag (span), not among all children,
+   so this targets the badge group correctly whether or not the sibling
+   Start Review button is rendered before it. margin-left: auto on the first
+   badge is what actually pushes the group to the row's right edge -
+   margin-right alone only adds space after the last item, it doesn't move
+   anything. */
+.markdown-file-actions .ai-badge:first-of-type {
+    margin-left: auto;
+}
+
+.markdown-file-actions .ai-badge:last-of-type {
+    margin-right: 10px;
+}
+
+.ai-badge svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Same bubble mechanic as .info-tooltip (see below), just anchored to the
+   badge itself instead of a fixed-size trigger icon. Opens from the badge's
+   right edge since the badge now sits at the right end of the row. */
+.ai-badge::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    right: 0;
+    width: max-content;
+    max-width: 220px;
+    background: #1f2937;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    text-align: left;
+    padding: 6px 8px;
+    border-radius: 6px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .15s ease;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.ai-badge:hover::after,
+.ai-badge:focus::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ai-badge.clickable {
+    cursor: pointer;
+}
+
+.ai-badge.clickable:hover {
+    opacity: .75;
 }
 
 .reset-file-reviews-button {

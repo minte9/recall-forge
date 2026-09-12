@@ -17,6 +17,7 @@ import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Review;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.Topic;
+import dev.recallforge.dto.AppliedOptimization;
 import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.dto.MarkdownVaultUploadResponse;
@@ -293,12 +294,35 @@ public class MarkdownFileService {
      */
     @Transactional
     public MarkdownUploadResponse importMarkdown(String content, Integer displayOrder) throws Exception {
-        return importMarkdown(content, null, false, displayOrder);
+        return importMarkdown(content, displayOrder, null);
+    }
+
+    /**
+     * Same as {@link #importMarkdown(String, Integer)}, but also copies
+     * {@code templateFile}'s optimized/aiGenerated/originalContent onto the
+     * created/updated file - used when cloning a starter-pack template file,
+     * so a user's copy carries the same AI provenance as the template it
+     * came from instead of always starting blank.
+     */
+    @Transactional
+    public MarkdownUploadResponse importMarkdown(
+            String content, Integer displayOrder, MarkdownFile templateFile
+    ) throws Exception {
+        return importMarkdown(content, null, false, displayOrder, null, null, templateFile);
     }
 
     @Transactional
     public MarkdownUploadResponse createFromContent(String content) throws Exception {
-        return importMarkdown(content, (String) null);
+        return createFromContent(content, null, null);
+    }
+
+    @Transactional
+    public MarkdownUploadResponse createFromContent(
+            String content,
+            AppliedOptimization appliedOptimization,
+            String originalContentSnapshot
+    ) throws Exception {
+        return importMarkdown(content, null, true, null, appliedOptimization, originalContentSnapshot);
     }
 
     public MarkdownUploadResponse getById(Long markdownFileId) {
@@ -307,15 +331,31 @@ public class MarkdownFileService {
         MarkdownFile markdownFile = markdownFileRepository.findByIdAndUserId(markdownFileId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Markdown file not found: " + markdownFileId));
 
-        return new MarkdownUploadResponse(
-                markdownFile.getId(),
-                markdownFile.getFilename(),
-                markdownFile.getContent()
-        );
+        return toResponse(markdownFile);
     }
 
     @Transactional
     public MarkdownUploadResponse update(Long markdownFileId, String content) throws Exception {
+        return update(markdownFileId, content, null, null);
+    }
+
+    /**
+     * @param appliedOptimization set only when this save follows an accepted
+     *                             Optimize preview, unchanged since; null for
+     *                             a plain manual edit.
+     * @param originalContentSnapshot the pre-optimize content, used only
+     *                                when {@code appliedOptimization} is
+     *                                {@code STRUCTURED} and only the first
+     *                                time this file is optimized - see
+     *                                {@link MarkdownFile#markOptimized}.
+     */
+    @Transactional
+    public MarkdownUploadResponse update(
+            Long markdownFileId,
+            String content,
+            AppliedOptimization appliedOptimization,
+            String originalContentSnapshot
+    ) throws Exception {
         if (content.length() > MAX_CONTENT_LENGTH) {
             throw new IllegalArgumentException("Markdown content is too large.");
         }
@@ -356,15 +396,50 @@ public class MarkdownFileService {
                 firstTopic.subcategory(),
                 firstTopic.fileTitle()
         );
+        applyOptimizationMetadata(markdownFile, appliedOptimization, originalContentSnapshot);
         markdownFileRepository.save(markdownFile);
 
         syncTopicsFromMarkdown(markdownFile, parsedTopics, userId, user);
 
-        return new MarkdownUploadResponse(
-                markdownFile.getId(),
-                markdownFile.getFilename(),
-                markdownFile.getContent()
-        );
+        return toResponse(markdownFile);
+    }
+
+    /**
+     * Admin-only. Updates the stored original snapshot directly, independent
+     * of `content` - backs the original's own edit form.
+     *
+     * Also doubles as "Add Original": a file that has never been optimized
+     * gets one added retroactively here rather than only ever via the AI
+     * Optimize path - {@code optimized} means "has an original", not
+     * specifically "the AI wrote it", so the two are free to diverge (e.g. a
+     * more detailed original than the review-optimized current content).
+     */
+    @Transactional
+    public MarkdownUploadResponse updateOriginal(Long markdownFileId, String content) {
+        currentUserService.requireAdmin();
+
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("Original markdown content is empty.");
+        }
+
+        if (content.length() > MAX_CONTENT_LENGTH) {
+            throw new IllegalArgumentException("Original markdown content is too large.");
+        }
+
+        Long userId = currentUserService.currentUserId();
+
+        MarkdownFile markdownFile = markdownFileRepository.findByIdAndUserId(markdownFileId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Markdown file not found: " + markdownFileId));
+
+        if (markdownFile.isOptimized()) {
+            markdownFile.updateOriginalContent(content);
+        } else {
+            markdownFile.markOptimized(content);
+        }
+
+        markdownFileRepository.save(markdownFile);
+
+        return toResponse(markdownFile);
     }
 
     /**
@@ -378,8 +453,12 @@ public class MarkdownFileService {
      * still contain exactly those titles before anything from it is used.
      * Otherwise (raw/unstructured notes) the AI generates the full
      * structure, grounded against {@link AllowedEnvironmentRepository}.
+     *
+     * The returned {@link OptimizeResult#structured()} tells the caller
+     * which {@link AppliedOptimization} to send back on a later
+     * create/update call, if the preview is accepted.
      */
-    public String optimize(String content) {
+    public OptimizeResult optimize(String content) {
         currentUserService.requireAdmin();
 
         if (content == null || content.isBlank()) {
@@ -396,9 +475,13 @@ public class MarkdownFileService {
             throw new IllegalArgumentException("Markdown content does not contain any topics.");
         }
 
-        return hasPathHeading(content)
+        boolean structured = hasPathHeading(content);
+
+        String optimizedContent = structured
                 ? optimizeStructuredContent(parsedTopics)
                 : optimizeUnstructuredContent(content);
+
+        return new OptimizeResult(optimizedContent, structured);
     }
 
     private String optimizeStructuredContent(List<MarkdownTopicImporter.ParsedTopic> parsedTopics) {
@@ -501,7 +584,7 @@ public class MarkdownFileService {
     }
 
     private MarkdownUploadResponse importMarkdown(String content, String filename) throws Exception {
-        return importMarkdown(content, filename, true, null);
+        return importMarkdown(content, filename, true, null, null, null, null);
     }
 
     private MarkdownUploadResponse importMarkdown(
@@ -509,6 +592,31 @@ public class MarkdownFileService {
             String filename,
             boolean autoAssignDisplayOrder,
             Integer explicitDisplayOrder
+    ) throws Exception {
+        return importMarkdown(content, filename, autoAssignDisplayOrder, explicitDisplayOrder, null, null, null);
+    }
+
+    private MarkdownUploadResponse importMarkdown(
+            String content,
+            String filename,
+            boolean autoAssignDisplayOrder,
+            Integer explicitDisplayOrder,
+            AppliedOptimization appliedOptimization,
+            String originalContentSnapshot
+    ) throws Exception {
+        return importMarkdown(
+                content, filename, autoAssignDisplayOrder, explicitDisplayOrder,
+                appliedOptimization, originalContentSnapshot, null);
+    }
+
+    private MarkdownUploadResponse importMarkdown(
+            String content,
+            String filename,
+            boolean autoAssignDisplayOrder,
+            Integer explicitDisplayOrder,
+            AppliedOptimization appliedOptimization,
+            String originalContentSnapshot,
+            MarkdownFile cloneOptimizationFrom
     ) throws Exception {
         if (content.length() > MAX_CONTENT_LENGTH) {
             throw new IllegalArgumentException("Markdown content is too large.");
@@ -551,6 +659,8 @@ public class MarkdownFileService {
                 markdownFile.updateDisplayOrder(explicitDisplayOrder);
             }
 
+            applyOptimizationMetadata(markdownFile, appliedOptimization, originalContentSnapshot);
+            applyClonedOptimizationMetadata(markdownFile, cloneOptimizationFrom);
             markdownFileRepository.save(markdownFile);
 
         } else {
@@ -570,15 +680,66 @@ public class MarkdownFileService {
             );
             markdownFile.updateDisplayOrder(resolvedDisplayOrder);
 
+            applyOptimizationMetadata(markdownFile, appliedOptimization, originalContentSnapshot);
+            applyClonedOptimizationMetadata(markdownFile, cloneOptimizationFrom);
             markdownFileRepository.save(markdownFile);
         }
 
         syncTopicsFromMarkdown(markdownFile, parsedTopics, userId, user);
 
+        return toResponse(markdownFile);
+    }
+
+    // update()/createFromContent() aren't otherwise admin-gated (any owner
+    // can edit their own file), so this flag-setting path is guarded
+    // separately - without it, a crafted request could fabricate the
+    // optimized/aiGenerated provenance without ever calling optimize().
+    private void applyOptimizationMetadata(
+            MarkdownFile markdownFile,
+            AppliedOptimization appliedOptimization,
+            String originalContentSnapshot
+    ) {
+        if (appliedOptimization == null) {
+            return;
+        }
+
+        currentUserService.requireAdmin();
+
+        if (appliedOptimization == AppliedOptimization.STRUCTURED) {
+            markdownFile.markOptimized(originalContentSnapshot);
+        } else {
+            markdownFile.markAiGenerated();
+        }
+    }
+
+    // Used only when cloning a starter-pack template file (see
+    // StarterPackService) - copies its optimized/aiGenerated/originalContent
+    // as-is, so a user's copy carries the same AI provenance as the template
+    // it came from instead of always starting blank. No admin check here:
+    // this copies existing, already-trusted server-side data, not
+    // user-submitted input.
+    private void applyClonedOptimizationMetadata(MarkdownFile markdownFile, MarkdownFile cloneFrom) {
+        if (cloneFrom == null) {
+            return;
+        }
+
+        if (cloneFrom.isOptimized()) {
+            markdownFile.markOptimized(cloneFrom.getOriginalContent());
+        }
+
+        if (cloneFrom.isAiGenerated()) {
+            markdownFile.markAiGenerated();
+        }
+    }
+
+    private MarkdownUploadResponse toResponse(MarkdownFile markdownFile) {
         return new MarkdownUploadResponse(
                 markdownFile.getId(),
                 markdownFile.getFilename(),
-                markdownFile.getContent()
+                markdownFile.getContent(),
+                markdownFile.getOriginalContent(),
+                markdownFile.isOptimized(),
+                markdownFile.isAiGenerated()
         );
     }
 

@@ -58,10 +58,21 @@
             Markdown
           </div>
 
-          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
-            @click="markdownEditing ? showMarkdown() : editMarkdown(); mobileMenuOpen = false"
-            :title="markdownEditing ? null : 'Ctrl+Shift+E'">
-            <icon :name="markdownEditing ? 'eye' : 'pencil'" class="menu-icon"></icon>{{ markdownEditing ? "Show Markdown" : "Edit Markdown" }}
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
+              (!viewingOriginal || currentUser?.role == 'ADMIN')"
+            @click="toggleEdit(); mobileMenuOpen = false"
+            :title="!viewingOriginal && !markdownEditing ? 'Ctrl+Shift+E' : null">
+            <icon :name="editToggleIcon" class="menu-icon"></icon>{{ editToggleLabel }}
+          </button>
+
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && currentMarkdownOptimized"
+            @click="viewingOriginal ? hideOriginal() : showOriginal(); mobileMenuOpen = false">
+            <icon :name="viewingOriginal ? 'ai-badge' : 'eye'" class="menu-icon"></icon>{{ viewingOriginal ? "Show Markdown" : "Show Original" }}
+          </button>
+
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && !currentMarkdownOptimized && currentUser?.role == 'ADMIN'"
+            @click="editOriginalMarkdown(); mobileMenuOpen = false">
+            <icon name="ai-badge" class="menu-icon"></icon>Add Original
           </button>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
@@ -162,10 +173,21 @@
                 Markdown
               </div>
 
-              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
-                @click="markdownEditing ? showMarkdown() : editMarkdown(); menuOpen = false"
-                :title="markdownEditing ? null : 'Ctrl+Shift+E'">
-                <icon :name="markdownEditing ? 'eye' : 'pencil'" class="menu-icon"></icon>{{ markdownEditing ? "Show Markdown" : "Edit Markdown" }}
+              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
+                  (!viewingOriginal || currentUser?.role == 'ADMIN')"
+                @click="toggleEdit(); menuOpen = false"
+                :title="!viewingOriginal && !markdownEditing ? 'Ctrl+Shift+E' : null">
+                <icon :name="editToggleIcon" class="menu-icon"></icon>{{ editToggleLabel }}
+              </button>
+
+              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && currentMarkdownOptimized"
+                @click="viewingOriginal ? hideOriginal() : showOriginal(); menuOpen = false">
+                <icon :name="viewingOriginal ? 'ai-badge' : 'eye'" class="menu-icon"></icon>{{ viewingOriginal ? "Show Markdown" : "Show Original" }}
+              </button>
+
+              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && !currentMarkdownOptimized && currentUser?.role == 'ADMIN'"
+                @click="editOriginalMarkdown(); menuOpen = false">
+                <icon name="ai-badge" class="menu-icon"></icon>Add Original
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
@@ -412,7 +434,7 @@
 
           <div v-else-if="markdownEditing" class="markdown-editor-wrap">
             <textarea ref="markdownEditor" class="markdown markdown-editor" v-model="markdown"
-              @input="resizeMarkdownEditor(); optimizeFinalized = false" @keydown.esc="showMarkdown()"
+              @input="resizeMarkdownEditor(); optimizeFinalized = false; pendingOptimization = null" @keydown.esc="showMarkdown()"
               @keydown.ctrl.enter="submitMarkdownEdit"></textarea>
 
             <div class="markdown-editor-actions">
@@ -456,11 +478,32 @@
             </template>
           </div>
 
+          <div v-else-if="viewingOriginal && editingOriginalMarkdown" class="markdown-editor-wrap">
+            <textarea ref="originalMarkdownEditor" class="markdown markdown-editor" v-model="originalMarkdownDraft"
+              @input="resizeMarkdownEditor('originalMarkdownEditor')" @keydown.esc="editingOriginalMarkdown = false"
+              @keydown.ctrl.enter="submitOriginalMarkdownEdit"></textarea>
+
+            <div class="markdown-editor-actions">
+              <button class="markdown-editor-cancel" @click="editingOriginalMarkdown = false" title="Esc">
+                Cancel
+              </button>
+
+              <button class="markdown-editor-submit" @click="submitOriginalMarkdownEdit" title="Ctrl+Enter">
+                Submit
+              </button>
+            </div>
+          </div>
+
+          <div v-else-if="viewingOriginal" class="markdown original-markdown"
+            v-html="renderMarkdown(currentMarkdownOriginalContent || '', { openCode: true })"
+            @click="onOriginalMarkdownClick">
+          </div>
+
           <div v-else class="markdown" v-html="renderMarkdown(markdown)"
             @click="onMarkdownClick">
           </div>
 
-          <div v-if="!markdownLoading && !markdownEditing && currentMarkdownFileId"
+          <div v-if="!markdownLoading && !markdownEditing && !viewingOriginal && currentMarkdownFileId"
             class="markdown-file-actions">
             <button v-if="!activeTopic && !isDesktop && !viewingCodeChallenges" class="start-review-file-button"
               @click="startReviewForFile(currentMarkdownFileId)" :disabled="loading || (aiEnabled && dailyLimitReached)"
@@ -468,6 +511,16 @@
               <span class="btn-icon">►</span>
               {{ loading ? "Loading..." : (aiEnabled ? "Start Review" : "Reviews") }}
             </button>
+
+            <span v-if="currentMarkdownOptimized" class="ai-badge ai-badge-optimized clickable" tabindex="0"
+              data-tooltip="Optimized for review — click to view the original version" @click="showOriginal()">
+              <icon name="ai-badge-optimized"></icon>
+            </span>
+
+            <span v-else-if="currentMarkdownAiGenerated" class="ai-badge ai-badge-generated" tabindex="0"
+              data-tooltip="AI-generated content">
+              <icon name="ai-badge"></icon>
+            </span>
 
           </div>
         </div>
@@ -481,7 +534,7 @@
 
           <div class="markdown-editor-wrap">
             <textarea ref="addFileEditor" class="markdown markdown-editor" v-model="newMarkdownContent"
-              @input="resizeMarkdownEditor('addFileEditor'); optimizeFinalized = false"
+              @input="resizeMarkdownEditor('addFileEditor'); optimizeFinalized = false; pendingOptimization = null"
               placeholder="Paste or type your markdown content here..."></textarea>
 
             <div class="markdown-editor-actions">

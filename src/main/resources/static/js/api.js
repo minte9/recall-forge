@@ -143,14 +143,14 @@ const Api = {
     return await response.json();
   },
 
-  async createMarkdown(content) {
+  async createMarkdown(content, appliedOptimization = null, originalContent = null) {
     const response = await fetch("/api/markdown", {
       method: "POST",
       credentials: "same-origin",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ content })
+      body: JSON.stringify({ content, appliedOptimization, originalContent })
     });
 
     if (!response.ok) {
@@ -174,19 +174,38 @@ const Api = {
     return await response.json();
   },
 
-  async updateMarkdown(markdownFileId, content) {
+  async updateMarkdown(markdownFileId, content, appliedOptimization = null, originalContent = null) {
     const response = await fetch("/api/markdown/" + encodeURIComponent(markdownFileId), {
       method: "PUT",
       credentials: "same-origin",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ content })
+      body: JSON.stringify({ content, appliedOptimization, originalContent })
     });
 
     if (!response.ok) {
       const message = await response.text();
       throw new Error(message || "Could not save markdown file.");
+    }
+
+    return await response.json();
+  },
+
+  async updateOriginalMarkdown(markdownFileId, content) {
+    const response = await fetch(
+      "/api/markdown/" + encodeURIComponent(markdownFileId) + "/original", {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ content })
+      });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not save the original markdown.");
     }
 
     return await response.json();

@@ -105,7 +105,8 @@ public class StarterPackService {
         }
 
         for (MarkdownFile templateFile : templateFiles) {
-            markdownFileService.importMarkdown(templateFile.getContent(), templateFile.getDisplayOrder());
+            markdownFileService.importMarkdown(
+                    templateFile.getContent(), templateFile.getDisplayOrder(), templateFile);
         }
     }
 

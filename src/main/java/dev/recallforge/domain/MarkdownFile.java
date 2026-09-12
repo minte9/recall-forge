@@ -65,6 +65,25 @@ public class MarkdownFile {
     @Column(name = "display_order")
     private Integer displayOrder;
 
+    // Pre-optimize snapshot of `content`, captured once the first time this
+    // file is optimized (see markOptimized) and never touched again by later
+    // optimize/submit cycles - only its own dedicated edit form changes it
+    // from then on, independently of `content`.
+    @Column(name = "original_content", columnDefinition = "TEXT")
+    private String originalContent;
+
+    // True once this file has gone through the "rewrite existing structured
+    // content" Optimize path at least once (i.e. originalContent has been
+    // captured).
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean optimized;
+
+    // True if this file's content was produced by the "raw notes -> full
+    // structure" Optimize path - a historical fact that, unlike optimized,
+    // has no original snapshot behind it.
+    @Column(name = "ai_generated", nullable = false, columnDefinition = "boolean default false")
+    private boolean aiGenerated;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private UserAccount user;
@@ -110,5 +129,31 @@ public class MarkdownFile {
 
     public void updateDisplayOrder(Integer displayOrder) {
         this.displayOrder = displayOrder;
+    }
+
+    /**
+     * Marks this file as optimized. The snapshot is only ever captured the
+     * first time this is called for a given file (when {@code
+     * originalContent} is still null) - a later optimize/submit cycle on an
+     * already-optimized file leaves the stored original untouched.
+     */
+    public void markOptimized(String originalContentSnapshot) {
+        if (this.originalContent == null && originalContentSnapshot != null) {
+            this.originalContent = originalContentSnapshot;
+        }
+
+        this.optimized = true;
+    }
+
+    public void markAiGenerated() {
+        this.aiGenerated = true;
+    }
+
+    /**
+     * Direct edit of the stored original, independent of `content` - backs
+     * the original's own edit form.
+     */
+    public void updateOriginalContent(String originalContent) {
+        this.originalContent = originalContent;
     }
 }

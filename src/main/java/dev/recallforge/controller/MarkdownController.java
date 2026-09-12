@@ -18,12 +18,14 @@ import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownCreateRequest;
 import dev.recallforge.dto.MarkdownOptimizeRequest;
 import dev.recallforge.dto.MarkdownOptimizeResponse;
+import dev.recallforge.dto.MarkdownOriginalUpdateRequest;
 import dev.recallforge.dto.MarkdownReviewCountResponse;
 import dev.recallforge.dto.MarkdownUpdateRequest;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.dto.MarkdownVaultUploadResponse;
 import dev.recallforge.security.CurrentUserService;
 import dev.recallforge.service.MarkdownFileService;
+import dev.recallforge.service.OptimizeResult;
 import jakarta.validation.Valid;
 
 @RestController
@@ -53,7 +55,8 @@ public class MarkdownController {
 
     @PostMapping
     public MarkdownUploadResponse createMarkdown(@Valid @RequestBody MarkdownCreateRequest request) throws Exception {
-        return markdownFileService.createFromContent(request.content());
+        return markdownFileService.createFromContent(
+                request.content(), request.appliedOptimization(), request.originalContent());
     }
 
     @GetMapping("/{id}")
@@ -66,12 +69,22 @@ public class MarkdownController {
             @PathVariable Long id,
             @Valid @RequestBody MarkdownUpdateRequest request
     ) throws Exception {
-        return markdownFileService.update(id, request.content());
+        return markdownFileService.update(
+                id, request.content(), request.appliedOptimization(), request.originalContent());
+    }
+
+    @PutMapping("/{id}/original")
+    public MarkdownUploadResponse updateMarkdownOriginal(
+            @PathVariable Long id,
+            @Valid @RequestBody MarkdownOriginalUpdateRequest request
+    ) {
+        return markdownFileService.updateOriginal(id, request.content());
     }
 
     @PostMapping("/optimize")
     public MarkdownOptimizeResponse optimizeMarkdown(@Valid @RequestBody MarkdownOptimizeRequest request) {
-        return new MarkdownOptimizeResponse(markdownFileService.optimize(request.content()));
+        OptimizeResult result = markdownFileService.optimize(request.content());
+        return new MarkdownOptimizeResponse(result.content(), result.structured());
     }
 
     @DeleteMapping("/{id}/reviews")
