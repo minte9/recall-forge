@@ -17,7 +17,15 @@ public record ReviewQuestionResponse(
         // the user to write code, graded strictly) rather than a normal
         // review question - tells the frontend to submit the answer through
         // the strict grading path and to keep treating it as practice.
-        boolean codeChallenge
+        boolean codeChallenge,
+
+        // Mirrors MarkdownFile's own optimized/aiGenerated/originalContent -
+        // false/null when the topic has no backing MarkdownFile (an ad-hoc
+        // topic) - so the AI badge in the markdown panel stays correct while
+        // reviewing, not just when browsing the file directly.
+        boolean optimized,
+        boolean aiGenerated,
+        String originalContent
 ) {
     public static ReviewQuestionResponse noReviewsDue() {
         return new ReviewQuestionResponse(
@@ -29,7 +37,10 @@ public record ReviewQuestionResponse(
 			true,
 			"All reviews are done for now. Come back later.",
 			false,
-			false
+			false,
+			false,
+			false,
+			null
         );
     }
 }

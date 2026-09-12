@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import dev.recallforge.config.AppAiProperties;
 import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.dto.FeedbackHistoryResponse;
+import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.QuestionGeneration;
 import dev.recallforge.domain.Review;
 import dev.recallforge.domain.RetryType;
@@ -120,24 +121,7 @@ public class ReviewService {
 
         questionGenerationRepository.save(new QuestionGeneration(userId, topic.getCategory()));
 
-        String markdownContent = topic.getMarkdownFile() != null
-                ? topic.getMarkdownFile().getContent()
-                : "# " + topic.getTitle() + "\n\n" + topic.getContent();
-
-        Long responseMarkdownFileId = topic.getMarkdownFile() != null
-                ? topic.getMarkdownFile().getId()
-                : null;
-
-        return new ReviewQuestionResponse(
-                topic.getId(),
-                topic.getTitle(),
-                question,
-                markdownContent,
-                responseMarkdownFileId,
-                false,
-                null,
-                forcePractice,
-                false);
+        return buildQuestionResponse(topic, question, forcePractice, false);
     }
 
     /**
@@ -203,24 +187,34 @@ public class ReviewService {
 
         questionGenerationRepository.save(new QuestionGeneration(userId, topic.getCategory()));
 
-        String markdownContent = topic.getMarkdownFile() != null
-                ? topic.getMarkdownFile().getContent()
-                : "# " + topic.getTitle() + "\n\n" + topic.getContent();
+        return buildQuestionResponse(topic, question, true, true);
+    }
 
-        Long responseMarkdownFileId = topic.getMarkdownFile() != null
-                ? topic.getMarkdownFile().getId()
-                : null;
+    // Shared by startReview and generateCodeChallengeForTopic - both build a
+    // ReviewQuestionResponse from a Topic's own question/challenge text, its
+    // (possibly absent) MarkdownFile, and the two flags that differ between
+    // a normal review and a Code Challenge.
+    private ReviewQuestionResponse buildQuestionResponse(
+            Topic topic, String question, boolean forcePractice, boolean codeChallenge) {
+        MarkdownFile markdownFile = topic.getMarkdownFile();
+
+        String markdownContent = markdownFile != null
+                ? markdownFile.getContent()
+                : "# " + topic.getTitle() + "\n\n" + topic.getContent();
 
         return new ReviewQuestionResponse(
                 topic.getId(),
                 topic.getTitle(),
                 question,
                 markdownContent,
-                responseMarkdownFileId,
+                markdownFile != null ? markdownFile.getId() : null,
                 false,
                 null,
-                true,
-                true);
+                forcePractice,
+                codeChallenge,
+                markdownFile != null && markdownFile.isOptimized(),
+                markdownFile != null && markdownFile.isAiGenerated(),
+                markdownFile != null ? markdownFile.getOriginalContent() : null);
     }
 
     public ReviewQuestionResponse skipTopic(Long topicId, Long markdownFileId, String category) {
