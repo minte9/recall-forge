@@ -795,7 +795,7 @@
                 </span>
 
                 <span v-if="topicMemoryScore !== null" class="mastery-ring mastery-ring--actions"
-                  :class="topicMemoryScore >= 0.7 ? 'mastery-ring--high-score' : 'mastery-ring--low-score'"
+                  :class="isHighScore(topicMemoryScore) ? 'mastery-ring--high-score' : 'mastery-ring--low-score'"
                   title="Memory Score - Show feedback history" @click="toggleFeedbackHistory">
                   <svg viewBox="0 0 56 56" class="mastery-ring-svg" aria-hidden="true">
                     <circle class="mastery-ring-track" cx="28" cy="28" r="23"></circle>
@@ -849,7 +849,7 @@
                 </div>
 
                 <span v-if="topicMemoryScore !== null" class="mastery-ring mastery-ring--actions"
-                  :class="topicMemoryScore >= 0.7 ? 'mastery-ring--high-score' : 'mastery-ring--low-score'"
+                  :class="isHighScore(topicMemoryScore) ? 'mastery-ring--high-score' : 'mastery-ring--low-score'"
                   title="Memory Score - Show feedback history" @click="toggleFeedbackHistory">
                   <svg viewBox="0 0 56 56" class="mastery-ring-svg" aria-hidden="true">
                     <circle class="mastery-ring-track" cx="28" cy="28" r="23"></circle>
@@ -875,7 +875,7 @@
 
               <div v-else>
                 <details v-for="item in feedbackHistory" :key="item.id" class="feedback-history-item"
-                  :class="item.score >= 0.7 ? 'feedback-history-item--high-score' : 'feedback-history-item--low-score'"
+                  :class="isHighScore(item.score) ? 'feedback-history-item--high-score' : 'feedback-history-item--low-score'"
                   :open="openFeedbackHistoryItemId === item.id">
 
                   <summary class="feedback-history-summary" @click.prevent="
@@ -900,7 +900,7 @@
                   </summary>
 
                   <div class="feedback-qa-box"
-                    :class="item.score >= 0.7 ? 'feedback--high-score' : 'feedback--low-score'">
+                    :class="isHighScore(item.score) ? 'feedback--high-score' : 'feedback--low-score'">
                     <div class="feedback-history-question feedback-qa-text">
                       {{ item.question || "No question saved for this review." }}
                     </div>
@@ -918,7 +918,7 @@
             </div>
 
             <div v-if="result && !feedbackHistoryVisible" class="feedback"
-              :class="result.score >= 0.7 ? 'feedback--high-score' : 'feedback--low-score'">
+              :class="isHighScore(result.score) ? 'feedback--high-score' : 'feedback--low-score'">
               <p><strong>Score:</strong> {{ result.score }}</p>
               <p><strong>Feedback:</strong> {{ result.feedback }}</p>
               <p v-if="result.reward && result.reward.goalReachedToday">

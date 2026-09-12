@@ -293,6 +293,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return Number(score).toFixed(2);
     },
 
+    // Rounds the same way formatScore displays before comparing, so a score
+    // like 0.696 (displayed "0.70") is colored high-score instead of low.
+    isHighScore(score) {
+      return Number(Number(score).toFixed(2)) >= 0.7;
+    },
+
     // Dash offset for the mastery ring's progress circle - r=23 matches
     // the <circle> radius in the ring markup, so this stays in sync with
     // .mastery-ring-progress's stroke-dasharray in app.css.
