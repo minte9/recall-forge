@@ -137,19 +137,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return this.markdownEditing ? "Show Markdown" : "Edit Markdown";
     },
 
-    // "Show Markdown" gets the AI badge instead of the eye once the file is
-    // optimized - what you're about to see is the AI-optimized version,
-    // versus "Show Original" (see index.html) which stays a plain eye.
+    // The AI badge is a pure status label now (see index.html) - it isn't
+    // reused as a navigation icon anywhere, so this always stays eye/pencil.
     editToggleIcon() {
       if (this.viewingOriginal) {
         return this.editingOriginalMarkdown ? "eye" : "pencil";
       }
 
-      if (this.markdownEditing) {
-        return this.currentMarkdownOptimized ? "ai-badge" : "eye";
-      }
-
-      return "pencil";
+      return this.markdownEditing ? "eye" : "pencil";
     },
 
     // The topic's actual spaced-repetition memory score (30% old / 70% new
