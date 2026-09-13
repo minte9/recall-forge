@@ -102,20 +102,7 @@
   }
 
   .panel-resizer {
-    position: relative;
     cursor: col-resize;
-  }
-
-  .panel-resizer::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 2px;
-    transform: translateX(-50%);
-    border-radius: 2px;
-    background: var(--line);
   }
 
   body.panel-resizing {
