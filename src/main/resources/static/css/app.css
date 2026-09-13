@@ -280,29 +280,12 @@
     flex-shrink: 0;
 }
 
-/* The icon's star(s) read --ai-star-color (see icons.js), falling back to
-   yellow where neither variant class applies (e.g. the plain menu icons).
-   Optimized uses the two-star "ai-badge-optimized" icon variant instead of
-   a different color to stand apart from AI-generated. */
-.ai-badge-optimized {
-    --ai-star-color: #facc15;
-}
-
-.ai-badge-generated {
-    --ai-star-color: #facc15;
-}
-
-/* :first-of-type/:last-of-type match by tag (span), not among all children,
-   so this targets the badge group correctly whether or not the sibling
-   Start Review button is rendered before it. margin-left: auto on the first
-   badge is what actually pushes the group to the row's right edge -
-   margin-right alone only adds space after the last item, it doesn't move
-   anything. */
-.markdown-file-actions .ai-badge:first-of-type {
+/* Anchors a badge to the row's right end (the AI-generated status badge,
+   and its "KB" counterpart in the original view) - margin-left: auto is
+   what actually does the pushing, margin-right alone only adds space after
+   it. */
+.ai-badge-end {
     margin-left: auto;
-}
-
-.markdown-file-actions .ai-badge:last-of-type {
     margin-right: 10px;
 }
 
@@ -312,8 +295,8 @@
 }
 
 /* Same bubble mechanic as .info-tooltip (see below), just anchored to the
-   badge itself instead of a fixed-size trigger icon. Opens from the badge's
-   right edge since the badge now sits at the right end of the row. */
+   badge itself instead of a fixed-size trigger icon. Opens leftward (right:0)
+   since every current .ai-badge is anchored to the row's right end. */
 .ai-badge::after {
     content: attr(data-tooltip);
     position: absolute;
@@ -340,14 +323,6 @@
 .ai-badge:focus::after {
     opacity: 1;
     visibility: visible;
-}
-
-.ai-badge.clickable {
-    cursor: pointer;
-}
-
-.ai-badge.clickable:hover {
-    opacity: .75;
 }
 
 .reset-file-reviews-button {
@@ -397,7 +372,7 @@
     border-radius: 10px;
     background: white;
     color: #64748b;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #eeeeee;
     cursor: pointer;
     font-size: 14px;
     font-weight: 300;
