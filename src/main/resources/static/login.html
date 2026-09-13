@@ -441,7 +441,20 @@
         });
 
         render(0);
-        restartTimer();
+
+        if ('IntersectionObserver' in window) {
+            var visibilityObserver = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        restartTimer();
+                        visibilityObserver.unobserve(entry.target);
+                    }
+                });
+            });
+            visibilityObserver.observe(showcase);
+        } else {
+            restartTimer();
+        }
     })();
 
     (function () {
