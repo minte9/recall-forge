@@ -135,7 +135,7 @@
       'mobile-dashboard': mobileView === 'dashboard',
       'mobile-markdown': mobileView === 'markdown',
       'mobile-review': mobileView === 'review'
-    }">
+    }" :style="leftPanelWidth ? { '--left-pct': leftPanelWidth + '%' } : {}">
 
       <section class="panel left-panel" :class="{ expanded: leftExpanded }">
         <!-- <button class="expand-btn" v-if="review" :title="leftExpanded ? 'Restore split view' : 'Expand markdown panel'"
@@ -744,6 +744,10 @@
 
 
       </section>
+
+      <div v-if="!leftExpanded" class="panel-resizer" role="separator" aria-orientation="vertical"
+        aria-label="Resize panels" title="Drag to resize, double-click to reset"
+        @mousedown="startPanelResize" @dblclick="resetPanelWidth"></div>
 
       <section v-if="!leftExpanded" class="panel app-panel">
 

@@ -93,13 +93,34 @@
   .layout {
     min-height: 100vh;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 12px;
+    grid-template-columns: minmax(240px, var(--left-pct, 50%)) 12px minmax(240px, 1fr);
     padding: 12px;
   }
 
   .layout.expanded {
     grid-template-columns: 1fr;
+  }
+
+  .panel-resizer {
+    position: relative;
+    cursor: col-resize;
+  }
+
+  .panel-resizer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    border-radius: 2px;
+    background: var(--line);
+  }
+
+  body.panel-resizing {
+    cursor: col-resize;
+    user-select: none;
   }
 
   .panel {
@@ -2318,7 +2339,8 @@
     .desktop-menu,
     .expand-btn,
     .markdowns-btn,
-    .feedback-history-toggle {
+    .feedback-history-toggle,
+    .panel-resizer {
       display: none !important;
     }
 
