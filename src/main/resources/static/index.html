@@ -1252,7 +1252,7 @@
 
               <div v-if="dashboardActionMenuOpen" class="retry-menu-dropdown">
                 <button @click="dashboardActionMenuOpen = false; startReviewFromDashboard()"
-                  :disabled="dailyLimitReached">
+                  :disabled="dailyLimitReached || (!currentMarkdownFileId && (!dashboard || dashboard.dueNow === 0))">
                   <icon name="arrow-repeat" class="menu-icon"></icon>Start Review
                 </button>
                 <button @click="startDashboardCodeChallenge()" :disabled="dailyLimitReached">
