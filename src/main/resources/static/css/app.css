@@ -288,9 +288,9 @@
     flex-shrink: 0;
 }
 
-/* Anchors a badge to the row's right end (the AI-generated status badge,
-   and its "KB" counterpart in the original view) - margin-left: auto is
-   what actually does the pushing, margin-right alone only adds space after
+/* Anchors a badge to the row's right end (the AI-generated status badge)
+   margin-left: auto is what actually does the pushing, 
+   margin-right alone only adds space after
    it. */
 .ai-badge-end {
     margin-left: auto;
