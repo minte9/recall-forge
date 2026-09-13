@@ -28,6 +28,7 @@ const app = createApp({
       dashboard: null,
       markdownSummaries: [],
       leftExpanded: false,
+      leftPanelWidth: null,
       answerSubmitted: false,
       isRetry: false,
       currentUser: null,
@@ -321,6 +322,40 @@ When you click <strong>Start Review</strong>, this panel will be updated.
   },
 
   methods: {
+    // Drag-resize the left/right desktop panels. Clamps to a 240px minimum
+    // on each side (matches .layout's grid-template-columns minmax bounds
+    // in app.css) so neither panel can be dragged into uselessness.
+    startPanelResize(event) {
+      event.preventDefault();
+
+      const layoutEl = event.currentTarget.closest(".layout");
+      if (!layoutEl) return;
+
+      const rect = layoutEl.getBoundingClientRect();
+      const minPx = 240;
+      const gutterPx = 12;
+
+      const onMove = (moveEvent) => {
+        const maxX = rect.width - gutterPx - minPx;
+        const x = Math.min(Math.max(moveEvent.clientX - rect.left, minPx), maxX);
+        this.leftPanelWidth = (x / rect.width) * 100;
+      };
+
+      const onUp = () => {
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+        document.body.classList.remove("panel-resizing");
+      };
+
+      document.body.classList.add("panel-resizing");
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    },
+
+    resetPanelWidth() {
+      this.leftPanelWidth = null;
+    },
+
     formatScore(score) {
       return Number(score).toFixed(2);
     },
