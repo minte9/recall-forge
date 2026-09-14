@@ -443,6 +443,27 @@ public class MarkdownFileService {
     }
 
     /**
+     * Admin-only. Removes the stored original entirely, clearing {@code
+     * optimized} - the inverse of the first-time {@link #updateOriginal}
+     * capture. {@code content} (the current, optimized-for-review text) is
+     * untouched.
+     */
+    @Transactional
+    public MarkdownUploadResponse deleteOriginal(Long markdownFileId) {
+        currentUserService.requireAdmin();
+
+        Long userId = currentUserService.currentUserId();
+
+        MarkdownFile markdownFile = markdownFileRepository.findByIdAndUserId(markdownFileId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Markdown file not found: " + markdownFileId));
+
+        markdownFile.clearOriginal();
+        markdownFileRepository.save(markdownFile);
+
+        return toResponse(markdownFile);
+    }
+
+    /**
      * Admin-only. Returns AI-optimized markdown text without persisting
      * anything - the caller previews it and submits separately through
      * {@link #update} or {@link #createFromContent} if they want to keep it.

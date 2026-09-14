@@ -156,4 +156,14 @@ public class MarkdownFile {
     public void updateOriginalContent(String originalContent) {
         this.originalContent = originalContent;
     }
+
+    /**
+     * Removes the stored original entirely and clears {@code optimized} -
+     * the inverse of {@link #markOptimized}. {@code content} (the current,
+     * optimized-for-review text) is untouched.
+     */
+    public void clearOriginal() {
+        this.originalContent = null;
+        this.optimized = false;
+    }
 }

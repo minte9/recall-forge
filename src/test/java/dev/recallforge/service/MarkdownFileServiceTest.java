@@ -662,6 +662,51 @@ class MarkdownFileServiceTest {
     }
 
     @Test
+    void deleteOriginal_notAdmin_throwsAccessDeniedExceptionWithoutSaving() {
+        setUp();
+        doThrow(new AccessDeniedException("Admin access required"))
+            .when(currentUserService).requireAdmin();
+
+        assertThatThrownBy(() -> markdownFileService.deleteOriginal(1L))
+            .isInstanceOf(AccessDeniedException.class);
+
+        verify(markdownFileRepository, never()).save(any());
+    }
+
+    @Test
+    void deleteOriginal_happyPath_clearsOriginalAndOptimizedWithoutTouchingContent() {
+        setUp();
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "current optimized content", "hash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        existingMarkdownFile.markOptimized("captured original");
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        MarkdownUploadResponse response = markdownFileService.deleteOriginal(1L);
+
+        assertThat(response.optimized()).isFalse();
+        assertThat(response.originalContent()).isNull();
+        assertThat(response.content()).isEqualTo("current optimized content");
+        assertThat(existingMarkdownFile.isOptimized()).isFalse();
+        assertThat(existingMarkdownFile.getOriginalContent()).isNull();
+    }
+
+    @Test
+    void deleteOriginal_fileNotFoundOrNotOwned_throwsIllegalArgumentException() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(5L, 1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> markdownFileService.deleteOriginal(5L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Markdown file not found: 5");
+    }
+
+    @Test
     void importMarkdown_withOptimizedTemplateFile_clonesOptimizedFlagAndOriginalContent() throws Exception {
         setUp();
         String content = "## Java Basics\nTemplate content.";

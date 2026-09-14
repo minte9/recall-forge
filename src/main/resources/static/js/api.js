@@ -211,6 +211,21 @@ const Api = {
     return await response.json();
   },
 
+  async deleteOriginalMarkdown(markdownFileId) {
+    const response = await fetch(
+      "/api/markdown/" + encodeURIComponent(markdownFileId) + "/original", {
+        method: "DELETE",
+        credentials: "same-origin"
+      });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not delete the original markdown.");
+    }
+
+    return await response.json();
+  },
+
   async optimizeMarkdown(content) {
     const response = await fetch("/api/markdown/optimize", {
       method: "POST",

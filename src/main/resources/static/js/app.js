@@ -668,6 +668,48 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
+    // Inverse of submitOriginalMarkdownEdit's first save - removes the
+    // original entirely (optimized goes back to false) and returns to the
+    // main markdown view, since there's nothing left to show/edit here.
+    async deleteOriginalMarkdown() {
+      if (!this.currentMarkdownFileId) {
+        return;
+      }
+
+      const confirmed = confirm(
+        "Delete the original for this file? This cannot be undone."
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      const scrollY = window.scrollY;
+
+      this.loading = true;
+      this.error = null;
+      this.success = null;
+
+      try {
+        const updated = await Api.deleteOriginalMarkdown(this.currentMarkdownFileId);
+
+        this.currentMarkdownOriginalContent = updated.originalContent || null;
+        this.currentMarkdownOptimized = !!updated.optimized;
+        this.success = "Original markdown deleted.";
+        this.editingOriginalMarkdown = false;
+        this.viewingOriginal = false;
+
+        this.$nextTick(() => {
+          window.scrollTo(0, scrollY);
+        });
+
+      } catch (err) {
+        this.error = err.message || "Could not delete the original markdown.";
+      } finally {
+        this.loading = false;
+      }
+    },
+
     resizeMarkdownEditor(refName = "markdownEditor") {
       const el = this.$refs[refName];
 
