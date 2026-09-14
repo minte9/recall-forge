@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk
+FROM eclipse-temurin:21-jdk AS build
 
 WORKDIR /app
 
@@ -13,4 +13,10 @@ COPY src src
 
 RUN ./gradlew bootJar
 
-CMD ["sh", "-c", "java -jar build/libs/*.jar"]
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+
+COPY --from=build /app/build/libs/*.jar app.jar
+
+CMD ["sh", "-c", "java -jar app.jar"]

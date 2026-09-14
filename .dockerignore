@@ -5,3 +5,10 @@ docs
 data
 database
 *.md
+
+# Always served from the bind-mounted host directory at runtime (see
+# SPRING_WEB_RESOURCES_STATIC_LOCATIONS in compose.yml/compose.prod.yml) -
+# never actually read from inside the jar, so excluding it here means a
+# frontend-only change (HTML/CSS/JS/icons) doesn't invalidate the Docker
+# build at all.
+src/main/resources/static
