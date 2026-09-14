@@ -115,6 +115,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return window.innerWidth > 900;
     },
 
+    todayStatIcon() {
+      return (this.currentCategory && CATEGORY_ICONS[this.currentCategory]) || null;
+    },
+
     dailyLimitReached() {
       return !!this.dashboard && this.dashboard.reviewsToday >= this.dashboard.dailyReviewLimit;
     },
