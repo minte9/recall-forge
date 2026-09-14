@@ -81,6 +81,11 @@ public class MarkdownController {
         return markdownFileService.updateOriginal(id, request.content());
     }
 
+    @DeleteMapping("/{id}/original")
+    public MarkdownUploadResponse deleteMarkdownOriginal(@PathVariable Long id) {
+        return markdownFileService.deleteOriginal(id);
+    }
+
     @PostMapping("/optimize")
     public MarkdownOptimizeResponse optimizeMarkdown(@Valid @RequestBody MarkdownOptimizeRequest request) {
         OptimizeResult result = markdownFileService.optimize(request.content());
