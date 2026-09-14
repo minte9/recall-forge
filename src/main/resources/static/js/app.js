@@ -71,7 +71,7 @@ const app = createApp({
       adminUsers: [],
       categoryOptions: [],
       starterPackUnlockStatus: {},
-      starterPackUnlockThreshold: 50,
+      starterPackUnlockThreshold: 30,
       starterPackMastery: {},
       showDangerZone: false,
       topicsInFile: [],
