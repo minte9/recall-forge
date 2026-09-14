@@ -41,8 +41,8 @@ public class MarkdownTopicImporter {
 
         for (String line : markdown.split("\\R")) {
             boolean isFenceDelimiter = line.matches("^\\s*(`{3,}|~{3,}).*");
-            boolean isPathHeading = !insideFence && !isFenceDelimiter && line.matches("^#\\s+.+");
-            boolean isTopicHeading = !insideFence && !isFenceDelimiter && line.matches("^##\\s+.+");
+            boolean isPathHeading = !insideFence && !isFenceDelimiter && line.matches("^#\\s+\\S.*");
+            boolean isTopicHeading = !insideFence && !isFenceDelimiter && line.matches("^##\\s+\\S.*");
 
             if (isFenceDelimiter) {
                 insideFence = !insideFence;

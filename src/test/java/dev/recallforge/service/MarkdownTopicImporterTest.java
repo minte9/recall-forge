@@ -136,6 +136,40 @@ class MarkdownTopicImporterTest {
     }
 
     @Test
+    void blankHashLine_isNotMisparsedAsPathHeadingAndDoesNotResetCategory() {
+        String markdown = "# JVM / Spring / Framework / AOP\n"
+            + "## 1. Aspect-Oriented Programming\n"
+            + "Some content.\n"
+            + "#  \n"
+            + "More content after a stray hard-break hash line.";
+
+        List<ParsedTopic> topics = importer.parseMarkdown(markdown);
+
+        assertThat(topics).hasSize(1);
+        ParsedTopic topic = topics.get(0);
+        assertThat(topic.environment()).isEqualTo("JVM");
+        assertThat(topic.category()).isEqualTo("Spring");
+        assertThat(topic.subcategory()).isEqualTo("Framework");
+        assertThat(topic.fileTitle()).isEqualTo("AOP");
+        assertThat(topic.content()).contains("#");
+    }
+
+    @Test
+    void blankDoubleHashLine_isNotMisparsedAsTopicHeading() {
+        String markdown = "# JVM / Spring / Framework / AOP\n"
+            + "## Only Topic\n"
+            + "Some content.\n"
+            + "##  \n"
+            + "More content after a stray hard-break double-hash line.";
+
+        List<ParsedTopic> topics = importer.parseMarkdown(markdown);
+
+        assertThat(topics).hasSize(1);
+        assertThat(topics.get(0).title()).isEqualTo("Only Topic");
+        assertThat(topics.get(0).content()).contains("##");
+    }
+
+    @Test
     void tildeFence_alsoSuppressesHeadingDetectionInsideIt() {
         String markdown = "# Programming / Bash / Basics / Comments\n"
             + "## Only Topic\n"
