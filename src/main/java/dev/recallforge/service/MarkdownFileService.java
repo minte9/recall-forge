@@ -665,10 +665,28 @@ public class MarkdownFileService {
 
         MarkdownFile markdownFile;
 
+        boolean skipTopicSync = false;
+
         if (existingFile.isPresent()) {
             markdownFile = existingFile.get();
 
-            markdownFile.updateContent(content, contentHash);
+            // A re-import (e.g. re-uploading an Obsidian vault) matches this
+            // file by path/title alone, not by content - so if it was
+            // previously optimized, the incoming raw content must be compared
+            // against the pre-optimize originalContent, not against the
+            // current (optimized) content, which is expected to differ.
+            // Otherwise every re-upload would silently blow away the
+            // optimization by resetting content back to the raw source.
+            boolean unchangedSinceOptimization = markdownFile.isOptimized()
+                    && markdownFile.getOriginalContent() != null
+                    && markdownFile.getOriginalContent().equals(content);
+
+            if (unchangedSinceOptimization) {
+                skipTopicSync = true;
+            } else {
+                markdownFile.updateContent(content, contentHash);
+            }
+
             markdownFile.updateMetadata(
                     firstTopic.environment(),
                     firstTopic.category(),
@@ -706,7 +724,9 @@ public class MarkdownFileService {
             markdownFileRepository.save(markdownFile);
         }
 
-        syncTopicsFromMarkdown(markdownFile, parsedTopics, userId, user);
+        if (!skipTopicSync) {
+            syncTopicsFromMarkdown(markdownFile, parsedTopics, userId, user);
+        }
 
         return toResponse(markdownFile);
     }
