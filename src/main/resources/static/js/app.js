@@ -1300,8 +1300,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     // Non-markdown files (images, .obsidian/ config, etc.) are filtered
     // out here rather than sent and skipped server-side.
     async uploadVaultFiles(event) {
+      // The File API has no filesystem creation time - lastModified is the
+      // closest available proxy, and the folder picker otherwise returns
+      // entries alphabetically rather than in any meaningful order.
       const files = Array.from(event.target.files || [])
-        .filter(file => /\.md$/i.test(file.name));
+        .filter(file => /\.md$/i.test(file.name))
+        .sort((a, b) => a.lastModified - b.lastModified);
 
       if (files.length === 0) {
         this.error = "No .md files found in the selected folder.";
