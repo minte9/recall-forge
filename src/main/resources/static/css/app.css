@@ -576,6 +576,12 @@
     overflow: hidden;
   }
 
+  /* Tints the code itself instead of a separate header bar/summary, so the
+     card still reads as a code block. */
+  .original-markdown .code-block pre {
+    background: #f7f7f7;
+  }
+
   /* Extra breathing room after each challenge block, scoped to the Code
      Challenges list only - the regular file-content view keeps its normal
      spacing. */
