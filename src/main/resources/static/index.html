@@ -1306,6 +1306,13 @@
                 </button>
                 <button @click="triggerVaultUpload()">
                   <icon name="files" class="menu-icon"></icon>Obsidian Vault
+                  <span class="info-tooltip" tabindex="0" @click.stop
+                    data-tooltip="Upload the whole environment Obsidian folder (e.g. API) — 
+                      files already imported are matched by their header and updated in place, not duplicated. 
+                      Or upload just the new category's folder if its markdown files already have a full header: 
+                      # Environment / Category / Subcategory / Title">
+                    <icon name="question-circle"></icon>
+                  </span>
                 </button>
               </div>
 
