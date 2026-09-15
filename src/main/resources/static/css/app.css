@@ -566,6 +566,16 @@
     overflow: hidden;
   }
 
+  /* Original view's code blocks aren't collapsible (see openCode in
+     markdown.js) - same card look as .markdown details above, just on the
+     plain <div class="code-block"> it renders instead, with no toggle row. */
+  .original-markdown .code-block {
+    margin: 10px 0;
+    border: 1px solid #ececec;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
   /* Extra breathing room after each challenge block, scoped to the Code
      Challenges list only - the regular file-content view keeps its normal
      spacing. */
