@@ -316,42 +316,7 @@ class MarkdownFileServiceTest {
     }
 
     @Test
-    void upload_existingOptimizedFileWithUnchangedSourceContent_preservesOptimizedContent() throws Exception {
-        setUp();
-        String rawContent = "## Java Basics\nOriginal raw notes.";
-        MockMultipartFile file = new MockMultipartFile(
-            "file", "notes.md", "text/markdown", rawContent.getBytes(StandardCharsets.UTF_8)
-        );
-        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
-            "Programming", "Java", "Core", "Java Basics", "Java Basics", "Original raw notes."
-        );
-        UserAccount user = new UserAccount();
-        MarkdownFile existingMarkdownFile = new MarkdownFile(
-            "notes.md", "AI-optimized content.", "optimizedhash", "Programming", "Java", "Core", "Java Basics", user
-        );
-        existingMarkdownFile.markOptimized(rawContent);
-
-        when(currentUserService.currentUserId()).thenReturn(1L);
-        when(currentUserService.currentUser()).thenReturn(user);
-        when(markdownTopicImporter.parseMarkdown(rawContent)).thenReturn(List.of(parsedTopic));
-        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
-                "Programming", "Java", "Core", "Java Basics", 1L))
-            .thenReturn(Optional.of(existingMarkdownFile));
-        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-
-        markdownFileService.upload(file);
-
-        assertThat(existingMarkdownFile.getContent()).isEqualTo("AI-optimized content.");
-        assertThat(existingMarkdownFile.getContentHash()).isEqualTo("optimizedhash");
-        assertThat(existingMarkdownFile.isOptimized()).isTrue();
-        assertThat(existingMarkdownFile.getOriginalContent()).isEqualTo(rawContent);
-        verify(topicRepository, org.mockito.Mockito.never())
-            .findByMarkdownFileAndTitleAndUserId(any(), any(), any());
-        verify(topicRepository, org.mockito.Mockito.never()).save(any());
-    }
-
-    @Test
-    void upload_existingOptimizedFileWithChangedSourceContent_stillOverwritesContent() throws Exception {
+    void upload_existingOptimizedFile_neverOverwritesContent() throws Exception {
         setUp();
         String newRawContent = "## Java Basics\nChanged raw notes.";
         MockMultipartFile file = new MockMultipartFile(
@@ -373,14 +338,48 @@ class MarkdownFileServiceTest {
                 "Programming", "Java", "Core", "Java Basics", 1L))
             .thenReturn(Optional.of(existingMarkdownFile));
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(topicRepository.findByMarkdownFileAndTitleAndUserId(
-                eq(existingMarkdownFile), eq("Java Basics"), eq(1L)))
-            .thenReturn(Optional.empty());
 
         markdownFileService.upload(file);
 
-        assertThat(existingMarkdownFile.getContent()).isEqualTo(newRawContent);
-        assertThat(existingMarkdownFile.getContentHash()).isEqualTo(sha256(newRawContent));
+        assertThat(existingMarkdownFile.getContent()).isEqualTo("AI-optimized content.");
+        assertThat(existingMarkdownFile.getContentHash()).isEqualTo("optimizedhash");
+        verify(topicRepository, org.mockito.Mockito.never())
+            .findByMarkdownFileAndTitleAndUserId(any(), any(), any());
+        verify(topicRepository, org.mockito.Mockito.never()).save(any());
+    }
+
+    @Test
+    void upload_existingAiGeneratedFile_neverOverwritesContent() throws Exception {
+        setUp();
+        String newRawContent = "## GraphQL Basics\nChanged raw notes.";
+        MockMultipartFile file = new MockMultipartFile(
+            "file", "notes.md", "text/markdown", newRawContent.getBytes(StandardCharsets.UTF_8)
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "GraphQL", "Core", "GraphQL Basics", "GraphQL Basics", "Changed raw notes."
+        );
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "AI-generated structured content.", "aigeneratedhash",
+            "Programming", "GraphQL", "Core", "GraphQL Basics", user
+        );
+        existingMarkdownFile.markAiGenerated();
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(newRawContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Programming", "GraphQL", "Core", "GraphQL Basics", 1L))
+            .thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        markdownFileService.upload(file);
+
+        assertThat(existingMarkdownFile.getContent()).isEqualTo("AI-generated structured content.");
+        assertThat(existingMarkdownFile.getContentHash()).isEqualTo("aigeneratedhash");
+        verify(topicRepository, org.mockito.Mockito.never())
+            .findByMarkdownFileAndTitleAndUserId(any(), any(), any());
+        verify(topicRepository, org.mockito.Mockito.never()).save(any());
     }
 
     @Test
