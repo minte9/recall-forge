@@ -270,6 +270,26 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return groups;
     },
 
+    // Flattens filteredMarkdownGroups (subcategory groups, in the same
+    // order the sidebar renders them) into a single ordered list of file
+    // IDs for the current category, used for the prev/next nav buttons.
+    currentCategoryMarkdownFileIds() {
+      return Object.values(this.filteredMarkdownGroups)
+        .flatMap(group => group.files.map(file => file.markdownFileId));
+    },
+
+    previousMarkdownFileId() {
+      const ids = this.currentCategoryMarkdownFileIds;
+      const index = ids.indexOf(this.currentMarkdownFileId);
+      return index > 0 ? ids[index - 1] : null;
+    },
+
+    nextMarkdownFileId() {
+      const ids = this.currentCategoryMarkdownFileIds;
+      const index = ids.indexOf(this.currentMarkdownFileId);
+      return index !== -1 && index < ids.length - 1 ? ids[index + 1] : null;
+    },
+
     // The current file's code challenges, ordered by the topic's leading
     // number (stable, so same-topic challenges keep their reviewedAt
     // order), with a showTopicHeader flag marking the first challenge of
@@ -1108,6 +1128,17 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       await this.loadTopicsInFile(markdownFileId);
       await this.loadMarkdownReviewCount();
       await this.loadMarkdownCodeChallenges();
+    },
+
+    // Back/forward buttons at the bottom of the markdown view - restricted
+    // to previousMarkdownFileId/nextMarkdownFileId, which only walk files
+    // within the current category.
+    async goToAdjacentMarkdownFile(markdownFileId) {
+      if (!markdownFileId) {
+        return;
+      }
+
+      await this.previewMarkdownFile(markdownFileId);
     },
 
     async startReviewFromDashboard() {

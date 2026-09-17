@@ -536,6 +536,18 @@
               KB
             </button>
 
+            <div class="markdown-file-nav">
+              <button v-if="previousMarkdownFileId" class="file-nav-button" @click="goToAdjacentMarkdownFile(previousMarkdownFileId)"
+                title="Previous file in this category">
+                <icon name="chevron-left"></icon>
+              </button>
+
+              <button v-if="nextMarkdownFileId" class="file-nav-button" @click="goToAdjacentMarkdownFile(nextMarkdownFileId)"
+                title="Next file in this category">
+                <icon name="chevron-right"></icon>
+              </button>
+            </div>
+
             <span v-if="currentMarkdownOptimized || currentMarkdownAiGenerated" class="ai-badge ai-badge-end" tabindex="0"
               data-tooltip="AI-generated content">
               <icon name="ai-badge"></icon>
