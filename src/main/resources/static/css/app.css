@@ -1669,6 +1669,11 @@
     stroke-linejoin: round;
   }
 
+  .group-icon svg.group-category-icon {
+    fill: currentColor;
+    stroke: none;
+  }
+
   .group-icon {
     color: #f97316;
   }
