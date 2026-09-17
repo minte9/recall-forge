@@ -370,6 +370,38 @@
     cursor: not-allowed;
 }
 
+.markdown-file-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.file-nav-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid #eeeeee;
+    border-radius: 50%;
+    background: white;
+    color: #64748b;
+    cursor: pointer;
+    margin: 0;
+}
+
+.file-nav-button:hover {
+    color: #0f172a;
+}
+
+.file-nav-button svg {
+    width: 16px;
+    height: 16px;
+}
+
 .edit-file-button {
     display: flex;
     align-items: center;
