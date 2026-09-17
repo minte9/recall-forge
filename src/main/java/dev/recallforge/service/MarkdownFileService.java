@@ -671,17 +671,13 @@ public class MarkdownFileService {
             markdownFile = existingFile.get();
 
             // A re-import (e.g. re-uploading an Obsidian vault) matches this
-            // file by path/title alone, not by content - so if it was
-            // previously optimized, the incoming raw content must be compared
-            // against the pre-optimize originalContent, not against the
-            // current (optimized) content, which is expected to differ.
-            // Otherwise every re-upload would silently blow away the
-            // optimization by resetting content back to the raw source.
-            boolean unchangedSinceOptimization = markdownFile.isOptimized()
-                    && markdownFile.getOriginalContent() != null
-                    && markdownFile.getOriginalContent().equals(content);
-
-            if (unchangedSinceOptimization) {
+            // file by path/title alone, not by content, so it can't tell a
+            // stale re-upload of the raw source apart from a deliberate edit.
+            // Once a file has gone through either Optimize path, any further
+            // change to its content/original is expected to happen through
+            // the dedicated edit/optimize UI, not silently via re-import -
+            // so leave it untouched here entirely.
+            if (markdownFile.isOptimized() || markdownFile.isAiGenerated()) {
                 skipTopicSync = true;
             } else {
                 markdownFile.updateContent(content, contentHash);
