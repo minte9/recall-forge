@@ -115,7 +115,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return window.innerWidth > 900;
     },
 
-    todayStatIcon() {
+    categoryIconName() {
       return (this.currentCategory && CATEGORY_ICONS[this.currentCategory]) || null;
     },
 

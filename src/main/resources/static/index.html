@@ -368,7 +368,8 @@
                         color: groupHasDue(group) ? environmentColor(index) : 'var(--green)',
                         backgroundColor: softColor(environmentColor(groupName))
                     }">
-                  <svg viewBox="0 0 24 24">
+                  <icon v-if="categoryIconName" :name="categoryIconName" class="group-category-icon"></icon>
+                  <svg v-else viewBox="0 0 24 24">
                     <path d="M21 8l-9-5-9 5 9 5 9-5z"></path>
                     <path d="M3 8v8l9 5 9-5V8"></path>
                     <path d="M12 13v8"></path>
@@ -1071,7 +1072,7 @@
             <div class="review-stats-grid">
               <div class="review-stat stat-orange">
                 <div class="stat-icon orange">
-                  <icon v-if="todayStatIcon" :name="todayStatIcon"></icon>
+                  <icon v-if="categoryIconName" :name="categoryIconName"></icon>
                   <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="5" width="18" height="16" rx="2" />
                     <line x1="16" y1="3" x2="16" y2="7" />
