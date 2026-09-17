@@ -45,7 +45,7 @@ public class StarterPackService {
                 "SQL", List.of("PostgreSQL", "Oracle"),
                 "Javascript", List.of("Node", "TypeScript"),
                 "Security", List.of("HTTPS", "OAuth2"),
-                "API", List.of("MCP")
+                "API", List.of("GraphQL", "MCP")
             );
 
     private static final Set<String> PUBLIC_CATEGORIES =
