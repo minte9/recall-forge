@@ -19,8 +19,8 @@ due/weak/strong areas.
 
 - Backend: Spring Boot (Java), REST API, Spring Data JPA, PostgreSQL, Spring
   Security OAuth2 (Google, GitHub login).
-- Frontend: server-rendered static HTML + vanilla JS (no framework, no build
-  step) in `src/main/resources/static`.
+- Frontend: static HTML + Vue 3 (loaded via CDN `<script>` tag, no build
+  step/SFCs) in `src/main/resources/static`.
 - External service: OpenAI (question generation + answer grading).
 
 ## Request flow
@@ -98,10 +98,11 @@ on it for scoping data to the current user.
 
 ## Frontend
 
-Plain JS, no bundler:
+Vue 3 via CDN (`Vue.createApp`), no bundler/build step:
 - `static/js/api.js` — fetch wrapper for the REST API.
-- `static/js/app.js` — main UI logic (dashboard, review flow, markdown list).
+- `static/js/app.js` — main Vue app (dashboard, review flow, markdown list).
 - `static/js/markdown.js` — markdown-specific view helpers.
+- `static/js/icons.js` — inline SVG icon set.
 - `static/index.html`, `login.html`, `privacy.html`, `terms.html`.
 
 ## Configuration
