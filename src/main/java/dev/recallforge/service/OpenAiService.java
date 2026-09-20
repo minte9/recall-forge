@@ -451,7 +451,7 @@ public class OpenAiService {
         int completionTokens = usage.path("completion_tokens").asInt();
         int totalTokens = usage.path("total_tokens").asInt();
 
-        String content = contentNode.asText().trim();
+        String content = contentNode.asString().trim();
         
         log.info(
             "OpenAI tokens: prompt={}, completion={}, total={}",  // docker compose logs -f app | grep "OpenAI tokens"
