@@ -29,6 +29,7 @@ import dev.recallforge.domain.AllowedEnvironment;
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Review;
 import dev.recallforge.domain.RetryType;
+import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.dto.AppliedOptimization;
@@ -39,6 +40,7 @@ import dev.recallforge.exception.MarkdownFileHasReviewsException;
 import dev.recallforge.repository.AllowedEnvironmentRepository;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.repository.ReviewRepository;
+import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.security.CurrentUserService;
 
@@ -66,12 +68,15 @@ class MarkdownFileServiceTest {
     @Mock
     private AllowedEnvironmentRepository allowedEnvironmentRepository;
 
+    @Mock
+    private SubcategoryOrderRepository subcategoryOrderRepository;
+
     private MarkdownFileService markdownFileService;
 
     private void setUp() {
         markdownFileService = new MarkdownFileService(
             markdownFileRepository, topicRepository, reviewRepository, markdownTopicImporter,
-            currentUserService, openAiService, allowedEnvironmentRepository
+            currentUserService, openAiService, allowedEnvironmentRepository, subcategoryOrderRepository
         );
     }
 
@@ -1543,5 +1548,99 @@ class MarkdownFileServiceTest {
         assertThat(markdownFileCaptor.getValue().getEnvironment()).isEqualTo("Explicit");
         assertThat(markdownFileCaptor.getValue().getCategory()).isEqualTo("Header");
         assertThat(markdownFileCaptor.getValue().getSubcategory()).isEqualTo("Line");
+    }
+
+    @Test
+    void uploadVault_multipleNewSubcategories_assignsSequentialDisplayOrderInUploadOrder() throws Exception {
+        setUp();
+        UserAccount user = new UserAccount();
+
+        String content1 = "## Args\nBody1";
+        MultipartFile file1 = new MockMultipartFile(
+            "files", "Args.md", "text/markdown", content1.getBytes(StandardCharsets.UTF_8)
+        );
+        String expectedSynthesized1 = "# API / GraphQL / Query Arguments / Args\n\n" + content1;
+        MarkdownTopicImporter.ParsedTopic parsedTopic1 = new MarkdownTopicImporter.ParsedTopic(
+            "API", "GraphQL", "Query Arguments", "Args", "Args", "Body1"
+        );
+
+        String content2 = "## Basics\nBody2";
+        MultipartFile file2 = new MockMultipartFile(
+            "files", "Basics.md", "text/markdown", content2.getBytes(StandardCharsets.UTF_8)
+        );
+        String expectedSynthesized2 = "# API / GraphQL / Fundamentals / Basics\n\n" + content2;
+        MarkdownTopicImporter.ParsedTopic parsedTopic2 = new MarkdownTopicImporter.ParsedTopic(
+            "API", "GraphQL", "Fundamentals", "Basics", "Basics", "Body2"
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(subcategoryOrderRepository.findByCategoryIgnoreCase("GraphQL")).thenReturn(List.of());
+        when(markdownTopicImporter.parseMarkdown(expectedSynthesized1)).thenReturn(List.of(parsedTopic1));
+        when(markdownTopicImporter.parseMarkdown(expectedSynthesized2)).thenReturn(List.of(parsedTopic2));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                eq("API"), eq("GraphQL"), any(), any(), eq(1L)))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId(any(), eq(1L))).thenReturn(Optional.empty());
+        when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(eq(1L), eq("GraphQL"), any()))
+            .thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), any(), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(file1, file2),
+            List.of("API/GraphQL/Query Arguments/Args.md", "API/GraphQL/Fundamentals/Basics.md")
+        );
+
+        assertThat(response.errors()).isEmpty();
+        assertThat(response.imported()).hasSize(2);
+
+        ArgumentCaptor<SubcategoryOrder> orderCaptor = ArgumentCaptor.forClass(SubcategoryOrder.class);
+        verify(subcategoryOrderRepository, org.mockito.Mockito.times(2)).save(orderCaptor.capture());
+        List<SubcategoryOrder> savedOrders = orderCaptor.getAllValues();
+        assertThat(savedOrders.get(0).getSubcategory()).isEqualTo("Query Arguments");
+        assertThat(savedOrders.get(0).getDisplayOrder()).isEqualTo(1);
+        assertThat(savedOrders.get(1).getSubcategory()).isEqualTo("Fundamentals");
+        assertThat(savedOrders.get(1).getDisplayOrder()).isEqualTo(2);
+    }
+
+    @Test
+    void uploadVault_subcategoryAlreadyHasExplicitOrder_isNotOverwrittenOrDuplicated() throws Exception {
+        setUp();
+        UserAccount user = new UserAccount();
+
+        String content = "## Args\nBody1";
+        MultipartFile file = new MockMultipartFile(
+            "files", "Args.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
+        );
+        String expectedSynthesized = "# API / GraphQL / Query Arguments / Args\n\n" + content;
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "API", "GraphQL", "Query Arguments", "Args", "Args", "Body1"
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(subcategoryOrderRepository.findByCategoryIgnoreCase("GraphQL"))
+            .thenReturn(List.of(new SubcategoryOrder("GraphQL", "Query Arguments", 3)));
+        when(markdownTopicImporter.parseMarkdown(expectedSynthesized)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "API", "GraphQL", "Query Arguments", "Args", 1L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("Args", 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(
+                1L, "GraphQL", "Query Arguments"))
+            .thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Args"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(file), List.of("API/GraphQL/Query Arguments/Args.md")
+        );
+
+        assertThat(response.errors()).isEmpty();
+        assertThat(response.imported()).hasSize(1);
+        verify(subcategoryOrderRepository, org.mockito.Mockito.never()).save(any());
     }
 }
