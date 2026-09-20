@@ -47,7 +47,8 @@ public class StarterPackService {
                 "Security", List.of("HTTPS", "OAuth2"),
                 "API", List.of("GraphQL", "MCP")
             );
-
+    
+    @SuppressWarnings("null")
     private static final Set<String> PUBLIC_CATEGORIES =
             Stream.concat(
                 DEPENDENTS_BY_LEVEL_ONE_CATEGORY.keySet().stream(),
@@ -61,6 +62,7 @@ public class StarterPackService {
     // dependent category -> its level 1 category (see
     // DEPENDENTS_BY_LEVEL_ONE_CATEGORY above). Level 1 categories themselves
     // have no entry here and so aren't gated - they're always importable.
+    @SuppressWarnings("null")
     private static final Map<String, String> LEVEL_ONE_PREREQUISITE_CATEGORY =
             DEPENDENTS_BY_LEVEL_ONE_CATEGORY.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream()
@@ -145,6 +147,7 @@ public class StarterPackService {
      * #UNLOCK_MASTERY_THRESHOLD_PERCENT}. A level 1 category the user hasn't
      * imported yet has 0% mastery, so everything under it starts locked.
      */
+    @SuppressWarnings("null")
     public Map<String, Boolean> getUnlockStatus() {
         Map<String, Integer> masteryPercentages = getMasteryPercentages();
 

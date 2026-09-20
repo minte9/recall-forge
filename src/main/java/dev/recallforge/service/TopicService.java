@@ -48,7 +48,8 @@ public class TopicService {
         this.subcategoryOrderRepository = subcategoryOrderRepository;
         this.reviewRepository = reviewRepository;
     }
-
+    
+    @SuppressWarnings("null")
     public List<Topic> getAllTopics(Long userId) {
         return topicRepository.findByUserId(userId)
             .stream()
@@ -78,6 +79,7 @@ public class TopicService {
      *  6. memoryScore (weakest first, only breaks ties left by document order)
      *  7. nextReviewAt
      */
+    @SuppressWarnings("null")
     public Optional<Topic> selectNextTopic(Long userId, String category) {
         List<Topic> dueTopics = topicRepository.findDueTopicsByCategory(userId, category, LocalDateTime.now());
 
@@ -142,6 +144,7 @@ public class TopicService {
         return markdownFile != null ? markdownFile.getDisplayOrder() : null;
     }
 
+    @SuppressWarnings("null")
     public Optional<Topic> selectNextTopicByMarkdownFileId(Long markdownFileId, Long userId) {
         return topicRepository.findDueTopicsByMarkdownFileId(
                 markdownFileId,
@@ -180,6 +183,7 @@ public class TopicService {
      * code-challenge counts tie, the earliest topic the user can see wins.
      * Empty only when the category has no topics at all.
      */
+    @SuppressWarnings("null")
     public Optional<Topic> selectNextCodeChallengeTopic(Long userId, String category) {
         List<Topic> topics = topicRepository.findByUserIdAndCategoryIgnoreCase(userId, category);
 

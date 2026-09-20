@@ -116,6 +116,7 @@ public class CurrentUserService {
     }
 
     @Transactional
+    @SuppressWarnings("null")
     public void resetCurrentUserReviews() {
         UserAccount user = currentUser();
         Long userId = user.getId();
@@ -129,6 +130,7 @@ public class CurrentUserService {
     }
 
     @Transactional
+    @SuppressWarnings("null")
     public void resetCurrentUserReviewsForMarkdownFile(Long markdownFileId) {
         Long userId = currentUserId();
 

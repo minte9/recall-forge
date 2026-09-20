@@ -240,6 +240,7 @@ public class MarkdownFileService {
      * is left untouched: this only ever fills in missing slots, never
      * reorders existing ones.
      */
+    @SuppressWarnings("null")
     private void ensureSubcategoryOrder(
             String category,
             String subcategory,
@@ -665,15 +666,6 @@ public class MarkdownFileService {
             String content,
             String filename,
             boolean autoAssignDisplayOrder,
-            Integer explicitDisplayOrder
-    ) throws Exception {
-        return importMarkdown(content, filename, autoAssignDisplayOrder, explicitDisplayOrder, null, null, null);
-    }
-
-    private MarkdownUploadResponse importMarkdown(
-            String content,
-            String filename,
-            boolean autoAssignDisplayOrder,
             Integer explicitDisplayOrder,
             AppliedOptimization appliedOptimization,
             String originalContentSnapshot
@@ -847,6 +839,7 @@ public class MarkdownFileService {
     // resubmission of the same challenge shouldn't show up twice, matching
     // the distinct-question semantics of the dashboard's codeChallengeCount.
     @Transactional
+    @SuppressWarnings("null")
     public List<CodeChallengeResponse> getCodeChallenges(Long markdownFileId) {
         Long userId = currentUserService.currentUserId();
 
@@ -907,6 +900,7 @@ public class MarkdownFileService {
             .trim();
     }
 
+    @SuppressWarnings("null")
     private Optional<MarkdownFile> findExistingMarkdownFile(
         MarkdownTopicImporter.ParsedTopic firstTopic,
         Long userId
@@ -985,6 +979,7 @@ public class MarkdownFileService {
      * and creating a new one, so its review history is intentionally not
      * preserved.
      */
+    @SuppressWarnings("null")
     private void deleteStaleTopics(
         MarkdownFile markdownFile,
         List<MarkdownTopicImporter.ParsedTopic> parsedTopics,
