@@ -1,12 +1,9 @@
 package dev.recallforge.config;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
@@ -14,12 +11,12 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.endpoint.PkceParameterNames;
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.SecurityFilterChain;
 
+import dev.recallforge.exception.LoginDisabledException;
 import dev.recallforge.security.DatabaseOAuth2UserService;
 import dev.recallforge.security.DatabaseOidcUserService;
-import dev.recallforge.exception.LoginDisabledException;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Builds the security filter chain with three distinct modes, checked in
