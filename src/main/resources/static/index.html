@@ -365,7 +365,7 @@
 
               <div class="group-left">
                 <div class="group-icon" :style="{
-                        color: groupHasDue(group) ? environmentColor(index) : 'var(--green)',
+                        color: groupHasDue(group) ? 'var(--orange)' : 'var(--green)',
                         backgroundColor: softColor(environmentColor(groupName))
                     }">
                   <icon v-if="categoryIconName" :name="categoryIconName" class="group-category-icon"></icon>
@@ -1070,8 +1070,8 @@
             </div>
 
             <div class="review-stats-grid">
-              <div class="review-stat stat-orange">
-                <div class="stat-icon orange">
+              <div class="review-stat" :class="dashboard.dueNow > 0 ? 'stat-orange' : 'stat-green'">
+                <div class="stat-icon" :class="dashboard.dueNow > 0 ? 'orange' : 'green'">
                   <icon v-if="categoryIconName" :name="categoryIconName"></icon>
                   <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="5" width="18" height="16" rx="2" />
