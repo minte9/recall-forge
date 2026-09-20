@@ -163,6 +163,7 @@ class DashboardServiceTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     void getDashboard_selectsFirstThreeWeakAreasInSubcategoryOrder() {
         setUp();
         // findWeakAreas returns busiest-first, but selection now follows
@@ -424,6 +425,7 @@ class DashboardServiceTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     void getMarkdownSummaries_mergesCodeChallengeCountsFromReviewRepository() {
         setUp();
         MarkdownSummaryDto fileWithChallenge =
@@ -442,6 +444,7 @@ class DashboardServiceTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     void getMarkdownSummaries_mergesCodeChallengeXpFromRewardService() {
         setUp();
         MarkdownSummaryDto fileWithXp =

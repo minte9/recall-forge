@@ -90,14 +90,15 @@ public class DashboardService {
         long dueThisWeek = topicRepository.countDueBetweenByUser(userId, category, tomorrowStart, weekEnd);
         long totalTopics = topicRepository.countByUser(userId, category);
 
-
+        @SuppressWarnings("null")
         Map<String, Long> reviewCountBySubcategory = reviewRepository.countReviewsBySubcategory(userId, category)
             .stream()
             .collect(Collectors.toMap(
                 SubcategoryReviewCountProjection::getSubcategory,
                 SubcategoryReviewCountProjection::getReviewCount
             ));
-
+        
+        @SuppressWarnings("null")
         Map<String, Integer> subcategoryOrder = subcategoryOrderRepository.findByCategoryIgnoreCase(category)
             .stream()
             .collect(Collectors.toMap(SubcategoryOrder::getSubcategory, SubcategoryOrder::getDisplayOrder));
@@ -114,6 +115,7 @@ public class DashboardService {
         // subcategory happens to have the most due topics (the query's
         // busiest-first ordering now only acts as a stable tiebreaker for
         // subcategories with no configured display order).
+        @SuppressWarnings("null")
         List<WeakAreaResponse> weakAreas = topicRepository.findWeakAreas(userId, category, now)
             .stream()
             .sorted(Comparator.<WeakAreaProjection, Integer>comparing(
@@ -220,6 +222,7 @@ public class DashboardService {
         return reviewCountBySubcategory.getOrDefault(area.getTitle(), 0L) >= MIN_REVIEWS_FOR_KNOWLEDGE_INSIGHTS;
     }
 
+    @SuppressWarnings("null")
     public List<MarkdownSummaryDto> getMarkdownSummaries(String category) {
         Long userId = currentUserService.currentUserId();
 
@@ -255,6 +258,7 @@ public class DashboardService {
             .toList();
     }
 
+    @SuppressWarnings("null")
     public List<CategoryOptionResponse> getCategoryOptions() {
         Long userId = currentUserService.currentUserId();
 

@@ -165,6 +165,7 @@ public class ReviewService {
                 .orElseGet(ReviewQuestionResponse::noReviewsDue);
     }
 
+    @SuppressWarnings("null")
     private ReviewQuestionResponse generateCodeChallengeForTopic(Topic topic, Long userId) {
         long questionsToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
                 userId, topic.getCategory(), LocalDate.now().atStartOfDay());
@@ -361,6 +362,7 @@ public class ReviewService {
                 .toList();
     }
 
+    @SuppressWarnings("null")
     public ReviewQueueResponse getDailyQueue(Long markdownFileId, String category) {
         Long userId = currentUserService.currentUserId();
         LocalDateTime now = LocalDateTime.now();

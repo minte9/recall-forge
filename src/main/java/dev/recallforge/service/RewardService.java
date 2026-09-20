@@ -238,6 +238,7 @@ public class RewardService {
     // one of those qualifying days - checked here (same qualifying-day set)
     // rather than as a separate query, and read by ReviewService after every
     // answer via rewardDefaultUser to show a "goal reached today" badge.
+    @SuppressWarnings("null")
     private GoalDaysSummary goalDaysThisMonth(Long userId, String category, LocalDate today) {
         LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
 
@@ -279,6 +280,7 @@ public class RewardService {
     private record GoalDaysSummary(int count, boolean reachedToday) {
     }
 
+    @SuppressWarnings("null")
     public Map<Long, Long> getCodeChallengeXpByMarkdownFile(String category) {
         Long userId = currentUserService.currentUserId();
 
@@ -290,6 +292,7 @@ public class RewardService {
                 p -> p.getCodeChallengeCount() * rewardProperties.codeChallengeXp()));
     }
 
+    @SuppressWarnings("null")
     public Map<Long, Long> getCodeChallengeXpByTopicInMarkdownFile(Long markdownFileId) {
         Long userId = currentUserService.currentUserId();
 

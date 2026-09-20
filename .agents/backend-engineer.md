@@ -90,6 +90,17 @@ Avoid:
 
 ---
 
+## Null Safety
+
+The codebase relies on convention, not static tooling:
+
+- `Optional<T>` at repository/lookup boundaries, resolved with `.orElseThrow(...)` into a typed exception (see `CurrentUserService.currentUser()`). This is the standard way to fail fast on a missing entity.
+- No `@Nullable`/`@NonNull` or JSpecify annotations are used anywhere in `src/main/java`. Don't introduce them piecemeal on a single class/package — that's a cross-cutting decision (annotations, dependency, IDE config) that needs approval first, not something to do incidentally while touching unrelated code.
+- IDE-only null-analysis warnings (e.g. JDT/VS Code flagging "unchecked conversion to `@NonNull`") are expected noise given the above and don't indicate a real null-safety gap — they're not a signal to add annotations or suppressions as part of an unrelated change.
+- When such a warning is a known false positive (e.g. a method-reference receiver in a `Consumer`/`forEach` call, as in `CurrentUserService.resetCurrentUserReviews()`), the accepted fix is a method-scoped `@SuppressWarnings("null")` on that method — not a package-wide annotation or an IDE/settings change.
+
+---
+
 ## Decision Making
 
 When uncertain:
