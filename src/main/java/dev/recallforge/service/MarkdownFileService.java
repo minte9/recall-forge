@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Review;
 import dev.recallforge.domain.RetryType;
+import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.dto.AppliedOptimization;
 import dev.recallforge.dto.CodeChallengeResponse;
@@ -26,6 +28,7 @@ import dev.recallforge.exception.MarkdownFileHasReviewsException;
 import dev.recallforge.repository.AllowedEnvironmentRepository;
 import dev.recallforge.repository.MarkdownFileRepository;
 import dev.recallforge.repository.ReviewRepository;
+import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
 import dev.recallforge.security.CurrentUserService;
 import dev.recallforge.domain.UserAccount;
@@ -57,6 +60,7 @@ public class MarkdownFileService {
     private final CurrentUserService currentUserService;
     private final OpenAiService openAiService;
     private final AllowedEnvironmentRepository allowedEnvironmentRepository;
+    private final SubcategoryOrderRepository subcategoryOrderRepository;
 
     private static final long MAX_FILE_SIZE = 200 * 1024;  // 200 KB
     private static final int MAX_CONTENT_LENGTH = 200_000;
@@ -77,7 +81,8 @@ public class MarkdownFileService {
             MarkdownTopicImporter markdownTopicImporter,
             CurrentUserService currentUserService,
             OpenAiService openAiService,
-            AllowedEnvironmentRepository allowedEnvironmentRepository
+            AllowedEnvironmentRepository allowedEnvironmentRepository,
+            SubcategoryOrderRepository subcategoryOrderRepository
     ) {
         this.markdownFileRepository = markdownFileRepository;
         this.topicRepository = topicRepository;
@@ -86,6 +91,7 @@ public class MarkdownFileService {
         this.currentUserService = currentUserService;
         this.openAiService = openAiService;
         this.allowedEnvironmentRepository = allowedEnvironmentRepository;
+        this.subcategoryOrderRepository = subcategoryOrderRepository;
     }
 
     @Transactional
@@ -160,6 +166,14 @@ public class MarkdownFileService {
         List<MarkdownUploadResponse> imported = new ArrayList<>();
         List<MarkdownVaultUploadResponse.VaultFileError> errors = new ArrayList<>();
 
+        // Category -> (subcategory -> displayOrder), lazily loaded per
+        // category the first time it's encountered in this pass. Files
+        // arrive pre-sorted by the client (folder mtime order), and are
+        // processed in that same order below, so the first time a new
+        // subcategory shows up here is a reasonable proxy for "this is
+        // where it belongs" relative to subcategories already seen.
+        Map<String, Map<String, Integer>> subcategoryOrderByCategory = new HashMap<>();
+
         for (int i = 0; i < files.size(); i++) {
             MultipartFile file = files.get(i);
             String relativePath = resolveRelativePath(file, paths.get(i));
@@ -199,6 +213,14 @@ public class MarkdownFileService {
                     content = synthesizeHeaderFromPath(relativePath) + "\n\n" + content;
                 }
 
+                List<MarkdownTopicImporter.ParsedTopic> parsedTopics = markdownTopicImporter.parseMarkdown(content);
+
+                if (!parsedTopics.isEmpty()) {
+                    MarkdownTopicImporter.ParsedTopic firstTopic = parsedTopics.get(0);
+                    ensureSubcategoryOrder(
+                            firstTopic.category(), firstTopic.subcategory(), subcategoryOrderByCategory);
+                }
+
                 imported.add(importMarkdown(content, sanitizeFilename(baseFilename)));
 
             } catch (IllegalArgumentException e) {
@@ -207,6 +229,37 @@ public class MarkdownFileService {
         }
 
         return new MarkdownVaultUploadResponse(imported, errors);
+    }
+
+    /**
+     * Assigns the next {@link SubcategoryOrder} slot to {@code subcategory}
+     * the first time it's seen for {@code category}, either in this pass
+     * (tracked via {@code subcategoryOrderByCategory}) or in a prior one
+     * (loaded from the repository on first encounter of the category). A
+     * subcategory that already has an explicit order - from either source -
+     * is left untouched: this only ever fills in missing slots, never
+     * reorders existing ones.
+     */
+    private void ensureSubcategoryOrder(
+            String category,
+            String subcategory,
+            Map<String, Map<String, Integer>> subcategoryOrderByCategory
+    ) {
+        Map<String, Integer> ordersForCategory = subcategoryOrderByCategory.computeIfAbsent(category, key ->
+                subcategoryOrderRepository.findByCategoryIgnoreCase(key).stream()
+                        .collect(Collectors.toMap(
+                                SubcategoryOrder::getSubcategory,
+                                SubcategoryOrder::getDisplayOrder,
+                                (existing, duplicate) -> existing,
+                                HashMap::new)));
+
+        if (ordersForCategory.containsKey(subcategory)) {
+            return;
+        }
+
+        int nextOrder = ordersForCategory.values().stream().mapToInt(Integer::intValue).max().orElse(0) + 1;
+        subcategoryOrderRepository.save(new SubcategoryOrder(category, subcategory, nextOrder));
+        ordersForCategory.put(subcategory, nextOrder);
     }
 
     /**
