@@ -2253,14 +2253,14 @@ app.component("starter-pack-list", {
 
       return this.isImported(category) ? "Go to category" : "Import category";
     },
-    masteryClass(category) {
-      const percent = this.mastery[category] || 0;
+    dueColorClass(category) {
+      const option = this.categoryOptions.find(o => o.category === category);
 
-      if (percent >= 70) {
-        return "starter-pack-btn-mastered";
+      if (!option || !option.started) {
+        return "";
       }
 
-      return percent > 0 ? "starter-pack-btn-practicing" : "";
+      return option.dueCount > 0 ? "starter-pack-btn-due" : "starter-pack-btn-caught-up";
     },
     onClick(category) {
       this.$emit(this.isImported(category) ? "open" : "import", category);
@@ -2269,7 +2269,7 @@ app.component("starter-pack-list", {
   template: `
     <div class="starter-pack-list">
       <button v-for="category in categories" :key="category" class="starter-pack-btn"
-        :class="masteryClass(category)"
+        :class="dueColorClass(category)"
         :disabled="isLocked(category)" :title="tooltip(category)" @click="onClick(category)">
         {{ category }}
         <span v-if="mastery[category] > 0" class="starter-pack-mastery-badge">{{ mastery[category] || 0 }}%</span>
