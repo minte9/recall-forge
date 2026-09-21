@@ -288,9 +288,9 @@
 
                       <span class="category-icon-slot">
                         <icon v-if="category.isPrivate" name="lock-fill" class="category-lock-icon"
-                          title="Private"></icon>
+                          :style="{ color: categoryDueColor(category) }" title="Private"></icon>
                         <icon v-else name="unlock-fill" class="category-public-icon"
-                          title="Public"></icon>
+                          :style="{ color: categoryDueColor(category) }" title="Public"></icon>
                       </span>
                     </span>
 

@@ -331,6 +331,29 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         @Param("userId") Long userId
     );
 
+    // reviewedCount (any topic ever reviewed) distinguishes a category
+    // that's genuinely untouched from one that's merely caught up - a
+    // brand new topic's nextReviewAt defaults to creation time, so an
+    // untouched category's topics are immediately "due" too and would
+    // otherwise be indistinguishable from a caught-up category's backlog.
+    // dueCount counts ALL currently-due topics, first-time or repeat -
+    // unlike findWeakAreas above, a topic due for the first time still
+    // belongs in the due count here (it's real, reviewable work), it's
+    // only excluded from "not started" (reviewedCount) at the category level.
+    @Query("""
+        select
+            t.category as category,
+            sum(case when exists (select 1 from Review r where r.topic = t) then 1 else 0 end) as reviewedCount,
+            sum(case when t.nextReviewAt <= :now then 1 else 0 end) as dueCount
+        from Topic t
+        where t.markdownFile.user.id = :userId
+        group by t.category
+    """)
+    List<CategoryDueStatusProjection> findCategoryDueStatuses(
+        @Param("userId") Long userId,
+        @Param("now") LocalDateTime now
+    );
+
     @Modifying
     @Query("delete from Topic t where t.user.id = :userId")
     void deleteByUserId(@Param("userId") Long userId);
