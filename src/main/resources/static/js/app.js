@@ -1709,6 +1709,19 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       await this.loadStarterPackStatus();
     },
 
+    async toggleMasteredPanel() {
+      if (!this.isDesktop) {
+        await this.showStarterPack();
+        return;
+      }
+
+      if (this.leftPanel === "starter-pack") {
+        this.showMarkdownSummaries();
+      } else {
+        await this.showStarterPack();
+      }
+    },
+
     async showDashboard() {
       this.error = null;
       this.success = null;
