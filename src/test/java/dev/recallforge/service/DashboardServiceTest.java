@@ -25,6 +25,7 @@ import dev.recallforge.dto.KnowledgeAreaResponse;
 import dev.recallforge.dto.MarkdownSummaryDto;
 import dev.recallforge.dto.RewardResponse;
 import dev.recallforge.dto.WeakAreaResponse;
+import dev.recallforge.repository.CategoryDueStatusProjection;
 import dev.recallforge.repository.CategoryOrderRepository;
 import dev.recallforge.repository.EnvironmentCategoryProjection;
 import dev.recallforge.repository.KnowledgeAreaProjection;
@@ -131,6 +132,14 @@ class DashboardServiceTest {
         EnvironmentCategoryProjection projection = mock(EnvironmentCategoryProjection.class);
         when(projection.getEnvironment()).thenReturn(environment);
         when(projection.getCategory()).thenReturn(category);
+        return projection;
+    }
+
+    private CategoryDueStatusProjection categoryDueStatus(String category, long reviewedCount, long dueCount) {
+        CategoryDueStatusProjection projection = mock(CategoryDueStatusProjection.class);
+        when(projection.getCategory()).thenReturn(category);
+        when(projection.getReviewedCount()).thenReturn(reviewedCount);
+        when(projection.getDueCount()).thenReturn(dueCount);
         return projection;
     }
 
@@ -515,9 +524,34 @@ class DashboardServiceTest {
         List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
 
         assertThat(result).containsExactly(
-            new CategoryOptionResponse("JVM", "Java", true),
-            new CategoryOptionResponse("JVM", "Spring", true),
-            new CategoryOptionResponse("PVM", "Python", true)
+            new CategoryOptionResponse("JVM", "Java", true, 0, false),
+            new CategoryOptionResponse("JVM", "Spring", true, 0, false),
+            new CategoryOptionResponse("PVM", "Python", true, 0, false)
+        );
+    }
+
+    @Test
+    void getCategoryOptions_marksDueCountAndStartedFromDueStatusRepository() {
+        setUp();
+        List<EnvironmentCategoryProjection> options = List.of(
+            environmentCategory("JVM", "Java"),
+            environmentCategory("JVM", "Spring"),
+            environmentCategory("PVM", "Python")
+        );
+        when(topicRepository.findDistinctEnvironmentCategories(1L)).thenReturn(options);
+        List<CategoryDueStatusProjection> dueStatuses = List.of(
+            categoryDueStatus("Java", 5, 2),
+            categoryDueStatus("Spring", 3, 0),
+            categoryDueStatus("Python", 0, 0)
+        );
+        when(topicRepository.findCategoryDueStatuses(eq(1L), any())).thenReturn(dueStatuses);
+
+        List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
+
+        assertThat(result).containsExactly(
+            new CategoryOptionResponse("JVM", "Java", true, 2, true),
+            new CategoryOptionResponse("JVM", "Spring", true, 0, true),
+            new CategoryOptionResponse("PVM", "Python", true, 0, false)
         );
     }
 
@@ -535,8 +569,8 @@ class DashboardServiceTest {
         List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
 
         assertThat(result).containsExactly(
-            new CategoryOptionResponse("JVM", "Java", false),
-            new CategoryOptionResponse("JVM", "Spring", true)
+            new CategoryOptionResponse("JVM", "Java", false, 0, false),
+            new CategoryOptionResponse("JVM", "Spring", true, 0, false)
         );
     }
 
@@ -567,8 +601,8 @@ class DashboardServiceTest {
         List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
 
         assertThat(result).containsExactly(
-            new CategoryOptionResponse("DB", "SQL", true),
-            new CategoryOptionResponse("DB", "Antipatterns", true)
+            new CategoryOptionResponse("DB", "SQL", true, 0, false),
+            new CategoryOptionResponse("DB", "Antipatterns", true, 0, false)
         );
     }
 
@@ -589,9 +623,9 @@ class DashboardServiceTest {
         List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
 
         assertThat(result).containsExactly(
-            new CategoryOptionResponse("JVM", "Java", true),
-            new CategoryOptionResponse("JVM", "Python", true),
-            new CategoryOptionResponse("JVM", "Spring", true)
+            new CategoryOptionResponse("JVM", "Java", true, 0, false),
+            new CategoryOptionResponse("JVM", "Python", true, 0, false),
+            new CategoryOptionResponse("JVM", "Spring", true, 0, false)
         );
     }
 
@@ -616,9 +650,9 @@ class DashboardServiceTest {
         List<CategoryOptionResponse> result = dashboardService.getCategoryOptions();
 
         assertThat(result).containsExactly(
-            new CategoryOptionResponse("DB", "SQL", true),
-            new CategoryOptionResponse("DB", "Antipatterns", true),
-            new CategoryOptionResponse("JVM", "Java", true)
+            new CategoryOptionResponse("DB", "SQL", true, 0, false),
+            new CategoryOptionResponse("DB", "Antipatterns", true, 0, false),
+            new CategoryOptionResponse("JVM", "Java", true, 0, false)
         );
     }
 }

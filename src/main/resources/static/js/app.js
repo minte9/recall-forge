@@ -215,7 +215,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         groups[option.environment].push({
           category: option.category,
-          isPrivate: option.isPrivate
+          isPrivate: option.isPrivate,
+          dueCount: option.dueCount,
+          started: option.started
         });
       });
 
@@ -1409,6 +1411,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         await this.loadDashboard();
         await this.loadMarkdownSummaries(false);
+        await this.loadCategoryOptions();
         await this.loadFeedbackHistory(this.review.topicId);
 
         // Refresh the Code Challenges list so this attempt's score and
@@ -1756,6 +1759,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     groupHasDue(group) {
       return group.files.some(file => file.dueCount > 0);
+    },
+
+    categoryDueColor(category) {
+      if (!category.started) {
+        return "var(--muted)";
+      }
+
+      return category.dueCount > 0 ? "var(--orange)" : "var(--green)";
     },
 
     softColor(hex) {

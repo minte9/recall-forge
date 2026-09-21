@@ -18,6 +18,7 @@ import dev.recallforge.dto.DashboardResponse;
 import dev.recallforge.dto.KnowledgeAreaResponse;
 import dev.recallforge.dto.MarkdownSummaryDto;
 import dev.recallforge.dto.WeakAreaResponse;
+import dev.recallforge.repository.CategoryDueStatusProjection;
 import dev.recallforge.repository.CategoryOrderRepository;
 import dev.recallforge.repository.EnvironmentCategoryProjection;
 import dev.recallforge.repository.KnowledgeAreaProjection;
@@ -269,6 +270,14 @@ public class DashboardService {
                 CategoryOrder::getDisplayOrder
             ));
 
+        Map<String, CategoryDueStatusProjection> dueStatusByCategory =
+            topicRepository.findCategoryDueStatuses(userId, LocalDateTime.now())
+                .stream()
+                .collect(Collectors.toMap(
+                    status -> status.getCategory().toLowerCase(),
+                    status -> status
+                ));
+
         // Environment order stays alphabetical (unchanged). Within an
         // environment, categories with an explicit order sort by it; a
         // category with no explicit order falls back to the alphabetical
@@ -279,11 +288,18 @@ public class DashboardService {
                 .comparing((EnvironmentCategoryProjection option) -> option.getEnvironment())
                 .thenComparingInt(option -> categoryOrder.getOrDefault(
                     categoryOrderKey(option.getEnvironment(), option.getCategory()), Integer.MAX_VALUE)))
-            .map(option -> new CategoryOptionResponse(
-                option.getEnvironment(),
-                option.getCategory(),
-                !starterPackService.isPublicCategory(userId, option.getCategory())
-            ))
+            .map(option -> {
+                CategoryDueStatusProjection dueStatus =
+                    dueStatusByCategory.get(option.getCategory().toLowerCase());
+
+                return new CategoryOptionResponse(
+                    option.getEnvironment(),
+                    option.getCategory(),
+                    !starterPackService.isPublicCategory(userId, option.getCategory()),
+                    dueStatus != null ? dueStatus.getDueCount() : 0,
+                    dueStatus != null && dueStatus.getReviewedCount() > 0
+                );
+            })
             .toList();
     }
 
