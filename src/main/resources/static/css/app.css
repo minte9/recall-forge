@@ -1923,7 +1923,7 @@
   }
 
   /* Same >= 70% mastery threshold and color codes as .feedback--high-score /
-     .feedback--low-score and .starter-pack-btn-mastered. */
+     .feedback--low-score. */
   .mastery-ring--high-score .mastery-ring-progress {
     stroke: #10b981;
   }
@@ -2271,26 +2271,27 @@
     border-color: #e2e8f0;
   }
 
-  /* Same color codes as the answer-feedback boxes (.feedback--high-score /
-     .feedback--low-score), reusing the same >= 70% mastery threshold. */
-  .starter-pack-btn.starter-pack-btn-mastered {
-    background: #ecfdf5;
-    border-color: #10b981;
-  }
-
-  .starter-pack-btn.starter-pack-btn-mastered:hover {
-    background: #d1fae5;
-    border-color: #10b981;
-  }
-
-  .starter-pack-btn.starter-pack-btn-practicing {
+  /* Driven by due status now (see dueColorClass in app.js), not mastery -
+     but keeping the original mastery color codes rather than the
+     dropdown's orange/green, so this panel's look stays unchanged. */
+  .starter-pack-btn.starter-pack-btn-due {
     background: #fffbeb;
     border-color: #f59e0b;
   }
 
-  .starter-pack-btn.starter-pack-btn-practicing:hover {
+  .starter-pack-btn.starter-pack-btn-due:hover {
     background: #fef3c7;
     border-color: #f59e0b;
+  }
+
+  .starter-pack-btn.starter-pack-btn-caught-up {
+    background: #ecfdf5;
+    border-color: #10b981;
+  }
+
+  .starter-pack-btn.starter-pack-btn-caught-up:hover {
+    background: #d1fae5;
+    border-color: #10b981;
   }
 
   .starter-pack-btn svg {
