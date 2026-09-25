@@ -523,9 +523,15 @@
             </button>
           </div>
 
-          <div v-if="!markdownLoading && !markdownEditing && !viewingOriginal && currentMarkdownFileId"
+          <div v-if="!markdownLoading && !markdownEditing && viewingCodeChallenges" class="markdown-file-actions">
+            <button class="edit-file-button" @click="hideCodeChallenges()">
+              Back
+            </button>
+          </div>
+
+          <div v-if="!markdownLoading && !markdownEditing && !viewingOriginal && !viewingCodeChallenges && currentMarkdownFileId"
             class="markdown-file-actions">
-            <button v-if="!activeTopic && !isDesktop && !viewingCodeChallenges" class="start-review-file-button"
+            <button v-if="!activeTopic && !isDesktop" class="start-review-file-button"
               @click="startReviewForFile(currentMarkdownFileId)" :disabled="loading || (aiEnabled && dailyLimitReached)"
               :title="aiEnabled && dailyLimitReached ? 'Daily review limit reached' : null">
               <span class="btn-icon">►</span>
@@ -535,6 +541,11 @@
             <button v-if="currentMarkdownOptimized" class="edit-file-button" @click="showOriginal()"
               title="More detailed reference version">
               KB
+            </button>
+
+            <button v-if="currentMarkdownCodeChallenges.length > 0" class="edit-file-button"
+              @click="showCodeChallenges()" title="Code Challenges Ctrl+Shift+C">
+              CC
             </button>
 
             <div class="markdown-file-nav">
