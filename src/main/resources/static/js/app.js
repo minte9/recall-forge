@@ -420,12 +420,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     formatDate(date) {
-      return new Date(date).toLocaleString(undefined, {
+      return new Date(date).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
+        day: "numeric"
       });
     },
 
