@@ -192,7 +192,7 @@ const CATEGORY_ICONS = {
   HTTPS: "lock",
   OAuth2: "key",
   Architecture: "diagram-3-fill",
-  API: "plug",
+  REST: "plug",
   GraphQL: "graphql",
   MCP: "mcp",
   Microservices: "diagram-2-fill",
