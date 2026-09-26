@@ -1,5 +1,6 @@
 package dev.recallforge.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
@@ -46,7 +47,8 @@ public class RepetitionService {
      * Weak answers come back soon. Strong answers come back later, and
      * further out still the more consecutive strong answers in a row -
      * a topic that's clearly mastered should stop coming back every
-     * couple of weeks forever.
+     * couple of weeks forever. Due dates land at midnight, so a day's 
+     * reviews all come due together.
      */
     public RepetitionResult calculateNextReview(double score, int previousStreak) {
         int baseIntervalDays;
@@ -71,15 +73,16 @@ public class RepetitionService {
             intervalDays = Math.min(MAX_INTERVAL_DAYS, Math.round(baseIntervalDays * multiplier));
         }
 
-        return new RepetitionResult(LocalDateTime.now().plusDays(intervalDays), newStreak);
+        return new RepetitionResult(LocalDate.now().plusDays(intervalDays).atStartOfDay(), newStreak);
     }
 
     /**
      * Skipping a question isn't an answer, so it shouldn't touch memoryScore.
      * Push it out by the shortest existing interval so it drops out of
      * today's due queue without implying anything about answer quality.
+     * Due dates land at midnight, so a day's reviews all come due together.
      */
     public LocalDateTime calculateSkipReviewAt() {
-        return LocalDateTime.now().plusDays(1);
+        return LocalDate.now().plusDays(1).atStartOfDay();
     }
 }
