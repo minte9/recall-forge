@@ -134,11 +134,14 @@ class StarterPackServiceTest {
     }
 
     @Test
-    void isPublicCategory_templateUserRowThreeCategoryCaseInsensitive_returnsTrue() {
+    void isPublicCategory_templateUserKotlinOracleTypeScriptOAuth2Mcp_returnsFalse() {
         setUp();
 
-        assertThat(starterPackService.isPublicCategory(1L, "kotlin")).isTrue();
-        assertThat(starterPackService.isPublicCategory(1L, "typescript")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "kotlin")).isFalse();
+        assertThat(starterPackService.isPublicCategory(1L, "oracle")).isFalse();
+        assertThat(starterPackService.isPublicCategory(1L, "typescript")).isFalse();
+        assertThat(starterPackService.isPublicCategory(1L, "oauth2")).isFalse();
+        assertThat(starterPackService.isPublicCategory(1L, "mcp")).isFalse();
     }
 
     @Test
@@ -153,8 +156,8 @@ class StarterPackServiceTest {
     void isPublicCategory_templateUserFullCatalogAdditionsCaseInsensitive_returnsTrue() {
         setUp();
 
-        assertThat(starterPackService.isPublicCategory(1L, "oracle")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "postgresql")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "https")).isTrue();
     }
 
     @Test
@@ -201,24 +204,21 @@ class StarterPackServiceTest {
         assertThat(starterPackService.getUnlockStatus())
             .containsOnlyKeys(
                 "Spring", "Algorithms", "Docker", "Node",
-                "Kotlin", "TypeScript",
-                "Oracle", "PostgreSQL",
-                "GraphQL", "MCP", "HTTPS", "OAuth2"
+                "PostgreSQL", "GraphQL", "HTTPS"
             );
     }
 
     @Test
     void getUnlockStatus_allDependentsOfALevelOneCategoryUnlockTogetherOnItsMasteryAlone() {
         setUp();
-        // Java mastered, Kotlin never touched (0% mastery) - it still
-        // unlocks alongside Spring, since both gate directly on Java, not on
-        // each other.
+        // Security mastered, HTTPS never touched (0% mastery) - it still
+        // unlocks, since it gates directly on Security alone.
         when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
-        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 30));
+        when(rewardService.getCurrentUserReward("Security")).thenReturn(rewardWithMastery("Security", 30));
 
         assertThat(starterPackService.getUnlockStatus())
-            .containsEntry("Spring", true)
-            .containsEntry("Kotlin", true);
+            .containsEntry("HTTPS", true)
+            .containsEntry("Spring", false);
     }
 
     @Test
@@ -231,8 +231,7 @@ class StarterPackServiceTest {
             .containsOnlyKeys(
                 "Java", "Python", "Git", "SQL", "Javascript",
                 "Spring", "Algorithms", "Docker", "Node",
-                "Kotlin", "TypeScript", "Security",
-                "Oracle", "PostgreSQL", "REST", "GraphQL", "MCP", "HTTPS", "OAuth2"
+                "Security", "PostgreSQL", "REST", "GraphQL", "HTTPS"
             )
             .containsEntry("Java", 73);
     }

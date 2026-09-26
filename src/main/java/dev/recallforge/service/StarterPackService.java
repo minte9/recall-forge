@@ -34,18 +34,18 @@ public class StarterPackService {
     // Javascript) is always importable; every category listed under it here
     // unlocks together, flatly, once level 1's mastery crosses
     // UNLOCK_MASTERY_THRESHOLD_PERCENT - there's no further chaining between
-    // them (e.g. Kotlin doesn't need Spring first, just Java). Every
+    // them (each dependent gates directly on its level 1 category). Every
     // category across every entry is the full set a non-template user can
     // ever see as "public"; everything else defaults to private.
     private static final Map<String, List<String>> DEPENDENTS_BY_LEVEL_ONE_CATEGORY =
             Map.of(
-                "Java", List.of("Spring", "Kotlin"),
+                "Java", List.of("Spring"),
                 "Python", List.of("Algorithms"),
                 "Git", List.of("Docker"),
-                "SQL", List.of("PostgreSQL", "Oracle"),
-                "Javascript", List.of("Node", "TypeScript"),
-                "Security", List.of("HTTPS", "OAuth2"),
-                "REST", List.of("GraphQL", "MCP")
+                "SQL", List.of("PostgreSQL"),
+                "Javascript", List.of("Node"),
+                "Security", List.of("HTTPS"),
+                "REST", List.of("GraphQL")
             );
     
     @SuppressWarnings("null")
