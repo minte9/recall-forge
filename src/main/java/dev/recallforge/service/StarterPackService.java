@@ -45,7 +45,7 @@ public class StarterPackService {
                 "SQL", List.of("PostgreSQL", "Oracle"),
                 "Javascript", List.of("Node", "TypeScript"),
                 "Security", List.of("HTTPS", "OAuth2"),
-                "API", List.of("GraphQL", "MCP")
+                "REST", List.of("GraphQL", "MCP")
             );
     
     @SuppressWarnings("null")
