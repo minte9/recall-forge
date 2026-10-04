@@ -931,13 +931,17 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       // there's nothing already on screen to preserve.
       const markdownAlreadyShown = !!this.currentMarkdownFileId && !!this.markdown;
       const startingFreshReview = markdownAlreadyShown && !this.review;
-      // Next Review after the last due topic in this subcategory - the next
-      // question comes from another file, so don't keep the old one on screen.
+      // Next Review after the last due topic in this file (or subcategory) -
+      // the next question comes from another file, so don't keep the old one
+      // on screen. markdownSummaries is refreshed right after submitAnswer.
+      const currentFileSummary = this.markdownSummaries.find(
+        file => file.markdownFileId === this.currentMarkdownFileId);
+      const fileDone = !!this.result && !!currentFileSummary && currentFileSummary.dueCount === 0;
       const subcategoryDone = !!this.result && this.result.dueInSubcategory === 0;
 
       this.loading = true;
       this.reviewQuestionLoading = true;
-      if (!markdownAlreadyShown || subcategoryDone) {
+      if (!markdownAlreadyShown || subcategoryDone || fileDone) {
         this.markdownLoading = true;
       }
       this.markdownEditing = false;
