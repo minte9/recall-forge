@@ -2271,7 +2271,7 @@ app.component("starter-pack-list", {
       return this.categoryOptions.some(o => o.category === category);
     },
     isLocked(category) {
-      return this.unlockStatus[category] === false;
+      return this.unlockStatus[category] === false && !(this.mastery[category] > 0);
     },
     tooltip(category) {
       if (this.isLocked(category)) {
