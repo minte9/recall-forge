@@ -512,7 +512,7 @@
             @click="onOriginalMarkdownClick">
           </div>
 
-          <div v-else class="markdown" v-html="renderMarkdown(markdown)"
+          <div v-else ref="markdownView" class="markdown" v-html="renderMarkdown(markdown)"
             @click="onMarkdownClick">
           </div>
 

@@ -532,6 +532,37 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return Markdown.render(md, options);
     },
 
+    // v-html only re-renders when the markdown string changes, so reviewing
+    // another topic from the same file keeps whatever code blocks were left
+    // open. Close them all, then open only the ones under the current topic's
+    // ## heading (up to the next h1/h2). Titles are compared with markdown
+    // formatting stripped since the rendered heading's text drops it; no
+    // match just leaves everything closed.
+    openCurrentTopicCode() {
+      const container = this.$refs.markdownView;
+      if (!container) {
+        return;
+      }
+
+      container.querySelectorAll("details.code-block").forEach(d => d.open = false);
+
+      const normalize = text => (text || "").replace(/[`*_]/g, "").replace(/\s+/g, " ").trim();
+      const title = normalize(this.review && this.review.topicTitle);
+      if (!title) {
+        return;
+      }
+
+      const heading = Array.from(container.querySelectorAll("h2"))
+        .find(h => normalize(h.textContent) === title);
+
+      for (let el = heading && heading.nextElementSibling; el && !/^H[12]$/.test(el.tagName); el = el.nextElementSibling) {
+        el.querySelectorAll("details.code-block").forEach(d => d.open = true);
+        if (el.matches("details.code-block")) {
+          el.open = true;
+        }
+      }
+    },
+
     onMarkdownClick(event) {
       if (event.target.closest(".code-block")) {
         return;
@@ -1013,7 +1044,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.currentMarkdownAiGenerated = !!this.review.aiGenerated;
         this.currentMarkdownOriginalContent = this.review.originalContent || null;
 
-        this.$nextTick(() => window.scrollTo(0, 0));
+        this.$nextTick(() => {
+          window.scrollTo(0, 0);
+          this.openCurrentTopicCode();
+        });
 
         await this.loadDashboard();
 
