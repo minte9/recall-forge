@@ -931,10 +931,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       // there's nothing already on screen to preserve.
       const markdownAlreadyShown = !!this.currentMarkdownFileId && !!this.markdown;
       const startingFreshReview = markdownAlreadyShown && !this.review;
+      // Next Review after the last due topic in this subcategory - the next
+      // question comes from another file, so don't keep the old one on screen.
+      const subcategoryDone = !!this.result && this.result.dueInSubcategory === 0;
 
       this.loading = true;
       this.reviewQuestionLoading = true;
-      if (!markdownAlreadyShown) {
+      if (!markdownAlreadyShown || subcategoryDone) {
         this.markdownLoading = true;
       }
       this.markdownEditing = false;
@@ -968,6 +971,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           this.historyTopic = null;
           this.reviewMessage = data.message;
           this.topicsInFile = [];
+          // Nothing due in the whole category - show the markdown list
+          // instead of the last studied file (mobile stays on the dashboard).
+          this.leftPanel = "markdowns";
           await this.loadDashboard();
           return;
         }
