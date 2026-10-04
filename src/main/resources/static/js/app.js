@@ -2128,10 +2128,16 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     async openImportedCategory(category) {
       this.error = null;
       this.success = null;
-      this.mobilePageTitle = "Markdowns";
       this.leftPanel = "markdowns";
-      this.mobileView = "markdown";
       this.markdownEditing = false;
+
+      if (this.isDesktop) {
+        this.mobilePageTitle = "Markdowns";
+        this.mobileView = "markdown";
+      } else {
+        this.mobilePageTitle = "Dashboard";
+        this.mobileView = "dashboard";
+      }
 
       await this.selectEnvironment(category);
     },
