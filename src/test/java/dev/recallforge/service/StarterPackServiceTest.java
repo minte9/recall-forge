@@ -134,14 +134,13 @@ class StarterPackServiceTest {
     }
 
     @Test
-    void isPublicCategory_templateUserKotlinOracleNodeOAuth2Mcp_returnsFalse() {
+    void isPublicCategory_templateUserKotlinOracleNodeOAuth2_returnsFalse() {
         setUp();
 
         assertThat(starterPackService.isPublicCategory(1L, "kotlin")).isFalse();
         assertThat(starterPackService.isPublicCategory(1L, "oracle")).isFalse();
         assertThat(starterPackService.isPublicCategory(1L, "node")).isFalse();
         assertThat(starterPackService.isPublicCategory(1L, "oauth2")).isFalse();
-        assertThat(starterPackService.isPublicCategory(1L, "mcp")).isFalse();
     }
 
     @Test
@@ -158,6 +157,7 @@ class StarterPackServiceTest {
 
         assertThat(starterPackService.isPublicCategory(1L, "postgresql")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "https")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "mcp")).isTrue();
     }
 
     @Test
@@ -204,7 +204,7 @@ class StarterPackServiceTest {
         assertThat(starterPackService.getUnlockStatus())
             .containsOnlyKeys(
                 "Spring", "Algorithms", "Docker", "TypeScript",
-                "PostgreSQL", "GraphQL", "HTTPS"
+                "PostgreSQL", "GraphQL", "MCP", "HTTPS"
             );
     }
 
@@ -231,7 +231,7 @@ class StarterPackServiceTest {
             .containsOnlyKeys(
                 "Java", "Python", "Git", "SQL", "Javascript",
                 "Spring", "Algorithms", "Docker", "TypeScript",
-                "Security", "PostgreSQL", "REST", "GraphQL", "HTTPS"
+                "Security", "PostgreSQL", "REST", "GraphQL", "MCP", "HTTPS"
             )
             .containsEntry("Java", 73);
     }
