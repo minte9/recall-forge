@@ -56,6 +56,9 @@ spring:
 server:
   port: 9090
   forward-headers-strategy: framework
+  tomcat:
+    # Vault upload sends 2 parts per file (file + path); default 50 caps it at ~24 notes.
+    max-part-count: 650
   servlet:
     session:
       timeout: 30d
