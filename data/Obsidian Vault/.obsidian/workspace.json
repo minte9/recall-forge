@@ -1,0 +1,250 @@
+{
+  "main": {
+    "id": "9d7f912fb09be210",
+    "type": "split",
+    "children": [
+      {
+        "id": "f275c97e0537d91d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "fe0bb4231313da0f",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "API/MCP/images/mcp_inspector2.png"
+              },
+              "icon": "lucide-image",
+              "title": "mcp_inspector2"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "b943b1482bf42a4c",
+    "type": "split",
+    "children": [
+      {
+        "id": "bf64e1dab2fc1e88",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "493fa442051c9418",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "byCreatedTimeReverse",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "ff6a3156cbec0fae",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "22efeed38c06258b",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 279.5
+  },
+  "right": {
+    "id": "03bb5cf4e0812267",
+    "type": "split",
+    "children": [
+      {
+        "id": "5f39d4c395924c73",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d5005ed7cfd2855f",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "API/GraphQL/Query Arguments/Variables.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "49c58f378a9d6888",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          },
+          {
+            "id": "8aa5445328ee9baa",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "8e04070bc5ad9445",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "21d26ba5afc9f4a6",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "8ca4f4fa0a10e2a8",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 472.5,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "493fa442051c9418",
+  "lastOpenFiles": [
+    "API/MCP/MCP Tools/Creating Tools.md",
+    "API/MCP/images/mcp_inspector2.png",
+    "API/MCP/images/mcp_sequence.png",
+    "API/MCP/images/mcp_tools.png",
+    "API/MCP/MCP Tools/Tool Basics.md",
+    "API/MCP/Basics/First MCP Server.md",
+    "API/MCP/MCP Tools",
+    "API/MCP/images/mcp_inspector.png",
+    "Pasted image 20261009174712.png",
+    "API/MCP/images/mcp_execution_flow.png",
+    "API/MCP/Basics/Spring Setup.md",
+    "API/MCP/Basics/Untitled",
+    "API/MCP/images/mcp_host.png",
+    "API/MCP/Basics/Transports.md",
+    "API/MCP/images/mcp_stdio.png",
+    "API/MCP/Basics/Architecture.md",
+    "API/MCP/Basics/What is MCP.md",
+    "API/MCP/images/mcp_architecture.png",
+    "API/MCP/images/mcp_services.png",
+    "API/MCP/images",
+    "JS/TypeScript/Interfaces & Types/Interfaces.md",
+    "API/MCP/Basics",
+    "API/MCP",
+    "JS/TypeScript/Basics/Introduction.md",
+    "JS/TypeScript/Basics/Basic Types.md",
+    "JS/TypeScript/Basics/Variables.md",
+    "JS/TypeScript/Basics/Functions.md",
+    "JS/TypeScript/Basics/Control flow.md",
+    "JS/TypeScript/Interfaces & Types/Type Narrowing.md",
+    "JS/TypeScript/Interfaces & Types/Null Undefined.md",
+    "JS/TypeScript/Interfaces & Types/Union Types.md",
+    "JS/TypeScript/Interfaces & Types/Types Aliases.md",
+    "PostgreSQL/Basics/Database.md",
+    "JS/TypeScript/Interfaces & Types",
+    "JS/TypeScript/Basics",
+    "API/GraphQL/Crud Api/Crud Api.md",
+    "JS/TypeScript",
+    "JS",
+    "API/GraphQL/Data Persistence/GraphQL Request.md",
+    "API/GraphQL/Crud Api",
+    "API/GraphQL/Data Persistence/Repositories.md",
+    "API/GraphQL/Data Fetching/DataFetcher.md",
+    "API/GraphQL/Fundamentals/Queries.md",
+    "API/GraphQL/Data Fetching/Query Mapping.md",
+    "API/GraphQL/Mutations/Input Types.md",
+    "API/Fundamentals.canvas",
+    "API/API.canvas",
+    "API/Query Arguments.canvas",
+    "Untitled.canvas",
+    "API/GraphQL.canvas"
+  ]
+}
