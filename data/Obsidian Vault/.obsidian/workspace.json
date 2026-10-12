@@ -4,19 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "f275c97e0537d91d",
+        "id": "a4c1d5df4996a719",
         "type": "tabs",
         "children": [
           {
-            "id": "fe0bb4231313da0f",
+            "id": "af36281826da951f",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "API/MCP/_images/mcp_inspector2.png"
+                "file": "API/MCP/Prompts/Prompts Practice.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "mcp_inspector2"
+              "icon": "lucide-file",
+              "title": "Prompts Practice"
             }
           }
         ]
@@ -194,9 +196,23 @@
       "bases:Create new base": false
     }
   },
-  "active": "493fa442051c9418",
+  "active": "af36281826da951f",
   "lastOpenFiles": [
+    "API/MCP/Resources/Creating Resources.md",
+    "API/MCP/Resources/Resource Basics.md",
+    "API/MCP/Prompts/Prompts Practice.md",
+    "API/MCP/_images/mcp_prompts.png",
+    "Pasted image 20261012194308.png",
+    "API/MCP/Prompts/MCP Prompts.md",
+    "API/MCP/Prompts",
+    "API/MCP/MCP Tools/Integrating Tools.md",
+    "API/MCP/MCP Tools/Error Handling.md",
+    "API/MCP/Resources",
+    "API/MCP/_images/mcp_integration.png",
+    "API/MCP/_images/mcp_integration.png",
+    "API/MCP/MCP Tools/Input Output.md",
     "API/MCP/MCP Tools/Creating Tools.md",
+    "General/Alpinism/Catarare/Hamul.md",
     "API/MCP/_images/mcp_inspector2.png",
     "API/MCP/_images/mcp_sequence.png",
     "API/MCP/_images/mcp_tools.png",
@@ -208,13 +224,9 @@
     "API/MCP/_images/mcp_execution_flow.png",
     "API/MCP/Basics/Spring Setup.md",
     "API/MCP/Basics/Untitled",
-    "API/MCP/_images/mcp_host.png",
     "API/MCP/Basics/Transports.md",
-    "API/MCP/_images/mcp_stdio.png",
     "API/MCP/Basics/Architecture.md",
     "API/MCP/Basics/What is MCP.md",
-    "API/MCP/_images/mcp_architecture.png",
-    "API/MCP/_images/mcp_services.png",
     "API/MCP/_images",
     "JS/TypeScript/Interfaces & Types/Interfaces.md",
     "API/MCP/Basics",
@@ -228,19 +240,9 @@
     "JS/TypeScript/Interfaces & Types/Null Undefined.md",
     "JS/TypeScript/Interfaces & Types/Union Types.md",
     "JS/TypeScript/Interfaces & Types/Types Aliases.md",
-    "PostgreSQL/Basics/Database.md",
     "JS/TypeScript/Interfaces & Types",
     "JS/TypeScript/Basics",
-    "API/GraphQL/Crud Api/Crud Api.md",
     "JS/TypeScript",
-    "JS",
-    "API/GraphQL/Data Persistence/GraphQL Request.md",
-    "API/GraphQL/Crud Api",
-    "API/GraphQL/Data Persistence/Repositories.md",
-    "API/GraphQL/Data Fetching/DataFetcher.md",
-    "API/GraphQL/Fundamentals/Queries.md",
-    "API/GraphQL/Data Fetching/Query Mapping.md",
-    "API/GraphQL/Mutations/Input Types.md",
     "API/Fundamentals.canvas",
     "API/API.canvas",
     "API/Query Arguments.canvas",
