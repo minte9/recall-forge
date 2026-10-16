@@ -428,6 +428,19 @@
     margin-left: 0px;
   }
 
+  /* KB / CC are toggles now - marks the one whose section is open below. */
+  .edit-file-button.active {
+    color: #0f172a;
+    background: #f1f5f9;
+  }
+
+  /* KB / CC sections rendered under the markdown's action bar. */
+  .markdown-section {
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 1px solid #eeeeee;
+  }
+
 .warning-button:disabled,
 .danger-button:disabled {
     opacity: .5;

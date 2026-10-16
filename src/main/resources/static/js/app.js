@@ -131,12 +131,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return this.leftPanel !== "markdown";
     },
 
-    // Single Edit/Show menu slot, aware of which content is on screen - it
-    // edits/shows the original while viewingOriginal, otherwise the main
-    // markdown, so there's one toggle instead of two unrelated ones.
+    // Single Edit/Show menu slot - the main markdown is always on screen now
+    // (KB/CC open as sections under it), so it edits the main markdown, and
+    // only acts on the original while the original itself is being edited.
     editToggleLabel() {
-      if (this.viewingOriginal) {
-        return this.editingOriginalMarkdown ? "Show Original" : "Edit Original";
+      if (this.editingOriginalMarkdown) {
+        return "Show Original";
       }
 
       return this.markdownEditing ? "Show Markdown" : "Edit Markdown";
@@ -145,8 +145,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     // The AI badge is a pure status label now (see index.html) - it isn't
     // reused as a navigation icon anywhere, so this always stays eye/pencil.
     editToggleIcon() {
-      if (this.viewingOriginal) {
-        return this.editingOriginalMarkdown ? "eye" : "pencil";
+      if (this.editingOriginalMarkdown) {
+        return "eye";
       }
 
       return this.markdownEditing ? "eye" : "pencil";
@@ -586,21 +586,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     // Backs the single Edit/Show menu button (see editToggleLabel/Icon) -
-    // operates on the original while viewingOriginal, otherwise the main
-    // markdown. Editing the original is admin-only (the button itself is
-    // already hidden from non-admins in that state - see index.html - this
-    // is just a backstop against triggering it some other way).
+    // closes the original's editor while it's open, otherwise toggles the
+    // main markdown editor. The original itself is edited in place from its
+    // section (click it, admin-only) or via Add Original.
     toggleEdit() {
-      if (this.viewingOriginal) {
-        if (this.currentUser?.role !== "ADMIN") {
-          return;
-        }
-
-        if (this.editingOriginalMarkdown) {
-          this.editingOriginalMarkdown = false;
-        } else {
-          this.editOriginalMarkdown();
-        }
+      if (this.editingOriginalMarkdown) {
+        this.editingOriginalMarkdown = false;
         return;
       }
 
@@ -669,6 +660,16 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       });
     },
 
+    // KB button / menu - the original opens as a section under the markdown
+    // rather than replacing it; only one of KB / CC is open at a time.
+    toggleOriginal() {
+      if (this.viewingOriginal) {
+        this.hideOriginal();
+      } else {
+        this.showOriginal();
+      }
+    },
+
     // Original's own edit form - saves through updateOriginalMarkdown,
     // completely separate from submitMarkdownEdit, so it can never affect
     // the current (optimized) `content`. Also doubles as "Add Original" for
@@ -678,6 +679,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     editOriginalMarkdown() {
       const scrollY = window.scrollY;
 
+      this.viewingCodeChallenges = false;
       this.viewingOriginal = true;
       this.originalMarkdownDraft = this.currentMarkdownOriginalContent || "";
       this.editingOriginalMarkdown = true;
@@ -2087,6 +2089,15 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     hideCodeChallenges() {
       this.viewingCodeChallenges = false;
+    },
+
+    // CC button / menu - same section-under-the-markdown toggle as KB.
+    toggleCodeChallenges() {
+      if (this.viewingCodeChallenges) {
+        this.hideCodeChallenges();
+      } else {
+        this.showCodeChallenges();
+      }
     },
 
     async deleteMarkdownFile() {
