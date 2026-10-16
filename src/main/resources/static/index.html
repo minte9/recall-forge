@@ -58,16 +58,15 @@
             Markdown
           </div>
 
-          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
-              (!viewingOriginal || currentUser?.role == 'ADMIN')"
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
             @click="toggleEdit(); mobileMenuOpen = false"
-            :title="!viewingOriginal && !markdownEditing ? 'Ctrl+Shift+E' : null">
+            :title="!editingOriginalMarkdown && !markdownEditing ? 'Ctrl+Shift+E' : null">
             <icon :name="editToggleIcon" class="menu-icon"></icon>{{ editToggleLabel }}
           </button>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && currentMarkdownOptimized"
-            @click="viewingOriginal ? hideOriginal() : showOriginal(); mobileMenuOpen = false">
-            <icon name="eye" class="menu-icon"></icon>{{ viewingOriginal ? "Show Markdown" : "Show Original" }}
+            @click="toggleOriginal(); mobileMenuOpen = false">
+            <icon name="eye" class="menu-icon"></icon>{{ viewingOriginal ? "Hide Original" : "Show Original" }}
           </button>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && !currentMarkdownOptimized && currentUser?.role == 'ADMIN'"
@@ -81,18 +80,13 @@
           </button>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
-                    currentMarkdownCodeChallenges.length > 0 && !viewingCodeChallenges"
-            @click="showCodeChallenges(); mobileMenuOpen = false" title="Ctrl+Shift+C">
-            <icon name="code" class="menu-icon"></icon> Code Challenges
+                currentMarkdownCodeChallenges.length > 0"
+            @click="toggleCodeChallenges(); mobileMenuOpen = false"
+            :title="viewingCodeChallenges ? 'Ctrl+Shift+M' : 'Ctrl+Shift+C'">
+            <icon name="code" class="menu-icon"></icon>{{ viewingCodeChallenges ? "Hide Code Challenges" : "Code Challenges" }}
           </button>
 
-          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
-                    viewingCodeChallenges"
-            @click="hideCodeChallenges(); mobileMenuOpen = false" title="Ctrl+Shift+M">
-            <icon name="eye" class="menu-icon"></icon> Show Markdown
-          </button>
-
-          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && !viewingOriginal"
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
             @click.stop="deleteMarkdownFile(); mobileMenuOpen = false">
             <icon name="trash" class="menu-icon"></icon>Delete Markdown
           </button>
@@ -179,16 +173,15 @@
                 Markdown
               </div>
 
-              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
-                  (!viewingOriginal || currentUser?.role == 'ADMIN')"
+              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
                 @click="toggleEdit(); menuOpen = false"
-                :title="!viewingOriginal && !markdownEditing ? 'Ctrl+Shift+E' : null">
+                :title="!editingOriginalMarkdown && !markdownEditing ? 'Ctrl+Shift+E' : null">
                 <icon :name="editToggleIcon" class="menu-icon"></icon>{{ editToggleLabel }}
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && currentMarkdownOptimized"
-                @click="viewingOriginal ? hideOriginal() : showOriginal(); menuOpen = false">
-                <icon name="eye" class="menu-icon"></icon>{{ viewingOriginal ? "Show Markdown" : "Show Original" }}
+                @click="toggleOriginal(); menuOpen = false">
+                <icon name="eye" class="menu-icon"></icon>{{ viewingOriginal ? "Hide Original" : "Show Original" }}
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && !currentMarkdownOptimized && currentUser?.role == 'ADMIN'"
@@ -202,18 +195,13 @@
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
-                  currentMarkdownCodeChallenges.length > 0 && !viewingCodeChallenges"
-                @click="showCodeChallenges(); menuOpen = false" title="Ctrl+Shift+C">
-                <icon name="code" class="menu-icon"></icon>Code Challenges
+                    currentMarkdownCodeChallenges.length > 0"
+                @click="toggleCodeChallenges(); menuOpen = false"
+                :title="viewingCodeChallenges ? 'Ctrl+Shift+M' : 'Ctrl+Shift+C'">
+                <icon name="code" class="menu-icon"></icon>{{ viewingCodeChallenges ? "Hide Code Challenges" : "Code Challenges" }}
               </button>
 
-              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
-                  viewingCodeChallenges"
-                @click="hideCodeChallenges(); menuOpen = false" title="Ctrl+Shift+M">
-                <icon name="eye" class="menu-icon"></icon>Show Markdown
-              </button>
-
-              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && !viewingOriginal"
+              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId"
                 @click.stop="deleteMarkdownFile(); menuOpen = false">
                 <icon name="trash" class="menu-icon"></icon>Delete Markdown
               </button>
@@ -467,69 +455,11 @@
             </div>
           </div>
 
-          <div v-else-if="viewingCodeChallenges" class="markdown code-challenges-markdown">
-            <h2>Code Challenges</h2>
-
-            <template v-for="(c, idx) in codeChallengesList" :key="c.topicId + '-' + idx">
-              <div v-if="c.showTopicHeader" class="challenge-topic">{{ c.topicHeading }}</div>
-
-              <div class="challenge-item">
-                <details class="code-block">
-                  <summary>{{ c.question }}</summary>
-                  <pre v-if="(c.userAnswer || '').trim()"><code>{{ c.userAnswer }}</code></pre>
-                  <p v-else><em>No answer submitted.</em></p>
-                </details>
-
-                <div v-if="c.reviewedAt" class="challenge-reviewed">
-                  {{ daysAgoLabel(c.reviewedAt) }} / <span class="challenge-score">Score: {{ formatScore(c.score) }}</span>
-                  <button class="challenge-retry-btn" @click="tryAgainFromList(c)" :disabled="loading"
-                    title="Retry this code challenge">
-                      Retry
-                  </button>
-                </div>
-              </div>
-            </template>
-          </div>
-
-          <div v-else-if="viewingOriginal && editingOriginalMarkdown" class="markdown-editor-wrap">
-            <textarea ref="originalMarkdownEditor" class="markdown markdown-editor" v-model="originalMarkdownDraft"
-              @input="resizeMarkdownEditor('originalMarkdownEditor')" @keydown.esc="editingOriginalMarkdown = false"
-              @keydown.ctrl.enter="submitOriginalMarkdownEdit"></textarea>
-
-            <div class="markdown-editor-actions">
-              <button class="markdown-editor-cancel" @click="editingOriginalMarkdown = false" title="Esc">
-                Cancel
-              </button>
-
-              <button class="markdown-editor-submit" @click="submitOriginalMarkdownEdit" title="Ctrl+Enter">
-                Submit
-              </button>
-            </div>
-          </div>
-
-          <div v-else-if="viewingOriginal" class="markdown original-markdown"
-            v-html="renderMarkdown(currentMarkdownOriginalContent || '', { openCode: true })"
-            @click="onOriginalMarkdownClick">
-          </div>
-
           <div v-else ref="markdownView" class="markdown" v-html="renderMarkdown(markdown)"
             @click="onMarkdownClick">
           </div>
 
-          <div v-if="!markdownLoading && !markdownEditing && viewingOriginal && !editingOriginalMarkdown"
-            class="markdown-file-actions">
-            <button class="edit-file-button" @click="hideOriginal()">
-              Back
-            </button>
-          </div>
-
-          <div v-if="!markdownLoading && !markdownEditing && viewingCodeChallenges" class="markdown-file-actions">
-            <button class="edit-file-button" @click="hideCodeChallenges()">
-              Back
-            </button>
-          </div>
-
-          <div v-if="!markdownLoading && !markdownEditing && !viewingOriginal && !viewingCodeChallenges && currentMarkdownFileId"
+          <div v-if="!markdownLoading && !markdownEditing && currentMarkdownFileId"
             class="markdown-file-actions">
             <button v-if="!activeTopic && !isDesktop" class="start-review-file-button"
               @click="startReviewForFile(currentMarkdownFileId)" :disabled="loading || (aiEnabled && dailyLimitReached)"
@@ -538,13 +468,14 @@
               {{ loading ? "Loading..." : (aiEnabled ? "Start Review" : "Reviews") }}
             </button>
 
-            <button v-if="currentMarkdownOptimized" class="edit-file-button" @click="showOriginal()"
-              title="More detailed reference version">
+            <button v-if="currentMarkdownOptimized" class="edit-file-button" :class="{ active: viewingOriginal }"
+              @click="toggleOriginal()" title="More detailed reference version">
               KB
             </button>
 
             <button v-if="currentMarkdownCodeChallenges.length > 0" class="edit-file-button cc-file-button"
-              @click="showCodeChallenges()" title="Code Challenges Ctrl+Shift+C">
+              :class="{ active: viewingCodeChallenges }" @click="toggleCodeChallenges()"
+              :title="viewingCodeChallenges ? 'Hide Code Challenges Ctrl+Shift+M' : 'Code Challenges Ctrl+Shift+C'">
               CC
             </button>
 
@@ -565,6 +496,61 @@
               <icon name="ai-badge"></icon>
             </span>
 
+          </div>
+
+          <!-- KB / CC sections - shown under the markdown (and its action bar)
+               instead of replacing it; both reset to hidden on every file load. -->
+          <div v-if="!markdownLoading && !markdownEditing && currentMarkdownFileId && viewingOriginal"
+            class="markdown-section">
+            <div v-if="editingOriginalMarkdown" class="markdown-editor-wrap">
+              <textarea ref="originalMarkdownEditor" class="markdown markdown-editor" v-model="originalMarkdownDraft"
+                @input="resizeMarkdownEditor('originalMarkdownEditor')" @keydown.esc="editingOriginalMarkdown = false"
+                @keydown.ctrl.enter="submitOriginalMarkdownEdit"></textarea>
+
+              <div class="markdown-editor-actions">
+                <button class="markdown-editor-cancel" @click="editingOriginalMarkdown = false" title="Esc">
+                  Cancel
+                </button>
+
+                <button class="markdown-editor-submit" @click="submitOriginalMarkdownEdit" title="Ctrl+Enter">
+                  Submit
+                </button>
+              </div>
+            </div>
+
+            <div v-else class="markdown original-markdown">
+              <h2>Original (reference version)</h2>
+              <div v-html="renderMarkdown(currentMarkdownOriginalContent || '', { openCode: true })"
+                @click="onOriginalMarkdownClick">
+              </div>
+            </div>
+          </div>
+
+          <div v-if="!markdownLoading && !markdownEditing && currentMarkdownFileId && viewingCodeChallenges"
+            class="markdown-section">
+            <div class="markdown code-challenges-markdown">
+              <h2>Code Challenges</h2>
+
+              <template v-for="(c, idx) in codeChallengesList" :key="c.topicId + '-' + idx">
+                <div v-if="c.showTopicHeader" class="challenge-topic">{{ c.topicHeading }}</div>
+
+                <div class="challenge-item">
+                  <details class="code-block">
+                    <summary>{{ c.question }}</summary>
+                    <pre v-if="(c.userAnswer || '').trim()"><code>{{ c.userAnswer }}</code></pre>
+                    <p v-else><em>No answer submitted.</em></p>
+                  </details>
+
+                  <div v-if="c.reviewedAt" class="challenge-reviewed">
+                    {{ daysAgoLabel(c.reviewedAt) }} / <span class="challenge-score">Score: {{ formatScore(c.score) }}</span>
+                    <button class="challenge-retry-btn" @click="tryAgainFromList(c)" :disabled="loading"
+                      title="Retry this code challenge">
+                        Retry
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
 
