@@ -362,6 +362,7 @@
             var current = 0;
             var timer = null;
             var interval = 6000;
+            var visible = false;
 
             function render(index) {
                 current = (index + features.length) % features.length;
@@ -373,8 +374,14 @@
                 description.textContent = feature.description;
             }
 
-            function restartTimer() {
+            function stopTimer() {
                 if (timer) window.clearInterval(timer);
+                timer = null;
+            }
+
+            function restartTimer() {
+                stopTimer();
+                if (!visible) return;
                 if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
                 timer = window.setInterval(function () {
@@ -397,14 +404,10 @@
                 restartTimer();
             });
 
-            showcase.addEventListener('mouseenter', function () {
-                if (timer) window.clearInterval(timer);
-            });
+            showcase.addEventListener('mouseenter', stopTimer);
 
             showcase.addEventListener('mouseleave', restartTimer);
-            showcase.addEventListener('focusin', function () {
-                if (timer) window.clearInterval(timer);
-            });
+            showcase.addEventListener('focusin', stopTimer);
 
             showcase.addEventListener('focusout', function (event) {
                 if (!showcase.contains(event.relatedTarget)) restartTimer();
@@ -415,14 +418,13 @@
             if ('IntersectionObserver' in window) {
                 var visibilityObserver = new IntersectionObserver(function (entries) {
                     entries.forEach(function (entry) {
-                        if (entry.isIntersecting) {
-                            restartTimer();
-                            visibilityObserver.unobserve(entry.target);
-                        }
+                        visible = entry.intersectionRatio >= 0.5;
+                        restartTimer();
                     });
-                });
+                }, { threshold: 0.5 });
                 visibilityObserver.observe(showcase);
             } else {
+                visible = true;
                 restartTimer();
             }
         }
