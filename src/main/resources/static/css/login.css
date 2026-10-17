@@ -299,7 +299,7 @@ h1 {
     gap: 16px;
     max-width: 1300px;
     margin: 0 auto;
-    padding: 16px 16px 64px;
+    padding: 16px 16px;
 }
 
 .packs-chapter .section-label {
