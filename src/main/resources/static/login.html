@@ -35,6 +35,15 @@
             overflow: hidden;
         }
 
+        /* Obsidian images draw the character smaller, so the box is taller to match. */
+        .feature-showcase--tall .feature-showcase__visual {
+            height: 290px;
+        }
+
+        .feature-showcase--tall .feature-showcase__content {
+            padding-top: 18px;
+        }
+
         .feature-showcase__visual img {
             display: block;
             width: 100%;
@@ -110,6 +119,10 @@
             .feature-showcase__visual {
                 height: 190px;
                 padding: 10px 14px 2px;
+            }
+
+            .feature-showcase--tall .feature-showcase__visual {
+                height: 240px;
             }
 
             .feature-showcase__content {
@@ -190,26 +203,26 @@
             </p>
         </header>
 
-        <section class="feature-showcase" aria-label="Recall Forge features">
+        <section class="feature-showcase" id="features-showcase" aria-label="Recall Forge features">
             <div class="feature-showcase__visual">
-                <button type="button" class="feature-showcase__arrow feature-showcase__arrow--prev" id="feature-prev"
+                <button type="button" class="feature-showcase__arrow feature-showcase__arrow--prev"
                         aria-label="Previous feature">‹</button>
 
-                <img id="feature-showcase-image"
+                <img class="feature-showcase__image"
                      src="images/features/markdown-uploads.png"
                      alt="Markdown notes being turned into Recall Forge review topics">
 
-                <button type="button" class="feature-showcase__arrow feature-showcase__arrow--next" id="feature-next"
+                <button type="button" class="feature-showcase__arrow feature-showcase__arrow--next"
                         aria-label="Next feature">›</button>
             </div>
 
             <div class="feature-showcase__content" aria-live="polite">
                 <div class="feature-showcase__text">
                     <div class="feature-showcase__topline">
-                        <h3 id="feature-showcase-title">Markdown uploads</h3>
+                        <h3 class="feature-showcase__title">Markdown uploads</h3>
                     </div>
 
-                    <p id="feature-showcase-description">
+                    <p class="feature-showcase__description">
                         Import your existing Markdown notes and turn them into structured review topics.
                     </p>
                 </div>
@@ -287,6 +300,54 @@
     </div>
 </section>
 
+<section class="obsidian-chapter" id="obsidian">
+    <div class="packs-grid">
+        <div class="packs-spacer" aria-hidden="true"></div>
+
+        <section class="content-card">
+            <header class="section-header">
+                <div class="section-label__row">
+                    <div class="section-label">Level up</div>
+                    <span class="section-label__badge">Obsidian</span>
+                </div>
+
+                <h2>Your Obsidian vault, ready for review</h2>
+
+                <p>
+                    Already keep notes in Obsidian? Import your vault, let AI shape each note into focused topics.
+                </p>
+            </header>
+
+            <section class="feature-showcase feature-showcase--tall" id="obsidian-showcase" aria-label="Obsidian workflow">
+                <div class="feature-showcase__visual">
+                    <button type="button" class="feature-showcase__arrow feature-showcase__arrow--prev"
+                            aria-label="Previous step">‹</button>
+
+                    <img class="feature-showcase__image"
+                         src="images/obsidian/01_import_obsidian.png"
+                         alt="An Obsidian vault being imported into Recall Forge"
+                         loading="lazy">
+
+                    <button type="button" class="feature-showcase__arrow feature-showcase__arrow--next"
+                            aria-label="Next step">›</button>
+                </div>
+
+                <div class="feature-showcase__content" aria-live="polite">
+                    <div class="feature-showcase__text">
+                        <div class="feature-showcase__topline">
+                            <h3 class="feature-showcase__title">Import Your Vault</h3>
+                        </div>
+
+                        <p class="feature-showcase__description">
+                            Import your Obsidian vault and turn its Markdown notes into topics.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </div>
+</section>
+
 <a href="#content" class="scroll-hint" aria-label="Scroll down for more">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <polyline points="6 9 12 15 18 9"></polyline>
@@ -330,6 +391,87 @@
 
 
     (function () {
+        function initShowcase(showcase, features) {
+            if (!showcase) return;
+
+            var image = showcase.querySelector('.feature-showcase__image');
+            var title = showcase.querySelector('.feature-showcase__title');
+            var description = showcase.querySelector('.feature-showcase__description');
+            var previous = showcase.querySelector('.feature-showcase__arrow--prev');
+            var next = showcase.querySelector('.feature-showcase__arrow--next');
+
+            if (!image || !title || !description || !previous || !next) {
+                return;
+            }
+
+            var current = 0;
+            var timer = null;
+            var interval = 6000;
+
+            function render(index) {
+                current = (index + features.length) % features.length;
+                var feature = features[current];
+
+                image.src = feature.image;
+                image.alt = feature.alt;
+                title.textContent = feature.title;
+                description.textContent = feature.description;
+            }
+
+            function restartTimer() {
+                if (timer) window.clearInterval(timer);
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+                timer = window.setInterval(function () {
+                    render(current + 1);
+                }, interval);
+            }
+
+            previous.addEventListener('click', function () {
+                render(current - 1);
+                restartTimer();
+            });
+
+            next.addEventListener('click', function () {
+                render(current + 1);
+                restartTimer();
+            });
+
+            image.addEventListener('click', function () {
+                render(current + 1);
+                restartTimer();
+            });
+
+            showcase.addEventListener('mouseenter', function () {
+                if (timer) window.clearInterval(timer);
+            });
+
+            showcase.addEventListener('mouseleave', restartTimer);
+            showcase.addEventListener('focusin', function () {
+                if (timer) window.clearInterval(timer);
+            });
+
+            showcase.addEventListener('focusout', function (event) {
+                if (!showcase.contains(event.relatedTarget)) restartTimer();
+            });
+
+            render(0);
+
+            if ('IntersectionObserver' in window) {
+                var visibilityObserver = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            restartTimer();
+                            visibilityObserver.unobserve(entry.target);
+                        }
+                    });
+                });
+                visibilityObserver.observe(showcase);
+            } else {
+                restartTimer();
+            }
+        }
+
         var features = [
             {
                 title: 'Markdown Uploads',
@@ -369,83 +511,29 @@
             },
         ];
 
-        var image = document.getElementById('feature-showcase-image');
-        var title = document.getElementById('feature-showcase-title');
-        var description = document.getElementById('feature-showcase-description');
-        var previous = document.getElementById('feature-prev');
-        var next = document.getElementById('feature-next');
+        var obsidianSteps = [
+            {
+                title: 'Import Your Vault',
+                description: 'Import your Obsidian vault and turn its Markdown notes into topics.',
+                image: 'images/obsidian/01_import_obsidian.png',
+                alt: 'An Obsidian vault being imported into Recall Forge'
+            },
+            {
+                title: 'AI Optimizer',
+                description: 'Let AI turn each note into focused, easy-to-review topics.',
+                image: 'images/obsidian/02_optimize_file.png',
+                alt: 'The Recall Forge AI Optimizer preparing a Markdown note for review'
+            },
+            {
+                title: 'Review From Your Notes',
+                description: 'Answer questions from your own notes and track every review.',
+                image: 'images/obsidian/03_reviewing.png',
+                alt: 'A learner answering a review question generated from their own notes'
+            },
+        ];
 
-        if (!image || !title || !description || !previous || !next) {
-            return;
-        }
-
-        var current = 0;
-        var timer = null;
-        var interval = 6000;
-
-        function render(index) {
-            current = (index + features.length) % features.length;
-            var feature = features[current];
-
-            image.src = feature.image;
-            image.alt = feature.alt;
-            title.textContent = feature.title;
-            description.textContent = feature.description;
-        }
-
-        function restartTimer() {
-            if (timer) window.clearInterval(timer);
-            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-            timer = window.setInterval(function () {
-                render(current + 1);
-            }, interval);
-        }
-
-        previous.addEventListener('click', function () {
-            render(current - 1);
-            restartTimer();
-        });
-
-        next.addEventListener('click', function () {
-            render(current + 1);
-            restartTimer();
-        });
-
-        image.addEventListener('click', function () {
-            render(current + 1);
-            restartTimer();
-        });
-
-        var showcase = document.querySelector('.feature-showcase');
-        showcase.addEventListener('mouseenter', function () {
-            if (timer) window.clearInterval(timer);
-        });
-
-        showcase.addEventListener('mouseleave', restartTimer);
-        showcase.addEventListener('focusin', function () {
-            if (timer) window.clearInterval(timer);
-        });
-
-        showcase.addEventListener('focusout', function (event) {
-            if (!showcase.contains(event.relatedTarget)) restartTimer();
-        });
-
-        render(0);
-
-        if ('IntersectionObserver' in window) {
-            var visibilityObserver = new IntersectionObserver(function (entries) {
-                entries.forEach(function (entry) {
-                    if (entry.isIntersecting) {
-                        restartTimer();
-                        visibilityObserver.unobserve(entry.target);
-                    }
-                });
-            });
-            visibilityObserver.observe(showcase);
-        } else {
-            restartTimer();
-        }
+        initShowcase(document.getElementById('features-showcase'), features);
+        initShowcase(document.getElementById('obsidian-showcase'), obsidianSteps);
     })();
 
     (function () {
