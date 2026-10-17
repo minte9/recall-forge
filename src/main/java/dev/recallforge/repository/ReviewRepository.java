@@ -88,6 +88,17 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     );
 
     @Query("""
+        select count(r)
+        from Review r
+        where r.user.id = :userId
+        and r.reviewedAt >= :since
+    """)
+    long countByUserIdAndReviewedAtAfter(
+        @Param("userId") Long userId,
+        @Param("since") LocalDateTime since
+    );
+
+    @Query("""
         select
             r.topic.subcategory as subcategory,
             count(r) as reviewCount

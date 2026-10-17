@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +26,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import dev.recallforge.config.AppMarkdownLimitProperties;
 import dev.recallforge.domain.AllowedEnvironment;
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Review;
@@ -71,13 +73,19 @@ class MarkdownFileServiceTest {
     @Mock
     private SubcategoryOrderRepository subcategoryOrderRepository;
 
+    @Mock
+    private AppMarkdownLimitProperties markdownLimitProperties;
+
     private MarkdownFileService markdownFileService;
 
     private void setUp() {
         markdownFileService = new MarkdownFileService(
             markdownFileRepository, topicRepository, reviewRepository, markdownTopicImporter,
-            currentUserService, openAiService, allowedEnvironmentRepository, subcategoryOrderRepository
+            currentUserService, openAiService, allowedEnvironmentRepository, subcategoryOrderRepository,
+            markdownLimitProperties
         );
+
+        lenient().when(markdownLimitProperties.maxTopicsPerUser()).thenReturn(2000);
     }
 
     private static String sha256(String content) throws Exception {
@@ -283,6 +291,71 @@ class MarkdownFileServiceTest {
         assertThat(existingMarkdownFile.getDisplayOrder()).isEqualTo(3);
         verify(markdownFileRepository, org.mockito.Mockito.never())
             .findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(any(), any(), any());
+    }
+
+    @Test
+    void upload_newFileWouldExceedUserTopicLimit_throwsWithoutSavingAnything() throws Exception {
+        setUp();
+        String content = "## Java Basics\nSome content.";
+        MockMultipartFile file = new MockMultipartFile(
+            "file", "notes.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Java Basics", "Some content."
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Programming", "Java", "Core", "Java Basics", 1L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("Java Basics", 1L)).thenReturn(Optional.empty());
+        when(topicRepository.countAllByUser(1L)).thenReturn(2000L);
+
+        assertThatThrownBy(() -> markdownFileService.upload(file))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Topic limit reached. Maximum is 2000 topics per account.");
+
+        verify(markdownFileRepository, never()).save(any());
+        verify(topicRepository, never()).save(any());
+    }
+
+    @Test
+    void upload_reimportOfExistingFileAtUserTopicLimit_isAllowedBecauseItsOwnTopicsAreReplaced() throws Exception {
+        setUp();
+        String newContent = "## Java Basics\nUpdated content.";
+        MockMultipartFile file = new MockMultipartFile(
+            "file", "notes.md", "text/markdown", newContent.getBytes(StandardCharsets.UTF_8)
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Programming", "Java", "Core", "Java Basics", "Java Basics", "Updated content."
+        );
+        UserAccount user = new UserAccount();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "old content", "oldhash", "Programming", "Java", "Core", "Java Basics", user
+        );
+        ReflectionTestUtils.setField(existingMarkdownFile, "id", 5L);
+        Topic existingTopic = new Topic(
+            "Programming", "Java", "Core", "Java Basics", "Java Basics", "old content", existingMarkdownFile, user
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(newContent)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Programming", "Java", "Core", "Java Basics", 1L))
+            .thenReturn(Optional.of(existingMarkdownFile));
+        when(topicRepository.findByMarkdownFileIdAndUserIdOrderByIdAsc(5L, 1L)).thenReturn(List.of(existingTopic));
+        when(topicRepository.countAllByUser(1L)).thenReturn(2000L);
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(
+                eq(existingMarkdownFile), eq("Java Basics"), eq(1L)))
+            .thenReturn(Optional.of(existingTopic));
+
+        markdownFileService.upload(file);
+
+        assertThat(existingMarkdownFile.getContent()).isEqualTo(newContent);
+        verify(markdownFileRepository).save(existingMarkdownFile);
     }
 
     @Test
@@ -1337,6 +1410,40 @@ class MarkdownFileServiceTest {
         assertThat(response.errors().get(0).path()).isEqualTo("Big.md");
         assertThat(response.errors().get(0).message()).isEqualTo("File is too large. Maximum size is 200 KB.");
         assertThat(response.imported()).hasSize(1);
+    }
+
+    @Test
+    void uploadVault_fileOverUserTopicLimit_recordedAsPerFileErrorWithoutSaving() throws Exception {
+        setUp();
+        String content = "## Topic\ncontent";
+        MultipartFile file = new MockMultipartFile(
+            "files", "Notes.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
+        );
+
+        String expectedSynthesized = "# Java / OOP /  / Notes\n\n" + content;
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Java", "OOP", "Uncategorized", "Notes", "Topic", "content"
+        );
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownTopicImporter.parseMarkdown(expectedSynthesized)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Java", "OOP", "Uncategorized", "Notes", 1L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("Topic", 1L)).thenReturn(Optional.empty());
+        when(topicRepository.countAllByUser(1L)).thenReturn(2000L);
+
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(file),
+            List.of("Java/OOP/Notes.md")
+        );
+
+        assertThat(response.imported()).isEmpty();
+        assertThat(response.errors()).hasSize(1);
+        assertThat(response.errors().get(0).path()).isEqualTo("Java/OOP/Notes.md");
+        assertThat(response.errors().get(0).message())
+            .isEqualTo("Topic limit reached. Maximum is 2000 topics per account.");
+        verify(markdownFileRepository, never()).save(any());
     }
 
     @Test
