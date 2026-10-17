@@ -186,6 +186,16 @@ public class DashboardService {
         long questionsToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
             userId, category, LocalDate.now().atStartOfDay());
 
+        // Usage against the per-user caps (shown on Account Details) - same
+        // queries the caps themselves check in ReviewService/MarkdownFileService.
+        long userReviewsToday = reviewRepository.countByUserIdAndReviewedAtAfter(
+            userId, LocalDate.now().atStartOfDay());
+        long userQuestionsToday = questionGenerationRepository.countByUserIdAndGeneratedAtAfter(
+            userId, LocalDate.now().atStartOfDay());
+        long optimizesToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
+            userId, MarkdownFileService.OPTIMIZE_CATEGORY, LocalDate.now().atStartOfDay());
+        long totalUserTopics = topicRepository.countAllByUser(userId);
+
         // Tomorrow/this week aren't separately enforced — they show what's realistically
         // reachable given the daily cap. Today's overdue backlog counts too: an overdue
         // topic stays reviewable indefinitely, so it can still fill tomorrow's (or next
@@ -212,7 +222,11 @@ public class DashboardService {
             todayReviewLimit,
             questionsToday,
             tomorrowReviewLimit,
-            thisWeekReviewLimit
+            thisWeekReviewLimit,
+            userReviewsToday,
+            userQuestionsToday,
+            optimizesToday,
+            totalUserTopics
         );
     }
 

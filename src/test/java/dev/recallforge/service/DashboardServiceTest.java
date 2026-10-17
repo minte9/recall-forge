@@ -405,6 +405,32 @@ class DashboardServiceTest {
     }
 
     @Test
+    void getDashboard_perUserUsage_comesFromUserWideCountsNotCategoryScoped() {
+        setUp();
+        when(topicRepository.findWeakAreas(eq(1L), eq("python"), any())).thenReturn(List.of());
+        when(topicRepository.findStrongKnowledgeAreas(1L, "python")).thenReturn(List.of());
+        when(topicRepository.findWeakKnowledgeAreas(1L, "python")).thenReturn(List.of());
+        when(rewardService.getCurrentUserReward("python"))
+            .thenReturn(new RewardResponse(0, 0, false, 10, 3, "Python", 0L, 0L, 0, 0L, 0, 0L, 0, 0L, 0L, 0L, false));
+        when(reviewRepository.countByUserIdAndReviewedAtAfter(eq(1L), any())).thenReturn(12L);
+        when(questionGenerationRepository.countByUserIdAndGeneratedAtAfter(eq(1L), any())).thenReturn(14L);
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("python"), any()))
+            .thenReturn(3L);
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
+                eq(1L), eq(MarkdownFileService.OPTIMIZE_CATEGORY), any()))
+            .thenReturn(2L);
+        when(topicRepository.countAllByUser(1L)).thenReturn(234L);
+
+        DashboardResponse dashboard = dashboardService.getDashboard("python");
+
+        assertThat(dashboard.userReviewsToday()).isEqualTo(12L);
+        assertThat(dashboard.questionsToday()).isEqualTo(3L);
+        assertThat(dashboard.userQuestionsToday()).isEqualTo(14L);
+        assertThat(dashboard.optimizesToday()).isEqualTo(2L);
+        assertThat(dashboard.totalUserTopics()).isEqualTo(234L);
+    }
+
+    @Test
     void getDashboard_emptyRepositoryResults_produceEmptyListsNotErrors() {
         setUp();
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
