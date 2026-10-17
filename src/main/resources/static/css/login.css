@@ -430,7 +430,9 @@ h1 {
     }
 
     .login-card {
+        padding-right: 16px;
         padding-bottom: 74px;
+        padding-left: 16px;
     }
 
     .packs-grid {
