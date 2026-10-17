@@ -2,6 +2,8 @@ package dev.recallforge.service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -15,19 +17,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import dev.recallforge.domain.MarkdownFile;
+import dev.recallforge.domain.QuestionGeneration;
 import dev.recallforge.domain.Review;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.config.AppMarkdownLimitProperties;
+import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.dto.AppliedOptimization;
 import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.dto.MarkdownVaultUploadResponse;
+import dev.recallforge.exception.DailyOptimizeLimitExceededException;
+import dev.recallforge.exception.DailyQuestionLimitExceededException;
 import dev.recallforge.exception.MarkdownAlreadyImportedException;
 import dev.recallforge.exception.MarkdownFileHasReviewsException;
 import dev.recallforge.repository.AllowedEnvironmentRepository;
 import dev.recallforge.repository.MarkdownFileRepository;
+import dev.recallforge.repository.QuestionGenerationRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
@@ -46,7 +53,7 @@ import jakarta.transaction.Transactional;
  * environment/category/subcategory/title metadata so re-imports update the
  * existing file and its topics instead of creating duplicates.
  *
- * {@link #optimize} is a separate, admin-only, non-persisting entry point
+ * {@link #optimize} is a separate, non-persisting entry point
  * that returns AI-rewritten markdown text for preview before the caller
  * submits it (if at all) through the normal {@link #update}/
  * {@link #createFromContent} paths.
@@ -63,6 +70,8 @@ public class MarkdownFileService {
     private final AllowedEnvironmentRepository allowedEnvironmentRepository;
     private final SubcategoryOrderRepository subcategoryOrderRepository;
     private final AppMarkdownLimitProperties markdownLimitProperties;
+    private final QuestionGenerationRepository questionGenerationRepository;
+    private final AppReviewLimitProperties reviewLimitProperties;
 
     private static final long MAX_FILE_SIZE = 200 * 1024;  // 200 KB
     private static final int MAX_CONTENT_LENGTH = 200_000;
@@ -76,6 +85,11 @@ public class MarkdownFileService {
     // vault won't be caught), just the common case.
     private static final String LIKELY_VAULT_ROOT_NAME = "obsidian vault";
 
+    // Optimize runs are recorded as question_generations rows under this
+    // reserved category, so they count toward the per-user daily AI total
+    // without a separate table. No real category can collide with it.
+    static final String OPTIMIZE_CATEGORY = "__optimize__";
+
     public MarkdownFileService(
             MarkdownFileRepository markdownFileRepository,
             TopicRepository topicRepository,
@@ -85,7 +99,9 @@ public class MarkdownFileService {
             OpenAiService openAiService,
             AllowedEnvironmentRepository allowedEnvironmentRepository,
             SubcategoryOrderRepository subcategoryOrderRepository,
-            AppMarkdownLimitProperties markdownLimitProperties
+            AppMarkdownLimitProperties markdownLimitProperties,
+            QuestionGenerationRepository questionGenerationRepository,
+            AppReviewLimitProperties reviewLimitProperties
     ) {
         this.markdownFileRepository = markdownFileRepository;
         this.topicRepository = topicRepository;
@@ -96,6 +112,8 @@ public class MarkdownFileService {
         this.allowedEnvironmentRepository = allowedEnvironmentRepository;
         this.subcategoryOrderRepository = subcategoryOrderRepository;
         this.markdownLimitProperties = markdownLimitProperties;
+        this.questionGenerationRepository = questionGenerationRepository;
+        this.reviewLimitProperties = reviewLimitProperties;
     }
 
     @Transactional
@@ -120,7 +138,7 @@ public class MarkdownFileService {
     }
 
     /**
-     * Admin-only. Imports an Obsidian vault: many files, each with a path
+     * Imports an Obsidian vault: many files, each with a path
      * relative to the vault root (as sent by a folder/webkitdirectory file
      * picker) - {@code paths.get(i)} is the relative path of {@code
      * files.get(i)}.
@@ -143,8 +161,6 @@ public class MarkdownFileService {
      */
     @Transactional
     public MarkdownVaultUploadResponse uploadVault(List<MultipartFile> files, List<String> paths) throws Exception {
-        currentUserService.requireAdmin();
-
         if (files == null || files.isEmpty()) {
             throw new IllegalArgumentException("No files provided.");
         }
@@ -465,7 +481,7 @@ public class MarkdownFileService {
     }
 
     /**
-     * Admin-only. Updates the stored original snapshot directly, independent
+     * Updates the stored original snapshot directly, independent
      * of `content` - backs the original's own edit form.
      *
      * Also doubles as "Add Original": a file that has never been optimized
@@ -476,8 +492,6 @@ public class MarkdownFileService {
      */
     @Transactional
     public MarkdownUploadResponse updateOriginal(Long markdownFileId, String content) {
-        currentUserService.requireAdmin();
-
         if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Original markdown content is empty.");
         }
@@ -503,15 +517,13 @@ public class MarkdownFileService {
     }
 
     /**
-     * Admin-only. Removes the stored original entirely, clearing {@code
+     * Removes the stored original entirely, clearing {@code
      * optimized} - the inverse of the first-time {@link #updateOriginal}
      * capture. {@code content} (the current, optimized-for-review text) is
      * untouched.
      */
     @Transactional
     public MarkdownUploadResponse deleteOriginal(Long markdownFileId) {
-        currentUserService.requireAdmin();
-
         Long userId = currentUserService.currentUserId();
 
         MarkdownFile markdownFile = markdownFileRepository.findByIdAndUserId(markdownFileId, userId)
@@ -524,8 +536,8 @@ public class MarkdownFileService {
     }
 
     /**
-     * Admin-only. Returns AI-optimized markdown text without persisting
-     * anything - the caller previews it and submits separately through
+     * Returns AI-optimized markdown text without persisting the file - the
+     * caller previews it and submits separately through
      * {@link #update} or {@link #createFromContent} if they want to keep it.
      *
      * If {@code content} already has a "#" header, the header/topic titles
@@ -540,8 +552,6 @@ public class MarkdownFileService {
      * create/update call, if the preview is accepted.
      */
     public OptimizeResult optimize(String content) {
-        currentUserService.requireAdmin();
-
         if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Markdown content is empty.");
         }
@@ -556,6 +566,8 @@ public class MarkdownFileService {
             throw new IllegalArgumentException("Markdown content does not contain any topics.");
         }
 
+        recordOptimizeRun();
+
         boolean structured = hasPathHeading(content);
 
         String optimizedContent = structured
@@ -563,6 +575,30 @@ public class MarkdownFileService {
                 : optimizeUnstructuredContent(content);
 
         return new OptimizeResult(optimizedContent, structured);
+    }
+
+    // Checked and recorded before the AI call, so a failed or abandoned run
+    // still counts - it cost the same. Two limits: the optimize-specific one
+    // (it's the most expensive call) and the shared per-user daily AI total.
+    private void recordOptimizeRun() {
+        Long userId = currentUserService.currentUserId();
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+
+        long optimizesToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
+                userId, OPTIMIZE_CATEGORY, startOfDay);
+
+        if (optimizesToday >= markdownLimitProperties.dailyOptimizeLimit()) {
+            throw new DailyOptimizeLimitExceededException();
+        }
+
+        long aiCallsToday = questionGenerationRepository.countByUserIdAndGeneratedAtAfter(userId, startOfDay);
+
+        if (aiCallsToday >= reviewLimitProperties.dailyUserQuestionLimit()) {
+            throw new DailyQuestionLimitExceededException(
+                    "You've hit your daily AI limit across all categories. Come back tomorrow for more.");
+        }
+
+        questionGenerationRepository.save(new QuestionGeneration(userId, OPTIMIZE_CATEGORY));
     }
 
     private String optimizeStructuredContent(List<MarkdownTopicImporter.ParsedTopic> parsedTopics) {
@@ -781,10 +817,9 @@ public class MarkdownFileService {
         return toResponse(markdownFile);
     }
 
-    // update()/createFromContent() aren't otherwise admin-gated (any owner
-    // can edit their own file), so this flag-setting path is guarded
-    // separately - without it, a crafted request could fabricate the
-    // optimized/aiGenerated provenance without ever calling optimize().
+    // Not gated: a crafted request could set the optimized/aiGenerated
+    // flags without calling optimize(), but only on the caller's own file,
+    // and the flags only affect how that file is labeled.
     private void applyOptimizationMetadata(
             MarkdownFile markdownFile,
             AppliedOptimization appliedOptimization,
@@ -793,8 +828,6 @@ public class MarkdownFileService {
         if (appliedOptimization == null) {
             return;
         }
-
-        currentUserService.requireAdmin();
 
         if (appliedOptimization == AppliedOptimization.STRUCTURED) {
             markdownFile.markOptimized(originalContentSnapshot);

@@ -1,6 +1,7 @@
 package dev.recallforge.controller;
 
 import dev.recallforge.config.AppAiProperties;
+import dev.recallforge.config.AppMarkdownLimitProperties;
 import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.dto.CurrentUserResponse;
@@ -20,14 +21,17 @@ public class CurrentUserController {
     private final CurrentUserService currentUserService;
     private final AppReviewLimitProperties reviewLimitProperties;
     private final AppAiProperties aiProperties;
+    private final AppMarkdownLimitProperties markdownLimitProperties;
 
     public CurrentUserController(
             CurrentUserService currentUserService,
             AppReviewLimitProperties reviewLimitProperties,
-            AppAiProperties aiProperties) {
+            AppAiProperties aiProperties,
+            AppMarkdownLimitProperties markdownLimitProperties) {
         this.currentUserService = currentUserService;
         this.reviewLimitProperties = reviewLimitProperties;
         this.aiProperties = aiProperties;
+        this.markdownLimitProperties = markdownLimitProperties;
     }
 
     @GetMapping("/me")
@@ -44,6 +48,10 @@ public class CurrentUserController {
             user.getAvatarUrl(),
             reviewLimitProperties.dailyLimit(),
             reviewLimitProperties.dailyQuestionLimit(),
+            reviewLimitProperties.dailyUserReviewLimit(),
+            reviewLimitProperties.dailyUserQuestionLimit(),
+            markdownLimitProperties.dailyOptimizeLimit(),
+            markdownLimitProperties.maxTopicsPerUser(),
             aiProperties.enabled()
         );
     }

@@ -573,14 +573,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
-    // Original's counterpart to onMarkdownClick - admin-gated since editing
-    // the original itself is (see updateOriginal on the backend).
+    // Original's counterpart to onMarkdownClick.
     onOriginalMarkdownClick(event) {
       if (event.target.closest(".code-block")) {
         return;
       }
 
-      if (this.currentMarkdownFileId && this.currentUser?.role === "ADMIN") {
+      if (this.currentMarkdownFileId) {
         this.editOriginalMarkdown();
       }
     },

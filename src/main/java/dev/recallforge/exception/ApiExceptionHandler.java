@@ -57,6 +57,13 @@ public class ApiExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    @ExceptionHandler(DailyOptimizeLimitExceededException.class)
+    public ResponseEntity<String> handleDailyOptimizeLimitExceeded(DailyOptimizeLimitExceededException ex) {
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ex.getMessage());
+    }
+
     // Catch-all for the validation errors MarkdownFileService/
     // StarterPackService throw (bad upload, bad vault selection, not
     // found, etc.) - without this they fall through to Spring Boot's

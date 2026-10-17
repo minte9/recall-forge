@@ -98,6 +98,9 @@ app:
     daily-user-review-limit: ${APP_DAILY_USER_REVIEW_LIMIT:100}
   markdown:
     max-topics-per-user: ${APP_MAX_TOPICS_PER_USER:2000}
+    # Optimize is the most expensive AI call (whole file in, whole rewrite
+    # out). Also counts toward daily-user-question-limit above.
+    daily-optimize-limit: ${APP_DAILY_OPTIMIZE_LIMIT:10}
   goal-days:
     reviews: ${APP_GOAL_DAYS_REVIEWS:10}
     code-challenges: ${APP_GOAL_DAYS_CHALLENGES:3}

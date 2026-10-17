@@ -8,4 +8,8 @@ public class DailyReviewLimitExceededException extends RuntimeException {
     public DailyReviewLimitExceededException() {
         super("Daily review limit reached for this category.");
     }
+
+    public DailyReviewLimitExceededException(String message) {
+        super(message);
+    }
 }

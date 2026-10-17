@@ -10,5 +10,9 @@ public record CurrentUserResponse(
     String avatarUrl,
     int dailyReviewLimit,
     int dailyQuestionLimit,
+    int dailyUserReviewLimit,
+    int dailyUserQuestionLimit,
+    int dailyOptimizeLimit,
+    int maxTopicsPerUser,
     boolean aiEnabled
 ) {}
