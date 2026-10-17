@@ -655,22 +655,30 @@
 
             <div class="account-row">
               <span>Answers daily limit, all categories</span>
-              <strong>{{ currentUser.dailyUserReviewLimit }}</strong>
+              <strong>
+                {{ dashboard ? dashboard.userReviewsToday : "-" }}/{{ currentUser.dailyUserReviewLimit }}
+              </strong>
             </div>
 
             <div class="account-row">
               <span>AI requests daily limit, all categories (questions + optimize)</span>
-              <strong>{{ currentUser.dailyUserQuestionLimit }}</strong>
+              <strong>
+                {{ dashboard ? dashboard.userQuestionsToday : "-" }}/{{ currentUser.dailyUserQuestionLimit }}
+              </strong>
             </div>
 
             <div class="account-row">
               <span>Optimize daily limit</span>
-              <strong>{{ currentUser.dailyOptimizeLimit }}</strong>
+              <strong>
+                {{ dashboard ? dashboard.optimizesToday : "-" }}/{{ currentUser.dailyOptimizeLimit }}
+              </strong>
             </div>
 
             <div class="account-row">
               <span>Topics limit per account</span>
-              <strong>{{ currentUser.maxTopicsPerUser }}</strong>
+              <strong>
+                {{ dashboard ? formatTokenCount(dashboard.totalUserTopics) : "-" }}/{{ formatTokenCount(currentUser.maxTopicsPerUser) }}
+              </strong>
             </div>
 
           </div>

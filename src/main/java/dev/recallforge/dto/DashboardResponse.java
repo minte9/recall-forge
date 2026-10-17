@@ -17,5 +17,9 @@ public record DashboardResponse(
     long todayReviewLimit,
     long questionsToday,
     long tomorrowReviewLimit,
-    long thisWeekReviewLimit
+    long thisWeekReviewLimit,
+    long userReviewsToday,
+    long userQuestionsToday,
+    long optimizesToday,
+    long totalUserTopics
 ) {}
