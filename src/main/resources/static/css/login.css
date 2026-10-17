@@ -98,10 +98,11 @@ h1 {
 .login-split__primary {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
     flex: 1;
     margin-bottom: 0;
-    text-align: left;
+    padding-left: 14px;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
