@@ -91,12 +91,7 @@ public class ReviewService {
 
         Topic topic = topicOptional.get();
 
-        long questionsToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
-                userId, topic.getCategory(), LocalDate.now().atStartOfDay());
-
-        if (questionsToday >= reviewLimitProperties.dailyQuestionLimit()) {
-            throw new DailyQuestionLimitExceededException();
-        }
+        ensureDailyQuestionLimit(userId, topic.getCategory());
 
         List<Review> recentReviewRows = reviewRepository
                 .findTop3ByTopicIdAndTopicUserIdOrderByReviewedAtDesc(topic.getId(), userId);
@@ -167,12 +162,7 @@ public class ReviewService {
 
     @SuppressWarnings("null")
     private ReviewQuestionResponse generateCodeChallengeForTopic(Topic topic, Long userId) {
-        long questionsToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
-                userId, topic.getCategory(), LocalDate.now().atStartOfDay());
-
-        if (questionsToday >= reviewLimitProperties.dailyQuestionLimit()) {
-            throw new DailyQuestionLimitExceededException();
-        }
+        ensureDailyQuestionLimit(userId, topic.getCategory());
 
         List<String> recentChallenges = reviewRepository
                 .findByTopicIdAndTopicUserIdAndRetryTypeOrderByReviewedAtDesc(
@@ -189,6 +179,27 @@ public class ReviewService {
         questionGenerationRepository.save(new QuestionGeneration(userId, topic.getCategory()));
 
         return buildQuestionResponse(topic, question, true, true);
+    }
+
+    // Shared by startReview and generateCodeChallengeForTopic. The per-category
+    // limit keeps one category from eating the day; the per-user total caps
+    // the overall AI cost, since a vault upload can create many categories.
+    private void ensureDailyQuestionLimit(Long userId, String category) {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+
+        long questionsToday = questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
+                userId, category, startOfDay);
+
+        if (questionsToday >= reviewLimitProperties.dailyQuestionLimit()) {
+            throw new DailyQuestionLimitExceededException();
+        }
+
+        long userQuestionsToday = questionGenerationRepository.countByUserIdAndGeneratedAtAfter(
+                userId, startOfDay);
+
+        if (userQuestionsToday >= reviewLimitProperties.dailyUserQuestionLimit()) {
+            throw new DailyQuestionLimitExceededException();
+        }
     }
 
     // Shared by startReview and generateCodeChallengeForTopic - both build a
@@ -242,6 +253,13 @@ public class ReviewService {
                 userId, topic.getCategory(), LocalDate.now().atStartOfDay());
 
         if (reviewsToday >= reviewLimitProperties.dailyLimit()) {
+            throw new DailyReviewLimitExceededException();
+        }
+
+        long userReviewsToday = reviewRepository.countByUserIdAndReviewedAtAfter(
+                userId, LocalDate.now().atStartOfDay());
+
+        if (userReviewsToday >= reviewLimitProperties.dailyUserReviewLimit()) {
             throw new DailyReviewLimitExceededException();
         }
 

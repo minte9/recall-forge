@@ -13,6 +13,8 @@ public interface QuestionGenerationRepository extends JpaRepository<QuestionGene
 
     long countByUserIdAndCategoryAndGeneratedAtAfter(Long userId, String category, LocalDateTime since);
 
+    long countByUserIdAndGeneratedAtAfter(Long userId, LocalDateTime since);
+
     @Modifying
     @Query("delete from QuestionGeneration q where q.userId = :userId")
     void deleteByUserId(@Param("userId") Long userId);

@@ -177,6 +177,13 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     );
 
     @Query("""
+        select count(t)
+        from Topic t
+        where t.markdownFile.user.id = :userId
+    """)
+    long countAllByUser(@Param("userId") Long userId);
+
+    @Query("""
         select
             t.environment as environment,
             t.category as category,

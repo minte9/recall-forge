@@ -81,6 +81,8 @@ class ReviewServiceTest {
         );
 
         lenient().when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
+        lenient().when(reviewLimitProperties.dailyUserQuestionLimit()).thenReturn(100);
+        lenient().when(reviewLimitProperties.dailyUserReviewLimit()).thenReturn(100);
         lenient().when(aiProperties.enabled()).thenReturn(true);
     }
 
@@ -266,6 +268,24 @@ class ReviewServiceTest {
     }
 
     @Test
+    void startReview_userDailyQuestionLimitReached_throwsEvenWhenCategoryIsBelowItsLimit() {
+        setUp();
+        Topic topic = topicWithId(10L, null);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.selectNextTopic(1L, "java")).thenReturn(Optional.of(topic));
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("Uncategorized"), any()))
+            .thenReturn(5L);
+        when(questionGenerationRepository.countByUserIdAndGeneratedAtAfter(eq(1L), any()))
+            .thenReturn(100L);
+
+        assertThatThrownBy(() -> reviewService.startReview(null, "java", null))
+            .isInstanceOf(DailyQuestionLimitExceededException.class);
+
+        verify(openAiService, never()).generateQuestion(any(), any(), anyDouble(), any());
+        verify(questionGenerationRepository, never()).save(any());
+    }
+
+    @Test
     void startReview_belowDailyQuestionLimit_generatesQuestionAndRecordsGeneration() {
         setUp();
         Topic topic = topicWithId(10L, null);
@@ -344,6 +364,24 @@ class ReviewServiceTest {
         when(reviewLimitProperties.dailyQuestionLimit()).thenReturn(50);
         when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("Uncategorized"), any()))
             .thenReturn(50L);
+
+        assertThatThrownBy(() -> reviewService.startCodeChallenge(30L))
+            .isInstanceOf(DailyQuestionLimitExceededException.class);
+
+        verify(openAiService, never()).generateCodeChallenge(any(), any(), any(), anyDouble(), any());
+        verify(questionGenerationRepository, never()).save(any());
+    }
+
+    @Test
+    void startCodeChallenge_userDailyQuestionLimitReached_throwsEvenWhenCategoryIsBelowItsLimit() {
+        setUp();
+        Topic topic = topicWithId(30L, null);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(30L, 1L)).thenReturn(topic);
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(eq(1L), eq("Uncategorized"), any()))
+            .thenReturn(5L);
+        when(questionGenerationRepository.countByUserIdAndGeneratedAtAfter(eq(1L), any()))
+            .thenReturn(100L);
 
         assertThatThrownBy(() -> reviewService.startCodeChallenge(30L))
             .isInstanceOf(DailyQuestionLimitExceededException.class);
@@ -576,6 +614,25 @@ class ReviewServiceTest {
         when(reviewLimitProperties.dailyLimit()).thenReturn(20);
         when(reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any()))
             .thenReturn(20L);
+
+        assertThatThrownBy(() -> reviewService.answerQuestion(7L, "Q?", "My answer", false, false))
+            .isInstanceOf(DailyReviewLimitExceededException.class);
+
+        verify(openAiService, never()).evaluateAnswer(any(), any(), any(), any());
+    }
+
+    @Test
+    void answerQuestion_userDailyReviewLimitReached_throwsEvenWhenCategoryIsBelowItsLimit() {
+        setUp();
+        Topic topic = topicWithId(7L, null);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicService.getTopic(7L, 1L)).thenReturn(topic);
+        when(reviewLimitProperties.dailyLimit()).thenReturn(20);
+        when(reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(eq(1L), eq("Uncategorized"), any()))
+            .thenReturn(2L);
+        when(reviewRepository.countByUserIdAndReviewedAtAfter(eq(1L), any()))
+            .thenReturn(100L);
 
         assertThatThrownBy(() -> reviewService.answerQuestion(7L, "Q?", "My answer", false, false))
             .isInstanceOf(DailyReviewLimitExceededException.class);

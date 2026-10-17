@@ -19,6 +19,7 @@ import dev.recallforge.domain.Review;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.SubcategoryOrder;
 import dev.recallforge.domain.Topic;
+import dev.recallforge.config.AppMarkdownLimitProperties;
 import dev.recallforge.dto.AppliedOptimization;
 import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownUploadResponse;
@@ -61,6 +62,7 @@ public class MarkdownFileService {
     private final OpenAiService openAiService;
     private final AllowedEnvironmentRepository allowedEnvironmentRepository;
     private final SubcategoryOrderRepository subcategoryOrderRepository;
+    private final AppMarkdownLimitProperties markdownLimitProperties;
 
     private static final long MAX_FILE_SIZE = 200 * 1024;  // 200 KB
     private static final int MAX_CONTENT_LENGTH = 200_000;
@@ -82,7 +84,8 @@ public class MarkdownFileService {
             CurrentUserService currentUserService,
             OpenAiService openAiService,
             AllowedEnvironmentRepository allowedEnvironmentRepository,
-            SubcategoryOrderRepository subcategoryOrderRepository
+            SubcategoryOrderRepository subcategoryOrderRepository,
+            AppMarkdownLimitProperties markdownLimitProperties
     ) {
         this.markdownFileRepository = markdownFileRepository;
         this.topicRepository = topicRepository;
@@ -92,6 +95,7 @@ public class MarkdownFileService {
         this.openAiService = openAiService;
         this.allowedEnvironmentRepository = allowedEnvironmentRepository;
         this.subcategoryOrderRepository = subcategoryOrderRepository;
+        this.markdownLimitProperties = markdownLimitProperties;
     }
 
     @Transactional
@@ -441,6 +445,8 @@ public class MarkdownFileService {
             }
         }
 
+        ensureTopicLimit(userId, markdownFile, parsedTopics.size());
+
         MarkdownTopicImporter.ParsedTopic firstTopic = parsedTopics.get(0);
 
         markdownFile.updateContent(content, contentHash);
@@ -725,6 +731,7 @@ public class MarkdownFileService {
             if (markdownFile.isOptimized() || markdownFile.isAiGenerated()) {
                 skipTopicSync = true;
             } else {
+                ensureTopicLimit(userId, markdownFile, parsedTopics.size());
                 markdownFile.updateContent(content, contentHash);
             }
 
@@ -744,6 +751,8 @@ public class MarkdownFileService {
             markdownFileRepository.save(markdownFile);
 
         } else {
+            ensureTopicLimit(userId, null, parsedTopics.size());
+
             Integer resolvedDisplayOrder = autoAssignDisplayOrder
                     ? nextDisplayOrder(userId, firstTopic.category(), firstTopic.subcategory())
                     : explicitDisplayOrder;
@@ -922,6 +931,24 @@ public class MarkdownFileService {
                 topicRepository.findByTitleAndUserId(firstTopic.title(), userId);
 
         return byTopicTitle.map(Topic::getMarkdownFile);
+    }
+
+    // Checked before anything is saved. The projected total assumes this
+    // import replaces the file's current topics (syncTopicsFromMarkdown
+    // drops topics no longer in the file), so re-importing an unchanged
+    // file never trips the cap. existingFile is null for a new file.
+    private void ensureTopicLimit(Long userId, MarkdownFile existingFile, int newTopicCount) {
+        long currentInFile = existingFile == null
+                ? 0
+                : topicRepository.findByMarkdownFileIdAndUserIdOrderByIdAsc(existingFile.getId(), userId).size();
+
+        long projectedTotal = topicRepository.countAllByUser(userId) - currentInFile + newTopicCount;
+        int maxTopics = markdownLimitProperties.maxTopicsPerUser();
+
+        if (projectedTotal > maxTopics) {
+            throw new IllegalArgumentException(
+                    "Topic limit reached. Maximum is " + maxTopics + " topics per account.");
+        }
     }
 
     private void syncTopicsFromMarkdown(
