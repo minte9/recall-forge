@@ -47,7 +47,10 @@ cd recall-forge
 docker network create traefik-net
 
 # APP_SECURITY_ENABLED=false skips OAuth login for local use
-OPENAI_API_KEY=sk-... APP_SECURITY_ENABLED=false docker compose up --build
+OPENAI_API_KEY=sk-... 
+APP_SECURITY_ENABLED=false 
+
+docker compose up --build
 ~~~
 
 Then open http://localhost:9090.
