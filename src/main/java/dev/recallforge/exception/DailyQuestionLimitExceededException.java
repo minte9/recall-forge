@@ -8,4 +8,8 @@ public class DailyQuestionLimitExceededException extends RuntimeException {
     public DailyQuestionLimitExceededException() {
         super("You've hit your daily question limit for this category. Come back tomorrow for more.");
     }
+
+    public DailyQuestionLimitExceededException(String message) {
+        super(message);
+    }
 }

@@ -198,7 +198,8 @@ public class ReviewService {
                 userId, startOfDay);
 
         if (userQuestionsToday >= reviewLimitProperties.dailyUserQuestionLimit()) {
-            throw new DailyQuestionLimitExceededException();
+            throw new DailyQuestionLimitExceededException(
+                    "You've hit your daily AI limit across all categories. Come back tomorrow for more.");
         }
     }
 
@@ -260,7 +261,8 @@ public class ReviewService {
                 userId, LocalDate.now().atStartOfDay());
 
         if (userReviewsToday >= reviewLimitProperties.dailyUserReviewLimit()) {
-            throw new DailyReviewLimitExceededException();
+            throw new DailyReviewLimitExceededException(
+                    "Daily review limit reached across all categories. Come back tomorrow for more.");
         }
 
         EvaluationResult evaluation = evaluateAnswer(topicId, question, userAnswer, codeChallenge);

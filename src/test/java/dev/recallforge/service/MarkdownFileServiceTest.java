@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -27,8 +26,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import dev.recallforge.config.AppMarkdownLimitProperties;
+import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.domain.AllowedEnvironment;
 import dev.recallforge.domain.MarkdownFile;
+import dev.recallforge.domain.QuestionGeneration;
 import dev.recallforge.domain.Review;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.SubcategoryOrder;
@@ -38,9 +39,12 @@ import dev.recallforge.dto.AppliedOptimization;
 import dev.recallforge.dto.CodeChallengeResponse;
 import dev.recallforge.dto.MarkdownUploadResponse;
 import dev.recallforge.dto.MarkdownVaultUploadResponse;
+import dev.recallforge.exception.DailyOptimizeLimitExceededException;
+import dev.recallforge.exception.DailyQuestionLimitExceededException;
 import dev.recallforge.exception.MarkdownFileHasReviewsException;
 import dev.recallforge.repository.AllowedEnvironmentRepository;
 import dev.recallforge.repository.MarkdownFileRepository;
+import dev.recallforge.repository.QuestionGenerationRepository;
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.SubcategoryOrderRepository;
 import dev.recallforge.repository.TopicRepository;
@@ -76,16 +80,24 @@ class MarkdownFileServiceTest {
     @Mock
     private AppMarkdownLimitProperties markdownLimitProperties;
 
+    @Mock
+    private QuestionGenerationRepository questionGenerationRepository;
+
+    @Mock
+    private AppReviewLimitProperties reviewLimitProperties;
+
     private MarkdownFileService markdownFileService;
 
     private void setUp() {
         markdownFileService = new MarkdownFileService(
             markdownFileRepository, topicRepository, reviewRepository, markdownTopicImporter,
             currentUserService, openAiService, allowedEnvironmentRepository, subcategoryOrderRepository,
-            markdownLimitProperties
+            markdownLimitProperties, questionGenerationRepository, reviewLimitProperties
         );
 
         lenient().when(markdownLimitProperties.maxTopicsPerUser()).thenReturn(2000);
+        lenient().when(markdownLimitProperties.dailyOptimizeLimit()).thenReturn(10);
+        lenient().when(reviewLimitProperties.dailyUserQuestionLimit()).thenReturn(100);
     }
 
     private static String sha256(String content) throws Exception {
@@ -686,7 +698,7 @@ class MarkdownFileServiceTest {
         MarkdownUploadResponse response = markdownFileService.update(
             1L, newContent, AppliedOptimization.STRUCTURED, oldContent);
 
-        verify(currentUserService).requireAdmin();
+        verify(currentUserService, never()).requireAdmin();
         assertThat(response.optimized()).isTrue();
         assertThat(response.originalContent()).isEqualTo(oldContent);
         assertThat(existingMarkdownFile.isOptimized()).isTrue();
@@ -756,15 +768,21 @@ class MarkdownFileServiceTest {
     }
 
     @Test
-    void updateOriginal_notAdmin_throwsAccessDeniedExceptionWithoutSaving() {
+    void updateOriginal_nonAdmin_isAllowed() {
         setUp();
-        doThrow(new AccessDeniedException("Admin access required"))
+        lenient().doThrow(new AccessDeniedException("Admin access required"))
             .when(currentUserService).requireAdmin();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "content", "hash", "Programming", "Java", "Core", "Java Basics", new UserAccount()
+        );
 
-        assertThatThrownBy(() -> markdownFileService.updateOriginal(1L, "new original"))
-            .isInstanceOf(AccessDeniedException.class);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        verify(markdownFileRepository, never()).save(any());
+        MarkdownUploadResponse response = markdownFileService.updateOriginal(1L, "new original");
+
+        assertThat(response.originalContent()).isEqualTo("new original");
     }
 
     @Test
@@ -807,15 +825,22 @@ class MarkdownFileServiceTest {
     }
 
     @Test
-    void deleteOriginal_notAdmin_throwsAccessDeniedExceptionWithoutSaving() {
+    void deleteOriginal_nonAdmin_isAllowed() {
         setUp();
-        doThrow(new AccessDeniedException("Admin access required"))
+        lenient().doThrow(new AccessDeniedException("Admin access required"))
             .when(currentUserService).requireAdmin();
+        MarkdownFile existingMarkdownFile = new MarkdownFile(
+            "notes.md", "content", "hash", "Programming", "Java", "Core", "Java Basics", new UserAccount()
+        );
+        existingMarkdownFile.markOptimized("captured original");
 
-        assertThatThrownBy(() -> markdownFileService.deleteOriginal(1L))
-            .isInstanceOf(AccessDeniedException.class);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(existingMarkdownFile));
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        verify(markdownFileRepository, never()).save(any());
+        MarkdownUploadResponse response = markdownFileService.deleteOriginal(1L);
+
+        assertThat(response.originalContent()).isNull();
     }
 
     @Test
@@ -880,8 +905,6 @@ class MarkdownFileServiceTest {
 
         assertThat(response.optimized()).isTrue();
         assertThat(response.originalContent()).isEqualTo("Template's original content.");
-        // Cloning copies existing, already-trusted template data - it's not
-        // user-submitted input, so it isn't admin-gated like a live optimize.
         verify(currentUserService, never()).requireAdmin();
     }
 
@@ -1113,15 +1136,73 @@ class MarkdownFileServiceTest {
     }
 
     @Test
-    void optimize_notAdmin_throwsAccessDeniedExceptionWithoutParsing() {
+    void optimize_nonAdmin_isAllowedAndRecordsRunUnderReservedCategory() {
         setUp();
-        doThrow(new AccessDeniedException("Admin access required"))
+        lenient().doThrow(new AccessDeniedException("Admin access required"))
             .when(currentUserService).requireAdmin();
+        String content = "raw notes, no headings";
+        MarkdownTopicImporter.ParsedTopic fallbackTopic = new MarkdownTopicImporter.ParsedTopic(
+            "General", "Uncategorized", "Uncategorized", "Untitled", "Untitled", content
+        );
+        String aiResponse = "# JVM / Java / Streams / Streams Basics\n## Stream Creation\nContent.";
+        MarkdownTopicImporter.ParsedTopic generatedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "JVM", "Java", "Streams", "Streams Basics", "Stream Creation", "Content."
+        );
 
-        assertThatThrownBy(() -> markdownFileService.optimize("## Topic\ncontent"))
-            .isInstanceOf(AccessDeniedException.class);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(fallbackTopic));
+        when(allowedEnvironmentRepository.findAllByOrderByDisplayOrderAsc()).thenReturn(List.of());
+        when(openAiService.generateStructuredMarkdown(eq(content), any())).thenReturn(aiResponse);
+        when(markdownTopicImporter.parseMarkdown(aiResponse)).thenReturn(List.of(generatedTopic));
 
-        verify(markdownTopicImporter, never()).parseMarkdown(any());
+        OptimizeResult result = markdownFileService.optimize(content);
+
+        assertThat(result.content()).isEqualTo(aiResponse);
+        ArgumentCaptor<QuestionGeneration> captor = ArgumentCaptor.forClass(QuestionGeneration.class);
+        verify(questionGenerationRepository).save(captor.capture());
+        assertThat(captor.getValue().getUserId()).isEqualTo(1L);
+        assertThat(captor.getValue().getCategory()).isEqualTo(MarkdownFileService.OPTIMIZE_CATEGORY);
+    }
+
+    @Test
+    void optimize_dailyOptimizeLimitReached_throwsWithoutCallingAi() {
+        setUp();
+        String content = "## Topic\ncontent";
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(new MarkdownTopicImporter.ParsedTopic(
+            "General", "Uncategorized", "Uncategorized", "Untitled", "Topic", "content")));
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
+                eq(1L), eq(MarkdownFileService.OPTIMIZE_CATEGORY), any()))
+            .thenReturn(10L);
+
+        assertThatThrownBy(() -> markdownFileService.optimize(content))
+            .isInstanceOf(DailyOptimizeLimitExceededException.class);
+
+        verify(openAiService, never()).generateStructuredMarkdown(any(), any());
+        verify(openAiService, never()).optimizeTopicBodies(any());
+        verify(questionGenerationRepository, never()).save(any());
+    }
+
+    @Test
+    void optimize_userDailyAiLimitReached_throwsEvenWhenBelowOptimizeLimit() {
+        setUp();
+        String content = "## Topic\ncontent";
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(new MarkdownTopicImporter.ParsedTopic(
+            "General", "Uncategorized", "Uncategorized", "Untitled", "Topic", "content")));
+        when(questionGenerationRepository.countByUserIdAndCategoryAndGeneratedAtAfter(
+                eq(1L), eq(MarkdownFileService.OPTIMIZE_CATEGORY), any()))
+            .thenReturn(2L);
+        when(questionGenerationRepository.countByUserIdAndGeneratedAtAfter(eq(1L), any()))
+            .thenReturn(100L);
+
+        assertThatThrownBy(() -> markdownFileService.optimize(content))
+            .isInstanceOf(DailyQuestionLimitExceededException.class)
+            .hasMessageContaining("across all categories");
+
+        verify(openAiService, never()).generateStructuredMarkdown(any(), any());
+        verify(openAiService, never()).optimizeTopicBodies(any());
+        verify(questionGenerationRepository, never()).save(any());
     }
 
     @Test
@@ -1277,19 +1358,37 @@ class MarkdownFileServiceTest {
     }
 
     @Test
-    void uploadVault_notAdmin_throwsAccessDeniedExceptionWithoutImporting() {
+    void uploadVault_nonAdmin_isAllowedAndImportsFiles() throws Exception {
         setUp();
-        doThrow(new AccessDeniedException("Admin access required"))
+        lenient().doThrow(new AccessDeniedException("Admin access required"))
             .when(currentUserService).requireAdmin();
-
+        String content = "## Topic\ncontent";
         MultipartFile file = new MockMultipartFile(
-            "files", "Notes.md", "text/markdown", "## Topic\ncontent".getBytes(StandardCharsets.UTF_8)
+            "files", "Notes.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
+        );
+        String expectedSynthesized = "# Java / OOP /  / Notes\n\n" + content;
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "Java", "OOP", "Uncategorized", "Notes", "Topic", "content"
         );
 
-        assertThatThrownBy(() -> markdownFileService.uploadVault(List.of(file), List.of("Vault/Notes.md")))
-            .isInstanceOf(AccessDeniedException.class);
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(new UserAccount());
+        when(markdownTopicImporter.parseMarkdown(expectedSynthesized)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "Java", "OOP", "Uncategorized", "Notes", 1L))
+            .thenReturn(Optional.empty());
+        when(topicRepository.findByTitleAndUserId("Topic", 1L)).thenReturn(Optional.empty());
+        when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "OOP", "Uncategorized"))
+            .thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Topic"), eq(1L)))
+            .thenReturn(Optional.empty());
 
-        verify(markdownTopicImporter, never()).parseMarkdown(any());
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(file), List.of("Java/OOP/Notes.md"));
+
+        assertThat(response.errors()).isEmpty();
+        assertThat(response.imported()).hasSize(1);
     }
 
     @Test

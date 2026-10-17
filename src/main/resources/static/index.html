@@ -69,7 +69,7 @@
             <icon name="eye" class="menu-icon"></icon>{{ viewingOriginal ? "Hide Original" : "Show Original" }}
           </button>
 
-          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && !currentMarkdownOptimized && currentUser?.role == 'ADMIN'"
+          <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && !currentMarkdownOptimized"
             @click="editOriginalMarkdown(); mobileMenuOpen = false">
             <icon name="ai-badge" class="menu-icon"></icon>Add Original
           </button>
@@ -92,7 +92,7 @@
           </button>
 
           <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
-              viewingOriginal && currentMarkdownOptimized && currentUser?.role == 'ADMIN'"
+              viewingOriginal && currentMarkdownOptimized"
             @click.stop="deleteOriginalMarkdown(); mobileMenuOpen = false">
             <icon name="trash" class="menu-icon"></icon>Delete Original
           </button>
@@ -184,7 +184,7 @@
                 <icon name="eye" class="menu-icon"></icon>{{ viewingOriginal ? "Hide Original" : "Show Original" }}
               </button>
 
-              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && !currentMarkdownOptimized && currentUser?.role == 'ADMIN'"
+              <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId && !currentMarkdownOptimized"
                 @click="editOriginalMarkdown(); menuOpen = false">
                 <icon name="ai-badge" class="menu-icon"></icon>Add Original
               </button>
@@ -207,7 +207,7 @@
               </button>
 
               <button v-if="leftPanel === 'markdown' && !markdownLoading && currentMarkdownFileId &&
-                  viewingOriginal && currentMarkdownOptimized && currentUser?.role == 'ADMIN'"
+                  viewingOriginal && currentMarkdownOptimized"
                 @click.stop="deleteOriginalMarkdown(); menuOpen = false">
                 <icon name="trash" class="menu-icon"></icon>Delete Original
               </button>
@@ -443,7 +443,7 @@
                 Cancel
               </button>
 
-              <button v-if="currentUser?.role == 'ADMIN'" class="markdown-editor-optimize"
+              <button class="markdown-editor-optimize"
                 :disabled="optimizingMarkdown || optimizeFinalized" @click="optimizeMarkdown"
                 title="Preview an AI-tightened version of this content">
                 {{ optimizingMarkdown ? "Optimizing... " + optimizingSeconds + "s" : (optimizeFinalized ? "Finalized" : "Optimize") }}
@@ -567,7 +567,7 @@
               placeholder="Paste or type your markdown content here..."></textarea>
 
             <div class="markdown-editor-actions">
-              <button v-if="currentUser?.role == 'ADMIN'" class="markdown-editor-optimize"
+              <button class="markdown-editor-optimize"
                 :disabled="optimizingMarkdown || optimizeFinalized" @click="optimizeMarkdown"
                 title="Preview an AI-structured version of this content">
                 {{ optimizingMarkdown ? "Optimizing... " + optimizingSeconds + "s" : (optimizeFinalized ? "Finalized" : "Optimize") }}
@@ -654,14 +654,29 @@
             </div>
 
             <div class="account-row">
-              <span>Skip allowed</span>
-              <strong>Yes</strong>
+              <span>Answers daily limit, all categories</span>
+              <strong>{{ currentUser.dailyUserReviewLimit }}</strong>
+            </div>
+
+            <div class="account-row">
+              <span>AI requests daily limit, all categories (questions + optimize)</span>
+              <strong>{{ currentUser.dailyUserQuestionLimit }}</strong>
+            </div>
+
+            <div class="account-row">
+              <span>Optimize daily limit</span>
+              <strong>{{ currentUser.dailyOptimizeLimit }}</strong>
+            </div>
+
+            <div class="account-row">
+              <span>Topics limit per account</span>
+              <strong>{{ currentUser.maxTopicsPerUser }}</strong>
             </div>
 
           </div>
 
-          <div v-if="leftPanel === 'account' && currentUser?.role == 'ADMIN'" class="account-panel">
-            <h3>Premium Features</h3>
+          <div v-if="leftPanel === 'account' && currentUser" class="account-panel">
+            <h3>Features</h3>
 
             <div class="account-row">
               <span>Optimize markdowns for reviewing</span>
@@ -670,6 +685,11 @@
 
             <div class="account-row">
               <span>Obsidian Vault uploads</span>
+              <strong>Yes</strong>
+            </div>
+
+            <div class="account-row">
+              <span>Skip allowed</span>
               <strong>Yes</strong>
             </div>
 
@@ -1296,13 +1316,7 @@
               {{ loading ? "Loading..." : "Reviews" }}
             </button>
 
-            <label v-if="aiEnabled && currentUser?.role != 'ADMIN'" class="upload-btn">
-              <span class="btn-icon" v-if="isDesktop">→</span>
-              Upload Markdown
-              <input hidden type="file" accept=".md,.markdown,text/plain" @change="uploadMarkdown" />
-            </label>
-
-            <div v-else-if="aiEnabled" class="retry-split-btn">
+            <div v-if="aiEnabled" class="retry-split-btn">
               <button class="submit-btn retry-btn" @click="triggerSingleFileUpload()" :disabled="loading">
                 <span class="btn-icon" v-if="isDesktop">→</span>
                 Upload Markdown
@@ -1323,10 +1337,8 @@
                 <button @click="triggerVaultUpload()">
                   <icon name="files" class="menu-icon"></icon>Obsidian Vault
                   <span class="info-tooltip" tabindex="0" @click.stop
-                    data-tooltip="Upload the whole environment Obsidian folder (e.g. API) — 
-                      files already imported are matched by their header and updated in place, not duplicated. 
-                      Or upload just the new category's folder if its markdown files already have a full header: 
-                      # Environment / Category / Subcategory / Title">
+                    data-tooltip="Upload the whole environment Obsidian folder — 
+                      files already imported are matched by their header and updated in place, not duplicated.">
                     <icon name="question-circle"></icon>
                   </span>
                 </button>

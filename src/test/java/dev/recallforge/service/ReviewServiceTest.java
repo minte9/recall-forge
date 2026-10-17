@@ -279,7 +279,8 @@ class ReviewServiceTest {
             .thenReturn(100L);
 
         assertThatThrownBy(() -> reviewService.startReview(null, "java", null))
-            .isInstanceOf(DailyQuestionLimitExceededException.class);
+            .isInstanceOf(DailyQuestionLimitExceededException.class)
+            .hasMessageContaining("across all categories");
 
         verify(openAiService, never()).generateQuestion(any(), any(), anyDouble(), any());
         verify(questionGenerationRepository, never()).save(any());
@@ -384,7 +385,8 @@ class ReviewServiceTest {
             .thenReturn(100L);
 
         assertThatThrownBy(() -> reviewService.startCodeChallenge(30L))
-            .isInstanceOf(DailyQuestionLimitExceededException.class);
+            .isInstanceOf(DailyQuestionLimitExceededException.class)
+            .hasMessageContaining("across all categories");
 
         verify(openAiService, never()).generateCodeChallenge(any(), any(), any(), anyDouble(), any());
         verify(questionGenerationRepository, never()).save(any());
@@ -635,7 +637,8 @@ class ReviewServiceTest {
             .thenReturn(100L);
 
         assertThatThrownBy(() -> reviewService.answerQuestion(7L, "Q?", "My answer", false, false))
-            .isInstanceOf(DailyReviewLimitExceededException.class);
+            .isInstanceOf(DailyReviewLimitExceededException.class)
+            .hasMessageContaining("across all categories");
 
         verify(openAiService, never()).evaluateAnswer(any(), any(), any(), any());
     }
