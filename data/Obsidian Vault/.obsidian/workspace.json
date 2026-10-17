@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "a4c1d5df4996a719",
+        "id": "a163ebd1d5009c7e",
         "type": "tabs",
         "children": [
           {
-            "id": "af36281826da951f",
+            "id": "4df01d1765957b7e",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "API/MCP/Prompts/Prompts Practice.md",
+                "file": "API/MCP/AI Integration/Spring AI.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Prompts Practice"
+              "title": "Spring AI"
             }
           }
         ]
@@ -196,11 +196,24 @@
       "bases:Create new base": false
     }
   },
-  "active": "af36281826da951f",
+  "active": "4df01d1765957b7e",
   "lastOpenFiles": [
+    "API/MCP/AI Integration/MCP with LLM.md",
+    "API/MCP/AI Integration/Spring AI.md",
+    "API/MCP/_images/mcp_chatclient.png",
+    "API/MCP/_images/mcp_llm_too_integration.png",
+    "API/MCP/_images/mcp_llm_tool_integration.png",
+    "API/MCP/MCP Clients/Calling Tools.md",
+    "API/MCP/AI Integration",
+    "API/MCP/MCP Clients/Java Client.md",
+    "API/MCP/_images/mcp_tool_execution_flow.png",
+    "Pasted image 20261016161501.png",
+    "API/MCP/MCP Clients/Basics.md",
+    "API/MCP/MCP Tools/Tool Basics.md",
+    "API/MCP/Prompts/Prompts Practice.md",
+    "API/MCP/MCP Clients",
     "API/MCP/Resources/Creating Resources.md",
     "API/MCP/Resources/Resource Basics.md",
-    "API/MCP/Prompts/Prompts Practice.md",
     "API/MCP/_images/mcp_prompts.png",
     "Pasted image 20261012194308.png",
     "API/MCP/Prompts/MCP Prompts.md",
@@ -214,14 +227,8 @@
     "API/MCP/MCP Tools/Creating Tools.md",
     "General/Alpinism/Catarare/Hamul.md",
     "API/MCP/_images/mcp_inspector2.png",
-    "API/MCP/_images/mcp_sequence.png",
-    "API/MCP/_images/mcp_tools.png",
-    "API/MCP/MCP Tools/Tool Basics.md",
     "API/MCP/Basics/First MCP Server.md",
     "API/MCP/MCP Tools",
-    "API/MCP/_images/mcp_inspector.png",
-    "Pasted image 20261009174712.png",
-    "API/MCP/_images/mcp_execution_flow.png",
     "API/MCP/Basics/Spring Setup.md",
     "API/MCP/Basics/Untitled",
     "API/MCP/Basics/Transports.md",
@@ -235,14 +242,7 @@
     "JS/TypeScript/Basics/Basic Types.md",
     "JS/TypeScript/Basics/Variables.md",
     "JS/TypeScript/Basics/Functions.md",
-    "JS/TypeScript/Basics/Control flow.md",
-    "JS/TypeScript/Interfaces & Types/Type Narrowing.md",
-    "JS/TypeScript/Interfaces & Types/Null Undefined.md",
-    "JS/TypeScript/Interfaces & Types/Union Types.md",
-    "JS/TypeScript/Interfaces & Types/Types Aliases.md",
     "JS/TypeScript/Interfaces & Types",
-    "JS/TypeScript/Basics",
-    "JS/TypeScript",
     "API/Fundamentals.canvas",
     "API/API.canvas",
     "API/Query Arguments.canvas",
