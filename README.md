@@ -4,8 +4,6 @@
 
 [Live app](https://recallforge.dev) · [Architecture](docs/ARCHITECTURE.md)
 
-![Recall Forge review screen](docs/images/recall-forge_2.png)
-
 Write notes the way you already do, in Markdown or straight from your
 Obsidian vault. Recall Forge splits them into topics, asks you a fresh
 AI-generated question on each one, grades your free-text answer with
