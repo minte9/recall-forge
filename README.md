@@ -1,114 +1,60 @@
 # Recall Forge
 
-The application import topics from a local README.md, ask review questions,  
-evaluates answers with OpenAI, and stores memory in database.  
+**Turn your Markdown notes into AI-graded spaced-repetition reviews.**
 
-## 1. Backend-only
-v1.0.1
+[Live app](https://recallforge.dev) · [Architecture](docs/ARCHITECTURE.md)
 
-- 1.1 Project structure
-- 1.2 Gradle Settings 
-- 1.3 Gradle Build
-- 1.4 Docker Compose
-- 1.5 OpenAPI 
-- 1.6 Application Properties
-- 1.7 Main App
-- 1.8 Domain model (JPA)
-- 1.9 Repositories
-- 1.10 DTOs
-- 1.11 OpenAI Config
-- 1.12 Services
-- 1.13 Controllers
-- 1.14 Run the project
-- 1.15 Api Requests
+![Recall Forge review screen](docs/images/recall-forge_2.png)
 
-## 2. Repetition System
-v1.0.2
+Write notes the way you already do, in Markdown or straight from your
+Obsidian vault. Recall Forge splits them into topics, asks you a fresh
+AI-generated question on each one, grades your free-text answer with
+feedback, and schedules the next review based on how well you remembered.
 
-- 2.1 Review History Endpoint
-- 2.2 Due Topics Endpoint
-- 2.3 Test it
-- 2.4 Dashboard
-- 2.5 Upload markdown file
-- 2.6 Database clear
-- 2.7 Due topics
-- 2.8 Categories
-- 2.9 Database backup
-- 2.10 Queue Summary
+No flashcards to write. No "show answer / I knew it" self-grading.
 
-## 3. Dashboard
-v1.0.3
+## How it works
 
-- 3.1 Improved Summary
-- 3.2 Dashboard Graphics
-- 3.3 Subdomain with Traefix
-- 3.4 Markdowns Summary
+1. **Import** – upload a `.md` file; every `##` / `###` heading becomes a topic.
+2. **Review** – get a question for a due topic and answer in your own words.
+3. **Get graded** – OpenAI scores the answer and explains what you missed.
+4. **Repeat at the right time** – the score updates your memory strength
+   and sets the next review date.
 
-## 4. Reward Layer
-v1.0.4
+## Features
 
-- 4.1 XP points
-- 4.2 Perfect streak bonus
-- 4.3 Reward bar
-- 4.4 Level title
+- Markdown & Obsidian import, with re-sync when a file changes
+- Difficulty-aware questions, generated fresh each review
+- AI grading with written feedback
+- Spaced-repetition scheduling with mastery streaks
+- Dashboard: due topics, weak and strong areas, per-category progress
+- XP, levels and streaks to keep the daily habit going
+- Starter packs to get going without your own notes
+- Google / GitHub login, per-user daily caps and token tracking
 
+## Tech stack
 
-## 5. OAuth2
-v1.0.5
+Spring Boot 4 (Java) · Spring Data JPA · PostgreSQL · Spring Security OAuth2 ·
+Vue 3 (no build step) · OpenAI API · Docker Compose
 
-- 5.1 Add oauth2 dependency
-- 5.2 Modify SecurityConfig.java
-- 5.3 Povider setup (googl, github)
-- 5.4 Database integration
-- 5.5 App user integration
-- 5.7 Demo layout
+## Run locally
 
+Requires Docker and an OpenAI API key.
 
-## 6. Unit Testing (with Claude)
+~~~sh
+git clone https://github.com/minte9/recall-forge.git
+cd recall-forge
 
-- 6.1 Claude Code
-- 6.2 Create account
-- 6.3 Install Claude Code
-- 6.4 First safe task
-- 6.5. Instruction files
-- 6.6 Recommended structure
-- 6.7 Claude Usage
+# compose.yml attaches to an external Traefik network
+docker network create traefik-net
 
-## 7. Users
+# APP_SECURITY_ENABLED=false skips OAuth login for local use
+OPENAI_API_KEY=sk-... APP_SECURITY_ENABLED=false docker compose up --build
+~~~
 
-- 7.1 Users list (admin)
-- 7.2 Category aware (dashboard)
-- 7.3 Danger zone (reset learning)
-- 7.4 Starter pack
-- 7.5 Tokens limits (logs)
-
-## 8. Content
-
-- 8.1 Markdown edit
-- 8.2 Markdown reset reviews or delete
-- 8.3 Subcategories and categories order
-- 8.4 Claude content authoring instructions
-- 8.5 Content author subagent
-- 8.6 Agent Git safety
-- 8.7 Login disabled
-- 8.9 Daily reviews limit
-
-### 9. Tokens
-
-- 9.1 Difficutly aware questions
-- 9.2 User tokens spent
-- 9.3 Daily caps (reviews and questions, per category)
-- 9.4 Skip today & Shortcuts
-- 9.5 Manual topic selection
-- 9.6 Docker Hub setup
-- 9.7 Markdown Optimize
-- 9.8 Mastery streak (increse next review interval)
+Then open http://localhost:9090.
 
 
 ## Architecture
 
 ![Screenshot](docs/images/recall-forge_architecture.png)
-
-## Screenshots
-
-![Screenshot](docs/images/recall-forge_4.png)
