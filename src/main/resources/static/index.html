@@ -499,7 +499,8 @@
           </div>
 
           <!-- KB / CC sections - shown under the markdown (and its action bar)
-               instead of replacing it; both reset to hidden on every file load. -->
+               instead of replacing it; both reset to hidden on every file load,
+               except prev/next arrows keep the open one when the next file has it. -->
           <div v-if="!markdownLoading && !markdownEditing && currentMarkdownFileId && viewingOriginal"
             class="markdown-section">
             <div v-if="editingOriginalMarkdown" class="markdown-editor-wrap">

@@ -1177,13 +1177,27 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     // Back/forward buttons at the bottom of the markdown view - restricted
     // to previousMarkdownFileId/nextMarkdownFileId, which only walk files
-    // within the current category.
+    // within the current category. An open KB / CC section stays open on the
+    // next file when that file has one, so the user can page through them.
     async goToAdjacentMarkdownFile(markdownFileId) {
       if (!markdownFileId) {
         return;
       }
 
+      const keepOriginal = this.viewingOriginal;
+      const keepCodeChallenges = this.viewingCodeChallenges;
+
       await this.previewMarkdownFile(markdownFileId);
+
+      if (this.currentMarkdownFileId !== markdownFileId) {
+        return;
+      }
+
+      if (keepOriginal && this.currentMarkdownOptimized) {
+        this.viewingOriginal = true;
+      } else if (keepCodeChallenges && this.currentMarkdownCodeChallenges.length > 0) {
+        this.viewingCodeChallenges = true;
+      }
     },
 
     async startReviewFromDashboard() {
