@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "823384659ecf4d7f",
+        "id": "a69dd18db9796d2d",
         "type": "tabs",
         "children": [
           {
-            "id": "0843d05ff00d3228",
+            "id": "3bbc0c9db85e480c",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "JS/Angular/Basics/TypeScript Basics.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "TypeScript Basics"
             }
           }
         ]
@@ -192,8 +196,23 @@
       "bases:Create new base": false
     }
   },
-  "active": "493fa442051c9418",
+  "active": "3bbc0c9db85e480c",
   "lastOpenFiles": [
+    "JS/Angular/Basics/Overview.md",
+    "JS/Angular/_images/welcome.png",
+    "JS/Angular/_images",
+    "JS/Angular/Basics/TypeScript Basics.md",
+    "JS/Angular/Basics/Development Setup.md",
+    "JS/Angular/Basics",
+    "JS/TypeScript/Classes & OOP/Abstract.md",
+    "JS/Angular",
+    "JS/TypeScript/Classes & OOP/Interfaces.md",
+    "JS/TypeScript/Interfaces & Types/Interfaces.md",
+    "JS/TypeScript/Classes & OOP/Access Modifiers.md",
+    "JS/TypeScript/Classes & OOP/Inheritance.md",
+    "JS/TypeScript/Classes & OOP/Classes.md",
+    "JS/TypeScript/Basics/Introduction.md",
+    "JS/TypeScript/Classes & OOP",
     "PostgreSQL/Basics/Database.md",
     "PostgreSQL/Basics",
     "PostgreSQL",
@@ -205,41 +224,25 @@
     "General/Alpinism/Catarare/Buclele.md",
     "General/Alpinism/images",
     "General/Alpinism/Catarare",
-    "General/Alpinism",
-    "General",
     "API/MCP/AI Integration/Spring AI.md",
     "API/MCP/AI Integration/MCP with LLM.md",
     "API/MCP/_images/mcp_chatclient.png",
     "API/MCP/_images/mcp_llm_too_integration.png",
     "API/MCP/_images/mcp_llm_tool_integration.png",
     "API/MCP/MCP Clients/Calling Tools.md",
-    "API/MCP/AI Integration",
     "API/MCP/MCP Clients/Java Client.md",
     "API/MCP/_images/mcp_tool_execution_flow.png",
     "Pasted image 20261016161501.png",
     "API/MCP/MCP Clients/Basics.md",
     "API/MCP/MCP Tools/Tool Basics.md",
     "API/MCP/Prompts/Prompts Practice.md",
-    "API/MCP/MCP Clients",
     "API/MCP/Resources/Creating Resources.md",
     "API/MCP/Resources/Resource Basics.md",
     "API/MCP/_images/mcp_prompts.png",
     "Pasted image 20261012194308.png",
     "API/MCP/Prompts/MCP Prompts.md",
     "API/MCP/MCP Tools/Integrating Tools.md",
-    "API/MCP/MCP Tools/Error Handling.md",
     "API/MCP/_images/mcp_integration.png",
-    "API/MCP/_images/mcp_integration.png",
-    "API/MCP/MCP Tools/Input Output.md",
-    "API/MCP/MCP Tools/Creating Tools.md",
-    "API/MCP/Basics/First MCP Server.md",
-    "API/MCP/Basics/Spring Setup.md",
-    "API/MCP/Basics/Transports.md",
-    "API/MCP/Basics/Architecture.md",
-    "API/MCP/Basics/What is MCP.md",
-    "JS/TypeScript/Interfaces & Types/Interfaces.md",
-    "JS/TypeScript/Basics/Introduction.md",
-    "JS/TypeScript/Basics/Basic Types.md",
     "API/Fundamentals.canvas",
     "API/API.canvas",
     "API/Query Arguments.canvas",
