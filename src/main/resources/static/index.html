@@ -305,7 +305,6 @@
             </p>
 
             <div v-if="jobProfiles.length > 0" class="job-profile-selector">
-              <label>Job Profile</label>
               <select aria-label="Job profile" :value="activeJobProfileId || ''"
                 @change="selectJobProfile($event.target.value)">
                 <option value="">All Categories</option>
@@ -763,7 +762,6 @@
             </p>
 
             <div v-if="jobProfiles.length > 0" class="job-profile-selector">
-              <label>Job Profile</label>
               <select aria-label="Job profile" :value="activeJobProfileId || ''"
                 @change="selectJobProfile($event.target.value)">
                 <option value="">All Categories</option>
