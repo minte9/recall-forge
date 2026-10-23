@@ -63,11 +63,17 @@ BEGIN
     END IF;
 END $$;
 
+-- Rename from the original name on installs that already ran this migration.
+UPDATE job_profiles SET name = 'Java Backend Engineer'
+WHERE user_id = 1 AND name = 'Java Backend Developer'
+  AND NOT EXISTS (SELECT 1 FROM job_profiles
+                  WHERE user_id = 1 AND name = 'Java Backend Engineer');
+
 INSERT INTO job_profiles (user_id, name, description, enabled)
 VALUES
-    (1, 'Java Backend Developer', 'Java, Spring Boot, REST, SQL, PostgreSQL, Docker, Git', TRUE),
+    (1, 'Java Backend Engineer', 'Java, Spring Boot, REST, SQL, PostgreSQL, Docker, Git', TRUE),
     (1, 'Java Full-Stack Developer', 'Java, Spring Boot, REST, TypeScript, Angular, SQL, Git', TRUE),
-    -- Disabled: its public categories are a subset of Java Backend Developer.
+    -- Disabled: its public categories are a subset of Java Backend Engineer.
     -- Re-enable once it has distinct content (e.g. Kafka/messaging packs).
     (1, 'Microservices Engineer', 'Java, Spring Boot, REST, Kafka, RabbitMQ, Docker, SQL', FALSE),
     (1, 'AI Integration Engineer', 'Java, Spring AI, MCP, REST, Python, LLM Integration', TRUE)
@@ -99,14 +105,14 @@ ON CONFLICT (environment, category) DO NOTHING;
 -- Re-running this block does not create duplicates.
 WITH desired(profile_name, environment, category) AS (
     VALUES
-      ('Java Backend Developer', 'JVM', 'Java'),
-      ('Java Backend Developer', 'JVM', 'Spring'),
-      ('Java Backend Developer', 'API', 'REST'),
-      ('Java Backend Developer', 'API', 'GraphQL'),
-      ('Java Backend Developer', 'DB', 'SQL'),
-      ('Java Backend Developer', 'DB', 'PostgreSQL'),
-      ('Java Backend Developer', 'DevOps', 'Docker'),
-      ('Java Backend Developer', 'DevOps', 'Git'),
+      ('Java Backend Engineer', 'JVM', 'Java'),
+      ('Java Backend Engineer', 'JVM', 'Spring'),
+      ('Java Backend Engineer', 'API', 'REST'),
+      ('Java Backend Engineer', 'API', 'GraphQL'),
+      ('Java Backend Engineer', 'DB', 'SQL'),
+      ('Java Backend Engineer', 'DB', 'PostgreSQL'),
+      ('Java Backend Engineer', 'DevOps', 'Docker'),
+      ('Java Backend Engineer', 'DevOps', 'Git'),
       ('Java Full-Stack Developer', 'JVM', 'Java'),
       ('Java Full-Stack Developer', 'JVM', 'Spring'),
       ('Java Full-Stack Developer', 'API', 'REST'),
@@ -151,7 +157,7 @@ BEGIN
     JOIN job_profiles jp ON jp.id = jpc.profile_id
     WHERE jp.user_id = 1
       AND jp.name IN (
-        'Java Backend Developer', 'Java Full-Stack Developer',
+        'Java Backend Engineer', 'Java Full-Stack Developer',
         'Microservices Engineer', 'AI Integration Engineer'
       );
     IF actual_count <> 33 THEN
