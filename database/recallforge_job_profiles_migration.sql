@@ -67,7 +67,9 @@ INSERT INTO job_profiles (user_id, name, description, enabled)
 VALUES
     (1, 'Java Backend Developer', 'Java, Spring Boot, REST, SQL, PostgreSQL, Docker, Git', TRUE),
     (1, 'Java Full-Stack Developer', 'Java, Spring Boot, REST, TypeScript, Angular, SQL, Git', TRUE),
-    (1, 'Microservices Engineer', 'Java, Spring Boot, REST, Kafka, RabbitMQ, Docker, SQL', TRUE),
+    -- Disabled: its public categories are a subset of Java Backend Developer.
+    -- Re-enable once it has distinct content (e.g. Kafka/messaging packs).
+    (1, 'Microservices Engineer', 'Java, Spring Boot, REST, Kafka, RabbitMQ, Docker, SQL', FALSE),
     (1, 'AI Integration Engineer', 'Java, Spring AI, MCP, REST, Python, LLM Integration', TRUE)
 ON CONFLICT (user_id, name) DO NOTHING;
 
