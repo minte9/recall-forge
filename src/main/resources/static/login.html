@@ -388,6 +388,12 @@
 
 
 <script>
+    // Anonymous visit counter: headless/automated browsers report navigator.webdriver,
+    // and crawlers that don't run JS never send this; the server filters bot user-agents.
+    if (!navigator.webdriver) {
+        fetch('/api/visits', { method: 'POST', keepalive: true }).catch(function () {});
+    }
+
     (function () {
         function initShowcase(showcase, features) {
             if (!showcase) return;

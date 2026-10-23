@@ -69,6 +69,7 @@ const app = createApp({
       dashboardActionMenuOpen: false,
       codeChallengeLoading: false,
       adminUsers: [],
+      adminVisits: [],
       categoryOptions: [],
       starterPackUnlockStatus: {},
       starterPackUnlockThreshold: 30,
@@ -1916,7 +1917,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async loadAdminUsers() {
-      this.adminUsers = await Api.loadAdminUsers();
+      [this.adminUsers, this.adminVisits] = await Promise.all([
+        Api.loadAdminUsers(),
+        Api.loadAdminVisits()
+      ]);
     },
 
     showDangerZonePage() {
