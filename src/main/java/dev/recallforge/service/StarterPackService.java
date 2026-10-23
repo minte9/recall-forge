@@ -43,7 +43,7 @@ public class StarterPackService {
                 "Python", List.of("Algorithms"),
                 "Git", List.of("Docker"),
                 "SQL", List.of("PostgreSQL"),
-                "Javascript", List.of("TypeScript"),
+                "Javascript", List.of("TypeScript", "Angular"),
                 "Security", List.of("HTTPS"),
                 "REST", List.of("GraphQL", "MCP")
             );
