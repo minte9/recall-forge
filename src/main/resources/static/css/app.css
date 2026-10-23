@@ -2203,14 +2203,6 @@
     max-width: 360px;
   }
 
-  .job-profile-selector label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 13px;
-    color: #64748b;
-    font-weight: 600;
-  }
-
   .job-profile-selector select {
     width: 100%;
     padding: 10px 12px;
