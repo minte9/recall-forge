@@ -73,6 +73,8 @@ const app = createApp({
       starterPackUnlockStatus: {},
       starterPackUnlockThreshold: 30,
       starterPackMastery: {},
+      jobProfiles: [],
+      activeJobProfileId: null,
       showDangerZone: false,
       topicsInFile: [],
       topicDropdownOpen: false,
@@ -205,6 +207,18 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return this.review || this.historyTopic || this.notDueTopic;
     },
 
+    activeJobProfile() {
+      return this.jobProfiles.find(p => p.id === this.activeJobProfileId) || null;
+    },
+
+    // Category names of the active job profile, or null for "All Categories".
+    // Matched by name only - starter pack buttons don't know their environment.
+    activeProfileCategories() {
+      return this.activeJobProfile
+        ? this.activeJobProfile.categories.map(c => c.category)
+        : null;
+    },
+
     environmentGroups() {
       const groups = {};
 
@@ -333,6 +347,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     await this.loadCategoryOptions();
     await this.loadDashboard();
     await this.loadCurrentUser();
+    await this.loadJobProfiles();
     await this.loadMarkdownSummaries(true);
 
     this.autoOpenSingleMarkdownGroup();
@@ -1606,6 +1621,37 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
+    // Predefined profiles + the user's saved choice, used to filter the
+    // Starter Pack rows. Loaded once; the profile list doesn't change.
+    async loadJobProfiles() {
+      try {
+        const [profiles, active] = await Promise.all([
+          Api.loadJobProfiles(),
+          Api.loadActiveJobProfile()
+        ]);
+
+        this.jobProfiles = profiles;
+        this.activeJobProfileId = active ? active.id : null;
+      } catch (err) {
+        console.error("Could not load job profiles", err);
+      }
+    },
+
+    async selectJobProfile(value) {
+      const previousId = this.activeJobProfileId;
+      const profileId = value ? Number(value) : null;
+
+      this.error = null;
+      this.activeJobProfileId = profileId;
+
+      try {
+        await Api.saveActiveJobProfile(profileId);
+      } catch (err) {
+        this.activeJobProfileId = previousId;
+        this.error = err.message;
+      }
+    },
+
     readLastCategory() {
       try {
         return localStorage.getItem(LAST_CATEGORY_STORAGE_KEY);
@@ -2312,7 +2358,8 @@ app.component("icon", {
 
 // Reusable Starter Pack row: <starter-pack-list :categories="['Java', 'Spring']"
 //   :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-//   :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+//   :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+//   @import="importStarterPack" @open="openImportedCategory">
 // Owns the per-button disabled/badge/tooltip logic so every mounting point (the
 // empty-state welcome screen, the standalone Starter Pack page) shares one copy
 // instead of duplicating a button block per category.
@@ -2321,9 +2368,20 @@ app.component("starter-pack-list", {
     categories: { type: Array, required: true },
     categoryOptions: { type: Array, default: () => [] },
     unlockStatus: { type: Object, default: () => ({}) },
-    mastery: { type: Object, default: () => ({}) }
+    mastery: { type: Object, default: () => ({}) },
+    // Active job profile's category names; null shows every category.
+    profileCategories: { type: Array, default: null }
   },
   emits: ["import", "open"],
+  computed: {
+    visibleCategories() {
+      if (!this.profileCategories) {
+        return this.categories;
+      }
+
+      return this.categories.filter(c => this.profileCategories.includes(c));
+    }
+  },
   methods: {
     isImported(category) {
       return this.categoryOptions.some(o => o.category === category);
@@ -2352,8 +2410,8 @@ app.component("starter-pack-list", {
     }
   },
   template: `
-    <div class="starter-pack-list">
-      <button v-for="category in categories" :key="category" class="starter-pack-btn"
+    <div v-if="visibleCategories.length > 0" class="starter-pack-list">
+      <button v-for="category in visibleCategories" :key="category" class="starter-pack-btn"
         :class="dueColorClass(category)"
         :disabled="isLocked(category)" :title="tooltip(category)" @click="onClick(category)">
         {{ category }}

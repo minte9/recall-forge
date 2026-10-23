@@ -304,34 +304,51 @@
               Reach <strong>{{ starterPackUnlockThreshold }}% mastery</strong> in the first category of a row to unlock the others.
             </p>
 
+            <div v-if="jobProfiles.length > 0" class="job-profile-selector">
+              <label>Job Profile</label>
+              <select aria-label="Job profile" :value="activeJobProfileId || ''"
+                @change="selectJobProfile($event.target.value)">
+                <option value="">All Categories</option>
+                <option v-for="profile in jobProfiles" :key="profile.id" :value="profile.id">
+                  {{ profile.name }}
+                </option>
+              </select>
+            </div>
+
             <starter-pack-list :categories="['Java', 'Spring']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
             <starter-pack-list :categories="['REST', 'GraphQL', 'MCP']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
             <starter-pack-list :categories="['Javascript', 'TypeScript']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
             <starter-pack-list :categories="['SQL', 'PostgreSQL']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
             <starter-pack-list :categories="['Python', 'Algorithms']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
             <starter-pack-list :categories="['Git', 'Docker']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
           </div>
@@ -745,34 +762,51 @@
               Reach <strong>{{ starterPackUnlockThreshold }}% mastery</strong> in the first category of a row to unlock the others.
             </p>
 
+            <div v-if="jobProfiles.length > 0" class="job-profile-selector">
+              <label>Job Profile</label>
+              <select aria-label="Job profile" :value="activeJobProfileId || ''"
+                @change="selectJobProfile($event.target.value)">
+                <option value="">All Categories</option>
+                <option v-for="profile in jobProfiles" :key="profile.id" :value="profile.id">
+                  {{ profile.name }}
+                </option>
+              </select>
+            </div>
+
             <starter-pack-list :categories="['Java', 'Spring']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
             <starter-pack-list :categories="['REST', 'GraphQL', 'MCP']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
             <starter-pack-list :categories="['Javascript', 'TypeScript']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
             <starter-pack-list :categories="['SQL', 'PostgreSQL']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
             <starter-pack-list :categories="['Python', 'Algorithms']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
             <starter-pack-list :categories="['Git', 'Docker']"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" @import="importStarterPack" @open="openImportedCategory">
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
             
           </div>

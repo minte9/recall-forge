@@ -463,4 +463,50 @@ const Api = {
 
     return await response.json();
   },
+
+  async loadJobProfiles() {
+    const response = await fetch("/api/job-profiles", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    return await response.json();
+  },
+
+  // The backend answers 200 with an empty body when no profile is
+  // selected ("All Categories"), so parse the text instead of json().
+  async loadActiveJobProfile() {
+    const response = await fetch("/api/job-profiles/active", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const text = await response.text();
+
+    return text ? JSON.parse(text) : null;
+  },
+
+  async saveActiveJobProfile(profileId) {
+    const response = await fetch("/api/job-profiles/active", {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ profileId })
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not save job profile.");
+    }
+  },
 };

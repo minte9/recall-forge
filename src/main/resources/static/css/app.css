@@ -2197,6 +2197,29 @@
     color: #64748b;
   }
 
+  /* Same look as .environment-selector, sized for the Starter Pack panel. */
+  .job-profile-selector {
+    margin: 16px 0 4px;
+    max-width: 360px;
+  }
+
+  .job-profile-selector label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .job-profile-selector select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: white;
+    font-size: 15px;
+  }
+
   .starter-pack-list {
     display: flex;
     flex-wrap: wrap;
