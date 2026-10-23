@@ -348,11 +348,14 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     await this.loadDashboard();
     await this.loadCurrentUser();
     await this.loadJobProfiles();
-    await this.loadMarkdownSummaries(true);
+    // Desktop opens on the Starter Pack; mobile keeps its Dashboard default.
+    await this.loadMarkdownSummaries(!this.isDesktop);
 
     this.autoOpenSingleMarkdownGroup();
 
-    if (this.categoryOptions.length === 0) {
+    if (this.isDesktop) {
+      await this.showStarterPack();
+    } else if (this.categoryOptions.length === 0) {
       this.showMarkdownSummaries();
     }
   },
