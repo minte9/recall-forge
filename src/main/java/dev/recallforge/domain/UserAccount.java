@@ -35,6 +35,9 @@ public class UserAccount {
     @Column(nullable = false)
     private Role role = Role.USER;
 
+    @Column(name = "active_job_profile_id")
+    private Long activeJobProfileId;
+
     private String email;
     private String displayName;
     private String avatarUrl;
