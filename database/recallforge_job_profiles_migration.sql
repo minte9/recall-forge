@@ -6,7 +6,8 @@
 --   public.user_accounts(id) exists and id is BIGINT-compatible.
 --   Template account has id = 1.
 --   public.category_order(id, environment, category) exists.
---   Mappings are based on the confirmed 23 category names (October 2026).
+--   Mappings are based on the confirmed 23 category names (October 2026),
+--   plus API/GraphQL and API/MCP, which this migration adds to category_order.
 
 BEGIN;
 
@@ -84,7 +85,15 @@ BEGIN
     END IF;
 END $$;
 
--- 6. Insert mappings by stable (environment, category), not numeric IDs.
+-- 6. Ensure API categories used by profiles exist in category_order
+-- (GraphQL and MCP have starter-pack content but no category_order row).
+INSERT INTO category_order (environment, category, display_order)
+VALUES
+    ('API', 'GraphQL', 2),
+    ('API', 'MCP', 3)
+ON CONFLICT (environment, category) DO NOTHING;
+
+-- 7. Insert mappings by stable (environment, category), not numeric IDs.
 -- Re-running this block does not create duplicates.
 WITH desired(profile_name, environment, category) AS (
     VALUES
@@ -99,9 +108,12 @@ WITH desired(profile_name, environment, category) AS (
       ('Java Full-Stack Developer', 'JVM', 'Java'),
       ('Java Full-Stack Developer', 'JVM', 'Spring'),
       ('Java Full-Stack Developer', 'API', 'REST'),
+      ('Java Full-Stack Developer', 'API', 'GraphQL'),
       ('Java Full-Stack Developer', 'JS', 'TypeScript'),
       ('Java Full-Stack Developer', 'JS', 'Javascript'),
       ('Java Full-Stack Developer', 'DB', 'SQL'),
+      ('Java Full-Stack Developer', 'DB', 'PostgreSQL'),
+      ('Java Full-Stack Developer', 'DevOps', 'Docker'),
       ('Java Full-Stack Developer', 'DevOps', 'Git'),
       ('Microservices Engineer', 'JVM', 'Java'),
       ('Microservices Engineer', 'JVM', 'Spring'),
@@ -109,12 +121,14 @@ WITH desired(profile_name, environment, category) AS (
       ('Microservices Engineer', 'API', 'REST'),
       ('Microservices Engineer', 'Architecture', 'Architecture'),
       ('Microservices Engineer', 'DevOps', 'Docker'),
+      ('Microservices Engineer', 'DevOps', 'Git'),
       ('Microservices Engineer', 'DB', 'SQL'),
       ('AI Integration Engineer', 'JVM', 'Java'),
       ('AI Integration Engineer', 'JVM', 'Spring'),
       ('AI Integration Engineer', 'API', 'REST'),
       ('AI Integration Engineer', 'API', 'MCP'),
       ('AI Integration Engineer', 'Python', 'Python'),
+      ('AI Integration Engineer', 'Python', 'Algorithms'),
       ('AI Integration Engineer', 'Architecture', 'Architecture')
 )
 INSERT INTO job_profile_categories (profile_id, category_id)
@@ -138,14 +152,14 @@ BEGIN
         'Java Backend Developer', 'Java Full-Stack Developer',
         'Microservices Engineer', 'AI Integration Engineer'
       );
-    IF actual_count <> 26 THEN
-        RAISE EXCEPTION 'Expected 26 profile/category mappings; found %', actual_count;
+    IF actual_count <> 33 THEN
+        RAISE EXCEPTION 'Expected 33 profile/category mappings; found %', actual_count;
     END IF;
 END $$;
 
 COMMIT;
 
--- Verification: expected counts are 7, 7, 7, 5.
+-- Verification: expected counts are 8, 10, 8, 7.
 SELECT jp.name, COUNT(jpc.category_id) AS category_count
 FROM job_profiles jp
 LEFT JOIN job_profile_categories jpc ON jpc.profile_id = jp.id
@@ -160,7 +174,7 @@ JOIN category_order co ON co.id = jpc.category_id
 WHERE jp.user_id = 1
 ORDER BY jp.id, co.environment, co.category;
 
--- 7. Optional operations (run manually, NOT part of migration):
+-- 8. Optional operations (run manually, NOT part of migration):
 -- Set active profile for a user, validating that the profile is enabled/shared:
 -- UPDATE user_accounts SET active_job_profile_id = <profile_id> WHERE id = <user_id>;
 -- Reset to All Categories:
