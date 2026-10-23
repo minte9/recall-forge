@@ -161,6 +161,7 @@ public class SecurityConfig {
                     "/privacy.html",
                     "/oauth2/**",
                     "/login/oauth2/**",
+                    "/api/visits", // anonymous landing-page visit beacon
                     "/recall-forge.png", // icon
                     "/css/**",
                     "/js/**",

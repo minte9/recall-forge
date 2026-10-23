@@ -13,15 +13,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 import dev.recallforge.controller.LoginController;
+import dev.recallforge.controller.VisitController;
 import dev.recallforge.security.DatabaseOAuth2UserService;
 import dev.recallforge.security.DatabaseOidcUserService;
+import dev.recallforge.service.PageVisitService;
 
 // Regression check: login enabled (the default) must keep working as before.
 // OAuth2ClientAutoConfiguration is deliberately kept active here (unlike the
 // disabled-login test) because .oauth2Login() needs a real ClientRegistrationRepository
 // to build; fake client-id/secret are supplied below since real ones only exist in .env.
 @WebMvcTest(
-    controllers = LoginController.class,
+    controllers = {LoginController.class, VisitController.class},
     excludeAutoConfiguration = {
         OAuth2ClientWebSecurityAutoConfiguration.class
     }
@@ -47,6 +49,9 @@ class SecurityConfigLoginEnabledTest {
     @MockitoBean
     private DatabaseOidcUserService databaseOidcUserService;
 
+    @MockitoBean
+    private PageVisitService pageVisitService;
+
     @Test
     void getLogin_forwardsToLoginPage() {
         mockMvcTester.get().uri("/login")
@@ -59,5 +64,12 @@ class SecurityConfigLoginEnabledTest {
         mockMvcTester.get().uri("/oauth2/authorization/google")
             .assertThat()
             .hasStatus(HttpStatus.FOUND);
+    }
+
+    @Test
+    void visitBeacon_isReachableAnonymously() {
+        mockMvcTester.post().uri("/api/visits")
+            .assertThat()
+            .hasStatus(HttpStatus.NO_CONTENT);
     }
 }

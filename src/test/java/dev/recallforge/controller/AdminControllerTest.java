@@ -3,6 +3,7 @@ package dev.recallforge.controller;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 import dev.recallforge.dto.AdminUsersStatsResponse;
+import dev.recallforge.dto.DailyVisitResponse;
 import dev.recallforge.service.AdminService;
 
 @WebMvcTest(
@@ -87,5 +89,24 @@ class AdminControllerTest {
         mockMvcTester.get().uri("/api/admin/users").assertThat().hasStatusOk();
 
         verify(adminService).getUsersStats();
+    }
+
+    @Test
+    void getDailyVisits_returnsVisitsFromServiceAsJson() {
+        when(adminService.getDailyVisits()).thenReturn(List.of(
+            new DailyVisitResponse(LocalDate.of(2026, 10, 23), 12),
+            new DailyVisitResponse(LocalDate.of(2026, 10, 22), 7)
+        ));
+
+        mockMvcTester.get().uri("/api/admin/visits")
+            .assertThat()
+            .hasStatusOk()
+            .bodyJson()
+            .isLenientlyEqualTo("""
+                [
+                  { "date": "2026-10-23", "visitors": 12 },
+                  { "date": "2026-10-22", "visitors": 7 }
+                ]
+                """);
     }
 }

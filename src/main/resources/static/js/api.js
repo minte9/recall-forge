@@ -399,6 +399,16 @@ const Api = {
     return await response.json();
   },
 
+  async loadAdminVisits() {
+    const response = await fetch("/api/admin/visits");
+
+    if (!response.ok) {
+      throw new Error("Failed to load admin visits");
+    }
+
+    return await response.json();
+  },
+
   async resetLearningData() {
     const response = await fetch("/api/me/learning-data", {
       method: "DELETE",
