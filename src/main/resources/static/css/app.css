@@ -999,7 +999,11 @@
     box-shadow: 0 8px 26px rgba(15, 23, 42, 0.08);
   }
 
+  /* Two-column grid so the counts right-align above each other. */
   .reward-attention-total {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
     font-size: 14px;
     color: var(--muted);
     margin-bottom: 10px;
@@ -1010,6 +1014,8 @@
     font-size: 16px;
     font-weight: 800;
     color: var(--text);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 
   .reward-attention-list {
