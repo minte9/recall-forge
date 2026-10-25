@@ -1290,7 +1290,14 @@
 
               <div class="reward-stat-box reward-attention-box">
                 <div class="reward-attention-total">
-                  <span class="reward-attention-count">{{ dashboard.dueNow }}</span> due now
+                  <span class="reward-attention-count">{{ dashboard.dueNow }}</span>
+                  <span>due now</span>
+                  <template v-if="dashboard.dueNow === 0">
+                    <span class="reward-attention-count">{{ dashboard.dueTomorrow }}</span>
+                    <span>due tomorrow</span>
+                    <span class="reward-attention-count">{{ dashboard.dueThisWeek }}</span>
+                    <span>due this week</span>
+                  </template>
                 </div>
 
                 <div v-if="dashboard.weakAreas && dashboard.weakAreas.length"
