@@ -413,7 +413,7 @@ public class OpenAiService {
         return response.content();
     }
 
-    private AiResponse ask(String prompt, int maxTokens) {
+    /*private AiResponse ask(String prompt, int maxTokens) {
         Map<String, Object> requestBody = Map.of(
             "model", model,
             "messages", new Object[]{
@@ -461,6 +461,84 @@ public class OpenAiService {
         ); 
         
         //log.debug("OpenAI prompt: {}", prompt);  // docker compose logs -f app | grep -A 40 "OpenAI prompt"
+
+        return new AiResponse(
+            content,
+            promptTokens,
+            completionTokens,
+            totalTokens
+        );
+    }*/
+
+    private AiResponse ask(String prompt, int maxTokens) {
+
+        Map<String, Object> requestBody = Map.of(
+            "model", model,
+            "messages", new Object[]{
+                Map.of(
+                    "role", "user",
+                    "content", prompt
+                )
+            },
+            "reasoning_effort", "none",
+            "max_completion_tokens", maxTokens
+        );
+
+        long start = System.nanoTime();
+
+        JsonNode response = openAiRestClient
+                .post()
+                .uri("/chat/completions")
+                .body(requestBody)
+                .retrieve()
+                .body(JsonNode.class);
+
+        if (response == null) {
+            throw new IllegalStateException(
+                "OpenAI returned an empty response."
+            );
+        }
+
+        JsonNode choice = response
+                .path("choices")
+                .path(0);
+
+        JsonNode contentNode = choice
+                .path("message")
+                .path("content");
+
+        String content = contentNode.asString().trim();
+
+        if (content.isEmpty()) {
+            throw new IllegalStateException(
+                "OpenAI returned no text. Finish reason: "
+                + choice.path("finish_reason").asString()
+                + ", response: " + response
+            );
+        }
+
+        JsonNode usage = response.path("usage");
+
+        int promptTokens = usage.path("prompt_tokens").asInt();
+        int completionTokens = usage.path("completion_tokens").asInt();
+        int totalTokens = usage.path("total_tokens").asInt();
+        int reasoningTokens = usage
+            .path("completion_tokens_details")
+            .path("reasoning_tokens")
+            .asInt(0);
+        long latencyMs = (System.nanoTime() - start) / 1_000_000;
+
+        log.info(
+            "OpenAI tokens: model={}, latency={}ms, prompt={}, completion={}, total={}",
+            model,
+            latencyMs,
+            promptTokens,
+            completionTokens,
+            reasoningTokens,
+            totalTokens
+        );
+
+        //log.debug("OpenAI prompt: {}", prompt);  // docker compose logs -f app | grep "OpenAI tokens"
 
         return new AiResponse(
             content,
