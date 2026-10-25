@@ -8,6 +8,8 @@ public record RewardResponse(
     int goalCodeChallengesPerDay,
 
     String masteryScope,
+    long reviewedTopics,
+    int reviewedPercent,
     long masteredTopics,
     long totalTopicsInScope,
     int masteryPercent,

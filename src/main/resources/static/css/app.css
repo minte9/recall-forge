@@ -1368,6 +1368,26 @@
     white-space: nowrap;
   }
 
+  /* A whole stat can double as the tooltip trigger (like .reward-ring) -
+     reset the icon-sized box .info-tooltip assumes, keep the stat's own
+     click cursor, and open the bubble leftward since the stat sits at the
+     row's right end, where a centered bubble would clip off the card. */
+  .review-stat.info-tooltip {
+    display: flex;
+    width: auto;
+    height: auto;
+    margin-left: 0;
+    vertical-align: baseline;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .review-stat.info-tooltip::after {
+    left: auto;
+    right: 0;
+    transform: none;
+  }
+
   .total-row {
     display: flex;
     align-items: center;

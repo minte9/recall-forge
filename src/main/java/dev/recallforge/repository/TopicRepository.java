@@ -311,6 +311,8 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         @Param("category") String category
     );
 
+    // "Reviewed": a good-enough score and not currently due, regardless of
+    // how many times in a row it's been answered well.
     @Query("""
         select count(t)
         from Topic t
@@ -319,10 +321,29 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         and t.memoryScore >= :memoryScore
         and t.nextReviewAt >= :now
     """)
+    long countReviewedByUserIdAndCategory(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("memoryScore") double memoryScore,
+        @Param("now") LocalDateTime now
+    );
+
+    // "Mastered": reviewed (see above) plus a streak of consecutive good
+    // reviews, so a single lucky answer doesn't count as mastery.
+    @Query("""
+        select count(t)
+        from Topic t
+        where t.user.id = :userId
+        and lower(t.category) = lower(:category)
+        and t.memoryScore >= :memoryScore
+        and t.nextReviewAt >= :now
+        and t.reviewStreak >= :minStreak
+    """)
     long countMasteredByUserIdAndCategory(
         @Param("userId") Long userId,
         @Param("category") String category,
         @Param("memoryScore") double memoryScore,
+        @Param("minStreak") int minStreak,
         @Param("now") LocalDateTime now
     );
 

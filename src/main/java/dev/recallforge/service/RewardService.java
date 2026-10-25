@@ -40,6 +40,10 @@ public class RewardService {
 
     private static final double MASTERY_MEMORY_SCORE = 0.7;
 
+    // Consecutive good reviews (see RepetitionService's streak) a reviewed
+    // topic needs before it counts as mastered.
+    private static final int MASTERY_MIN_STREAK = 3;
+
     // A "goal day" is hit either by grading enough fresh reviews well, or by
     // getting enough code-challenge attempts fully correct (score == 1 -
     // partial credit doesn't count, since the challenge either works or it
@@ -122,11 +126,24 @@ public class RewardService {
 
         long totalTopics = topicRepository.countByUserIdAndCategory(userId, category);
 
+        LocalDateTime now = LocalDateTime.now();
+
+        long reviewedTopics = topicRepository.countReviewedByUserIdAndCategory(
+                userId,
+                category,
+                MASTERY_MEMORY_SCORE,
+                now);
+
+        int reviewedPercent = totalTopics == 0
+                ? 0
+                : (int) Math.round(reviewedTopics * 100.0 / totalTopics);
+
         long masteredTopics = topicRepository.countMasteredByUserIdAndCategory(
                 userId,
                 category,
                 MASTERY_MEMORY_SCORE,
-                LocalDateTime.now());
+                MASTERY_MIN_STREAK,
+                now);
 
         int masteryPercent = totalTopics == 0
                 ? 0
@@ -163,6 +180,8 @@ public class RewardService {
                 goalProperties.codeChallenges(),
 
                 category,
+                reviewedTopics,
+                reviewedPercent,
                 masteredTopics,
                 totalTopics,
                 masteryPercent,

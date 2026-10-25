@@ -124,7 +124,7 @@ class ReviewControllerTest {
 
     @Test
     void answerQuestion_validRequest_returnsScoreAndReward() {
-        RewardResponse reward = new RewardResponse(4, 0, false, 10, 3, "backend", 6L, 10L, 60, 0L, 0, 0L, 0, 0L, 0L, 0L, false);
+        RewardResponse reward = new RewardResponse(4, 0, false, 10, 3, "backend", 8L, 80, 6L, 10L, 60, 0L, 0, 0L, 0, 0L, 0L, 0L, false);
         AnswerResponse response = new AnswerResponse(
             1L, "Topic One", 0.8, "Good job", 0.65,
             LocalDateTime.of(2026, 7, 6, 9, 0), 2, reward, 3L, "collections"
@@ -157,6 +157,8 @@ class ReviewControllerTest {
                   "reward": {
                     "streakDays": 4,
                     "masteryScope": "backend",
+                    "reviewedTopics": 8,
+                    "reviewedPercent": 80,
                     "masteredTopics": 6,
                     "totalTopicsInScope": 10,
                     "masteryPercent": 60

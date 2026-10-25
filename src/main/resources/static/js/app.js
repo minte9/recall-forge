@@ -1609,7 +1609,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
-    // Starter Pack button badges (per-category mastery %) and the unlock
+    // Starter Pack button badges (per-category reviewed %) and the unlock
     // state of dependent categories. Both are computed live on the backend
     // from review history, so re-fetching after every graded answer keeps
     // the badges current without a page refresh. Kept separate from

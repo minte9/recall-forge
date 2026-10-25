@@ -27,7 +27,7 @@ public class StarterPackController {
     }
 
     @GetMapping("/mastery")
-    public ResponseEntity<Map<String, Integer>> getMasteryPercentages() {
-        return ResponseEntity.ok(starterPackService.getMasteryPercentages());
+    public ResponseEntity<Map<String, Integer>> getReviewedPercentages() {
+        return ResponseEntity.ok(starterPackService.getReviewedPercentages());
     }
 }
