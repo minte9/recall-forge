@@ -44,8 +44,8 @@ class StarterPackServiceTest {
         );
     }
 
-    private static RewardResponse rewardWithMastery(String category, int masteryPercent) {
-        return new RewardResponse(0, 0, false, 0, 0, category, 0, 0, masteryPercent, 0L, 0, 0L, 0, 0L, 0L, 0L, false);
+    private static RewardResponse rewardWithReviewed(String category, int reviewedPercent) {
+        return new RewardResponse(0, 0, false, 0, 0, category, 0, reviewedPercent, 0, 0, 0, 0L, 0, 0L, 0, 0L, 0L, 0L, false);
     }
 
     private static MarkdownFile templateFile(String content, Integer displayOrder) {
@@ -180,8 +180,8 @@ class StarterPackServiceTest {
     @Test
     void getUnlockStatus_prerequisiteAtOrAboveThreshold_isUnlocked() {
         setUp();
-        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
-        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 30));
+        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithReviewed("x", 0));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithReviewed("Java", 30));
 
         assertThat(starterPackService.getUnlockStatus()).containsEntry("Spring", true);
     }
@@ -189,8 +189,20 @@ class StarterPackServiceTest {
     @Test
     void getUnlockStatus_prerequisiteBelowThreshold_isLocked() {
         setUp();
-        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
-        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 29));
+        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithReviewed("x", 0));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithReviewed("Java", 29));
+
+        assertThat(starterPackService.getUnlockStatus()).containsEntry("Spring", false);
+    }
+
+    // The gate follows reviewedPercent, not the stricter masteryPercent
+    // (which also needs a 3-review streak).
+    @Test
+    void getUnlockStatus_ignoresMasteryPercent() {
+        setUp();
+        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithReviewed("x", 0));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(
+            new RewardResponse(0, 0, false, 0, 0, "Java", 0, 29, 0, 0, 100, 0L, 0, 0L, 0, 0L, 0L, 0L, false));
 
         assertThat(starterPackService.getUnlockStatus()).containsEntry("Spring", false);
     }
@@ -199,7 +211,7 @@ class StarterPackServiceTest {
     void getUnlockStatus_coversEveryGatedCategory() {
         setUp();
         when(rewardService.getCurrentUserReward(anyString()))
-            .thenReturn(rewardWithMastery("x", 0));
+            .thenReturn(rewardWithReviewed("x", 0));
 
         assertThat(starterPackService.getUnlockStatus())
             .containsOnlyKeys(
@@ -209,12 +221,12 @@ class StarterPackServiceTest {
     }
 
     @Test
-    void getUnlockStatus_allDependentsOfALevelOneCategoryUnlockTogetherOnItsMasteryAlone() {
+    void getUnlockStatus_allDependentsOfALevelOneCategoryUnlockTogetherOnItsReviewedPercentAlone() {
         setUp();
-        // Security mastered, HTTPS never touched (0% mastery) - it still
+        // Security reviewed, HTTPS never touched (0% reviewed) - it still
         // unlocks, since it gates directly on Security alone.
-        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
-        when(rewardService.getCurrentUserReward("Security")).thenReturn(rewardWithMastery("Security", 30));
+        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithReviewed("x", 0));
+        when(rewardService.getCurrentUserReward("Security")).thenReturn(rewardWithReviewed("Security", 30));
 
         assertThat(starterPackService.getUnlockStatus())
             .containsEntry("HTTPS", true)
@@ -222,12 +234,12 @@ class StarterPackServiceTest {
     }
 
     @Test
-    void getMasteryPercentages_coversEveryPublicCategoryAndForwardsPercent() {
+    void getReviewedPercentages_coversEveryPublicCategoryAndForwardsPercent() {
         setUp();
-        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithMastery("x", 0));
-        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithMastery("Java", 73));
+        when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithReviewed("x", 0));
+        when(rewardService.getCurrentUserReward("Java")).thenReturn(rewardWithReviewed("Java", 73));
 
-        assertThat(starterPackService.getMasteryPercentages())
+        assertThat(starterPackService.getReviewedPercentages())
             .containsOnlyKeys(
                 "Java", "Python", "Git", "SQL", "Javascript",
                 "Spring", "Algorithms", "Docker", "TypeScript", "Angular",

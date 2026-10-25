@@ -32,8 +32,8 @@ public class StarterPackService {
     // Hardcoded for now - mirrors the Starter Pack panel's button rows
     // (static/index.html): a level 1 category (Java, Python, Git, SQL,
     // Javascript) is always importable; every category listed under it here
-    // unlocks together, flatly, once level 1's mastery crosses
-    // UNLOCK_MASTERY_THRESHOLD_PERCENT - there's no further chaining between
+    // unlocks together, flatly, once level 1's reviewed percent crosses
+    // UNLOCK_REVIEWED_THRESHOLD_PERCENT - there's no further chaining between
     // them (each dependent gates directly on its level 1 category). Every
     // category across every entry is the full set a non-template user can
     // ever see as "public"; everything else defaults to private.
@@ -56,8 +56,8 @@ public class StarterPackService {
             ).collect(Collectors.toUnmodifiableSet());
 
     // A level 1 category is always importable; everything under it unlocks
-    // once the current user's mastery in it crosses this threshold.
-    private static final int UNLOCK_MASTERY_THRESHOLD_PERCENT = 30;
+    // once the current user's reviewed percent in it crosses this threshold.
+    private static final int UNLOCK_REVIEWED_THRESHOLD_PERCENT = 30;
 
     // dependent category -> its level 1 category (see
     // DEPENDENTS_BY_LEVEL_ONE_CATEGORY above). Level 1 categories themselves
@@ -128,34 +128,34 @@ public class StarterPackService {
     }
 
     /**
-     * The current user's mastery percent in each starter-pack category
+     * The current user's reviewed percent in each starter-pack category
      * (every row), for display as a badge on the Starter Pack buttons. A
-     * category the user hasn't imported yet has 0% mastery.
+     * category the user hasn't imported yet is 0% reviewed.
      */
-    public Map<String, Integer> getMasteryPercentages() {
+    public Map<String, Integer> getReviewedPercentages() {
         return PUBLIC_CATEGORIES.stream()
             .collect(Collectors.toMap(
                 category -> category,
-                category -> rewardService.getCurrentUserReward(category).masteryPercent()
+                category -> rewardService.getCurrentUserReward(category).reviewedPercent()
             ));
     }
 
     /**
      * Whether each non-level-1 category is unlocked for the current user:
-     * true once mastery in its level 1 category (see {@link
+     * true once the reviewed percent in its level 1 category (see {@link
      * #LEVEL_ONE_PREREQUISITE_CATEGORY}) reaches {@link
-     * #UNLOCK_MASTERY_THRESHOLD_PERCENT}. A level 1 category the user hasn't
-     * imported yet has 0% mastery, so everything under it starts locked.
+     * #UNLOCK_REVIEWED_THRESHOLD_PERCENT}. A level 1 category the user hasn't
+     * imported yet is 0% reviewed, so everything under it starts locked.
      */
     @SuppressWarnings("null")
     public Map<String, Boolean> getUnlockStatus() {
-        Map<String, Integer> masteryPercentages = getMasteryPercentages();
+        Map<String, Integer> reviewedPercentages = getReviewedPercentages();
 
         return LEVEL_ONE_PREREQUISITE_CATEGORY.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                entry -> masteryPercentages.getOrDefault(entry.getValue(), 0)
-                    >= UNLOCK_MASTERY_THRESHOLD_PERCENT
+                entry -> reviewedPercentages.getOrDefault(entry.getValue(), 0)
+                    >= UNLOCK_REVIEWED_THRESHOLD_PERCENT
             ));
     }
 }

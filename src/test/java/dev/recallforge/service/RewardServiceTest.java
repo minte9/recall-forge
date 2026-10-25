@@ -157,6 +157,39 @@ class RewardServiceTest {
         assertThat(response.leveledUp()).isTrue();
     }
 
+    // Reviewed = score >= 0.7 and not due; Mastered additionally needs a
+    // streak of 3 consecutive good reviews.
+    @Test
+    void getCurrentUserReward_computesReviewedAndMasteredPercentsSeparately() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+        when(topicRepository.countByUserIdAndCategory(1L, "java")).thenReturn(10L);
+        when(topicRepository.countReviewedByUserIdAndCategory(eq(1L), eq("java"), eq(0.7), any()))
+            .thenReturn(6L);
+        when(topicRepository.countMasteredByUserIdAndCategory(eq(1L), eq("java"), eq(0.7), eq(3), any()))
+            .thenReturn(2L);
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.reviewedTopics()).isEqualTo(6L);
+        assertThat(response.reviewedPercent()).isEqualTo(60);
+        assertThat(response.masteredTopics()).isEqualTo(2L);
+        assertThat(response.masteryPercent()).isEqualTo(20);
+    }
+
+    @Test
+    void getCurrentUserReward_reviewedAndMasteredPercentsAreZero_whenCategoryHasNoTopics() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(userRewardRepository.findByUserId(1L)).thenReturn(Optional.of(new UserReward(1L)));
+
+        RewardResponse response = rewardService.getCurrentUserReward("java");
+
+        assertThat(response.reviewedPercent()).isZero();
+        assertThat(response.masteryPercent()).isZero();
+    }
+
     // "Code coverage" is masteryPercent's sibling: same totalTopics
     // denominator, but the numerator is topics with a perfect, non-retry
     // code challenge instead of a high memory score.
