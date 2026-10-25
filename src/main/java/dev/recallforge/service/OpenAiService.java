@@ -484,8 +484,11 @@ public class OpenAiService {
             "max_completion_tokens", maxTokens
         );
 
+<<<<<<< HEAD
         long start = System.nanoTime();
 
+=======
+>>>>>>> 0a70fbd8a768fba4120b0c79cd85226b3c7d42ca
         JsonNode response = openAiRestClient
                 .post()
                 .uri("/chat/completions")
@@ -526,19 +529,29 @@ public class OpenAiService {
             .path("completion_tokens_details")
             .path("reasoning_tokens")
             .asInt(0);
+<<<<<<< HEAD
         long latencyMs = (System.nanoTime() - start) / 1_000_000;
 
         log.info(
             "OpenAI tokens: model={}, latency={}ms, prompt={}, completion={}, total={}",
             model,
             latencyMs,
+=======
+
+        log.info(
+            "OpenAI tokens: prompt={}, completion={}, reasoning={}, total={}",
+>>>>>>> 0a70fbd8a768fba4120b0c79cd85226b3c7d42ca
             promptTokens,
             completionTokens,
             reasoningTokens,
             totalTokens
         );
 
+<<<<<<< HEAD
         //log.debug("OpenAI prompt: {}", prompt);  // docker compose logs -f app | grep "OpenAI tokens"
+=======
+        //log.debug("OpenAI prompt: {}", prompt);  // docker compose logs -f app | grep -A 40 "OpenAI tokens"
+>>>>>>> 0a70fbd8a768fba4120b0c79cd85226b3c7d42ca
 
         return new AiResponse(
             content,
