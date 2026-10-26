@@ -20,18 +20,28 @@ class RepetitionServiceTest {
     }
 
     @Test
-    void calculateNextReview_scheduleBelow0_4In1DayAndResetsStreak() {
+    void calculateNextReview_scheduleBelow0_4In1DayAndMovesDownOneBox() {
         RepetitionService.RepetitionResult result = repetitionService.calculateNextReview(0.39, 3);
 
         assertThat(result.nextReviewAt()).isEqualTo(LocalDate.now().plusDays(1).atStartOfDay());
-        assertThat(result.reviewStreak()).isZero();
+        assertThat(result.reviewStreak()).isEqualTo(2);
     }
 
     @Test
-    void calculateNextReview_scheduleBelow0_7In3DaysAndResetsStreak() {
+    void calculateNextReview_scheduleBelow0_7In3DaysAndMovesDownOneBox() {
+        // streak 2 would grow a success's interval, but a weak answer
+        // always comes back at its base interval
         RepetitionService.RepetitionResult result = repetitionService.calculateNextReview(0.69, 3);
 
         assertThat(result.nextReviewAt()).isEqualTo(LocalDate.now().plusDays(3).atStartOfDay());
+        assertThat(result.reviewStreak()).isEqualTo(2);
+    }
+
+    @Test
+    void calculateNextReview_weakAnswerInFirstBoxStaysThere() {
+        RepetitionService.RepetitionResult result = repetitionService.calculateNextReview(0.2, 0);
+
+        assertThat(result.nextReviewAt()).isEqualTo(LocalDate.now().plusDays(1).atStartOfDay());
         assertThat(result.reviewStreak()).isZero();
     }
 

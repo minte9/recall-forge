@@ -184,9 +184,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return topic ? topic.codeChallengeXp : 0;
     },
 
-    // Consecutive successful reviews for the active topic - same lookup
-    // pattern as topicMemoryScore/topicCodeChallengeXp. Drives the small
-    // streak badge on the mastery ring.
+    // Review streak for the active topic - same lookup pattern as
+    // topicMemoryScore/topicCodeChallengeXp. Shown to the user as a
+    // Leitner box (streak + 1) on the mastery ring's small badge.
     topicReviewStreak() {
       if (!this.activeTopic) {
         return 0;
@@ -198,6 +198,23 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       const topic = this.topicsInFile.find(t => t.id === this.activeTopic.topicId);
       return topic ? topic.reviewStreak : 0;
+    },
+
+    // A score of 0.7 or above moves the topic up one box, anything lower
+    // moves it down one - keep in sync with
+    // RepetitionService.STREAK_SUCCESS_THRESHOLD.
+    resultBoxAdvanced() {
+      return !!this.result && this.result.score >= 0.7;
+    },
+
+    // "Advanced to box N" / "Back to box N" on the result screen.
+    resultBoxMessage() {
+      if (!this.result) {
+        return "";
+      }
+
+      const box = this.result.reviewStreak + 1;
+      return this.resultBoxAdvanced ? `Advanced to box ${box}` : `Back to box ${box}`;
     },
 
     aiEnabled() {

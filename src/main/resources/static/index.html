@@ -961,8 +961,8 @@
                       :style="{ strokeDashoffset: masteryRingOffset(topicMemoryScore) }"></circle>
                   </svg>
                   <span class="mastery-ring-label">{{ formatScore(topicMemoryScore) }}</span>
-                  <span v-if="topicReviewStreak >= 2" class="mastery-ring-streak"
-                    :title="`${topicReviewStreak} reviews in a row`">{{ topicReviewStreak }}</span>
+                  <span v-if="topicReviewStreak >= 1" class="mastery-ring-streak"
+                    :title="`Box ${topicReviewStreak + 1}`">{{ topicReviewStreak + 1 }}</span>
                 </span>
 
               </div>
@@ -1015,8 +1015,8 @@
                       :style="{ strokeDashoffset: masteryRingOffset(topicMemoryScore) }"></circle>
                   </svg>
                   <span class="mastery-ring-label">{{ formatScore(topicMemoryScore) }}</span>
-                  <span v-if="topicReviewStreak >= 2" class="mastery-ring-streak"
-                    :title="`${topicReviewStreak} reviews in a row`">{{ topicReviewStreak }}</span>
+                  <span v-if="topicReviewStreak >= 1" class="mastery-ring-streak"
+                    :title="`Box ${topicReviewStreak + 1}`">{{ topicReviewStreak + 1 }}</span>
                 </span>
 
               </div>
@@ -1101,14 +1101,14 @@
                 <p>
                   <strong>Next review:</strong> {{ formatDate(result.nextReviewAt) }}
                   <span class="info-tooltip" tabindex="0"
-                    data-tooltip="Timing depends on your answer: weak answers come back in 1-3 days, strong ones in 7-14. Getting it right several times in a row pushes reviews out further still, up to about 6 months once a topic is clearly mastered.">
+                    data-tooltip="Timing depends on your answer: weak answers come back in 1-3 days, strong ones in 7-14. Moving up through the boxes pushes reviews out further still, up to about 6 months once a topic is clearly mastered.">
                     <icon name="question-circle"></icon>
                   </span>
                 </p>
-                <p v-if="result.reviewStreak >= 2">
-                  <strong>🔥 Streak:</strong> {{ result.reviewStreak }} correct reviews in a row
+                <p>
+                  <strong>{{ resultBoxAdvanced ? '🔥' : '📦' }} Box:</strong> {{ resultBoxMessage }}
                   <span class="info-tooltip" tabindex="0"
-                    data-tooltip="Reviews space out further the more you get right in a row - once a topic is clearly mastered, it stops coming back so often.">
+                    data-tooltip="Each good answer (0.7 or above) moves a topic up one box, and higher boxes are reviewed less often. A weaker answer moves it down one box and brings it back within 1-3 days.">
                     <icon name="question-circle"></icon>
                   </span>
                 </p>
@@ -1274,7 +1274,7 @@
                 </span>
 
                 <div class="reward-ring info-tooltip" role="img" tabindex="0"
-                  data-tooltip="Topics with a memory score of at least 0.7, at least 3 correct reviews in a row, and not currently due for review."
+                  data-tooltip="Topics with a memory score of at least 0.7, in box 4 or higher, and not currently due for review."
                   :aria-label="`${dashboard.reward.masteryPercent}% mastery`">
                   <svg viewBox="0 0 120 120">
                     <circle class="reward-ring-track" cx="60" cy="60" r="52" pathLength="100"></circle>

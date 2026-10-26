@@ -16,11 +16,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class RepetitionService {
 
-    // Scores at or above this count as a "success" that extends the streak;
-    // anything below resets it. Matches OpenAiService's own proficiency cutoff.
+    // Scores at or above this count as a "success" that moves the topic up
+    // one box (streak + 1); anything below moves it down one box. Matches
+    // OpenAiService's own proficiency cutoff, and the frontend's
+    // resultBoxAdvanced in app.js - keep them in sync.
     private static final double STREAK_SUCCESS_THRESHOLD = 0.7;
 
-    // Interval growth per consecutive success once a streak is underway
+    // Interval growth per box once a topic has moved up a few boxes
     // (SM-2/Anki-style ease factor), and the ceiling that keeps growth from
     // running away once a topic is clearly mastered.
     private static final double EASE_FACTOR = 1.8;
@@ -45,10 +47,18 @@ public class RepetitionService {
      * Spaced repetition rule:
      *
      * Weak answers come back soon. Strong answers come back later, and
-     * further out still the more consecutive strong answers in a row -
-     * a topic that's clearly mastered should stop coming back every
-     * couple of weeks forever. Due dates land at midnight, so a day's 
-     * reviews all come due together.
+     * further out still the higher the topic's box - a topic that's
+     * clearly mastered should stop coming back every couple of weeks
+     * forever. Due dates land at midnight, so a day's reviews all come
+     * due together.
+     *
+     * The streak works like a Leitner box (shown to the user as box
+     * streak + 1): a strong answer moves the topic up one box, a weaker
+     * one moves it down one box instead of resetting it, since a single
+     * slip after a run of good answers is usually a varied question or a
+     * harsh grade rather than real forgetting. Growth only applies after
+     * a strong answer, so a weaker one always comes back within 1-3 days
+     * whatever the box.
      */
     public RepetitionResult calculateNextReview(double score, int previousStreak) {
         int baseIntervalDays;
@@ -65,10 +75,11 @@ public class RepetitionService {
             baseIntervalDays = 14;
         }
 
-        int newStreak = score >= STREAK_SUCCESS_THRESHOLD ? previousStreak + 1 : 0;
+        boolean success = score >= STREAK_SUCCESS_THRESHOLD;
+        int newStreak = success ? previousStreak + 1 : Math.max(0, previousStreak - 1);
 
         long intervalDays = baseIntervalDays;
-        if (newStreak >= 2) {
+        if (success && newStreak >= 2) {
             double multiplier = Math.pow(EASE_FACTOR, newStreak - 1);
             intervalDays = Math.min(MAX_INTERVAL_DAYS, Math.round(baseIntervalDays * multiplier));
         }
