@@ -352,7 +352,7 @@
 
                 <p>
                     Pick a job profile and your starter packs are focused on the skills that role needs. <br>
-                    Your mastery in each category is shown on the button, so you always know where to study next.
+                    Your mastery in each category is shown as a progress bar, so you always know where to study next.
                 </p>
             </header>
 
@@ -363,24 +363,42 @@
                     </select>
                 </div>
 
-                <div class="starter-pack-row">
-                    <span class="starter-pack-chip">Java <span class="starter-pack-mastery-badge">95%</span></span>
-                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Spring</span>
-                </div>
+                <div class="job-profile-progress">
+                    <div class="job-profile-row">
+                        <span class="job-profile-label">Java</span>
+                        <span class="job-profile-track"><span class="job-profile-bar" style="width: 98%"></span></span>
+                        <span class="job-profile-percent">98%</span>
+                    </div>
 
-                <div class="starter-pack-row">
-                    <span class="starter-pack-chip">REST <span class="starter-pack-mastery-badge">16%</span></span>
-                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">MCP</span>
-                </div>
+                    <div class="job-profile-row">
+                        <span class="job-profile-label">Spring</span>
+                        <span class="job-profile-track"><span class="job-profile-bar" style="width: 40%"></span></span>
+                        <span class="job-profile-percent">40%</span>
+                    </div>
 
-                <div class="starter-pack-row">
-                    <span class="starter-pack-chip">SQL <span class="starter-pack-mastery-badge">24%</span></span>
-                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">PostgreSQL</span>
-                </div>
+                    <div class="job-profile-row">
+                        <span class="job-profile-label">REST</span>
+                        <span class="job-profile-track"><span class="job-profile-bar" style="width: 27%"></span></span>
+                        <span class="job-profile-percent">27%</span>
+                    </div>
 
-                <div class="starter-pack-row">
-                    <span class="starter-pack-chip">Python</span>
-                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">Algorithms</span>
+                    <div class="job-profile-row">
+                        <span class="job-profile-label">MCP</span>
+                        <span class="job-profile-track"><span class="job-profile-bar" style="width: 36%"></span></span>
+                        <span class="job-profile-percent">36%</span>
+                    </div>
+
+                    <div class="job-profile-row">
+                        <span class="job-profile-label">Python</span>
+                        <span class="job-profile-track"></span>
+                        <span class="job-profile-percent">0%</span>
+                    </div>
+
+                    <div class="job-profile-row job-profile-row--locked" title="Unlocks as you build mastery">
+                        <span class="job-profile-label">Algorithms</span>
+                        <span class="job-profile-track"></span>
+                        <span class="job-profile-percent">0%</span>
+                    </div>
                 </div>
             </section>
         </section>

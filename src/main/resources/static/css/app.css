@@ -2336,6 +2336,80 @@
     margin-right: 8px;
   }
 
+  /* Starter Pack view for an active job profile - one reviewed-% bar per
+     category (see job-profile-progress in app.js). */
+  .job-profile-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 20px;
+    max-width: 640px;
+  }
+
+  .job-profile-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 8px 10px;
+
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: #1e293b;
+
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .job-profile-row:hover {
+    background: #f8fafc;
+  }
+
+  .job-profile-row:disabled {
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+
+  .job-profile-row:disabled:hover {
+    background: none;
+  }
+
+  .job-profile-label {
+    flex: 0 0 110px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .job-profile-track {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    overflow: hidden;
+  }
+
+  .job-profile-bar {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--green);
+  }
+
+  .job-profile-row:disabled .job-profile-bar {
+    background: #cbd5e1;
+  }
+
+  .job-profile-percent {
+    flex: 0 0 40px;
+    color: #64748b;
+    font-size: 13px;
+    text-align: right;
+  }
+
 
   @media (max-width: 900px) {
     /* Safety net: some piece of content (a long unbroken line of pasted
