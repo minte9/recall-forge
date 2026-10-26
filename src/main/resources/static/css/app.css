@@ -2393,7 +2393,7 @@
   .job-profile-progress {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 0px;
     margin-top: 20px;
     /* Same width as .job-profile-selector so the readiness pill and the
        percentages share a right edge. */
