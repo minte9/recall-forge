@@ -2224,13 +2224,20 @@
   }
 
   /* Same look as .environment-selector, sized for the Starter Pack panel. */
+  /* Select + readiness pill on one row; the select shrinks on narrow
+     screens so the pill never wraps. */
   .job-profile-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin: 16px 0 4px;
-    max-width: 360px;
+    max-width: 480px;
   }
 
   .job-profile-selector select {
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 360px;
     padding: 10px 12px;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
@@ -2336,6 +2343,21 @@
     margin-right: 8px;
   }
 
+  /* Pushed to the right edge; the 10px margin matches .job-profile-row's
+     side padding so the pill lines up with the bars' percentages. */
+  .job-profile-readiness {
+    flex: 0 0 auto;
+    margin-left: auto;
+    margin-right: 10px;
+    padding: 3px 9px;
+    border: 1px solid var(--green);
+    border-radius: 999px;
+    background: white;
+    color: #64748b;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
   /* Starter Pack view for an active job profile - one reviewed-% bar per
      category (see job-profile-progress in app.js). */
   .job-profile-progress {
@@ -2343,7 +2365,9 @@
     flex-direction: column;
     gap: 4px;
     margin-top: 20px;
-    max-width: 640px;
+    /* Same width as .job-profile-selector so the readiness pill and the
+       percentages share a right edge. */
+    max-width: 480px;
   }
 
   .job-profile-row {
