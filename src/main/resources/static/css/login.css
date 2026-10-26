@@ -358,6 +358,57 @@ h1 {
     pointer-events: none;
 }
 
+/* Static, dark example of the app's <job-profile-progress> bars. */
+.job-profile-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 640px;
+}
+
+.job-profile-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 10px;
+    color: #e2e8f0;
+    font-size: 14px;
+}
+
+.job-profile-row--locked {
+    color: #64748b;
+}
+
+.job-profile-label {
+    flex: 0 0 110px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.job-profile-track {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: #0f172a;
+    overflow: hidden;
+}
+
+.job-profile-bar {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: #22c55e;
+}
+
+.job-profile-percent {
+    flex: 0 0 40px;
+    color: #94a3b8;
+    font-size: 13px;
+    text-align: right;
+}
+
 .starter-pack-row {
     display: flex;
     flex-wrap: wrap;

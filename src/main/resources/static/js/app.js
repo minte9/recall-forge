@@ -6,6 +6,18 @@ const LAST_CATEGORY_STORAGE_KEY = "recallforge.lastCategory";
 // sync manually since there's no shared config between frontend and backend.
 const MAX_ANSWER_LENGTH = 2000;
 
+// Starter Pack button rows, in display order. The first category of each
+// row is its level 1 category (see StarterPackService). Also sets the order
+// of <job-profile-progress> bars.
+const STARTER_PACK_ROWS = [
+  ["Java", "Spring"],
+  ["REST", "GraphQL", "MCP"],
+  ["Javascript", "TypeScript", "Angular"],
+  ["SQL", "PostgreSQL"],
+  ["Python", "Algorithms"],
+  ["Git", "Docker"]
+];
+
 const app = createApp({
   data() {
     return {
@@ -74,6 +86,7 @@ const app = createApp({
       starterPackUnlockStatus: {},
       starterPackUnlockThreshold: 30,
       starterPackMastery: {},
+      starterPackRows: STARTER_PACK_ROWS,
       jobProfiles: [],
       activeJobProfileId: null,
       showDangerZone: false,
@@ -2380,32 +2393,15 @@ app.component("icon", {
   }
 });
 
-// Reusable Starter Pack row: <starter-pack-list :categories="['Java', 'Spring']"
-//   :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-//   :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
-//   @import="importStarterPack" @open="openImportedCategory">
-// Owns the per-button disabled/badge/tooltip logic so every mounting point (the
-// empty-state welcome screen, the standalone Starter Pack page) shares one copy
-// instead of duplicating a button block per category.
-app.component("starter-pack-list", {
+// Import/open/lock behavior shared by every Starter Pack category control
+// (<starter-pack-list> buttons and <job-profile-progress> rows).
+const starterPackCategoryMixin = {
   props: {
-    categories: { type: Array, required: true },
     categoryOptions: { type: Array, default: () => [] },
     unlockStatus: { type: Object, default: () => ({}) },
-    mastery: { type: Object, default: () => ({}) },
-    // Active job profile's category names; null shows every category.
-    profileCategories: { type: Array, default: null }
+    mastery: { type: Object, default: () => ({}) }
   },
   emits: ["import", "open"],
-  computed: {
-    visibleCategories() {
-      if (!this.profileCategories) {
-        return this.categories;
-      }
-
-      return this.categories.filter(c => this.profileCategories.includes(c));
-    }
-  },
   methods: {
     isImported(category) {
       return this.categoryOptions.some(o => o.category === category);
@@ -2420,6 +2416,36 @@ app.component("starter-pack-list", {
 
       return this.isImported(category) ? "Go to category" : "Import category";
     },
+    onClick(category) {
+      this.$emit(this.isImported(category) ? "open" : "import", category);
+    }
+  }
+};
+
+// Reusable Starter Pack row: <starter-pack-list :categories="['Java', 'Spring']"
+//   :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+//   :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+//   @import="importStarterPack" @open="openImportedCategory">
+// Owns the per-button disabled/badge/tooltip logic so every mounting point (the
+// empty-state welcome screen, the standalone Starter Pack page) shares one copy
+// instead of duplicating a button block per category.
+app.component("starter-pack-list", {
+  mixins: [starterPackCategoryMixin],
+  props: {
+    categories: { type: Array, required: true },
+    // Active job profile's category names; null shows every category.
+    profileCategories: { type: Array, default: null }
+  },
+  computed: {
+    visibleCategories() {
+      if (!this.profileCategories) {
+        return this.categories;
+      }
+
+      return this.categories.filter(c => this.profileCategories.includes(c));
+    }
+  },
+  methods: {
     dueColorClass(category) {
       const option = this.categoryOptions.find(o => o.category === category);
 
@@ -2428,9 +2454,6 @@ app.component("starter-pack-list", {
       }
 
       return option.dueCount > 0 ? "starter-pack-btn-due" : "starter-pack-btn-caught-up";
-    },
-    onClick(category) {
-      this.$emit(this.isImported(category) ? "open" : "import", category);
     }
   },
   template: `
@@ -2440,6 +2463,41 @@ app.component("starter-pack-list", {
         :disabled="isLocked(category)" :title="tooltip(category)" @click="onClick(category)">
         {{ category }}
         <span v-if="mastery[category] > 0" class="starter-pack-mastery-badge">{{ mastery[category] || 0 }}%</span>
+      </button>
+    </div>
+  `
+});
+
+// Starter Pack view for an active job profile: <job-profile-progress
+//   :profile-categories="activeProfileCategories" :category-options="categoryOptions"
+//   :unlock-status="starterPackUnlockStatus" :mastery="starterPackMastery"
+//   @import="importStarterPack" @open="openImportedCategory">
+// One reviewed-% bar per profile category that is a starter pack, in the
+// same order as the Starter Pack button rows (STARTER_PACK_ROWS).
+app.component("job-profile-progress", {
+  mixins: [starterPackCategoryMixin],
+  props: {
+    profileCategories: { type: Array, required: true }
+  },
+  computed: {
+    visibleCategories() {
+      return STARTER_PACK_ROWS.flat().filter(c => this.profileCategories.includes(c));
+    }
+  },
+  methods: {
+    percent(category) {
+      return this.mastery[category] || 0;
+    }
+  },
+  template: `
+    <div v-if="visibleCategories.length > 0" class="job-profile-progress">
+      <button v-for="category in visibleCategories" :key="category" class="job-profile-row"
+        :disabled="isLocked(category)" :title="tooltip(category)" @click="onClick(category)">
+        <span class="job-profile-label">{{ category }}</span>
+        <span class="job-profile-track">
+          <span class="job-profile-bar" :style="{ width: percent(category) + '%' }"></span>
+        </span>
+        <span class="job-profile-percent">{{ percent(category) }}%</span>
       </button>
     </div>
   `

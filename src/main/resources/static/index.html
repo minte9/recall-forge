@@ -314,41 +314,21 @@
               </select>
             </div>
 
-            <starter-pack-list :categories="['Java', 'Spring']"
+            <job-profile-progress v-if="activeProfileCategories"
+              :profile-categories="activeProfileCategories" :category-options="categoryOptions"
+              :unlock-status="starterPackUnlockStatus" :mastery="starterPackMastery"
+              @import="importStarterPack" @open="openImportedCategory">
+            </job-profile-progress>
+
+            <template v-else>
+
+            <starter-pack-list v-for="row in starterPackRows" :key="row[0]" :categories="row"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
               :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
               @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
-            <starter-pack-list :categories="['REST', 'GraphQL', 'MCP']"
-              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
-              @import="importStarterPack" @open="openImportedCategory">
-            </starter-pack-list>
-
-            <starter-pack-list :categories="['Javascript', 'TypeScript', 'Angular']"
-              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
-              @import="importStarterPack" @open="openImportedCategory">
-            </starter-pack-list>
-
-            <starter-pack-list :categories="['SQL', 'PostgreSQL']"
-              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
-              @import="importStarterPack" @open="openImportedCategory">
-            </starter-pack-list>
-
-            <starter-pack-list :categories="['Python', 'Algorithms']"
-              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
-              @import="importStarterPack" @open="openImportedCategory">
-            </starter-pack-list>
-
-            <starter-pack-list :categories="['Git', 'Docker']"
-              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
-              @import="importStarterPack" @open="openImportedCategory">
-            </starter-pack-list>
+            </template>
 
           </div>
 
@@ -792,41 +772,21 @@
               </select>
             </div>
 
-            <starter-pack-list :categories="['Java', 'Spring']"
+            <job-profile-progress v-if="activeProfileCategories"
+              :profile-categories="activeProfileCategories" :category-options="categoryOptions"
+              :unlock-status="starterPackUnlockStatus" :mastery="starterPackMastery"
+              @import="importStarterPack" @open="openImportedCategory">
+            </job-profile-progress>
+
+            <template v-else>
+
+            <starter-pack-list v-for="row in starterPackRows" :key="row[0]" :categories="row"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
               :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
               @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
-            <starter-pack-list :categories="['REST', 'GraphQL', 'MCP']"
-              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
-              @import="importStarterPack" @open="openImportedCategory">
-            </starter-pack-list>
-
-            <starter-pack-list :categories="['Javascript', 'TypeScript', 'Angular']"
-              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
-              @import="importStarterPack" @open="openImportedCategory">
-            </starter-pack-list>
-
-            <starter-pack-list :categories="['SQL', 'PostgreSQL']"
-              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
-              @import="importStarterPack" @open="openImportedCategory">
-            </starter-pack-list>
-
-            <starter-pack-list :categories="['Python', 'Algorithms']"
-              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
-              @import="importStarterPack" @open="openImportedCategory">
-            </starter-pack-list>
-
-            <starter-pack-list :categories="['Git', 'Docker']"
-              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
-              @import="importStarterPack" @open="openImportedCategory">
-            </starter-pack-list>
+            </template>
             
           </div>
         </div>
