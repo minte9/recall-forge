@@ -1041,6 +1041,11 @@
               </div>
             </div>
 
+            <div v-if="answerSubmitted && loading && !result" class="feedback feedback--pending"
+              role="status" aria-live="polite">
+              <span class="feedback-pending-dot" aria-hidden="true"></span> Grading your answer…
+            </div>
+
             <div v-if="result && !feedbackHistoryVisible" class="feedback"
               :class="isHighScore(result.score) ? 'feedback--high-score' : 'feedback--low-score'">
               <p><strong>Score:</strong> {{ result.score }}</p>
