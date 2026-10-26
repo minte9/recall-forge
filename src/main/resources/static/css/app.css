@@ -2397,7 +2397,7 @@
     margin-top: 20px;
     /* Same width as .job-profile-selector so the readiness pill and the
        percentages share a right edge. */
-    max-width: 480px;
+    max-width: 630px;
   }
 
   .job-profile-row {
