@@ -328,8 +328,8 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         @Param("now") LocalDateTime now
     );
 
-    // "Mastered": reviewed (see above) plus a streak of consecutive good
-    // reviews, so a single lucky answer doesn't count as mastery.
+    // "Mastered": reviewed (see above) plus a high enough streak (box),
+    // so a single lucky answer doesn't count as mastery.
     @Query("""
         select count(t)
         from Topic t
