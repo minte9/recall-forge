@@ -1258,6 +1258,36 @@
     border-left: 4px solid #f59e0b;
   }
 
+  /* Placeholder shown in the feedback card's spot while the submitted
+     answer is being graded (answerSubmitted && loading && !result). */
+  .feedback--pending {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f9fafb;
+    border-left: 4px solid #9ca3af;
+    color: #6b7280;
+  }
+
+  .feedback-pending-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #9ca3af;
+    animation: feedback-pending-pulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes feedback-pending-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .feedback-pending-dot {
+      animation: none;
+    }
+  }
+
   /* Green check shown on the feedback card when a subcategory has no
      due topics left for the day (result.dueInSubcategory === 0). */
   .subcat-done-check {
