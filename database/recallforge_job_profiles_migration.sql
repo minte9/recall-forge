@@ -72,7 +72,7 @@ WHERE user_id = 1 AND name = 'Java Backend Developer'
 INSERT INTO job_profiles (user_id, name, description, enabled)
 VALUES
     (1, 'Java Backend Engineer', 'Java, Spring Boot, REST, SQL, PostgreSQL, Docker, Git', TRUE),
-    (1, 'Java Full-Stack Developer', 'Java, Spring Boot, REST, TypeScript, Angular, SQL, Git', TRUE),
+    (1, 'Java Full-Stack Developer', 'Java, Spring Boot, REST, TypeScript, Angular, SQL', TRUE),
     -- Disabled: its public categories are a subset of Java Backend Engineer.
     -- Re-enable once it has distinct content (e.g. Kafka/messaging packs).
     (1, 'Microservices Engineer', 'Java, Spring Boot, REST, Kafka, RabbitMQ, Docker, SQL', FALSE),
@@ -116,13 +116,10 @@ WITH desired(profile_name, environment, category) AS (
       ('Java Full-Stack Developer', 'JVM', 'Java'),
       ('Java Full-Stack Developer', 'JVM', 'Spring'),
       ('Java Full-Stack Developer', 'API', 'REST'),
-      ('Java Full-Stack Developer', 'API', 'GraphQL'),
       ('Java Full-Stack Developer', 'JS', 'TypeScript'),
       ('Java Full-Stack Developer', 'JS', 'Javascript'),
+      ('Java Full-Stack Developer', 'JS', 'Angular'),
       ('Java Full-Stack Developer', 'DB', 'SQL'),
-      ('Java Full-Stack Developer', 'DB', 'PostgreSQL'),
-      ('Java Full-Stack Developer', 'DevOps', 'Docker'),
-      ('Java Full-Stack Developer', 'DevOps', 'Git'),
       ('Microservices Engineer', 'JVM', 'Java'),
       ('Microservices Engineer', 'JVM', 'Spring'),
       ('Microservices Engineer', 'JVM', 'Microservices'),
@@ -160,14 +157,14 @@ BEGIN
         'Java Backend Engineer', 'Java Full-Stack Developer',
         'Microservices Engineer', 'AI Integration Engineer'
       );
-    IF actual_count <> 33 THEN
-        RAISE EXCEPTION 'Expected 33 profile/category mappings; found %', actual_count;
+    IF actual_count <> 30 THEN
+        RAISE EXCEPTION 'Expected 30 profile/category mappings; found %', actual_count;
     END IF;
 END $$;
 
 COMMIT;
 
--- Verification: expected counts are 8, 10, 8, 7.
+-- Verification: expected counts are 8, 7, 8, 7.
 SELECT jp.name, COUNT(jpc.category_id) AS category_count
 FROM job_profiles jp
 LEFT JOIN job_profile_categories jpc ON jpc.profile_id = jp.id
