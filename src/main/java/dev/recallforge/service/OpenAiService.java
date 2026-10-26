@@ -529,7 +529,7 @@ public class OpenAiService {
         long latencyMs = (System.nanoTime() - start) / 1_000_000;
 
         log.info(
-            "OpenAI tokens: model={}, latency={}ms, prompt={}, completion={}, total={}",
+            "OpenAI tokens: model={}, latency={}ms, prompt={}, completion={}, reasoning={}, total={}",
             model,
             latencyMs,
             promptTokens,
