@@ -312,6 +312,9 @@
                   {{ profile.name }}
                 </option>
               </select>
+              <span v-if="activeProfileReadiness !== null" class="job-profile-readiness">
+                {{ activeProfileReadiness }}% ready
+              </span>
             </div>
 
             <job-profile-progress v-if="activeProfileCategories"
@@ -770,6 +773,9 @@
                   {{ profile.name }}
                 </option>
               </select>
+              <span v-if="activeProfileReadiness !== null" class="job-profile-readiness">
+                {{ activeProfileReadiness }}% ready
+              </span>
             </div>
 
             <job-profile-progress v-if="activeProfileCategories"

@@ -250,6 +250,25 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         : null;
     },
 
+    // Simple average of the <job-profile-progress> bars' reviewed % (locked
+    // and not-imported categories count as 0), or null for "All Categories".
+    activeProfileReadiness() {
+      if (!this.activeProfileCategories) {
+        return null;
+      }
+
+      const categories = STARTER_PACK_ROWS.flat()
+        .filter(c => this.activeProfileCategories.includes(c));
+
+      if (categories.length === 0) {
+        return null;
+      }
+
+      const total = categories.reduce((sum, c) => sum + (this.starterPackMastery[c] || 0), 0);
+
+      return Math.round(total / categories.length);
+    },
+
     environmentGroups() {
       const groups = {};
 
