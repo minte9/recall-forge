@@ -531,7 +531,7 @@
                 <div v-if="c.showTopicHeader" class="challenge-topic">{{ c.topicHeading }}</div>
 
                 <div class="challenge-item">
-                  <details class="code-block">
+                  <details class="code-block" open>
                     <summary>{{ c.question }}</summary>
                     <pre v-if="(c.userAnswer || '').trim()"><code>{{ c.userAnswer }}</code></pre>
                     <p v-else><em>No answer submitted.</em></p>

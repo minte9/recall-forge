@@ -658,20 +658,25 @@
   .challenge-retry-btn {
     padding: 6px 12px;
     font-size: 12px;
-    border: 0px solid #eeeeee;
+    font-weight: 600;
+    border: 1px solid var(--orange-dark);
     border-radius: 5px;
     background: white;
-    color: #374151;
+    color: var(--orange-dark);
     cursor: pointer;
     float: left;
     margin-bottom: 5px;
   }
 
   .challenge-retry-btn:hover {
-    background: #f8fafc;
+    background: var(--orange-dark);
+    color: white;
   }
 
-  .challenge-retry-btn:disabled {
+  .challenge-retry-btn:disabled,
+  .challenge-retry-btn:disabled:hover {
+    background: white;
+    color: var(--orange-dark);
     opacity: .5;
     cursor: not-allowed;
   }
