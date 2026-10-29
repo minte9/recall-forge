@@ -361,6 +361,9 @@
 
                 <div class="group-title">
                   {{ formatSubcategory(groupName) }}
+                  <span v-if="groupXp(group) > 0" class="group-xp">
+                    <span class="xp-icon">⚡</span>{{ groupXp(group) }} xp
+                  </span>
                 </div>
               </div>
 
