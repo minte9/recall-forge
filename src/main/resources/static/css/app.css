@@ -2298,7 +2298,7 @@
     color: #1e293b;
 
     font-size: 14px;
-    /* font-weight: 600; */
+    font-weight: 600;
 
     cursor: pointer;
     transition: all 0.15s ease;
@@ -2464,7 +2464,7 @@
     border-radius: 8px;
     background: #eff6ff;
     font-size: 13px;
-    /* font-weight: 600; */
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
