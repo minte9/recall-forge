@@ -317,12 +317,22 @@
               </span>
             </div>
 
-            <job-profile-progress
-              :profile-categories="starterPackCategories" :category-options="categoryOptions"
+            <job-profile-progress v-if="activeProfileCategories"
+              :profile-categories="activeProfileCategories" :category-options="categoryOptions"
               :unlock-status="starterPackUnlockStatus" :mastery="starterPackMastery"
               :due="starterPackDue"
               @import="importStarterPack" @open="openImportedCategory">
             </job-profile-progress>
+
+            <template v-else>
+
+            <starter-pack-list v-for="row in starterPackRows" :key="row[0]" :categories="row"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
+
+            </template>
 
           </div>
 
@@ -769,12 +779,22 @@
               </span>
             </div>
 
-            <job-profile-progress
-              :profile-categories="starterPackCategories" :category-options="categoryOptions"
+            <job-profile-progress v-if="activeProfileCategories"
+              :profile-categories="activeProfileCategories" :category-options="categoryOptions"
               :unlock-status="starterPackUnlockStatus" :mastery="starterPackMastery"
               :due="starterPackDue"
               @import="importStarterPack" @open="openImportedCategory">
             </job-profile-progress>
+
+            <template v-else>
+
+            <starter-pack-list v-for="row in starterPackRows" :key="row[0]" :categories="row"
+              :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              @import="importStarterPack" @open="openImportedCategory">
+            </starter-pack-list>
+
+            </template>
             
           </div>
         </div>
