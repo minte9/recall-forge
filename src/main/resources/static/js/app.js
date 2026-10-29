@@ -6,9 +6,9 @@ const LAST_CATEGORY_STORAGE_KEY = "recallforge.lastCategory";
 // sync manually since there's no shared config between frontend and backend.
 const MAX_ANSWER_LENGTH = 2000;
 
-// Starter Pack rows: the first category of each row is its level 1
-// category (see StarterPackService). Flattened, it sets the order of the
-// <job-profile-progress> bars.
+// Starter Pack button rows, in display order. The first category of each
+// row is its level 1 category (see StarterPackService). Also sets the order
+// of <job-profile-progress> bars.
 const STARTER_PACK_ROWS = [
   ["Java", "Spring"],
   ["REST", "GraphQL", "MCP"],
@@ -87,6 +87,7 @@ const app = createApp({
       starterPackUnlockThreshold: 30,
       starterPackMastery: {},
       starterPackDue: {},
+      starterPackRows: STARTER_PACK_ROWS,
       jobProfiles: [],
       activeJobProfileId: null,
       showDangerZone: false,
@@ -250,17 +251,15 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         : null;
     },
 
-    // Categories shown as <job-profile-progress> bars: the active job
-    // profile's, or every starter pack for "All Categories".
-    starterPackCategories() {
-      return this.activeProfileCategories || STARTER_PACK_ROWS.flat();
-    },
-
     // Simple average of the <job-profile-progress> bars' reviewed % (locked
-    // and not-imported categories count as 0).
+    // and not-imported categories count as 0), or null for "All Categories".
     activeProfileReadiness() {
+      if (!this.activeProfileCategories) {
+        return null;
+      }
+
       const categories = STARTER_PACK_ROWS.flat()
-        .filter(c => this.starterPackCategories.includes(c));
+        .filter(c => this.activeProfileCategories.includes(c));
 
       if (categories.length === 0) {
         return null;
@@ -2415,8 +2414,8 @@ app.component("icon", {
   }
 });
 
-// Import/open/lock/due-color behavior for Starter Pack category rows
-// (<job-profile-progress>).
+// Import/open/lock behavior shared by every Starter Pack category control
+// (<starter-pack-list> buttons and <job-profile-progress> rows).
 const starterPackCategoryMixin = {
   props: {
     categoryOptions: { type: Array, default: () => [] },
@@ -2448,17 +2447,52 @@ const starterPackCategoryMixin = {
         return "";
       }
 
-      return option.dueCount > 0 ? "job-profile-label-due" : "job-profile-label-caught-up";
+      return option.dueCount > 0 ? "starter-pack-btn-due" : "starter-pack-btn-caught-up";
     }
   }
 };
 
-// Starter Pack view: <job-profile-progress
-//   :profile-categories="starterPackCategories" :category-options="categoryOptions"
+// Reusable Starter Pack row: <starter-pack-list :categories="['Java', 'Spring']"
+//   :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
+//   :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+//   @import="importStarterPack" @open="openImportedCategory">
+// Owns the per-button disabled/badge/tooltip logic so every mounting point (the
+// empty-state welcome screen, the standalone Starter Pack page) shares one copy
+// instead of duplicating a button block per category.
+app.component("starter-pack-list", {
+  mixins: [starterPackCategoryMixin],
+  props: {
+    categories: { type: Array, required: true },
+    // Active job profile's category names; null shows every category.
+    profileCategories: { type: Array, default: null }
+  },
+  computed: {
+    visibleCategories() {
+      if (!this.profileCategories) {
+        return this.categories;
+      }
+
+      return this.categories.filter(c => this.profileCategories.includes(c));
+    }
+  },
+  template: `
+    <div v-if="visibleCategories.length > 0" class="starter-pack-list">
+      <button v-for="category in visibleCategories" :key="category" class="starter-pack-btn"
+        :class="dueColorClass(category)"
+        :disabled="isLocked(category)" :title="tooltip(category)" @click="onClick(category)">
+        {{ category }}
+        <span v-if="mastery[category] > 0" class="starter-pack-mastery-badge">{{ mastery[category] || 0 }}%</span>
+      </button>
+    </div>
+  `
+});
+
+// Starter Pack view for an active job profile: <job-profile-progress
+//   :profile-categories="activeProfileCategories" :category-options="categoryOptions"
 //   :unlock-status="starterPackUnlockStatus" :mastery="starterPackMastery"
 //   :due="starterPackDue" @import="importStarterPack" @open="openImportedCategory">
-// One bar per given category that is a starter pack, in STARTER_PACK_ROWS
-// order: reviewed % in green,
+// One bar per profile category that is a starter pack, in the same order as
+// the Starter Pack button rows (STARTER_PACK_ROWS): reviewed % in green,
 // followed by due % (reviewed before, due again) in yellow.
 app.component("job-profile-progress", {
   mixins: [starterPackCategoryMixin],
