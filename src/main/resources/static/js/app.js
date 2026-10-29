@@ -1932,6 +1932,11 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return group.files.some(file => file.dueCount > 0);
     },
 
+    // Total code-challenge XP across a subcategory group's files.
+    groupXp(group) {
+      return group.files.reduce((sum, file) => sum + (file.codeChallengeXp || 0), 0);
+    },
+
     categoryDueColor(category) {
       if (!category.started) {
         return "var(--muted)";
