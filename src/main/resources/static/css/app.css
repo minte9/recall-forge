@@ -2397,7 +2397,7 @@
     margin-top: 20px;
     /* Same width as .job-profile-selector so the readiness pill and the
        percentages share a right edge. */
-    max-width: 630px;
+    max-width: 550px;
   }
 
   .job-profile-row {
@@ -2440,6 +2440,7 @@
 
   .job-profile-track {
     flex: 1;
+    display: flex;
     height: 8px;
     border-radius: 999px;
     background: #f1f5f9;
@@ -2453,7 +2454,21 @@
     background: var(--green);
   }
 
-  .job-profile-row:disabled .job-profile-bar {
+  /* Due segment continues the reviewed bar, so the seam between them is
+     square and only the outer end is rounded. */
+  .job-profile-bar-due {
+    display: block;
+    height: 100%;
+    border-radius: 0 999px 999px 0;
+    background: var(--yellow);
+  }
+
+  .job-profile-bar:has(+ .job-profile-bar-due) {
+    border-radius: 999px 0 0 999px;
+  }
+
+  .job-profile-row:disabled .job-profile-bar,
+  .job-profile-row:disabled .job-profile-bar-due {
     background: #cbd5e1;
   }
 

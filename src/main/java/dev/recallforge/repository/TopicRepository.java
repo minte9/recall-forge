@@ -328,6 +328,23 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         @Param("now") LocalDateTime now
     );
 
+    // "Due": reviewed at least once and currently due. A never-reviewed
+    // topic's nextReviewAt defaults to creation time, so without the
+    // exists check a freshly imported category would count as all due.
+    @Query("""
+        select count(t)
+        from Topic t
+        where t.user.id = :userId
+        and lower(t.category) = lower(:category)
+        and t.nextReviewAt < :now
+        and exists (select 1 from Review r where r.topic = t)
+    """)
+    long countDueReviewedByUserIdAndCategory(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("now") LocalDateTime now
+    );
+
     // "Mastered": reviewed (see above) plus a high enough streak (box),
     // so a single lucky answer doesn't count as mastery.
     @Query("""

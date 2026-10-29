@@ -474,6 +474,19 @@ const Api = {
     return await response.json();
   },
 
+  async loadStarterPackDue() {
+    const response = await fetch("/api/starter-packs/due", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      return {};
+    }
+
+    return await response.json();
+  },
+
   async loadJobProfiles() {
     const response = await fetch("/api/job-profiles", {
       credentials: "same-origin",

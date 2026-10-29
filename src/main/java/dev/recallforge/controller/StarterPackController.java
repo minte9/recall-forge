@@ -30,4 +30,9 @@ public class StarterPackController {
     public ResponseEntity<Map<String, Integer>> getReviewedPercentages() {
         return ResponseEntity.ok(starterPackService.getReviewedPercentages());
     }
+
+    @GetMapping("/due")
+    public ResponseEntity<Map<String, Integer>> getDuePercentages() {
+        return ResponseEntity.ok(starterPackService.getDuePercentages());
+    }
 }
