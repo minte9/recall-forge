@@ -190,6 +190,28 @@ class RewardServiceTest {
         assertThat(response.masteryPercent()).isZero();
     }
 
+    // Due = reviewed at least once and due again, over the same totalTopics
+    // denominator as reviewedPercent.
+    @Test
+    void getCurrentUserDuePercent_dividesDueReviewedTopicsByTotal() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(topicRepository.countByUserIdAndCategory(1L, "java")).thenReturn(8L);
+        when(topicRepository.countDueReviewedByUserIdAndCategory(eq(1L), eq("java"), any()))
+            .thenReturn(3L);
+
+        assertThat(rewardService.getCurrentUserDuePercent("java")).isEqualTo(38);
+    }
+
+    @Test
+    void getCurrentUserDuePercent_isZero_whenCategoryHasNoTopics() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+
+        assertThat(rewardService.getCurrentUserDuePercent("java")).isZero();
+        verify(topicRepository, never()).countDueReviewedByUserIdAndCategory(any(), any(), any());
+    }
+
     // "Code coverage" is masteryPercent's sibling: same totalTopics
     // denominator, but the numerator is topics with a perfect, non-retry
     // code challenge instead of a high memory score.

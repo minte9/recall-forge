@@ -141,6 +141,19 @@ public class StarterPackService {
     }
 
     /**
+     * The current user's due percent (reviewed before, due again) in each
+     * starter-pack category, shown next to the reviewed percent on the job
+     * profile bars. A category the user hasn't imported yet is 0% due.
+     */
+    public Map<String, Integer> getDuePercentages() {
+        return PUBLIC_CATEGORIES.stream()
+            .collect(Collectors.toMap(
+                category -> category,
+                rewardService::getCurrentUserDuePercent
+            ));
+    }
+
+    /**
      * Whether each non-level-1 category is unlocked for the current user:
      * true once the reviewed percent in its level 1 category (see {@link
      * #LEVEL_ONE_PREREQUISITE_CATEGORY}) reaches {@link

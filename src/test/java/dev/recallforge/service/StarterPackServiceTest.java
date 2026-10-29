@@ -247,4 +247,19 @@ class StarterPackServiceTest {
             )
             .containsEntry("Java", 73);
     }
+
+    @Test
+    void getDuePercentages_coversEveryPublicCategoryAndForwardsPercent() {
+        setUp();
+        when(rewardService.getCurrentUserDuePercent(anyString())).thenReturn(0);
+        when(rewardService.getCurrentUserDuePercent("Java")).thenReturn(15);
+
+        assertThat(starterPackService.getDuePercentages())
+            .containsOnlyKeys(
+                "Java", "Python", "Git", "SQL", "Javascript",
+                "Spring", "Algorithms", "Docker", "TypeScript", "Angular",
+                "Security", "PostgreSQL", "REST", "GraphQL", "MCP", "HTTPS"
+            )
+            .containsEntry("Java", 15);
+    }
 }

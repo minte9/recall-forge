@@ -118,6 +118,26 @@ public class RewardService {
         return toResponse(reward, category, 0);
     }
 
+    // Percent of the current user's topics in this category that were
+    // reviewed before and are due again - the counterpart to reviewedPercent
+    // (same totalTopics denominator), shown as the yellow job-profile bar.
+    public int getCurrentUserDuePercent(String category) {
+        Long userId = currentUserService.currentUserId();
+
+        long totalTopics = topicRepository.countByUserIdAndCategory(userId, category);
+
+        if (totalTopics == 0) {
+            return 0;
+        }
+
+        long dueTopics = topicRepository.countDueReviewedByUserIdAndCategory(
+                userId,
+                category,
+                LocalDateTime.now());
+
+        return (int) Math.round(dueTopics * 100.0 / totalTopics);
+    }
+
     private RewardResponse toResponse(
             UserReward reward,
             String category,

@@ -86,6 +86,7 @@ const app = createApp({
       starterPackUnlockStatus: {},
       starterPackUnlockThreshold: 30,
       starterPackMastery: {},
+      starterPackDue: {},
       starterPackRows: STARTER_PACK_ROWS,
       jobProfiles: [],
       activeJobProfileId: null,
@@ -1669,6 +1670,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       try {
         this.starterPackUnlockStatus = await Api.loadStarterPackUnlockStatus();
         this.starterPackMastery = await Api.loadStarterPackMastery();
+        this.starterPackDue = await Api.loadStarterPackDue();
       } catch (err) {
         console.error("Could not load starter pack status", err);
       }
@@ -2490,13 +2492,15 @@ app.component("starter-pack-list", {
 // Starter Pack view for an active job profile: <job-profile-progress
 //   :profile-categories="activeProfileCategories" :category-options="categoryOptions"
 //   :unlock-status="starterPackUnlockStatus" :mastery="starterPackMastery"
-//   @import="importStarterPack" @open="openImportedCategory">
-// One reviewed-% bar per profile category that is a starter pack, in the
-// same order as the Starter Pack button rows (STARTER_PACK_ROWS).
+//   :due="starterPackDue" @import="importStarterPack" @open="openImportedCategory">
+// One bar per profile category that is a starter pack, in the same order as
+// the Starter Pack button rows (STARTER_PACK_ROWS): reviewed % in green,
+// followed by due % (reviewed before, due again) in yellow.
 app.component("job-profile-progress", {
   mixins: [starterPackCategoryMixin],
   props: {
-    profileCategories: { type: Array, required: true }
+    profileCategories: { type: Array, required: true },
+    due: { type: Object, default: () => ({}) }
   },
   computed: {
     visibleCategories() {
@@ -2506,6 +2510,10 @@ app.component("job-profile-progress", {
   methods: {
     percent(category) {
       return this.mastery[category] || 0;
+    },
+    // Capped so independently rounded reviewed + due never overflow the track.
+    duePercent(category) {
+      return Math.min(this.due[category] || 0, 100 - this.percent(category));
     }
   },
   template: `
@@ -2515,6 +2523,9 @@ app.component("job-profile-progress", {
         <span class="job-profile-label">{{ category }}</span>
         <span class="job-profile-track">
           <span class="job-profile-bar" :style="{ width: percent(category) + '%' }"></span>
+          <span v-if="duePercent(category) > 0" class="job-profile-bar-due"
+            :style="{ width: duePercent(category) + '%' }"
+            :title="duePercent(category) + '% due'"></span>
         </span>
         <span class="job-profile-percent">{{ percent(category) }}%</span>
       </button>

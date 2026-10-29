@@ -320,6 +320,7 @@
             <job-profile-progress v-if="activeProfileCategories"
               :profile-categories="activeProfileCategories" :category-options="categoryOptions"
               :unlock-status="starterPackUnlockStatus" :mastery="starterPackMastery"
+              :due="starterPackDue"
               @import="importStarterPack" @open="openImportedCategory">
             </job-profile-progress>
 
@@ -781,6 +782,7 @@
             <job-profile-progress v-if="activeProfileCategories"
               :profile-categories="activeProfileCategories" :category-options="categoryOptions"
               :unlock-status="starterPackUnlockStatus" :mastery="starterPackMastery"
+              :due="starterPackDue"
               @import="importStarterPack" @open="openImportedCategory">
             </job-profile-progress>
 
