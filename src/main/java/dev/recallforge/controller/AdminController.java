@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.recallforge.dto.AdminUsersStatsResponse;
 import dev.recallforge.dto.DailyVisitResponse;
+import dev.recallforge.dto.ReferrerVisitResponse;
 import dev.recallforge.service.AdminService;
 
 @RestController
@@ -28,5 +29,10 @@ public class AdminController {
     @GetMapping("/visits")
     public List<DailyVisitResponse> getDailyVisits() {
         return adminService.getDailyVisits();
+    }
+
+    @GetMapping("/referrers")
+    public List<ReferrerVisitResponse> getReferrerVisits() {
+        return adminService.getReferrerVisits();
     }
 }

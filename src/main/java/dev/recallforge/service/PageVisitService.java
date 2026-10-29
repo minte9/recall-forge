@@ -1,10 +1,13 @@
 package dev.recallforge.service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.HexFormat;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
@@ -20,6 +23,7 @@ import dev.recallforge.repository.PageVisitRepository;
 // A visitor is identified by HMAC(date + IP + user-agent) under a random key that lives only
 // in memory, so stored hashes can't be reversed or linked across days. Trade-off: a restart
 // rotates the key, so a visitor seen both before and after it is counted twice that day.
+// The referrer is reduced to its host; self-referrals and direct visits store null.
 @Service
 public class PageVisitService {
 
@@ -29,6 +33,7 @@ public class PageVisitService {
     );
 
     private static final String HMAC_ALGORITHM = "HmacSHA256";
+    private static final int MAX_REFERRER_HOST_LENGTH = 255;
 
     private final PageVisitRepository pageVisitRepository;
     private final SecretKeySpec hashKey;
@@ -41,7 +46,7 @@ public class PageVisitService {
         this.hashKey = new SecretKeySpec(key, HMAC_ALGORITHM);
     }
 
-    public void recordVisit(String ipAddress, String userAgent) {
+    public void recordVisit(String ipAddress, String userAgent, String referrer, String ownHost) {
         if (isBot(userAgent)) {
             return;
         }
@@ -54,7 +59,7 @@ public class PageVisitService {
         }
 
         try {
-            pageVisitRepository.save(new PageVisit(today, visitorHash));
+            pageVisitRepository.save(new PageVisit(today, visitorHash, referrerHost(referrer, ownHost)));
         } catch (DataIntegrityViolationException e) {
             // A concurrent request from the same visitor already inserted today's row.
         }
@@ -62,6 +67,31 @@ public class PageVisitService {
 
     static boolean isBot(String userAgent) {
         return userAgent == null || userAgent.isBlank() || BOT_USER_AGENT.matcher(userAgent).find();
+    }
+
+    static String referrerHost(String referrer, String ownHost) {
+        if (referrer == null || referrer.isBlank()) {
+            return null;
+        }
+
+        String host;
+        try {
+            URI uri = new URI(referrer.trim());
+            String scheme = uri.getScheme();
+            if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) {
+                return null;
+            }
+            host = uri.getHost();
+        } catch (URISyntaxException e) {
+            return null;
+        }
+
+        if (host == null || host.isBlank() || host.length() > MAX_REFERRER_HOST_LENGTH) {
+            return null;
+        }
+
+        host = host.toLowerCase(Locale.ROOT);
+        return host.equalsIgnoreCase(ownHost) ? null : host;
     }
 
     private String hash(String value) {

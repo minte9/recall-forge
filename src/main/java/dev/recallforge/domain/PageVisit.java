@@ -14,7 +14,8 @@ import lombok.NoArgsConstructor;
 
 // One row per anonymous visitor per day on the public landing page (/login).
 // visitorHash is a keyed one-way hash of date + IP + user-agent (see PageVisitService);
-// no raw IP or user-agent is stored.
+// no raw IP or user-agent is stored. referrerHost is only the referring site's domain
+// (null for direct visits and self-referrals), never the full URL.
 @Entity
 @Table(
     name = "page_visits",
@@ -34,8 +35,12 @@ public class PageVisit {
     @Column(name = "visitor_hash", nullable = false, length = 64)
     private String visitorHash;
 
-    public PageVisit(LocalDate visitDate, String visitorHash) {
+    @Column(name = "referrer_host", length = 255)
+    private String referrerHost;
+
+    public PageVisit(LocalDate visitDate, String visitorHash, String referrerHost) {
         this.visitDate = visitDate;
         this.visitorHash = visitorHash;
+        this.referrerHost = referrerHost;
     }
 }

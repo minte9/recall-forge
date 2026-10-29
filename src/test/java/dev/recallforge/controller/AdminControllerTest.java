@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 import dev.recallforge.dto.AdminUsersStatsResponse;
 import dev.recallforge.dto.DailyVisitResponse;
+import dev.recallforge.dto.ReferrerVisitResponse;
 import dev.recallforge.service.AdminService;
 
 @WebMvcTest(
@@ -106,6 +107,25 @@ class AdminControllerTest {
                 [
                   { "date": "2026-10-23", "visitors": 12 },
                   { "date": "2026-10-22", "visitors": 7 }
+                ]
+                """);
+    }
+
+    @Test
+    void getReferrerVisits_returnsReferrersFromServiceAsJson() {
+        when(adminService.getReferrerVisits()).thenReturn(List.of(
+            new ReferrerVisitResponse("www.google.com", 9),
+            new ReferrerVisitResponse("news.ycombinator.com", 4)
+        ));
+
+        mockMvcTester.get().uri("/api/admin/referrers")
+            .assertThat()
+            .hasStatusOk()
+            .bodyJson()
+            .isLenientlyEqualTo("""
+                [
+                  { "referrer": "www.google.com", "visitors": 9 },
+                  { "referrer": "news.ycombinator.com", "visitors": 4 }
                 ]
                 """);
     }

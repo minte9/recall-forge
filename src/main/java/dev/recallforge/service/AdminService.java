@@ -7,6 +7,7 @@ import dev.recallforge.repository.UserAccountRepository;
 import dev.recallforge.security.CurrentUserService;
 import dev.recallforge.dto.AdminUsersStatsResponse;
 import dev.recallforge.dto.DailyVisitResponse;
+import dev.recallforge.dto.ReferrerVisitResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -43,6 +44,16 @@ public class AdminService {
 
         return pageVisitRepository.countDailyVisitorsSince(since).stream()
             .map(row -> new DailyVisitResponse(row.getVisitDate(), row.getVisitors()))
+            .toList();
+    }
+
+    public List<ReferrerVisitResponse> getReferrerVisits() {
+        currentUserService.requireAdmin();
+
+        LocalDate since = LocalDate.now().minusDays(VISIT_STATS_DAYS - 1);
+
+        return pageVisitRepository.countVisitorsByReferrerSince(since).stream()
+            .map(row -> new ReferrerVisitResponse(row.getReferrerHost(), row.getVisitors()))
             .toList();
     }
 }

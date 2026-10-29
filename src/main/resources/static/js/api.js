@@ -409,6 +409,16 @@ const Api = {
     return await response.json();
   },
 
+  async loadAdminReferrers() {
+    const response = await fetch("/api/admin/referrers");
+
+    if (!response.ok) {
+      throw new Error("Failed to load admin referrers");
+    }
+
+    return await response.json();
+  },
+
   async resetLearningData() {
     const response = await fetch("/api/me/learning-data", {
       method: "DELETE",

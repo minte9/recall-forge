@@ -82,6 +82,7 @@ const app = createApp({
       codeChallengeLoading: false,
       adminUsers: [],
       adminVisits: [],
+      adminReferrers: [],
       categoryOptions: [],
       starterPackUnlockStatus: {},
       starterPackUnlockThreshold: 30,
@@ -1973,9 +1974,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     },
 
     async loadAdminUsers() {
-      [this.adminUsers, this.adminVisits] = await Promise.all([
+      [this.adminUsers, this.adminVisits, this.adminReferrers] = await Promise.all([
         Api.loadAdminUsers(),
-        Api.loadAdminVisits()
+        Api.loadAdminVisits(),
+        Api.loadAdminReferrers()
       ]);
     },
 
