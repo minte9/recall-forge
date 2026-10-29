@@ -622,6 +622,27 @@
               </tr>
             </tbody>
           </table>
+
+          <h2>Top referrers (last 30 days)</h2>
+
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Referrer</th>
+                <th>Unique visitors</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr v-for="row in adminReferrers" :key="row.referrer">
+                <td>{{ row.referrer }}</td>
+                <td>{{ row.visitors }}</td>
+              </tr>
+              <tr v-if="adminReferrers.length === 0">
+                <td colspan="2">No referrers recorded yet.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div class="left-content">

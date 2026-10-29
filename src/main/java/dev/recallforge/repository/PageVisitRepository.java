@@ -21,4 +21,13 @@ public interface PageVisitRepository extends JpaRepository<PageVisit, Long> {
         order by v.visitDate desc
         """)
     List<DailyVisitProjection> countDailyVisitorsSince(@Param("since") LocalDate since);
+
+    @Query("""
+        select v.referrerHost as referrerHost, count(v) as visitors
+        from PageVisit v
+        where v.visitDate >= :since and v.referrerHost is not null
+        group by v.referrerHost
+        order by count(v) desc, v.referrerHost
+        """)
+    List<ReferrerVisitProjection> countVisitorsByReferrerSince(@Param("since") LocalDate since);
 }
