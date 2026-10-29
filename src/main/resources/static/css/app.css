@@ -1990,8 +1990,7 @@
     color: #64748b;
   }
 
-  /* Same corner-badge treatment as .starter-pack-mastery-badge, showing the
-     current consecutive-success streak instead of a mastery percentage. */
+  /* Corner badge showing the current consecutive-success streak. */
   .mastery-ring-streak {
     position: absolute;
     bottom: -7px;
@@ -2275,102 +2274,15 @@
     font-size: 15px;
   }
 
-  .starter-pack-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 20px;
-  }
-
-  .starter-pack-btn {
-    position: relative;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 10px 18px;
-
-    border: 1px solid #dbe4f0;
-    border-radius: 10px;
-
-    background: #eff6ff;
-    color: #1e293b;
-
-    font-size: 14px;
-    font-weight: 600;
-
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .starter-pack-mastery-badge {
-    position: absolute;
-    bottom: -8px;
-    right: -8px;
-
-    min-width: 28px;
-    padding: 1px 5px;
-    border-radius: 999px;
-    border: 1px solid #eeeeee;
-
-    background: #ffffff;
-    color: #64748b;
-
-    font-size: 10px;
-    font-weight: 700;
-    line-height: 1.5;
-    text-align: center;
-  }
-
-  .starter-pack-btn:hover {
-    background: #eeeeee;
-    border-color: #aaaaaa;
-  }
-
-  .starter-pack-btn:active {
-    transform: translateY(1px);
-  }
-
-  .starter-pack-btn:disabled {
-    background: #f1f5f9;
-    border-color: #e2e8f0;
-    color: #94a3b8;
-    cursor: not-allowed;
-  }
-
-  .starter-pack-btn:disabled:hover {
-    background: #f1f5f9;
-    border-color: #e2e8f0;
-  }
-
-  /* Driven by due status now (see dueColorClass in app.js), not mastery -
-     but keeping the original mastery color codes rather than the
-     dropdown's orange/green, so this panel's look stays unchanged. */
-  .starter-pack-btn.starter-pack-btn-due {
+  /* Category badge color by due status (see dueColorClass in app.js). */
+  .job-profile-label.job-profile-label-due {
     background: #fffbeb;
     border-color: #f59e0b;
   }
 
-  .starter-pack-btn.starter-pack-btn-due:hover {
-    background: #fef3c7;
-    border-color: #f59e0b;
-  }
-
-  .starter-pack-btn.starter-pack-btn-caught-up {
+  .job-profile-label.job-profile-label-caught-up {
     background: #ecfdf5;
     border-color: #10b981;
-  }
-
-  .starter-pack-btn.starter-pack-btn-caught-up:hover {
-    background: #d1fae5;
-    border-color: #10b981;
-  }
-
-  .starter-pack-btn svg {
-    width: 18px;
-    height: 18px;
-    margin-right: 8px;
   }
 
   /* Pushed to the right edge; the 10px margin matches .job-profile-row's
@@ -2405,7 +2317,7 @@
     align-items: center;
     gap: 16px;
     width: 100%;
-    padding: 8px 10px;
+    padding: 4px 0px;
 
     border: none;
     border-radius: 8px;
@@ -2430,20 +2342,57 @@
     background: none;
   }
 
+  /* A grey line (layer 1, ::before) runs the full row width; the category
+     badge (layer 2) covers its left end, and the fill track starts at the
+     badge's right edge, so 0% sits right after the badge. */
+  .job-profile-stack {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .job-profile-stack::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 8px;
+    transform: translateY(-50%);
+    border-radius: 999px;
+    background: #f1f5f9;
+  }
+
   .job-profile-label {
-    flex: 0 0 110px;
+    position: relative;
+    z-index: 1;
+    flex: 0 1 auto;
+    padding: 5px 15px;
+    border: 1px solid #dbe4f0;
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 13px;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-width: 100px;
   }
 
+  .job-profile-row:disabled .job-profile-label {
+    border-color: #e5e7eb;
+    background: #f8fafc;
+  }
+
+  /* Positioned so the fill paints above the stack's ::before grey line. */
   .job-profile-track {
+    position: relative;
     flex: 1;
     display: flex;
     height: 8px;
     border-radius: 999px;
-    background: #f1f5f9;
     overflow: hidden;
   }
 
