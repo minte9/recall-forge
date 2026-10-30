@@ -1275,16 +1275,16 @@
   }
 
   .feedback-pending-dot {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: #9ca3af;
     animation: feedback-pending-pulse 1.2s ease-in-out infinite;
   }
 
   @keyframes feedback-pending-pulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
+    0%, 100% { opacity: 0.35; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.4); }
   }
 
   @media (prefers-reduced-motion: reduce) {
