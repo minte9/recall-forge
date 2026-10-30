@@ -1,2 +1,0 @@
-[[Knn Classifier]]
-[[Linear Regression]]
