@@ -9,8 +9,8 @@ import java.util.Optional;
 public interface JobProfileRepository
         extends JpaRepository<JobProfile, Long> {
 
-    // Four predefined profiles from template user
-    List<JobProfile> findByUserIdAndEnabledTrueOrderByNameAsc(
+    // Predefined profiles from template user, in creation (id) order
+    List<JobProfile> findByUserIdAndEnabledTrueOrderByIdAsc(
         Long userId
     );
 

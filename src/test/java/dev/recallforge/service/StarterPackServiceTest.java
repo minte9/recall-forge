@@ -161,13 +161,13 @@ class StarterPackServiceTest {
     }
 
     @Test
-    void isPublicCategory_templateUserMicroservicesMySqlVueJsFastApi_returnsFalse() {
+    void isPublicCategory_templateUserMicroservicesMySqlVueJsAlgorithms_returnsFalse() {
         setUp();
 
         assertThat(starterPackService.isPublicCategory(1L, "microservices")).isFalse();
         assertThat(starterPackService.isPublicCategory(1L, "mysql")).isFalse();
         assertThat(starterPackService.isPublicCategory(1L, "vue.js")).isFalse();
-        assertThat(starterPackService.isPublicCategory(1L, "fastapi")).isFalse();
+        assertThat(starterPackService.isPublicCategory(1L, "algorithms")).isFalse();
     }
 
     @Test
@@ -215,8 +215,8 @@ class StarterPackServiceTest {
 
         assertThat(starterPackService.getUnlockStatus())
             .containsOnlyKeys(
-                "Spring", "Algorithms", "Docker", "TypeScript", "Angular",
-                "PostgreSQL", "GraphQL", "MCP", "HTTPS"
+                "Spring", "Docker", "TypeScript", "Angular",
+                "PostgreSQL", "GraphQL", "MCP", "HTTPS", "FastAPI"
             );
     }
 
@@ -242,8 +242,9 @@ class StarterPackServiceTest {
         assertThat(starterPackService.getReviewedPercentages())
             .containsOnlyKeys(
                 "Java", "Python", "Git", "SQL", "Javascript",
-                "Spring", "Algorithms", "Docker", "TypeScript", "Angular",
-                "Security", "PostgreSQL", "REST", "GraphQL", "MCP", "HTTPS"
+                "Spring", "Docker", "TypeScript", "Angular",
+                "Security", "PostgreSQL", "REST", "GraphQL", "MCP", "HTTPS",
+                "Embeddings", "FastAPI"
             )
             .containsEntry("Java", 73);
     }
@@ -257,8 +258,9 @@ class StarterPackServiceTest {
         assertThat(starterPackService.getDuePercentages())
             .containsOnlyKeys(
                 "Java", "Python", "Git", "SQL", "Javascript",
-                "Spring", "Algorithms", "Docker", "TypeScript", "Angular",
-                "Security", "PostgreSQL", "REST", "GraphQL", "MCP", "HTTPS"
+                "Spring", "Docker", "TypeScript", "Angular",
+                "Security", "PostgreSQL", "REST", "GraphQL", "MCP", "HTTPS",
+                "Embeddings", "FastAPI"
             )
             .containsEntry("Java", 15);
     }

@@ -94,11 +94,12 @@ BEGIN
 END $$;
 
 -- 6. Ensure API categories used by profiles exist in category_order
--- (GraphQL and MCP have starter-pack content but no category_order row).
+-- (GraphQL, MCP and Embeddings have starter-pack content but no category_order row).
 INSERT INTO category_order (environment, category, display_order)
 VALUES
     ('API', 'GraphQL', 2),
-    ('API', 'MCP', 3)
+    ('API', 'MCP', 3),
+    ('AI', 'Embeddings', 1)
 ON CONFLICT (environment, category) DO NOTHING;
 
 -- 7. Insert mappings by stable (environment, category), not numeric IDs.
@@ -129,11 +130,9 @@ WITH desired(profile_name, environment, category) AS (
       ('Microservices Engineer', 'DevOps', 'Git'),
       ('Microservices Engineer', 'DB', 'SQL'),
       ('AI Integration Engineer', 'JVM', 'Java'),
-      ('AI Integration Engineer', 'JVM', 'Spring'),
-      ('AI Integration Engineer', 'API', 'REST'),
       ('AI Integration Engineer', 'API', 'MCP'),
       ('AI Integration Engineer', 'Python', 'Python'),
-      ('AI Integration Engineer', 'Python', 'Algorithms'),
+      ('AI Integration Engineer', 'AI', 'Embeddings'),
       ('AI Integration Engineer', 'Architecture', 'Architecture')
 )
 INSERT INTO job_profile_categories (profile_id, category_id)
@@ -157,14 +156,14 @@ BEGIN
         'Java Backend Engineer', 'Java Full-Stack Developer',
         'Microservices Engineer', 'AI Integration Engineer'
       );
-    IF actual_count <> 30 THEN
-        RAISE EXCEPTION 'Expected 30 profile/category mappings; found %', actual_count;
+    IF actual_count <> 28 THEN
+        RAISE EXCEPTION 'Expected 28 profile/category mappings; found %', actual_count;
     END IF;
 END $$;
 
 COMMIT;
 
--- Verification: expected counts are 8, 7, 8, 7.
+-- Verification: expected counts are 8, 7, 8, 5.
 SELECT jp.name, COUNT(jpc.category_id) AS category_count
 FROM job_profiles jp
 LEFT JOIN job_profile_categories jpc ON jpc.profile_id = jp.id

@@ -31,8 +31,8 @@ public class StarterPackService {
 
     // Hardcoded for now - mirrors the Starter Pack panel's button rows
     // (static/index.html): a level 1 category (Java, Python, Git, SQL,
-    // Javascript) is always importable; every category listed under it here
-    // unlocks together, flatly, once level 1's reviewed percent crosses
+    // Javascript, Embeddings, ...) is always importable; every category
+    // listed under it here unlocks together, flatly, once level 1's reviewed percent crosses
     // UNLOCK_REVIEWED_THRESHOLD_PERCENT - there's no further chaining between
     // them (each dependent gates directly on its level 1 category). Every
     // category across every entry is the full set a non-template user can
@@ -40,12 +40,13 @@ public class StarterPackService {
     private static final Map<String, List<String>> DEPENDENTS_BY_LEVEL_ONE_CATEGORY =
             Map.of(
                 "Java", List.of("Spring"),
-                "Python", List.of("Algorithms"),
+                "Python", List.of("FastAPI"),
                 "Git", List.of("Docker"),
                 "SQL", List.of("PostgreSQL"),
                 "Javascript", List.of("TypeScript", "Angular"),
                 "Security", List.of("HTTPS"),
-                "REST", List.of("GraphQL", "MCP")
+                "REST", List.of("GraphQL", "MCP"),
+                "Embeddings", List.of()
             );
     
     @SuppressWarnings("null")
