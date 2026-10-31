@@ -362,7 +362,9 @@
 
             <section class="features-card" aria-label="Job profile example">
                 <div class="job-profile-demo">
-                    <select aria-label="Job profile (example)" tabindex="-1">
+                    <select aria-label="Job profile" id="job-profile-demo-select">
+                        <option>Java Backend Engineer</option>
+                        <option>Java Full-Stack Developer</option>
                         <option selected>AI Integration Engineer</option>
                     </select>
                     <span class="job-profile-readiness">54% ready</span>
@@ -584,6 +586,97 @@
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape') setOpen(false);
         });
+    })();
+
+    // Job profiles demo: switches the bars below the selector. Hardcoded copy
+    // of the enabled job profiles (database/recallforge_job_profiles_migration.sql),
+    // keeping only starter-pack categories in STARTER_PACK_ROWS order (app.js),
+    // like the app's <job-profile-progress>. Refresh by hand when profiles change:
+    //   SELECT jp.name, co.category FROM job_profiles jp
+    //   JOIN job_profile_categories jpc ON jpc.profile_id = jp.id
+    //   JOIN category_order co ON co.id = jpc.category_id
+    //   WHERE jp.user_id = 1 AND jp.enabled ORDER BY jp.id;
+    (function () {
+        var select = document.getElementById('job-profile-demo-select');
+        var readiness = document.querySelector('.job-profile-readiness');
+        var progress = document.querySelector('.job-profile-progress');
+
+        if (!select || !readiness || !progress) return;
+
+        var profiles = {
+            'Java Backend Engineer':
+                ['Java', 'Spring', 'REST', 'GraphQL', 'SQL', 'PostgreSQL', 'Git', 'Docker'],
+            'Java Full-Stack Developer':
+                ['Java', 'Spring', 'REST', 'Javascript', 'TypeScript', 'Angular', 'SQL'],
+            'AI Integration Engineer':
+                ['Java', 'MCP', 'Python', 'Embeddings']
+        };
+
+        // One fictional learner shared by every profile, so a category shows
+        // the same percent whichever profile is selected.
+        var reviewed = {
+            Java: 98, Spring: 40, REST: 45, GraphQL: 22, MCP: 36,
+            Javascript: 70, TypeScript: 31, Angular: 0,
+            SQL: 55, PostgreSQL: 20, Python: 62, Embeddings: 18,
+            Git: 12, Docker: 0
+        };
+
+        // Docker gates on Git, which is still below the 30% unlock threshold.
+        var locked = ['Docker'];
+
+        function row(category) {
+            var percent = reviewed[category] || 0;
+            var div = document.createElement('div');
+            div.className = 'job-profile-row';
+
+            if (locked.indexOf(category) !== -1) {
+                div.className += ' job-profile-row--locked';
+                div.title = 'Unlocks as you build mastery';
+            }
+
+            var label = document.createElement('span');
+            label.className = 'job-profile-label';
+            label.textContent = category;
+
+            var track = document.createElement('span');
+            track.className = 'job-profile-track';
+
+            if (percent > 0) {
+                var bar = document.createElement('span');
+                bar.className = 'job-profile-bar';
+                bar.style.width = percent + '%';
+                track.appendChild(bar);
+            }
+
+            var value = document.createElement('span');
+            value.className = 'job-profile-percent';
+            value.textContent = percent + '%';
+
+            div.appendChild(label);
+            div.appendChild(track);
+            div.appendChild(value);
+            return div;
+        }
+
+        // Same as the app's activeProfileReadiness: a simple average of the bars.
+        function render() {
+            var categories = profiles[select.value] || [];
+            var total = 0;
+
+            progress.innerHTML = '';
+            categories.forEach(function (category) {
+                total += reviewed[category] || 0;
+                progress.appendChild(row(category));
+            });
+
+            var percent = categories.length ? Math.round(total / categories.length) : 0;
+            readiness.textContent = percent + '% ready';
+        }
+
+        select.addEventListener('change', render);
+
+        // Browsers may restore a different selection on back/forward navigation.
+        render();
     })();
 </script>
 </body>

@@ -338,7 +338,7 @@ h1 {
     color: #cbd5e1;
 }
 
-/* Static, non-interactive example of the app's .job-profile-selector. */
+/* Interactive example of the app's .job-profile-selector (see login.html). */
 .job-profile-demo {
     display: flex;
     align-items: center;
@@ -360,7 +360,7 @@ h1 {
     background: #0f172a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 16px center;
     color: #e2e8f0;
     font-size: 15px;
-    pointer-events: none;
+    cursor: pointer;
 }
 
 /* Dark version of the app's .job-profile-readiness pill. */
@@ -377,7 +377,7 @@ h1 {
     white-space: nowrap;
 }
 
-/* Static, dark example of the app's <job-profile-progress> bars. */
+/* Dark example of the app's <job-profile-progress> bars. */
 .job-profile-progress {
     display: flex;
     flex-direction: column;
