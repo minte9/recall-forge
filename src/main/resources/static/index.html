@@ -291,18 +291,22 @@
 
           <div v-else class="markdown empty-markdown">
 
-            <h3>Welcome to RecallForge</h3>
+            <h3>{{ hasStarterPackProgress ? 'Welcome back to RecallForge' : 'Welcome to RecallForge' }}</h3>
 
-            Upload a markdown file to start. 
-            The uploaded markdown will be saved in the database. 
-            When you click <strong>Start Review</strong>, this panel will be updated.
+            <template v-if="!hasStarterPackProgress">
 
-            <h3>Starter Pack</h3>
+              Upload a markdown file to start. 
+              The uploaded markdown will be saved in the database. 
+              When you click <strong>Start Review</strong>, this panel will be updated.
 
-            <p>
-              Choose a starter pack or <strong>Upload</strong> your own notes. 
-              Reach <strong>{{ starterPackUnlockThreshold }}% reviewed</strong> in the first category of a row to unlock the others.
-            </p>
+              <h3>Starter Pack</h3>
+
+              <p>
+                Choose a starter pack or <strong>Upload</strong> your own notes. 
+                Reach <strong>{{ starterPackUnlockThreshold }}% reviewed</strong> in the first category of a row to unlock the others.
+              </p>
+
+            </template>
 
             <div v-if="jobProfiles.length > 0" class="job-profile-selector">
               <select aria-label="Job profile" :value="activeJobProfileId || ''"
@@ -777,18 +781,22 @@
 
           <div v-if="leftPanel === 'starter-pack'" class="markdown empty-markdown">
 
-            <h3>Welcome to RecallForge</h3>
+            <h3>{{ hasStarterPackProgress ? 'Welcome back to RecallForge' : 'Welcome to RecallForge' }}</h3>
 
-            Upload a markdown file to start.
-            The uploaded markdown will be saved in the database.
-            When you click <strong>Start Review</strong>, this panel will be updated.
+            <template v-if="!hasStarterPackProgress">
 
-            <h3>Starter Pack</h3>
+              Upload a markdown file to start.
+              The uploaded markdown will be saved in the database.
+              When you click <strong>Start Review</strong>, this panel will be updated.
 
-            <p>
-              Choose a starter pack or <strong>Upload</strong> your own notes. 
-              Reach <strong>{{ starterPackUnlockThreshold }}% reviewed</strong> in the first category of a row to unlock the others.
-            </p>
+              <h3>Starter Pack</h3>
+
+              <p>
+                Choose a starter pack or <strong>Upload</strong> your own notes. 
+                Reach <strong>{{ starterPackUnlockThreshold }}% reviewed</strong> in the first category of a row to unlock the others.
+              </p>
+
+            </template>
 
             <div v-if="jobProfiles.length > 0" class="job-profile-selector">
               <select aria-label="Job profile" :value="activeJobProfileId || ''"

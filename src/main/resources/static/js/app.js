@@ -272,6 +272,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return Math.round(total / categories.length);
     },
 
+    // True once any starter pack category reaches the unlock threshold; the
+    // Starter Pack panel then drops its intro text for a "Welcome back" title.
+    hasStarterPackProgress() {
+      return Object.values(this.starterPackMastery)
+        .some(percent => percent >= this.starterPackUnlockThreshold);
+    },
+
     environmentGroups() {
       const groups = {};
 
