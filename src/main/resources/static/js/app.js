@@ -441,6 +441,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       return this.assistantInsightData?.message
         || `Explore your ${this.currentCategory} knowledge and identify areas for improvement.`;
+    },
+
+    assistantInsightClickable() {
+      return !this.assistantInsightLoading
+        && !!this.assistantInsightData?.weakestTopicId
+        && !!this.assistantInsightData?.weakestMarkdownFileId;
     }
   },
 
@@ -583,6 +589,22 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           block: 'end'
         });
       });
+    },
+
+    // Opens the weakest due topic named in the Insights box. Being due,
+    // selectTopic starts a review for it (one AI question), or shows the
+    // already-reviewed-today panel / topic history as usual.
+    async openAssistantInsightTopic() {
+      const topicId = this.assistantInsightData?.weakestTopicId;
+      const markdownFileId = this.assistantInsightData?.weakestMarkdownFileId;
+
+      if (!topicId || !markdownFileId || this.assistantInsightLoading) {
+        return;
+      }
+
+      await this.previewMarkdownFile(markdownFileId);
+      await this.loadTopicsInFile(markdownFileId);
+      await this.selectTopic(topicId);
     },
 
     async loadAssistantInsight() {
@@ -1764,6 +1786,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         // can only change on a real graded answer.
         if (!this.isRetry) {
           await this.loadStarterPackStatus();
+          // The reviewed topic is no longer due, so pick the next weakest.
+          await this.loadAssistantInsight();
         }
 
         if (!this.review) {

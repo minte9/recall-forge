@@ -37,7 +37,7 @@ public class RecallInsightService {
         Long userId = currentUserService.currentUserId();
 
         List<Topic> topics =
-        topicRepository.findNotDueTopicsByCategory(
+        topicRepository.findDueTopicsByCategory(
                 userId,
                 category,
                 LocalDateTime.now()
@@ -46,12 +46,12 @@ public class RecallInsightService {
         if (topics.isEmpty()) {
             return new RecallInsightResponse(
                     category,
-                    "No topics found for " + category + ".",
-                    0, 0, 0, null, null
+                    "No due topics in " + category + ".",
+                    0, 0, 0, null, null, null, null
             );
         }
 
-        long notDueTopicCount = topics.size();
+        long dueTopicCount = topics.size();
 
         // An actual review is required before we can infer
         // anything about the user's performance.
@@ -68,10 +68,9 @@ public class RecallInsightService {
         if (reviewedCount == 0) {
             return new RecallInsightResponse(
                     category,
-                    "No reviewed topics are currently waiting for their next review in "
-                            + category + ".",
-                    notDueTopicCount,
-                    0, 0, null, null
+                    "No reviewed topics are due in " + category + ".",
+                    dueTopicCount,
+                    0, 0, null, null, null, null
             );
         }
 
@@ -85,13 +84,13 @@ public class RecallInsightService {
         String subcategory =
                 weakest.getMarkdownFile().getSubcategory();
 
-        String file =
-                weakest.getMarkdownFile().getFilename();
+        String topicTitle =
+                weakest.getTitle().replaceFirst("^\\d+\\.\\s*", "");
 
         String message = String.format(
                 "Your weakest %s topic is %s (score: %.2f) in %s subcategory.",
                 category,
-                weakest.getTitle().replaceFirst("^\\d+\\.\\s*", ""),
+                topicTitle,
                 weakest.getMemoryScore(),
                 subcategory              
         );
@@ -99,11 +98,13 @@ public class RecallInsightService {
         return new RecallInsightResponse(
                 category,
                 message,
-                notDueTopicCount,
+                dueTopicCount,
                 reviewedCount,
                 Math.round(averageScore * 100.0) / 100.0,
+                topicTitle,
                 subcategory,
-                file
+                weakest.getId(),
+                weakest.getMarkdownFile().getId()
         );
     }
 }
