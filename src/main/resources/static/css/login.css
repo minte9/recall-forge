@@ -363,6 +363,15 @@ h1 {
     cursor: pointer;
 }
 
+.job-profile-demo select:focus {
+    outline: none;
+}
+
+/* Keyboard focus still needs a cue; keep it subtle on the dark panel. */
+.job-profile-demo select:focus-visible {
+    border-color: #64748b;
+}
+
 /* Dark version of the app's .job-profile-readiness pill. */
 .job-profile-readiness {
     flex: 0 0 auto;
