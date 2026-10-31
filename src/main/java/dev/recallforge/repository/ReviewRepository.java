@@ -2,13 +2,15 @@ package dev.recallforge.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import dev.recallforge.domain.Review;
-import dev.recallforge.domain.RetryType;
+import java.util.Set;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import dev.recallforge.domain.RetryType;
+import dev.recallforge.domain.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
@@ -259,4 +261,18 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Param("userId") Long userId,
         @Param("category") String category,
         @Param("minScore") double minScore);
+
+    @Query("""
+        SELECT DISTINCT r.topic.id
+        FROM Review r
+        JOIN r.topic t
+        JOIN t.markdownFile m
+        WHERE r.user.id = :userId
+        AND t.user.id = :userId
+        AND LOWER(m.category) = LOWER(:category)
+        """)
+    Set<Long> findReviewedTopicIds(
+            @Param("userId") Long userId,
+            @Param("category") String category
+    );
 }

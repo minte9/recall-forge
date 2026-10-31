@@ -827,6 +827,85 @@
             </starter-pack-list>
 
             </template>
+
+            <!-- AI Recall Assistant -->
+            <div
+              class="recall-assistant"
+              :class="{ 'assistant-dropdown-open': assistantSuggestionsOpen && !assistantInput.trim() }" 
+              v-if="currentUser?.role == 'ADMIN'" 
+            >
+
+              <div class="assistant-title" title="AI Assistant">
+                <h3>✨ Insights</h3>
+              </div>
+
+              <div class="assistant-insight">
+                {{ assistantInsight }}
+              </div>
+
+              <!-- Assistant conversation -->
+              <div
+                v-if="assistantMessages.length || assistantLoading"
+                class="assistant-conversation"
+              >
+                <div
+                  v-for="(message, index) in assistantMessages"
+                  :key="index"
+                  class="assistant-message"
+                  :class="'assistant-message-' + message.role"
+                >
+                  {{ message.content }}
+                </div>
+
+              </div>
+
+              <!-- Input -->
+              <div class="assistant-input-wrapper" ref="assistantInputWrapper">
+
+                <div class="assistant-input-row">
+
+                  <input
+                    ref="assistantInput"
+                    v-model="assistantInput"
+                    placeholder="Ask about your knowledge…"
+                    @focus="openAssistantSuggestions"
+                    @input="assistantSuggestionsOpen = false"
+                    @keydown.enter.prevent="sendAssistantMessage"
+                  />
+
+                  <!-- <button
+                    type="button"
+                    @click="sendAssistantMessage"
+                    :disabled="!assistantInput.trim() || assistantLoading"
+                  >
+                    ↑
+                  </button> -->
+                </div>
+
+                <div
+                  v-if="assistantSuggestionsOpen && !assistantInput.trim()"
+                  class="assistant-suggestions"
+                >
+                  <button
+                    v-for="suggestion in assistantSuggestions"
+                    :key="suggestion.id"
+                    type="button"
+                    @click="selectAssistantSuggestion(suggestion)"
+                  >
+                    {{ suggestion.label }}
+                  </button>
+                </div>
+
+              </div>
+
+              <!-- Loading status -->
+              <div v-if="assistantLoading" class="assistant-status">
+                ✨ Analyzing your knowledge…
+              </div>
+
+              <div ref="assistantBottom"></div>
+
+            </div>
             
           </div>
         </div>

@@ -97,6 +97,15 @@ const app = createApp({
       topicDropdownOpen: false,
       topicDropdownAlignRight: false,
 
+      // AI Recall Assistant
+      assistantInput: '',
+      assistantSuggestionsOpen: false,
+      assistantLoading: false,
+      assistantMessages: [],
+
+      assistantInsightData: null,
+      assistantInsightLoading: false,
+
       initialMarkdown: `
 <h3>Markdown File</h3>
 
@@ -397,6 +406,52 @@ When you click <strong>Start Review</strong>, this panel will be updated.
             topicHeading: (c.topicTitle || "")
           };
         });
+    },
+
+    assistantSuggestions() {
+      const category = this.currentCategory || 'my knowledge';
+
+      return [
+        {
+          id: 'mistakes',
+          label: 'Explain my mistakes',
+          prompt: `Why do I keep getting ${category} questions wrong?`
+        },
+        {
+          id: 'discover',
+          label: 'Discover what to study next',
+          prompt: `What should I study next in ${category}?`
+        },
+        {
+          id: 'progress',
+          label: 'Track my progress',
+          prompt: `Am I improving in ${category} compared with last month?`
+        }
+      ];
+    },
+
+    assistantInsight() {
+      if (!this.currentCategory) {
+        return 'Select a category to get personalized recall insights.';
+      }
+
+      if (this.assistantInsightLoading) {
+        return 'Analyzing your knowledge…';
+      }
+
+      return this.assistantInsightData?.message
+        || `Explore your ${this.currentCategory} knowledge and identify areas for improvement.`;
+    }
+  },
+
+  watch: {
+    currentCategory(newCategory, oldCategory) {
+      if (newCategory === oldCategory) return;
+
+      this.assistantInsightData = null;
+      this.assistantInsightLoading = false;
+
+      this.loadAssistantInsight();
     }
   },
 
@@ -426,6 +481,150 @@ When you click <strong>Start Review</strong>, this panel will be updated.
   },
 
   methods: {
+    selectAssistantSuggestion(suggestion) {
+      this.assistantInput = suggestion.prompt;
+      this.assistantSuggestionsOpen = false;
+
+      this.sendAssistantMessage();
+    },
+
+    async sendAssistantMessage() {
+      const message = this.assistantInput.trim();
+
+      if (!message || this.assistantLoading) {
+        return;
+      }
+
+      const category = this.currentCategory || 'your knowledge';
+
+      this.assistantSuggestionsOpen = false;
+      this.assistantLoading = true;
+      this.assistantInput = '';
+      this.$refs.assistantInput?.blur();
+
+      // Display user question immediately
+      this.assistantMessages.push({
+        role: 'user',
+        content: message
+      });
+
+      this.scrollAssistantIntoView();
+
+      try {
+        // Simulate API latency
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const question = message.toLowerCase();
+        let response;
+
+        if (question.includes('wrong') ||
+            question.includes('mistake')) {
+          response =
+            `Mock analysis: Review your recent answers in ${category} ` +
+            `to identify recurring misunderstandings.`;
+        } else if (question.includes('next') ||
+                  question.includes('study')) {
+          response =
+            `Mock recommendation: Review your weakest ${category} ` +
+            `topics before moving to advanced concepts.`;
+        } else if (question.includes('improving') ||
+                  question.includes('progress')) {
+          response =
+            `Mock progress report: Compare your ${category} ` +
+            `review scores over the last 30 days.`;
+        } else {
+          response =
+            `Mock response for "${message}". ` +
+            `Real AI integration will be added later.`;
+        }
+
+        this.assistantMessages.push({
+          role: 'assistant',
+          content: response
+        });
+
+        this.scrollAssistantIntoView();
+
+      } catch (error) {
+        this.assistantMessages.push({
+          role: 'assistant',
+          content: 'Sorry, something went wrong. Please try again.'
+        });
+      } finally {
+        this.assistantLoading = false;
+      }
+    },
+
+    handleAssistantOutsideClick(event) {
+      const wrapper = this.$refs.assistantInputWrapper;
+
+      if (wrapper && !wrapper.contains(event.target)) {
+        this.assistantSuggestionsOpen = false;
+      }
+    },
+
+    scrollAssistantIntoView() {
+      this.$nextTick(() => {
+        this.$refs.assistantBottom?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end'
+        });
+      });
+    },
+
+    openAssistantSuggestions() {
+      if (this.assistantInput.trim()) return;
+
+      this.assistantSuggestionsOpen = true;
+
+      this.$nextTick(() => {
+        this.$refs.assistantBottom?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end'
+        });
+      });
+    },
+
+    async loadAssistantInsight() {
+      const category = this.currentCategory;
+
+      if (!category) {
+        this.assistantInsightData = null;
+        return;
+      }
+
+      this.assistantInsightLoading = true;
+
+      try {
+        const response = await fetch(
+          `/api/assistant/insight?category=${encodeURIComponent(category)}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Ignore stale responses when the user changes categories.
+        if (this.currentCategory === category) {
+          this.assistantInsightData = data;
+        }
+
+      } catch (error) {
+        console.error('Failed to load assistant insight:', error);
+
+        if (this.currentCategory === category) {
+          this.assistantInsightData = null;
+        }
+
+      } finally {
+        if (this.currentCategory === category) {
+          this.assistantInsightLoading = false;
+        }
+      }
+    },
+
     // Drag-resize the left/right desktop panels. Clamps to a 240px minimum
     // on each side (matches .layout's grid-template-columns minmax bounds
     // in app.css) so neither panel can be dragged into uselessness.
@@ -985,10 +1184,15 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.openMarkdownGroup = null;
       this.saveLastCategory(environment);
 
+      // Reset assistant UI for the new category
+      this.assistantMessages = [];
+      this.assistantInput = '';
+      this.assistantSuggestionsOpen = false;
+
       await this.loadDashboard();
       await this.loadMarkdownSummaries(false);
 
-      this.autoOpenSingleMarkdownGroup();
+      this.autoOpenSingleMarkdownGroup();      
     },
 
     autoOpenSingleMarkdownGroup() {
