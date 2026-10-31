@@ -88,7 +88,7 @@ public class RecallInsightService {
                 weakest.getTitle().replaceFirst("^\\d+\\.\\s*", "");
 
         String message = String.format(
-                "Your weakest %s topic is %s (score: %.2f) in %s subcategory.",
+                "Your weakest %s due topic is %s (score: %.2f) in %s subcategory.",
                 category,
                 topicTitle,
                 weakest.getMemoryScore(),
