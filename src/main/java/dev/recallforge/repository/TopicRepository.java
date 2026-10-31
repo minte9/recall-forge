@@ -409,19 +409,4 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         @Param("markdownFileId") Long markdownFileId,
         @Param("userId") Long userId
     );
-
-    @Query("""
-        SELECT t
-        FROM Topic t
-        JOIN FETCH t.markdownFile m
-        WHERE t.user.id = :userId
-            AND LOWER(m.category) = LOWER(:category)
-            AND t.nextReviewAt > :now
-        ORDER BY t.memoryScore ASC, t.nextReviewAt ASC
-        """)
-    List<Topic> findNotDueTopicsByCategory(
-            @Param("userId") Long userId,
-            @Param("category") String category,
-            @Param("now") LocalDateTime now
-    );
 }

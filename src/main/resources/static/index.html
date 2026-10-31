@@ -839,7 +839,14 @@
                 <h3>✨ Insights</h3>
               </div>
 
-              <div class="assistant-insight">
+              <div
+                class="assistant-insight"
+                :class="{ clickable: assistantInsightClickable }"
+                :role="assistantInsightClickable ? 'button' : null"
+                :tabindex="assistantInsightClickable ? 0 : null"
+                @click="openAssistantInsightTopic"
+                @keydown.enter="openAssistantInsightTopic"
+              >
                 {{ assistantInsight }}
               </div>
 

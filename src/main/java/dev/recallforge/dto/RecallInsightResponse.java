@@ -7,5 +7,7 @@ public record RecallInsightResponse(
     long reviewedTopicCount,
     double averageMemoryScore,
     String weakestTopic,
-    String weakestSubcategory
+    String weakestSubcategory,
+    Long weakestTopicId,
+    Long weakestMarkdownFileId
 ) {}

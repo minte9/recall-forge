@@ -1429,6 +1429,13 @@
     transform: none;
   }
 
+  /* Clicking the stat focuses it, which would keep the bubble pinned open -
+     only show it on hover or keyboard focus, not after a mouse click. */
+  .review-stat.info-tooltip:focus:not(:focus-visible):not(:hover)::after {
+    opacity: 0;
+    visibility: hidden;
+  }
+
   .total-row {
     display: flex;
     align-items: center;
@@ -2558,6 +2565,15 @@
     font-size: 14px;
     margin-bottom: 12px;
     line-height: 1.5;
+  }
+
+  .assistant-insight.clickable {
+    cursor: pointer;
+  }
+
+  .assistant-insight.clickable:hover,
+  .assistant-insight.clickable:focus-visible {
+    background: #e5e7eb;
   }
 
   .assistant-input-wrapper {
