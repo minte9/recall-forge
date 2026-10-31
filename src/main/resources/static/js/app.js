@@ -14,8 +14,9 @@ const STARTER_PACK_ROWS = [
   ["REST", "GraphQL", "MCP"],
   ["Javascript", "TypeScript", "Angular"],
   ["SQL", "PostgreSQL"],
-  ["Python", "Algorithms"],
-  ["Git", "Docker"]
+  ["Python", "FastAPI"],
+  ["Git", "Docker"],
+  ["Embeddings"]
 ];
 
 const app = createApp({

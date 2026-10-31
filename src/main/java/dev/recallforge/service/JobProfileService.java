@@ -43,7 +43,7 @@ public class JobProfileService {
     public List<JobProfileDto> findAll() {
 
         return profileRepository
-            .findByUserIdAndEnabledTrueOrderByNameAsc(
+            .findByUserIdAndEnabledTrueOrderByIdAsc(
                 TEMPLATE_USER_ID
             )
             .stream()
