@@ -1,3 +1,4 @@
+Embeddings and Vector Search · Language: Python
 ## 1. Cosine similiarity
 
 Cosine similarity measures the angle between two vectors, rather than their absolute distance. A value close to 1 indicates vectors pointing in similar directions, 0 indicates orthogonal vectors, and -1 indicates opposite directions. With text embeddings, higher cosine similarity generally indicates greater semantic relatedness, although the score is not a calibrated probability of matching meaning.

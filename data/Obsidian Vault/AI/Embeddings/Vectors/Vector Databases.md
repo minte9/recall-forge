@@ -1,3 +1,4 @@
+Embeddings and Vector Search · Language: Java / Spring Boot
 ## 1. Overview
 
 A vector database stores numerical embeddings and supports similarity searches over them. Unlike traditional databases, which primarily retrieve records using exact conditions, vector databases can retrieve records whose embeddings are semantically similar to a query.

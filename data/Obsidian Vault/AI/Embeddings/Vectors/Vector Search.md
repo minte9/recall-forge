@@ -1,3 +1,4 @@
+Embeddings and Vector Search · Language: Python
 ## 1. Nearest Neighbors
 
 Vector search finds data whose embeddings are closest to a query embedding. Instead of comparing exact words, it compares numerical vectors representing semantic meaning. A nearest-neighbor search returns the vectors most similar to a given query, usually ranked by cosine similarity, Euclidean distance, or dot product.

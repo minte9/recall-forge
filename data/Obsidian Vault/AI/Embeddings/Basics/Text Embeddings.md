@@ -1,3 +1,4 @@
+Embeddings and Vector Search · Language: Python
 ## 1. What are embeddings?
 
 An embedding is a numerical representation of data, such as text, images, or audio. For text embeddings, a model converts a sentence into a vector of floating-point numbers. Texts with similar meanings generally produce vectors that are close to each other in the embedding space.  

@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "f077d00a43d854c1",
+        "id": "1b5c20188539c8fc",
         "type": "tabs",
         "children": [
           {
-            "id": "7c27810e104ecc74",
+            "id": "52e3654d84857766",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "AI/Embeddings/Vectors/Vector Databases.md",
-                "mode": "preview",
+                "file": "AI/Embeddings/RAG/RAG Pipelines.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Vector Databases"
+              "title": "RAG Pipelines"
             }
           }
         ]
@@ -196,10 +196,19 @@
       "bases:Create new base": false
     }
   },
-  "active": "7c27810e104ecc74",
+  "active": "493fa442051c9418",
   "lastOpenFiles": [
-    "AI/Embeddings/Vectors/Vector Search.md",
+    "AI/_images/Pasted image 20261031103705.png",
     "AI/Embeddings/Vectors/Vector Databases.md",
+    "AI/Embeddings/Basics/Similarity.md",
+    "AI/Embeddings/Vectors/Vector Search.md",
+    "AI/Embeddings/Basics/Text Embeddings.md",
+    "AI/Embeddings/RAG/Fundamentals.md",
+    "AI/Embeddings/RAG/RAG Pipelines.md",
+    "Pasted image 20261031092229.png",
+    "Pasted image 20261031091819.png",
+    "AI/_images/Pasted image 20261031091903.png",
+    "AI/Embeddings/RAG",
     "AI/_images/Pasted image 20261030151651.png",
     "AI/_images/Pasted image 20261030151631.png",
     "AI/_images/Pasted image 20261030150649.png",
@@ -210,14 +219,11 @@
     "AI/Machine Learning/Supervised Learning/Linear Regression.md",
     "AI/RAG",
     "AI/Agents",
-    "AI/Embeddings/Basics/Similarity.md",
-    "AI/Embeddings/Basics/Text Embeddings.md",
     "AI/Embeddings/Basics",
     "AI/_images/embedings/Pasted image 20261030105455.png",
     "AI/_images/embedings",
     "AI/_images",
     "Pasted image 20261030105405.png",
-    "AI/_images/embedings/Pasted image 20261030120640.png",
     "AI/Embeddings",
     "AI/Machine Learning/Algorithms/Algorithms.md",
     "AI/Machine Learning/Supervised Learning/Knn Classifier.md",
@@ -229,11 +235,8 @@
     "JS/Angular/Routing",
     "JS/Angular/Services/Services.md",
     "JS/Angular/Comunication/View Queries.md",
-    "JS/Angular/Services",
     "JS/Angular/Comunication/Input Output.md",
     "JS/Angular/Comunication/Component Composition.md",
-    "JS/Angular/_images/components_architecture.png",
-    "JS/Angular/_images/products_components.png",
     "JS/Angular/Basics/Templates.md",
     "JS/Angular/Basics/Components.md",
     "JS/Angular/Basics/TypeScript Basics.md",
@@ -241,9 +244,6 @@
     "JS/Angular/Basics/Overview.md",
     "JS/TypeScript/Classes & OOP/Abstract.md",
     "JS/TypeScript/Classes & OOP/Interfaces.md",
-    "JS/TypeScript/Interfaces & Types/Interfaces.md",
-    "JS/TypeScript/Classes & OOP/Access Modifiers.md",
-    "JS/TypeScript/Classes & OOP/Inheritance.md",
     "API/Fundamentals.canvas",
     "API/API.canvas",
     "API/Query Arguments.canvas",
