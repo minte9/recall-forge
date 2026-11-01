@@ -968,18 +968,8 @@
                   <icon name="question-circle"></icon>
                 </span>
 
-                <span v-if="topicMemoryScore !== null" class="mastery-ring mastery-ring--actions"
-                  :class="isHighScore(topicMemoryScore) ? 'mastery-ring--high-score' : 'mastery-ring--low-score'"
-                  title="Memory Score - Show feedback history" @click="toggleFeedbackHistory">
-                  <svg viewBox="0 0 56 56" class="mastery-ring-svg" aria-hidden="true">
-                    <circle class="mastery-ring-track" cx="28" cy="28" r="23"></circle>
-                    <circle class="mastery-ring-progress" cx="28" cy="28" r="23"
-                      :style="{ strokeDashoffset: masteryRingOffset(topicMemoryScore) }"></circle>
-                  </svg>
-                  <span class="mastery-ring-label">{{ formatScore(topicMemoryScore) }}</span>
-                  <span v-if="topicReviewStreak >= 1" class="mastery-ring-streak"
-                    :title="`Box ${topicReviewStreak + 1}`">{{ topicReviewStreak + 1 }}</span>
-                </span>
+                <mastery-ring v-if="topicMemoryScore !== null" :score="topicMemoryScore"
+                  :streak="topicReviewStreak" @click="toggleFeedbackHistory"></mastery-ring>
 
               </div>
             </template>
@@ -1022,18 +1012,8 @@
                   </span>
                 </div>
 
-                <span v-if="topicMemoryScore !== null" class="mastery-ring mastery-ring--actions"
-                  :class="isHighScore(topicMemoryScore) ? 'mastery-ring--high-score' : 'mastery-ring--low-score'"
-                  title="Memory Score - Show feedback history" @click="toggleFeedbackHistory">
-                  <svg viewBox="0 0 56 56" class="mastery-ring-svg" aria-hidden="true">
-                    <circle class="mastery-ring-track" cx="28" cy="28" r="23"></circle>
-                    <circle class="mastery-ring-progress" cx="28" cy="28" r="23"
-                      :style="{ strokeDashoffset: masteryRingOffset(topicMemoryScore) }"></circle>
-                  </svg>
-                  <span class="mastery-ring-label">{{ formatScore(topicMemoryScore) }}</span>
-                  <span v-if="topicReviewStreak >= 1" class="mastery-ring-streak"
-                    :title="`Box ${topicReviewStreak + 1}`">{{ topicReviewStreak + 1 }}</span>
-                </span>
+                <mastery-ring v-if="topicMemoryScore !== null" :score="topicMemoryScore"
+                  :streak="topicReviewStreak" @click="toggleFeedbackHistory"></mastery-ring>
 
               </div>
             </template>
@@ -1462,6 +1442,7 @@
   <script src="js/markdown.js"></script>
   <script src="js/icons.js"></script>
   <script src="js/components/recall-assistant.js"></script>
+  <script src="js/components/mastery-ring.js"></script>
   <script src="js/app.js"></script>
 </body>
 
