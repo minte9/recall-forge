@@ -452,6 +452,33 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       ];
     },
 
+    // Example prompts per assistant tool, shown in the input's "?" tooltip.
+    assistantToolHints() {
+      // "Java " or "" so prompts read naturally with or without a category.
+      const c = this.currentCategory ? `${this.currentCategory} ` : '';
+
+      return [
+        {
+          title: 'Mistakes',
+          prompts: [
+            `What ${c}mistakes have I made recently?`,
+            `Which ${c}topics do I keep getting wrong?`,
+            `Show my lowest-scoring ${c}answers.`,
+            `What are my recurring ${c}errors?`
+          ]
+        },
+        {
+          title: 'Review history',
+          prompts: [
+            `Show my last 5 ${c}reviews.`,
+            'What did I review today?',
+            'Show my last 10 reviews with feedback.',
+            `How did I score on my recent ${c}reviews?`
+          ]
+        }
+      ];
+    },
+
     assistantInsight() {
       if (!this.currentCategory) {
         return 'Select a category to get personalized recall insights.';
