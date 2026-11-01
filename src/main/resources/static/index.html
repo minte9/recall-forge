@@ -884,6 +884,18 @@
                     @keydown.enter.prevent="sendAssistantMessage"
                   />
 
+                  <button
+                    v-if="assistantMessages.length"
+                    type="button"
+                    class="assistant-clear"
+                    :disabled="assistantLoading"
+                    title="Clear conversation"
+                    aria-label="Clear conversation"
+                    @click="clearAssistantConversation"
+                  >
+                    <icon name="trash"></icon>
+                  </button>
+
                   <span
                     class="assistant-hints"
                     :class="{ dismissed: assistantHintsDismissed }"
