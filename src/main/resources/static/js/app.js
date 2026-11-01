@@ -430,7 +430,8 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         {
           id: 'mistakes',
           label: 'Explain my mistakes',
-          prompt: `Why do I keep getting ${category} questions wrong?`
+          // prompt: `Why do I keep getting ${category} questions wrong?`
+          prompt: `What ${category} mistakes have I made recently?`
         },
         {
           id: 'discover',
@@ -513,67 +514,69 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       const message = this.assistantInput.trim();
 
       if (!message || this.assistantLoading) {
-        return;
+          return;
       }
 
-      const category = this.currentCategory || 'your knowledge';
+      const category = this.currentCategory;
 
       this.assistantSuggestionsOpen = false;
       this.assistantLoading = true;
       this.assistantInput = '';
+
       this.$refs.assistantInput?.blur();
 
-      // Display user question immediately
+      // Display the user's question immediately
       this.assistantMessages.push({
-        role: 'user',
-        content: message
+          role: 'user',
+          content: message
       });
 
       this.scrollAssistantIntoView();
 
       try {
-        // Simulate API latency
-        await new Promise(resolve => setTimeout(resolve, 500));
+          const answer = await this.askAssistant(
+              message,
+              category
+          );
 
-        const question = message.toLowerCase();
-        let response;
-
-        if (question.includes('wrong') ||
-            question.includes('mistake')) {
-          response =
-            `Mock analysis: Review your recent answers in ${category} ` +
-            `to identify recurring misunderstandings.`;
-        } else if (question.includes('next') ||
-                  question.includes('study')) {
-          response =
-            `Mock recommendation: Review your weakest ${category} ` +
-            `topics before moving to advanced concepts.`;
-        } else if (question.includes('improving') ||
-                  question.includes('progress')) {
-          response =
-            `Mock progress report: Compare your ${category} ` +
-            `review scores over the last 30 days.`;
-        } else {
-          response =
-            `Mock response for "${message}". ` +
-            `Real AI integration will be added later.`;
-        }
-
-        this.assistantMessages.push({
-          role: 'assistant',
-          content: response
-        });
-
-        this.scrollAssistantIntoView();
+          this.assistantMessages.push({
+              role: 'assistant',
+              content: answer
+          });
 
       } catch (error) {
-        this.assistantMessages.push({
-          role: 'assistant',
-          content: 'Sorry, something went wrong. Please try again.'
-        });
+          console.error('Assistant error:', error);
+
+          this.assistantMessages.push({
+              role: 'assistant',
+              content: 'Unable to analyze your mistakes right now.'
+          });
+
       } finally {
-        this.assistantLoading = false;
+          this.assistantLoading = false;
+          this.scrollAssistantIntoView();
       }
+    },
+
+    async askAssistant(question, category) {
+      const response = await fetch('/api/assistant/ask', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              question,
+              category
+          })
+      });
+
+      if (!response.ok) {
+          throw new Error(`Assistant API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      return data.answer;
     },
 
     handleAssistantOutsideClick(event) {
@@ -844,6 +847,17 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     renderMarkdown(md, options) {
       return Markdown.render(md, options);
+    },
+
+    renderAssistantMessage(message) {
+      if (message.role === 'assistant') {
+          return this.renderMarkdown(message.content);
+      }
+
+      // User messages remain plain text, safely escaped.
+      const div = document.createElement('div');
+      div.textContent = message.content;
+      return div.innerHTML;
     },
 
     // v-html only re-renders when the markdown string changes, so reviewing

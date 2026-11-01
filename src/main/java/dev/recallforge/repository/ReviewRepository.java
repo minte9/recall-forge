@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import dev.recallforge.assistant.MistakeDto;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.Review;
 
@@ -274,5 +276,30 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Set<Long> findReviewedTopicIds(
             @Param("userId") Long userId,
             @Param("category") String category
+    );
+
+    @Query("""
+        SELECT new dev.recallforge.assistant.MistakeDto(
+            m.category,
+            m.subcategory,
+            t.title,
+            r.question,
+            r.userAnswer,
+            r.feedback,
+            r.score,
+            r.reviewedAt
+        )
+        FROM Review r
+        JOIN r.topic t
+        JOIN t.markdownFile m
+        WHERE r.user.id = :userId
+        AND LOWER(m.category) = LOWER(:category)
+        AND r.score < 0.7
+        ORDER BY r.reviewedAt DESC
+        """)
+    List<MistakeDto> findRecentMistakes(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        Pageable pageable
     );
 }

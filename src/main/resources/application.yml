@@ -53,6 +53,14 @@ spring:
       enabled: true
       file: compose.yml
 
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: ${openai.model}
+          reasoning-effort: none
+
 server:
   port: 9090
   forward-headers-strategy: framework

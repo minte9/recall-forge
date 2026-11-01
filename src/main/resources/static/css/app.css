@@ -2685,6 +2685,7 @@
     background: #f3f4f6;
     color: #1f2937;
     border-bottom-left-radius: 4px;
+    white-space: normal;
   }
 
   .assistant-input-row input:focus {
@@ -2697,6 +2698,24 @@
     padding-top: 8px;
     font-size: 12px;
     color: #6b7280;
+  }
+
+  .assistant-message p {
+      margin: 0 0 8px;
+  }
+
+  .assistant-message ul {
+      margin: 4px 0 8px;
+      padding-left: 20px;
+  }
+
+  .assistant-message li {
+      margin-bottom: 6px;
+  }
+
+  .assistant-message p:last-child,
+  .assistant-message ul:last-child {
+      margin-bottom: 0;
   }
 
   .recall-assistant.assistant-dropdown-open {

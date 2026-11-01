@@ -860,9 +860,8 @@
                   :key="index"
                   class="assistant-message"
                   :class="'assistant-message-' + message.role"
-                >
-                  {{ message.content }}
-                </div>
+                  v-html="renderAssistantMessage(message)">
+                ></div>
 
               </div>
 

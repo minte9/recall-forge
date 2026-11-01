@@ -22,7 +22,7 @@ dependencies {
     // Allows Spring Boot to automatically work with compose.yml during development.
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
-    runtimeOnly 'org.postgresql:postgresql:42.7.11'
+    runtimeOnly 'org.postgresql:postgresql:42.7.12'
 
     compileOnly 'org.projectlombok:lombok:1.18.38'
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
@@ -33,6 +33,15 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-webmvc-test'
     testCompileOnly 'org.projectlombok:lombok:1.18.38'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+
+    // Spring AI - ChatClient, OpenAI, @Tool, ToolContext
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:2.0.0-M1"
+    }
 }
 
 tasks.named('test') {
