@@ -530,6 +530,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       }
     },
 
+    // Used "?" prompts stay disabled; only a new review unlocks them.
+    clearAssistantConversation() {
+      this.assistantMessages = [];
+      this.assistantInput = '';
+    },
+
     isAssistantHintUsed(prompt) {
       return (this.assistantUsedSuggestions[this.currentCategory] || [])
         .includes(prompt);
