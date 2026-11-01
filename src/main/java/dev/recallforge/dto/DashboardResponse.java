@@ -8,7 +8,6 @@ public record DashboardResponse(
     long dueThisWeek,
     long totalTopics,
     List<WeakAreaResponse> weakAreas,
-    List<KnowledgeAreaResponse> strongAreas,
     List<KnowledgeAreaResponse> weakKnowledgeAreas,
     RewardResponse reward,
     boolean showKnowledgeInsights,

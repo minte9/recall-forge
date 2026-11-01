@@ -13,7 +13,7 @@ RecallForge is a spaced-repetition learning app. Users import topics from
 markdown files, get an AI-generated question per topic, answer it, get an
 AI-graded score + feedback, and the app schedules the next review date based
 on that score. An XP/rewards layer gamifies progress; a dashboard summarizes
-due/weak/strong areas.
+due/weak areas and section progress.
 
 ## Stack
 
@@ -77,7 +77,7 @@ on it for scoping data to the current user.
   to a category and computed live from review history, no stored counters.
   `domain/UserReward` only holds the streak's day bookkeeping.
 - **Dashboard / analytics** — `DashboardController` → `DashboardService`
-  (due counts, weak/strong knowledge areas, markdown summaries, category
+  (due counts, weak knowledge areas, markdown summaries, category
   options, review-limit projections).
 - **Daily limits** — `config/AppReviewLimitProperties`
   (`app.reviews.daily-limit`, `app.reviews.daily-question-limit`), enforced

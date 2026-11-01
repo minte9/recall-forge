@@ -157,7 +157,6 @@ class DashboardServiceTest {
             weakAreaSubcategoryOnly("Zebra") // last alphabetically; cut by the top-3 limit
         );
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(weakAreas);
-        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(rewardService.getCurrentUserReward("java"))
             .thenReturn(new RewardResponse(0, 0, false, 10, 3, "Java", 0L, 0, 0L, 0L, 0, 0L, 0, 0L, 0, 0L, 0L, 0L, false));
@@ -192,7 +191,6 @@ class DashboardServiceTest {
             new SubcategoryOrder("Java", "Generics", 3),
             new SubcategoryOrder("Java", "Collections", 4)
         ));
-        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(rewardService.getCurrentUserReward("java"))
             .thenReturn(new RewardResponse(0, 0, false, 10, 3, "Java", 0L, 0, 0L, 0L, 0, 0L, 0, 0L, 0, 0L, 0L, 0L, false));
@@ -204,46 +202,19 @@ class DashboardServiceTest {
     }
 
     @Test
-    void getDashboard_limitsStrongKnowledgeAreasToTopTwo() {
-        setUp();
-        when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
-        List<KnowledgeAreaProjection> strongAreas = List.of(
-            knowledgeArea("Java, Core", 0.9),
-            knowledgeArea("Python, Core", 0.85),
-            mock(KnowledgeAreaProjection.class) // beyond the top-2 limit; its fields are never read
-        );
-        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(strongAreas);
-        when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
-        List<SubcategoryReviewCountProjection> reviewCounts = List.of(
-            reviewCount("Java, Core", 5L),
-            reviewCount("Python, Core", 5L)
-        );
-        when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
-        when(rewardService.getCurrentUserReward("java"))
-            .thenReturn(new RewardResponse(0, 0, false, 10, 3, "Java", 0L, 0, 0L, 0L, 0, 0L, 0, 0L, 0, 0L, 0L, 0L, false));
-
-        DashboardResponse dashboard = dashboardService.getDashboard("java");
-
-        assertThat(dashboard.strongAreas()).containsExactly(
-            new KnowledgeAreaResponse("Java, Core", 0.9),
-            new KnowledgeAreaResponse("Python, Core", 0.85)
-        );
-    }
-
-    @Test
     void getDashboard_limitsWeakKnowledgeAreasToTopTwo() {
         setUp();
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
-        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
         List<KnowledgeAreaProjection> weakKnowledgeAreas = List.of(
             knowledgeArea("Math, Basics", 0.2),
             knowledgeArea("Java, Core", 0.3),
-            mock(KnowledgeAreaProjection.class) // beyond the top-2 limit; its fields are never read
+            knowledgeAreaTitleOnly("Python, Core") // qualifies, but beyond the top-2 limit
         );
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(weakKnowledgeAreas);
         List<SubcategoryReviewCountProjection> reviewCounts = List.of(
             reviewCount("Math, Basics", 5L),
-            reviewCount("Java, Core", 5L)
+            reviewCount("Java, Core", 5L),
+            reviewCount("Python, Core", 5L)
         );
         when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
         when(rewardService.getCurrentUserReward("java"))
@@ -262,33 +233,41 @@ class DashboardServiceTest {
         setUp();
         // Every topic starts at the same default memory score, so a single
         // review to an otherwise-untouched subcategory is enough to make it
-        // rank as the top strong/weak subcategory purely by having moved off
-        // the shared baseline - it shouldn't be trusted yet.
+        // rank as the weakest subcategory purely by having moved off the
+        // shared baseline - it shouldn't be trusted yet.
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
-        List<KnowledgeAreaProjection> strongAreas = List.of(knowledgeAreaTitleOnly("Collections"));
-        List<KnowledgeAreaProjection> weakAreas = List.of(knowledgeAreaTitleOnly("Generics"));
-        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(strongAreas);
+        List<KnowledgeAreaProjection> weakAreas = List.of(
+            knowledgeAreaTitleOnly("Generics"),
+            knowledgeAreaTitleOnly("Collections"),
+            knowledgeAreaTitleOnly("Streams")
+        );
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(weakAreas);
-        // "Generics" has zero reviews - absent from the map entirely.
-        List<SubcategoryReviewCountProjection> reviewCounts = List.of(reviewCount("Collections", 1L));
+        // "Generics" has zero reviews - absent from the map entirely - and
+        // "Collections" is under the minimum, leaving only one qualifier.
+        List<SubcategoryReviewCountProjection> reviewCounts = List.of(
+            reviewCount("Collections", 1L),
+            reviewCount("Streams", 3L)
+        );
         when(reviewRepository.countReviewsBySubcategory(1L, "java")).thenReturn(reviewCounts);
         when(rewardService.getCurrentUserReward("java"))
             .thenReturn(new RewardResponse(0, 0, false, 10, 3, "Java", 0L, 0, 0L, 0L, 0, 0L, 0, 0L, 0, 0L, 0L, 0L, false));
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
-        assertThat(dashboard.strongAreas()).isEmpty();
         assertThat(dashboard.weakKnowledgeAreas()).isEmpty();
         assertThat(dashboard.showKnowledgeInsights()).isFalse();
     }
 
     @Test
-    void getDashboard_distinctSubcategoriesEachClearingMinReviews_showKnowledgeInsightsBecomesTrue() {
+    void getDashboard_onlyTwoQualifyingSubcategories_weakInsightsStayHidden() {
         setUp();
+        // With just two qualifying subcategories, the lower one isn't
+        // meaningfully "weak" - it's simply the other half of the pair.
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
-        List<KnowledgeAreaProjection> strongAreas = List.of(knowledgeArea("Collections", 0.9));
-        List<KnowledgeAreaProjection> weakAreas = List.of(knowledgeArea("Generics", 0.3));
-        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(strongAreas);
+        List<KnowledgeAreaProjection> weakAreas = List.of(
+            knowledgeAreaTitleOnly("Generics"),
+            knowledgeAreaTitleOnly("Collections")
+        );
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(weakAreas);
         List<SubcategoryReviewCountProjection> reviewCounts = List.of(
             reviewCount("Collections", 3L),
@@ -300,28 +279,19 @@ class DashboardServiceTest {
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
-        assertThat(dashboard.strongAreas()).containsExactly(new KnowledgeAreaResponse("Collections", 0.9));
-        assertThat(dashboard.weakKnowledgeAreas()).containsExactly(new KnowledgeAreaResponse("Generics", 0.3));
-        assertThat(dashboard.showKnowledgeInsights()).isTrue();
+        assertThat(dashboard.weakKnowledgeAreas()).isEmpty();
+        assertThat(dashboard.showKnowledgeInsights()).isFalse();
     }
 
     @Test
-    void getDashboard_subcategoryInBothTopTwoLists_excludedFromBothStrongAndWeak() {
+    void getDashboard_threeQualifyingSubcategories_showsBottomTwoAsWeak() {
         setUp();
-        // With exactly 3 qualifying subcategories, the middle one (Exceptions)
-        // is both the 2nd-highest and 2nd-lowest average, so it lands in both
-        // top-2 lists. It's ambiguous, not distinctly strong or weak, so it
-        // should be dropped from both rather than shown as both simultaneously.
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
-        List<KnowledgeAreaProjection> strongAreas = List.of(
-            knowledgeArea("Collections", 0.9),
-            knowledgeArea("Exceptions", 0.7)
-        );
         List<KnowledgeAreaProjection> weakAreas = List.of(
             knowledgeArea("Basics", 0.3),
-            knowledgeArea("Exceptions", 0.7)
+            knowledgeArea("Exceptions", 0.7),
+            knowledgeAreaTitleOnly("Collections")
         );
-        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(strongAreas);
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(weakAreas);
         List<SubcategoryReviewCountProjection> reviewCounts = List.of(
             reviewCount("Collections", 3L),
@@ -334,8 +304,10 @@ class DashboardServiceTest {
 
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
-        assertThat(dashboard.strongAreas()).containsExactly(new KnowledgeAreaResponse("Collections", 0.9));
-        assertThat(dashboard.weakKnowledgeAreas()).containsExactly(new KnowledgeAreaResponse("Basics", 0.3));
+        assertThat(dashboard.weakKnowledgeAreas()).containsExactly(
+            new KnowledgeAreaResponse("Basics", 0.3),
+            new KnowledgeAreaResponse("Exceptions", 0.7)
+        );
         assertThat(dashboard.showKnowledgeInsights()).isTrue();
     }
 
@@ -346,7 +318,6 @@ class DashboardServiceTest {
         when(topicRepository.countDueBetweenByUser(eq(1L), eq("java"), any(), any())).thenReturn(5L, 8L);
         when(topicRepository.countByUser(1L, "java")).thenReturn(42L);
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
-        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
         RewardResponse reward = new RewardResponse(4, 0, false, 10, 3, "Java", 0L, 0, 5L, 10L, 50, 0L, 0, 0L, 0, 0L, 0L, 0L, false);
         when(rewardService.getCurrentUserReward("java")).thenReturn(reward);
@@ -367,7 +338,6 @@ class DashboardServiceTest {
         when(topicRepository.countDueBetweenByUser(eq(1L), eq("python"), any(), any())).thenReturn(0L, 0L);
         when(topicRepository.countByUser(1L, "python")).thenReturn(14L);
         when(topicRepository.findWeakAreas(eq(1L), eq("python"), any())).thenReturn(List.of());
-        when(topicRepository.findStrongKnowledgeAreas(1L, "python")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "python")).thenReturn(List.of());
         when(rewardService.getCurrentUserReward("python"))
             .thenReturn(new RewardResponse(0, 0, false, 10, 3, "Python", 0L, 0, 0L, 0L, 0, 0L, 0, 0L, 0, 0L, 0L, 0L, false));
@@ -388,7 +358,6 @@ class DashboardServiceTest {
     void getDashboard_questionsToday_usesCategoryScopedQuestionCountNotGlobal() {
         setUp();
         when(topicRepository.findWeakAreas(eq(1L), eq("python"), any())).thenReturn(List.of());
-        when(topicRepository.findStrongKnowledgeAreas(1L, "python")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "python")).thenReturn(List.of());
         when(rewardService.getCurrentUserReward("python"))
             .thenReturn(new RewardResponse(0, 0, false, 10, 3, "Python", 0L, 0, 0L, 0L, 0, 0L, 0, 0L, 0, 0L, 0L, 0L, false));
@@ -408,7 +377,6 @@ class DashboardServiceTest {
     void getDashboard_perUserUsage_comesFromUserWideCountsNotCategoryScoped() {
         setUp();
         when(topicRepository.findWeakAreas(eq(1L), eq("python"), any())).thenReturn(List.of());
-        when(topicRepository.findStrongKnowledgeAreas(1L, "python")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "python")).thenReturn(List.of());
         when(rewardService.getCurrentUserReward("python"))
             .thenReturn(new RewardResponse(0, 0, false, 10, 3, "Python", 0L, 0, 0L, 0L, 0, 0L, 0, 0L, 0, 0L, 0L, 0L, false));
@@ -434,7 +402,6 @@ class DashboardServiceTest {
     void getDashboard_emptyRepositoryResults_produceEmptyListsNotErrors() {
         setUp();
         when(topicRepository.findWeakAreas(eq(1L), eq("java"), any())).thenReturn(List.of());
-        when(topicRepository.findStrongKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(topicRepository.findWeakKnowledgeAreas(1L, "java")).thenReturn(List.of());
         when(rewardService.getCurrentUserReward("java"))
             .thenReturn(new RewardResponse(0, 0, false, 10, 3, "Java", 0L, 0, 0L, 0L, 0, 0L, 0, 0L, 0, 0L, 0L, 0L, false));
@@ -442,7 +409,6 @@ class DashboardServiceTest {
         DashboardResponse dashboard = dashboardService.getDashboard("java");
 
         assertThat(dashboard.weakAreas()).isEmpty();
-        assertThat(dashboard.strongAreas()).isEmpty();
         assertThat(dashboard.weakKnowledgeAreas()).isEmpty();
     }
 
