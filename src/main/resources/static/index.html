@@ -887,6 +887,23 @@
                     @keydown.enter.prevent="sendAssistantMessage"
                   />
 
+                  <span class="assistant-hints" tabindex="0" aria-label="What you can ask">
+                    <icon name="question-circle"></icon>
+                    <span class="assistant-hints-bubble" role="tooltip">
+                      <span class="assistant-hints-header">Suggested questions</span>
+                      <span
+                        v-for="group in assistantToolHints"
+                        :key="group.title"
+                        class="assistant-hints-group"
+                      >
+                        <strong>{{ group.title }}</strong>
+                        <ul>
+                          <li v-for="prompt in group.prompts" :key="prompt">{{ prompt }}</li>
+                        </ul>
+                      </span>
+                    </span>
+                  </span>
+
                   <!-- <button
                     type="button"
                     @click="sendAssistantMessage"

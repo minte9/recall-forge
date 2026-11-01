@@ -2587,12 +2587,14 @@
   .assistant-input-row {
     display: flex;
     gap: 8px;
+    position: relative;
   }
 
   .assistant-input-row input {
     flex: 1;
     min-width: 0;
     padding: 11px;
+    padding-right: 34px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
   }
@@ -2609,6 +2611,79 @@
   .assistant-input-row button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  /* "?" inside the assistant input, right-aligned; bubble lists example
+     prompts per assistant tool. Same look as .info-tooltip, but with a real
+     child element so it can hold a grouped list. */
+  .assistant-hints {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    color: #94a3b8;
+    cursor: help;
+  }
+
+  .assistant-hints svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .assistant-hints-bubble {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: -4px;
+    width: max-content;
+    max-width: min(320px, calc(100vw - 32px));
+    background: #1f2937;
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 6px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .15s ease;
+    pointer-events: none;
+    z-index: 30;
+  }
+
+  .assistant-hints:hover .assistant-hints-bubble,
+  .assistant-hints:focus .assistant-hints-bubble {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .assistant-hints-header {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .assistant-hints-group {
+    display: block;
+  }
+
+  .assistant-hints-group + .assistant-hints-group {
+    margin-top: 8px;
+  }
+
+  .assistant-hints-group strong {
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .assistant-hints-group ul {
+    margin: 0;
+    padding-left: 16px;
   }
 
   .assistant-suggestions {
