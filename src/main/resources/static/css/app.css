@@ -2444,9 +2444,6 @@
     flex-direction: column;
     gap: 0px;
     margin-top: 20px;
-    /* Same width as .job-profile-selector so the readiness pill and the
-       percentages share a right edge. */
-    max-width: 550px;
   }
 
   .job-profile-row {
