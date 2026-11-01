@@ -512,6 +512,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
   async mounted() {
     document.addEventListener("click", this.handleBodyClick);
+    document.addEventListener("click", this.handleAssistantOutsideClick);
     document.addEventListener("keydown", this.handleGlobalKeydown);
 
     await this.loadCategoryOptions();
@@ -532,6 +533,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
   beforeUnmount() {
     document.removeEventListener("click", this.handleBodyClick);
+    document.removeEventListener("click", this.handleAssistantOutsideClick);
     document.removeEventListener("keydown", this.handleGlobalKeydown);
   },
 
