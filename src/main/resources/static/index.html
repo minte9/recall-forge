@@ -860,8 +860,16 @@
                   :key="index"
                   class="assistant-message"
                   :class="'assistant-message-' + message.role"
-                  v-html="renderAssistantMessage(message)">
+                  v-html="renderAssistantMessage(message)"
                 ></div>
+
+                <!-- Loading status: sits where the reply will appear -->
+                <div
+                  v-if="assistantLoading"
+                  class="assistant-message assistant-message-assistant assistant-pending"
+                >
+                  <span class="assistant-pending-icon" aria-hidden="true">✨</span> Analyzing your knowledge…
+                </div>
 
               </div>
 
@@ -902,11 +910,6 @@
                   </button>
                 </div>
 
-              </div>
-
-              <!-- Loading status -->
-              <div v-if="assistantLoading" class="assistant-status">
-                ✨ Analyzing your knowledge…
               </div>
 
               <div ref="assistantBottom"></div>
