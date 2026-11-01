@@ -99,11 +99,12 @@ const app = createApp({
 
       // AI Recall Assistant
       assistantInput: '',
-      assistantSuggestionsOpen: false,
       assistantLoading: false,
-      assistantMessages: [],
-      // category -> suggestion ids already answered; cleared by a new review
+      // Hides the "?" hints bubble after a pick until the mouse leaves it
+      assistantHintsDismissed: false,
+      // category -> "?" prompts already answered; cleared by a new review
       assistantUsedSuggestions: {},
+      assistantMessages: [],
 
       assistantInsightData: null,
       assistantInsightLoading: false,
@@ -425,33 +426,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         });
     },
 
-    assistantSuggestions() {
-      const category = this.currentCategory || 'my knowledge';
-
-      return [
-        {
-          id: 'mistakes',
-          label: 'Explain my mistakes',
-          prompt: `What ${category} mistakes have I made recently?`
-        },
-        {
-          id: 'reviewHistory',
-          label: 'Track my studied reviews',
-          prompt: `Show my last 5 ${category} reviews.`
-        },
-        {
-          id: 'discover',
-          label: 'Discover what to study next',
-          prompt: `What should I study next in ${category}?`
-        },
-        {
-          id: 'progress',
-          label: 'Track my progress',
-          prompt: `Am I improving in ${category} compared with last month?`
-        }
-      ];
-    },
-
     // Example prompts per assistant tool, shown in the input's "?" tooltip.
     assistantToolHints() {
       // Category is sent as context with the request, so prompts stay generic.
@@ -510,7 +484,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
   async mounted() {
     document.addEventListener("click", this.handleBodyClick);
-    document.addEventListener("click", this.handleAssistantOutsideClick);
     document.addEventListener("keydown", this.handleGlobalKeydown);
 
     await this.loadCategoryOptions();
@@ -531,32 +504,35 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
   beforeUnmount() {
     document.removeEventListener("click", this.handleBodyClick);
-    document.removeEventListener("click", this.handleAssistantOutsideClick);
     document.removeEventListener("keydown", this.handleGlobalKeydown);
   },
 
   methods: {
-    async selectAssistantSuggestion(suggestion) {
-      if (this.isAssistantSuggestionUsed(suggestion)) {
+    // "?" tooltip pick: close the bubble and ask the prompt right away.
+    async submitAssistantHint(prompt) {
+      if (this.isAssistantHintUsed(prompt)) {
         return;
       }
 
       const category = this.currentCategory;
 
-      this.assistantInput = suggestion.prompt;
-      this.assistantSuggestionsOpen = false;
+      this.assistantInput = prompt;
+      this.assistantHintsDismissed = true;
+      // Drop focus from the clicked prompt, or :focus-within keeps the bubble open.
+      document.activeElement?.blur();
 
       const answered = await this.sendAssistantMessage();
 
+      // Only burn the prompt once it was actually answered.
       if (answered) {
         const used = this.assistantUsedSuggestions[category] || [];
-        this.assistantUsedSuggestions[category] = [...used, suggestion.id];
+        this.assistantUsedSuggestions[category] = [...used, prompt];
       }
     },
 
-    isAssistantSuggestionUsed(suggestion) {
+    isAssistantHintUsed(prompt) {
       return (this.assistantUsedSuggestions[this.currentCategory] || [])
-        .includes(suggestion.id);
+        .includes(prompt);
     },
 
     async sendAssistantMessage() {
@@ -568,7 +544,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       const category = this.currentCategory;
 
-      this.assistantSuggestionsOpen = false;
       this.assistantLoading = true;
       this.assistantInput = '';
 
@@ -639,28 +614,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return data.answer;
     },
 
-    handleAssistantOutsideClick(event) {
-      const wrapper = this.$refs.assistantInputWrapper;
-
-      if (wrapper && !wrapper.contains(event.target)) {
-        this.assistantSuggestionsOpen = false;
-      }
-    },
-
     scrollAssistantIntoView() {
-      this.$nextTick(() => {
-        this.$refs.assistantBottom?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'end'
-        });
-      });
-    },
-
-    openAssistantSuggestions() {
-      if (this.assistantInput.trim()) return;
-
-      this.assistantSuggestionsOpen = true;
-
       this.$nextTick(() => {
         this.$refs.assistantBottom?.scrollIntoView({
           behavior: 'smooth',
@@ -1298,7 +1252,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       // Reset assistant UI for the new category
       this.assistantMessages = [];
       this.assistantInput = '';
-      this.assistantSuggestionsOpen = false;
 
       await this.loadDashboard();
       await this.loadMarkdownSummaries(false);
@@ -1859,7 +1812,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         this.feedbackHistoryVisible = false;
 
-        // New review data - the assistant suggestions are worth asking again
+        // New review data - the "?" prompts are worth asking again
         delete this.assistantUsedSuggestions[this.currentCategory];
 
         await this.loadDashboard();

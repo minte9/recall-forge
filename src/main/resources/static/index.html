@@ -831,7 +831,6 @@
             <!-- AI Recall Assistant -->
             <div
               class="recall-assistant"
-              :class="{ 'assistant-dropdown-open': assistantSuggestionsOpen && !assistantInput.trim() }" 
               v-if="currentUser?.role == 'ADMIN'" 
             >
 
@@ -874,7 +873,7 @@
               </div>
 
               <!-- Input -->
-              <div class="assistant-input-wrapper" ref="assistantInputWrapper">
+              <div class="assistant-input-wrapper">
 
                 <div class="assistant-input-row">
 
@@ -882,12 +881,16 @@
                     ref="assistantInput"
                     v-model="assistantInput"
                     placeholder="Ask about your knowledge…"
-                    @focus="openAssistantSuggestions"
-                    @input="assistantSuggestionsOpen = false"
                     @keydown.enter.prevent="sendAssistantMessage"
                   />
 
-                  <span class="assistant-hints" tabindex="0" aria-label="What you can ask">
+                  <span
+                    class="assistant-hints"
+                    :class="{ dismissed: assistantHintsDismissed }"
+                    tabindex="0"
+                    aria-label="What you can ask"
+                    @mouseleave="assistantHintsDismissed = false"
+                  >
                     <icon name="question-circle"></icon>
                     <span class="assistant-hints-bubble" role="tooltip">
                       <span class="assistant-hints-header">Suggested questions</span>
@@ -898,7 +901,16 @@
                       >
                         <strong>{{ group.title }}</strong>
                         <ul>
-                          <li v-for="prompt in group.prompts" :key="prompt">{{ prompt }}</li>
+                          <li v-for="prompt in group.prompts" :key="prompt">
+                            <button
+                              type="button"
+                              :disabled="isAssistantHintUsed(prompt)"
+                              :title="isAssistantHintUsed(prompt) ? 'Already asked — review more topics to refresh' : null"
+                              @click="submitAssistantHint(prompt)"
+                            >
+                              {{ prompt }}
+                            </button>
+                          </li>
                         </ul>
                       </span>
                     </span>
@@ -911,22 +923,6 @@
                   >
                     ↑
                   </button> -->
-                </div>
-
-                <div
-                  v-if="assistantSuggestionsOpen && !assistantInput.trim()"
-                  class="assistant-suggestions"
-                >
-                  <button
-                    v-for="suggestion in assistantSuggestions"
-                    :key="suggestion.id"
-                    type="button"
-                    :disabled="isAssistantSuggestionUsed(suggestion)"
-                    :title="isAssistantSuggestionUsed(suggestion) ? 'Already asked — review more topics to refresh' : null"
-                    @click="selectAssistantSuggestion(suggestion)"
-                  >
-                    {{ suggestion.label }}
-                  </button>
                 </div>
 
               </div>
