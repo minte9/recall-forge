@@ -65,7 +65,7 @@ class RecallInsightServiceTest {
         assertThat(response.topicCount()).isEqualTo(2);
         assertThat(response.reviewedTopicCount()).isEqualTo(1);
         assertThat(response.message())
-                .isEqualTo("Your weakest Java topic is HashMap internals (score: 0.31) in Collections subcategory.");
+                .isEqualTo("Your weakest Java due topic is HashMap internals (score: 0.31) in Collections subcategory.");
     }
 
     @Test
