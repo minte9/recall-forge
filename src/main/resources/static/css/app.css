@@ -2649,14 +2649,30 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity .15s ease;
-    pointer-events: none;
+    cursor: default;
     z-index: 30;
   }
 
+  /* Invisible bridge over the gap so the bubble stays open while the
+     mouse travels from the "?" up to a prompt. */
+  .assistant-hints-bubble::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 10px;
+  }
+
   .assistant-hints:hover .assistant-hints-bubble,
-  .assistant-hints:focus .assistant-hints-bubble {
+  .assistant-hints:focus-within .assistant-hints-bubble {
     opacity: 1;
     visibility: visible;
+  }
+
+  .assistant-hints.dismissed .assistant-hints-bubble {
+    opacity: 0;
+    visibility: hidden;
   }
 
   .assistant-hints-header {
@@ -2686,37 +2702,26 @@
     padding-left: 16px;
   }
 
-  .assistant-suggestions {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
-    z-index: 20;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 6px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  }
-
-  .assistant-suggestions button {
+  .assistant-hints-group button {
     display: block;
     width: 100%;
-    text-align: left;
-    padding: 10px;
+    padding: 2px 4px;
     border: none;
-    border-radius: 6px;
+    border-radius: 4px;
     background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
     cursor: pointer;
   }
 
-  .assistant-suggestions button:hover {
-    background: #f3f4f6;
+  .assistant-hints-group button:hover:not(:disabled),
+  .assistant-hints-group button:focus-visible {
+    background: rgba(255,255,255,0.12);
   }
 
-  .assistant-suggestions button:disabled {
-    color: #9ca3af;
-    background: transparent;
+  .assistant-hints-group button:disabled {
+    color: #6b7280;
     cursor: default;
   }
 
@@ -2807,10 +2812,6 @@
   .assistant-message p:last-child,
   .assistant-message ul:last-child {
       margin-bottom: 0;
-  }
-
-  .recall-assistant.assistant-dropdown-open {
-    padding-bottom: 150px;
   }
 
   /* .assistant-response p {
