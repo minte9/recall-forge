@@ -829,119 +829,12 @@
             </template>
 
             <!-- AI Recall Assistant -->
-            <div
-              class="recall-assistant"
-              v-if="currentUser?.role == 'ADMIN'" 
-            >
-
-              <div class="assistant-title" title="AI Assistant">
-                <h3>✨ Insights</h3>
-              </div>
-
-              <div
-                class="assistant-insight"
-                :class="{ clickable: assistantInsightClickable }"
-                :role="assistantInsightClickable ? 'button' : null"
-                :tabindex="assistantInsightClickable ? 0 : null"
-                @click="openAssistantInsightTopic"
-                @keydown.enter="openAssistantInsightTopic"
-              >
-                {{ assistantInsight }}
-              </div>
-
-              <!-- Assistant conversation -->
-              <div
-                v-if="assistantMessages.length || assistantLoading"
-                class="assistant-conversation"
-              >
-                <div
-                  v-for="(message, index) in assistantMessages"
-                  :key="index"
-                  class="assistant-message"
-                  :class="'assistant-message-' + message.role"
-                  v-html="renderAssistantMessage(message)"
-                ></div>
-
-                <!-- Loading status: sits where the reply will appear -->
-                <div
-                  v-if="assistantLoading"
-                  class="assistant-message assistant-message-assistant assistant-pending"
-                >
-                  <span class="assistant-pending-icon" aria-hidden="true">✨</span> Analyzing your knowledge…
-                </div>
-
-              </div>
-
-              <!-- Input -->
-              <div class="assistant-input-wrapper">
-
-                <div class="assistant-input-row">
-
-                  <input
-                    ref="assistantInput"
-                    v-model="assistantInput"
-                    placeholder="Ask about your knowledge…"
-                    @keydown.enter.prevent="sendAssistantMessage"
-                  />
-
-                  <button
-                    v-if="assistantMessages.length"
-                    type="button"
-                    class="assistant-clear"
-                    :disabled="assistantLoading"
-                    title="Clear conversation"
-                    aria-label="Clear conversation"
-                    @click="clearAssistantConversation"
-                  >
-                    <icon name="trash"></icon>
-                  </button>
-
-                  <span
-                    class="assistant-hints"
-                    :class="{ dismissed: assistantHintsDismissed }"
-                    tabindex="0"
-                    aria-label="What you can ask"
-                    @mouseleave="assistantHintsDismissed = false"
-                  >
-                    <icon name="question-circle"></icon>
-                    <span class="assistant-hints-bubble" role="tooltip">
-                      <span class="assistant-hints-header">Suggested questions</span>
-                      <span
-                        v-for="group in assistantToolHints"
-                        :key="group.title"
-                        class="assistant-hints-group"
-                      >
-                        <strong>{{ group.title }}</strong>
-                        <ul>
-                          <li v-for="prompt in group.prompts" :key="prompt">
-                            <button
-                              type="button"
-                              :disabled="isAssistantHintUsed(prompt)"
-                              :title="isAssistantHintUsed(prompt) ? 'Already asked — review more topics to refresh' : null"
-                              @click="submitAssistantHint(prompt)"
-                            >
-                              {{ prompt }}
-                            </button>
-                          </li>
-                        </ul>
-                      </span>
-                    </span>
-                  </span>
-
-                  <!-- <button
-                    type="button"
-                    @click="sendAssistantMessage"
-                    :disabled="!assistantInput.trim() || assistantLoading"
-                  >
-                    ↑
-                  </button> -->
-                </div>
-
-              </div>
-
-              <div ref="assistantBottom"></div>
-
-            </div>
+            <recall-assistant
+              v-if="currentUser?.role == 'ADMIN'"
+              ref="assistant"
+              :category="currentCategory"
+              @open-topic="openAssistantInsightTopic"
+            ></recall-assistant>
             
           </div>
         </div>
@@ -1560,6 +1453,7 @@
   <script src="js/api.js"></script>
   <script src="js/markdown.js"></script>
   <script src="js/icons.js"></script>
+  <script src="js/components/recall-assistant.js"></script>
   <script src="js/app.js"></script>
 </body>
 

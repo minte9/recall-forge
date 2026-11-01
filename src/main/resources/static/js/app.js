@@ -97,18 +97,6 @@ const app = createApp({
       topicDropdownOpen: false,
       topicDropdownAlignRight: false,
 
-      // AI Recall Assistant
-      assistantInput: '',
-      assistantLoading: false,
-      // Hides the "?" hints bubble after a pick until the mouse leaves it
-      assistantHintsDismissed: false,
-      // category -> "?" prompts already answered; cleared by a new review
-      assistantUsedSuggestions: {},
-      assistantMessages: [],
-
-      assistantInsightData: null,
-      assistantInsightLoading: false,
-
       initialMarkdown: `
 <h3>Markdown File</h3>
 
@@ -425,61 +413,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           };
         });
     },
-
-    // Example prompts per assistant tool, shown in the input's "?" tooltip.
-    assistantToolHints() {
-      // Category is sent as context with the request, so prompts stay generic.
-      return [
-        {
-          title: 'Mistakes',
-          prompts: [
-            'What mistakes have I made recently?',
-            'Which topics do I keep getting wrong?',
-            'Show my lowest-scoring answers.',
-            'What are my recurring errors?'
-          ]
-        },
-        {
-          title: 'Review history',
-          prompts: [
-            'Show my last 5 reviews.',
-            'What did I review today?',
-            'Show my last 10 reviews with feedback.',
-            'How did I score on my recent reviews?'
-          ]
-        }
-      ];
-    },
-
-    assistantInsight() {
-      if (!this.currentCategory) {
-        return 'Select a category to get personalized recall insights.';
-      }
-
-      if (this.assistantInsightLoading) {
-        return 'Analyzing your knowledge…';
-      }
-
-      return this.assistantInsightData?.message
-        || `Explore your ${this.currentCategory} knowledge and identify areas for improvement.`;
-    },
-
-    assistantInsightClickable() {
-      return !this.assistantInsightLoading
-        && !!this.assistantInsightData?.weakestTopicId
-        && !!this.assistantInsightData?.weakestMarkdownFileId;
-    }
-  },
-
-  watch: {
-    currentCategory(newCategory, oldCategory) {
-      if (newCategory === oldCategory) return;
-
-      this.assistantInsightData = null;
-      this.assistantInsightLoading = false;
-
-      this.loadAssistantInsight();
-    }
   },
 
   async mounted() {
@@ -508,181 +441,13 @@ When you click <strong>Start Review</strong>, this panel will be updated.
   },
 
   methods: {
-    // "?" tooltip pick: close the bubble and ask the prompt right away.
-    async submitAssistantHint(prompt) {
-      if (this.isAssistantHintUsed(prompt)) {
-        return;
-      }
-
-      const category = this.currentCategory;
-
-      this.assistantInput = prompt;
-      this.assistantHintsDismissed = true;
-      // Drop focus from the clicked prompt, or :focus-within keeps the bubble open.
-      document.activeElement?.blur();
-
-      const answered = await this.sendAssistantMessage();
-
-      // Only burn the prompt once it was actually answered.
-      if (answered) {
-        const used = this.assistantUsedSuggestions[category] || [];
-        this.assistantUsedSuggestions[category] = [...used, prompt];
-      }
-    },
-
-    // Used "?" prompts stay disabled; only a new review unlocks them.
-    clearAssistantConversation() {
-      this.assistantMessages = [];
-      this.assistantInput = '';
-    },
-
-    isAssistantHintUsed(prompt) {
-      return (this.assistantUsedSuggestions[this.currentCategory] || [])
-        .includes(prompt);
-    },
-
-    async sendAssistantMessage() {
-      const message = this.assistantInput.trim();
-
-      if (!message || this.assistantLoading) {
-          return false;
-      }
-
-      const category = this.currentCategory;
-
-      this.assistantLoading = true;
-      this.assistantInput = '';
-
-      this.$refs.assistantInput?.blur();
-
-      // Display the user's question immediately
-      this.assistantMessages.push({
-          role: 'user',
-          content: message
-      });
-
-      this.scrollAssistantIntoView();
-
-      try {
-          const answer = await this.askAssistant(
-              message,
-              category
-          );
-
-          this.assistantMessages.push({
-              role: 'assistant',
-              content: answer
-          });
-
-          return true;
-
-      } catch (error) {
-          console.error('Assistant error:', error);
-
-          this.assistantMessages.push({
-              role: 'assistant',
-              content: error.limitMessage || 'Unable to analyze your mistakes right now.'
-          });
-
-          return false;
-
-      } finally {
-          this.assistantLoading = false;
-          this.scrollAssistantIntoView();
-      }
-    },
-
-    async askAssistant(question, category) {
-      const response = await fetch('/api/assistant/ask', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-              question,
-              category
-          })
-      });
-
-      // Daily AI limit reached: show the server's message as the reply
-      if (response.status === 429) {
-          const error = new Error('Assistant daily AI limit reached');
-          error.limitMessage = await response.text();
-          throw error;
-      }
-
-      if (!response.ok) {
-          throw new Error(`Assistant API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      return data.answer;
-    },
-
-    scrollAssistantIntoView() {
-      this.$nextTick(() => {
-        this.$refs.assistantBottom?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'end'
-        });
-      });
-    },
-
-    // Opens the weakest due topic named in the Insights box. Being due,
-    // selectTopic starts a review for it (one AI question), or shows the
-    // already-reviewed-today panel / topic history as usual.
-    async openAssistantInsightTopic() {
-      const topicId = this.assistantInsightData?.weakestTopicId;
-      const markdownFileId = this.assistantInsightData?.weakestMarkdownFileId;
-
-      if (!topicId || !markdownFileId || this.assistantInsightLoading) {
-        return;
-      }
-
+    // Opens the weakest due topic named in the assistant's Insights box.
+    // Being due, selectTopic starts a review for it (one AI question), or
+    // shows the already-reviewed-today panel / topic history as usual.
+    async openAssistantInsightTopic(topicId, markdownFileId) {
       await this.previewMarkdownFile(markdownFileId);
       await this.loadTopicsInFile(markdownFileId);
       await this.selectTopic(topicId);
-    },
-
-    async loadAssistantInsight() {
-      const category = this.currentCategory;
-
-      if (!category) {
-        this.assistantInsightData = null;
-        return;
-      }
-
-      this.assistantInsightLoading = true;
-
-      try {
-        const response = await fetch(
-          `/api/assistant/insight?category=${encodeURIComponent(category)}`
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // Ignore stale responses when the user changes categories.
-        if (this.currentCategory === category) {
-          this.assistantInsightData = data;
-        }
-
-      } catch (error) {
-        console.error('Failed to load assistant insight:', error);
-
-        if (this.currentCategory === category) {
-          this.assistantInsightData = null;
-        }
-
-      } finally {
-        if (this.currentCategory === category) {
-          this.assistantInsightLoading = false;
-        }
-      }
     },
 
     // Drag-resize the left/right desktop panels. Clamps to a 240px minimum
@@ -867,17 +632,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
     renderMarkdown(md, options) {
       return Markdown.render(md, options);
-    },
-
-    renderAssistantMessage(message) {
-      if (message.role === 'assistant') {
-          return this.renderMarkdown(message.content);
-      }
-
-      // User messages remain plain text, safely escaped.
-      const div = document.createElement('div');
-      div.textContent = message.content;
-      return div.innerHTML;
     },
 
     // v-html only re-renders when the markdown string changes, so reviewing
@@ -1256,8 +1010,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.saveLastCategory(environment);
 
       // Reset assistant UI for the new category
-      this.assistantMessages = [];
-      this.assistantInput = '';
+      this.$refs.assistant?.reset();
 
       await this.loadDashboard();
       await this.loadMarkdownSummaries(false);
@@ -1818,9 +1571,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
         this.feedbackHistoryVisible = false;
 
-        // New review data - the "?" prompts are worth asking again
-        delete this.assistantUsedSuggestions[this.currentCategory];
-
         await this.loadDashboard();
         await this.loadMarkdownSummaries(false);
         await this.loadCategoryOptions();
@@ -1837,9 +1587,11 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         // can only change on a real graded answer.
         if (!this.isRetry) {
           await this.loadStarterPackStatus();
-          // The reviewed topic is no longer due, so pick the next weakest.
-          await this.loadAssistantInsight();
         }
+
+        // Unlocks the "?" prompts and, unless a retry, picks the next
+        // weakest topic (absent for non-admins).
+        await this.$refs.assistant?.onReviewSubmitted(this.isRetry);
 
         if (!this.review) {
           this.showMarkdownSummaries();
@@ -2693,6 +2445,8 @@ Java supports single inheritance...</pre>
     }
   }
 });
+
+app.component("recall-assistant", RecallAssistant);
 
 // Reusable icon: <icon name="pencil" class="menu-icon"></icon>
 // Backed by the Bootstrap Icons path data in js/icons.js - add a name there
