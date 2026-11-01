@@ -1286,24 +1286,6 @@
           </div>
 
           <div class="knowledge-grid">
-            <div v-if="dashboard && dashboard.reward" class="knowledge-card coverage">
-              <span class="reward-mastery-title">Code</span>
-
-              <div class="reward-ring info-tooltip" role="img" tabindex="0"
-                data-tooltip="Topics with at least one perfect (score of 1) code challenge."
-                :aria-label="`${dashboard.reward.codeCoveragePercent}% code coverage`">
-                <svg viewBox="0 0 120 120">
-                  <circle class="reward-ring-track" cx="60" cy="60" r="52" pathLength="100"></circle>
-                  <circle class="reward-ring-fill" cx="60" cy="60" r="52" pathLength="100"
-                    stroke-dasharray="100"
-                    :stroke-dashoffset="100 - codeCoverageProgress"></circle>
-                </svg>
-                <div class="reward-ring-label">
-                  <span class="reward-ring-percent">{{ dashboard.reward.codeCoveragePercent }}%</span>
-                </div>
-              </div>
-            </div>
-
             <div v-if="dashboard && dashboard.reward" class="knowledge-card coverage sections">
               <span class="reward-mastery-title">Sections</span>
 
@@ -1318,6 +1300,24 @@
                 </svg>
                 <div class="reward-ring-label">
                   <span class="reward-ring-percent">{{ sectionProgress.reviewed }}<span class="reward-ring-total">/{{ sectionProgress.total }}</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="dashboard && dashboard.reward" class="knowledge-card coverage">
+              <span class="reward-mastery-title">Code</span>
+
+              <div class="reward-ring info-tooltip" role="img" tabindex="0"
+                data-tooltip="Topics with at least one perfect (score of 1) code challenge."
+                :aria-label="`${dashboard.reward.codeCoveragePercent}% code coverage`">
+                <svg viewBox="0 0 120 120">
+                  <circle class="reward-ring-track" cx="60" cy="60" r="52" pathLength="100"></circle>
+                  <circle class="reward-ring-fill" cx="60" cy="60" r="52" pathLength="100"
+                    stroke-dasharray="100"
+                    :stroke-dashoffset="100 - codeCoverageProgress"></circle>
+                </svg>
+                <div class="reward-ring-label">
+                  <span class="reward-ring-percent">{{ dashboard.reward.codeCoveragePercent }}%</span>
                 </div>
               </div>
             </div>
