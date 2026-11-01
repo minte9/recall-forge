@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -45,6 +44,7 @@ public class DashboardService {
     // otherwise a single review is enough to move it off the shared
     // default score and make it look like a meaningful outlier.
     private static final long MIN_REVIEWS_FOR_KNOWLEDGE_INSIGHTS = 3;
+    private static final int MIN_SUBCATEGORIES_FOR_WEAK_INSIGHTS = 3;
 
     private final TopicRepository topicRepository;
     private final ReviewRepository reviewRepository;
@@ -132,53 +132,27 @@ public class DashboardService {
             ))
             .toList();
 
-        List<KnowledgeAreaResponse> strongCandidates = topicRepository.findStrongKnowledgeAreas(userId, category)
+        // Weak only means something relative to other subcategories, so the
+        // list is shown only once at least MIN_SUBCATEGORIES_FOR_WEAK_INSIGHTS
+        // subcategories have each cleared MIN_REVIEWS_FOR_KNOWLEDGE_INSIGHTS -
+        // otherwise the lone (or one of two) qualifying subcategory would be
+        // labelled Weak just for being there.
+        List<KnowledgeAreaProjection> qualifyingAreas = topicRepository.findWeakKnowledgeAreas(userId, category)
             .stream()
             .filter(area -> hasEnoughReviewsForInsights(area, reviewCountBySubcategory))
-            .limit(2)
-            .map(area -> new KnowledgeAreaResponse(
-                area.getTitle(),
-                area.getAverageMemoryScore()
-            ))
             .toList();
 
-        List<KnowledgeAreaResponse> weakCandidates = topicRepository.findWeakKnowledgeAreas(userId, category)
-            .stream()
-            .filter(area -> hasEnoughReviewsForInsights(area, reviewCountBySubcategory))
-            .limit(2)
-            .map(area -> new KnowledgeAreaResponse(
-                area.getTitle(),
-                area.getAverageMemoryScore()
-            ))
-            .toList();
+        List<KnowledgeAreaResponse> weakOnly = qualifyingAreas.size() >= MIN_SUBCATEGORIES_FOR_WEAK_INSIGHTS
+            ? qualifyingAreas.stream()
+                .limit(2)
+                .map(area -> new KnowledgeAreaResponse(
+                    area.getTitle(),
+                    area.getAverageMemoryScore()
+                ))
+                .toList()
+            : List.of();
 
-        // A subcategory that lands in both top-2 lists (common when only a
-        // few subcategories qualify at all) isn't distinctly strong or weak
-        // — it's just the middle of a small pack. Drop it from both rather
-        // than showing it as simultaneously "Strong" and "Weak".
-        Set<String> weakTitles = weakCandidates.stream()
-            .map(area -> area.title())
-            .collect(Collectors.toSet());
-
-        List<KnowledgeAreaResponse> strongOnly = strongCandidates.stream()
-            .filter(area -> !weakTitles.contains(area.title()))
-            .toList();
-
-        Set<String> strongTitles = strongCandidates.stream()
-            .map(area -> area.title())
-            .collect(Collectors.toSet());
-
-        List<KnowledgeAreaResponse> weakOnly = weakCandidates.stream()
-            .filter(area -> !strongTitles.contains(area.title()))
-            .toList();
-
-        // True only when there's a genuine strong/weak contrast between subcategories
-        // that have each individually cleared MIN_REVIEWS_FOR_KNOWLEDGE_INSIGHTS —
-        // strongCandidates/weakCandidates above are already filtered down to those,
-        // so a single review to one otherwise-untouched subcategory can no longer
-        // masquerade as a meaningful outlier.
-        boolean showKnowledgeInsights =
-            !strongOnly.isEmpty() && !weakOnly.isEmpty();
+        boolean showKnowledgeInsights = !weakOnly.isEmpty();
 
         int dailyReviewLimit = reviewLimitProperties.dailyLimit();
         long reviewsToday = reviewRepository.countByUserIdAndCategoryAndReviewedAtAfter(
@@ -213,7 +187,6 @@ public class DashboardService {
             dueThisWeek,
             totalTopics,
             weakAreas,
-            strongOnly,
             weakOnly,
             rewardService.getCurrentUserReward(category),
             showKnowledgeInsights,

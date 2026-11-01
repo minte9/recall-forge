@@ -204,22 +204,6 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         @Param("now") LocalDateTime now);
 
     @Query("""
-        select
-            t.subcategory as title,
-            avg(t.memoryScore) as averageMemoryScore
-        from Topic t
-        where t.markdownFile.user.id = :userId
-        and lower(t.category) = lower(:category)
-        group by t.category, t.subcategory
-        order by avg(t.memoryScore) desc
-    """)
-    List<KnowledgeAreaProjection> findStrongKnowledgeAreas(
-        @Param("userId") Long userId,
-        @Param("category") String category
-    );
-
-
-    @Query("""
        select
             t.subcategory as title,
             avg(t.memoryScore) as averageMemoryScore

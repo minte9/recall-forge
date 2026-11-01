@@ -139,6 +139,21 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       );
     },
 
+    // Sections ring: a section (subcategory group in the sidebar) counts
+    // as reviewed - green - when none of its files have topics due, the
+    // same rule groupHasDue() uses for the sidebar icon colour.
+    sectionProgress() {
+      const groups = Object.values(this.filteredMarkdownGroups);
+      const total = groups.length;
+      const reviewed = groups.filter(group => !this.groupHasDue(group)).length;
+
+      return {
+        reviewed,
+        total,
+        percent: total ? Math.round((reviewed / total) * 100) : 0
+      };
+    },
+
     isDesktop() {
       return window.innerWidth > 900;
     },

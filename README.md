@@ -25,7 +25,7 @@ No flashcards to write. No "show answer / I knew it" self-grading.
 - Difficulty-aware questions, generated fresh each review
 - AI grading with written feedback
 - Spaced-repetition scheduling with mastery streaks
-- Dashboard: due topics, weak and strong areas, per-category progress
+- Dashboard: due topics, weak areas, section progress ring, per-category progress
 - XP, levels and streaks to keep the daily habit going
 - Starter packs to get going without your own notes
 - Google / GitHub login, per-user daily caps and token tracking
