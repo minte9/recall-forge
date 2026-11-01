@@ -570,6 +570,11 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           })
       });
 
+      // Daily AI limit reached: show the server's message as the reply
+      if (response.status === 429) {
+          return await response.text();
+      }
+
       if (!response.ok) {
           throw new Error(`Assistant API error: ${response.status}`);
       }

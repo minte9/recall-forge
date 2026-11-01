@@ -2694,10 +2694,20 @@
     box-shadow: none;
   }
 
-  .assistant-status {
-    padding-top: 8px;
-    font-size: 12px;
+  .assistant-pending {
     color: #6b7280;
+  }
+
+  /* Same pulse as the review "Grading your answer…" dot */
+  .assistant-pending-icon {
+    display: inline-block;
+    animation: feedback-pending-pulse 1.2s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .assistant-pending-icon {
+      animation: none;
+    }
   }
 
   .assistant-message p {
