@@ -859,6 +859,21 @@
     font-weight: 600;
   }
 
+  /* Reviewed card reuses .coverage. Flat ends so green meets yellow
+     cleanly, like the job profile bars. */
+  .knowledge-card.coverage .reviewed-ring-green,
+  .knowledge-card.coverage .reviewed-ring-due {
+    stroke-linecap: butt;
+  }
+
+  .knowledge-card.coverage .reviewed-ring-green {
+    stroke: var(--green);
+  }
+
+  .knowledge-card.coverage .reviewed-ring-due {
+    stroke: var(--yellow);
+  }
+
   .knowledge-list {
     display: flex;
     flex-direction: column;
@@ -2988,14 +3003,14 @@
     }
 
     .knowledge-grid {
-      grid-template-columns: auto auto 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
     }
 
-    /* Keep the coverage card the same width as the mastery box on mobile
-       (both hold a 72px ring), so the left edge lines up down the page. */
+    /* On mobile the three ring cards (Reviewed, Sections, Code) share the
+       row equally and fill the full width. */
     .knowledge-card.coverage {
-      width: 100px;
+      width: auto;
       padding-left: 14px;
       padding-right: 14px;
     }
@@ -3019,9 +3034,10 @@
       padding: 14px;
     }
 
-    /* Match the coverage card's width exactly (72px ring + 14px padding). */
+    /* Same width as the Reviewed card above: one third of the row minus
+       the knowledge grid's two 8px gaps. */
     .reward-mastery-box {
-      width: 100px;
+      width: calc((100% - 16px) / 3);
     }
 
     .reward-combined-card {
@@ -3217,7 +3233,7 @@
     }
 
     .knowledge-grid {
-      grid-template-columns: auto auto 1fr;
+      grid-template-columns: repeat(3, 1fr);
     }
 
     .knowledge-list {
