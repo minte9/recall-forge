@@ -432,8 +432,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         {
           id: 'mistakes',
           label: 'Explain my mistakes',
-          // prompt: `Why do I keep getting ${category} questions wrong?`
           prompt: `What ${category} mistakes have I made recently?`
+        },
+        {
+          id: 'reviewHistory',
+          label: 'Track my studied reviews',
+          prompt: `Show my last 5 ${category} reviews.`
         },
         {
           id: 'discover',

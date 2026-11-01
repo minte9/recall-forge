@@ -11,10 +11,10 @@ import dev.recallforge.repository.ReviewRepository;
 @Service
 public class AssistantAnalyticsService {
 
-    private final ReviewRepository reviews;
+    private final ReviewRepository reviewRepository;
 
-    public AssistantAnalyticsService(ReviewRepository reviews) {
-        this.reviews = reviews;
+    public AssistantAnalyticsService(ReviewRepository reviewRepository) {
+        this.reviewRepository = reviewRepository;
     }
 
     @Transactional(readOnly = true)
@@ -22,10 +22,30 @@ public class AssistantAnalyticsService {
             Long userId,
             String category) {
 
-        return reviews.findRecentMistakes(
+        return reviewRepository.findRecentMistakes(
             userId,
             category,
             PageRequest.of(0, 20)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewHistoryDto> getReviewHistory(
+            Long userId,
+            String category,
+            int limit) {
+
+        int safeLimit = Math.max(1, Math.min(limit, 10));
+
+        String categoryFilter =
+            category == null || category.isBlank()
+                ? null
+                : category.trim();
+
+        return reviewRepository.findReviewHistory(
+            userId,
+            categoryFilter,
+            PageRequest.of(0, safeLimit)
         );
     }
 }

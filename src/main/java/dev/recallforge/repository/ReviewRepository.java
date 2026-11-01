@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import dev.recallforge.assistant.MistakeDto;
+import dev.recallforge.assistant.ReviewHistoryDto;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.Review;
 
@@ -298,6 +299,33 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         ORDER BY r.reviewedAt DESC
         """)
     List<MistakeDto> findRecentMistakes(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        Pageable pageable
+    );
+
+    @Query("""
+        SELECT new dev.recallforge.assistant.ReviewHistoryDto(
+            m.category,
+            m.subcategory,
+            t.title,
+            r.question,
+            r.userAnswer,
+            r.feedback,
+            r.score,
+            r.reviewedAt
+        )
+        FROM Review r
+        JOIN r.topic t
+        JOIN t.markdownFile m
+        WHERE r.user.id = :userId
+        AND (
+            :category IS NULL
+            OR LOWER(m.category) = LOWER(:category)
+        )
+        ORDER BY r.reviewedAt DESC, r.id DESC
+        """)
+    List<ReviewHistoryDto> findReviewHistory(
         @Param("userId") Long userId,
         @Param("category") String category,
         Pageable pageable
