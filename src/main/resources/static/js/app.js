@@ -130,6 +130,21 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       );
     },
 
+    // Reviewed ring: same numbers as the <job-profile-progress> bars -
+    // reviewed % (green) followed by due % (yellow), rest grey. Due comes
+    // from the starter-pack due map, so non-starter-pack categories show 0
+    // due. Due is capped so the two arcs never overflow the ring.
+    reviewedRingProgress() {
+      if (!this.dashboard || !this.dashboard.reward) {
+        return { reviewed: 0, due: 0 };
+      }
+
+      const reviewed = Math.max(0, Math.min(100, this.dashboard.reward.reviewedPercent || 0));
+      const due = Math.max(0, Math.min(this.starterPackDue[this.currentCategory] || 0, 100 - reviewed));
+
+      return { reviewed, due };
+    },
+
     // Sections ring: a section (subcategory group in the sidebar) counts
     // as reviewed - green - when none of its files have topics due, the
     // same rule groupHasDue() uses for the sidebar icon colour.

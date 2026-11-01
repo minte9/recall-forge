@@ -1181,7 +1181,7 @@
               </div>
 
               <div class="review-stat stat-green total-stat clickable info-tooltip" tabindex="0" @click="toggleMasteredPanel()"
-                data-tooltip="Share of topics with a memory score of at least 0.7 that aren't currently due for review.">
+                data-tooltip="Topics with a memory score of at least 0.7 that aren't currently due for review.">
                 <div class="stat-icon green">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 3 3 8l9 5 9-5-9-5z" />
@@ -1189,13 +1189,35 @@
                     <path d="M3 16l9 5 9-5" />
                   </svg>
                 </div>
-                <strong>{{ dashboard.reward.reviewedPercent }}%</strong>
+                <strong>{{ dashboard.reward.reviewedTopics }}</strong>
                 <span>Reviewed</span>
               </div>
             </div>
           </div>
 
           <div class="knowledge-grid">
+            <div v-if="dashboard && dashboard.reward" class="knowledge-card coverage reviewed">
+              <span class="reward-mastery-title">Reviewed</span>
+
+              <div class="reward-ring info-tooltip" role="img" tabindex="0"
+                data-tooltip="Reviewed and not due (green), due again (yellow), not reviewed yet (grey)."
+                :aria-label="`${reviewedRingProgress.reviewed}% reviewed, ${reviewedRingProgress.due}% due`">
+                <svg viewBox="0 0 120 120">
+                  <circle class="reward-ring-track" cx="60" cy="60" r="52" pathLength="100"></circle>
+                  <circle v-if="reviewedRingProgress.reviewed > 0" class="reward-ring-fill reviewed-ring-green"
+                    cx="60" cy="60" r="52" pathLength="100"
+                    :stroke-dasharray="`${reviewedRingProgress.reviewed} 100`"></circle>
+                  <circle v-if="reviewedRingProgress.due > 0" class="reward-ring-fill reviewed-ring-due"
+                    cx="60" cy="60" r="52" pathLength="100"
+                    :stroke-dasharray="`${reviewedRingProgress.due} 100`"
+                    :stroke-dashoffset="-reviewedRingProgress.reviewed"></circle>
+                </svg>
+                <div class="reward-ring-label">
+                  <span class="reward-ring-percent">{{ reviewedRingProgress.reviewed }}%</span>
+                </div>
+              </div>
+            </div>
+
             <div v-if="dashboard && dashboard.reward" class="knowledge-card coverage sections">
               <span class="reward-mastery-title">Sections</span>
 
@@ -1231,43 +1253,6 @@
                 </div>
               </div>
             </div>
-
-            <template v-if="!dashboard">
-              <div class="knowledge-card knowledge-card-wide">
-                Loading...
-              </div>
-            </template>
-
-            <template v-else-if="dashboard.showKnowledgeInsights">
-              <div v-if="dashboard.weakKnowledgeAreas && dashboard.weakKnowledgeAreas.length"
-                class="knowledge-card weak">
-                <div class="knowledge-header">
-                  <h3>Weak</h3>
-                </div>
-
-                <div class="knowledge-list">
-                  <div v-for="area in dashboard.weakKnowledgeAreas" :key="'weak-' + area.title" class="knowledge-item">
-                    <span class="dot red"></span>
-                    <span>{{ formatSubcategory(area.title) }}</span>
-                  </div>
-                </div>
-              </div>
-            </template>
-
-            <template v-else>
-              <div class="knowledge-card knowledge-card-wide">
-                <h3>
-                  Knowledge Insights
-                  <span class="info-tooltip" tabindex="0"
-                    data-tooltip="Needs at least 3 subcategories with 3 or more reviews each, so the weakest ones stand out against the rest.">
-                    <icon name="question-circle"></icon>
-                  </span>
-                </h3>
-                <p>
-                  Complete a few reviews to identify your weakest areas.
-                </p>
-              </div>
-            </template>
           </div>
 
           <div v-if="dashboard && dashboard.reward" class="reward-card">
