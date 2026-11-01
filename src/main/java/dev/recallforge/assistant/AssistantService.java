@@ -44,6 +44,10 @@ public class AssistantService {
 
     public String ask(String question, String category) {
 
+        // The panel is admin-only in the UI; enforce it here too so the
+        // endpoint can't be used to run OpenAI calls directly.
+        currentUser.requireAdmin();
+
         Long userId = currentUser.currentUserId();
 
         ensureDailyAiLimit(userId);

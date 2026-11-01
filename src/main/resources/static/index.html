@@ -904,6 +904,8 @@
                     v-for="suggestion in assistantSuggestions"
                     :key="suggestion.id"
                     type="button"
+                    :disabled="isAssistantSuggestionUsed(suggestion)"
+                    :title="isAssistantSuggestionUsed(suggestion) ? 'Already asked — review more topics to refresh' : null"
                     @click="selectAssistantSuggestion(suggestion)"
                   >
                     {{ suggestion.label }}
