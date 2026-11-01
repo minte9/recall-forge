@@ -494,15 +494,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       return Number(Number(score).toFixed(2)) >= 0.7;
     },
 
-    // Dash offset for the mastery ring's progress circle - r=23 matches
-    // the <circle> radius in the ring markup, so this stays in sync with
-    // .mastery-ring-progress's stroke-dasharray in app.css.
-    masteryRingOffset(score) {
-      const circumference = 2 * Math.PI * 23;
-      const clamped = Math.max(0, Math.min(1, Number(score) || 0));
-      return circumference * (1 - clamped);
-    },
-
     formatTokenCount(value) {
       const tokens = Number(value) || 0;
 
@@ -2447,6 +2438,7 @@ Java supports single inheritance...</pre>
 });
 
 app.component("recall-assistant", RecallAssistant);
+app.component("mastery-ring", MasteryRing);
 
 // Reusable icon: <icon name="pencil" class="menu-icon"></icon>
 // Backed by the Bootstrap Icons path data in js/icons.js - add a name there
