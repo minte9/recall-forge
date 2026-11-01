@@ -102,6 +102,8 @@ const app = createApp({
       assistantSuggestionsOpen: false,
       assistantLoading: false,
       assistantMessages: [],
+      // category -> suggestion ids already answered; cleared by a new review
+      assistantUsedSuggestions: {},
 
       assistantInsightData: null,
       assistantInsightLoading: false,
@@ -503,18 +505,34 @@ When you click <strong>Start Review</strong>, this panel will be updated.
   },
 
   methods: {
-    selectAssistantSuggestion(suggestion) {
+    async selectAssistantSuggestion(suggestion) {
+      if (this.isAssistantSuggestionUsed(suggestion)) {
+        return;
+      }
+
+      const category = this.currentCategory;
+
       this.assistantInput = suggestion.prompt;
       this.assistantSuggestionsOpen = false;
 
-      this.sendAssistantMessage();
+      const answered = await this.sendAssistantMessage();
+
+      if (answered) {
+        const used = this.assistantUsedSuggestions[category] || [];
+        this.assistantUsedSuggestions[category] = [...used, suggestion.id];
+      }
+    },
+
+    isAssistantSuggestionUsed(suggestion) {
+      return (this.assistantUsedSuggestions[this.currentCategory] || [])
+        .includes(suggestion.id);
     },
 
     async sendAssistantMessage() {
       const message = this.assistantInput.trim();
 
       if (!message || this.assistantLoading) {
-          return;
+          return false;
       }
 
       const category = this.currentCategory;
@@ -544,13 +562,17 @@ When you click <strong>Start Review</strong>, this panel will be updated.
               content: answer
           });
 
+          return true;
+
       } catch (error) {
           console.error('Assistant error:', error);
 
           this.assistantMessages.push({
               role: 'assistant',
-              content: 'Unable to analyze your mistakes right now.'
+              content: error.limitMessage || 'Unable to analyze your mistakes right now.'
           });
+
+          return false;
 
       } finally {
           this.assistantLoading = false;
@@ -572,7 +594,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       // Daily AI limit reached: show the server's message as the reply
       if (response.status === 429) {
-          return await response.text();
+          const error = new Error('Assistant daily AI limit reached');
+          error.limitMessage = await response.text();
+          throw error;
       }
 
       if (!response.ok) {
@@ -1803,6 +1827,9 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         });
 
         this.feedbackHistoryVisible = false;
+
+        // New review data - the assistant suggestions are worth asking again
+        delete this.assistantUsedSuggestions[this.currentCategory];
 
         await this.loadDashboard();
         await this.loadMarkdownSummaries(false);
