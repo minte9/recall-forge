@@ -2625,7 +2625,7 @@
     cursor: not-allowed;
   }
 
-  /* Trash button inside the assistant input, just left of the "?". */
+  /* Trash button inside the assistant input, just left of the AI badge. */
   .assistant-input-row button.assistant-clear {
     position: absolute;
     top: 50%;
@@ -2655,13 +2655,13 @@
     height: 100%;
   }
 
-  /* "?" inside the assistant input, left of the AI badge; bubble lists example
+  /* "?" inside the assistant input, right-most; bubble lists example
      prompts per assistant tool. Same look as .info-tooltip, but with a real
      child element so it can hold a grouped list. */
   .assistant-hints {
     position: absolute;
     top: 50%;
-    right: 34px;
+    right: 10px;
     transform: translateY(-50%);
     display: inline-flex;
     width: 16px;
@@ -2856,11 +2856,11 @@
       margin-bottom: 0;
   }
 
-  /* AI badge inside the assistant input, right-most (right of the "?"). */
+  /* AI badge inside the assistant input, between the trash and the "?". */
   .ai-badge-input {
     position: absolute;
     top: 50%;
-    right: 8px;
+    right: 32px;
     transform: translateY(-50%);
   }
 
