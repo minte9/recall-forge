@@ -89,6 +89,18 @@ const RecallAssistant = {
       return !this.insightLoading
         && !!this.insightData?.weakestTopicId
         && !!this.insightData?.weakestMarkdownFileId;
+    },
+
+    // Insight split at its last space, so the last word and the arrow icon
+    // can wrap together instead of leaving the arrow alone on a new line.
+    insightParts() {
+      const text = this.insight.trimEnd();
+      const cut = text.lastIndexOf(' ') + 1;
+
+      return {
+        lead: text.slice(0, cut),
+        last: text.slice(cut)
+      };
     }
   },
 
@@ -326,7 +338,8 @@ const RecallAssistant = {
         @click="openInsightTopic"
         @keydown.enter="openInsightTopic"
       >
-        {{ insight }}
+        <template v-if="insightClickable">{{ insightParts.lead }}<span class="assistant-insight-tail">{{ insightParts.last }}<icon name="arrow-up-right" class="assistant-insight-go" aria-hidden="true"></icon></span></template>
+        <template v-else>{{ insight }}</template>
       </div>
 
       <!-- Assistant conversation -->

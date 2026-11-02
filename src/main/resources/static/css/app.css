@@ -2592,6 +2592,26 @@
     background: #e5e7eb;
   }
 
+  /* Arrow after a clickable insight: one click starts reviewing that topic. */
+  .assistant-insight-go {
+    width: 12px;
+    height: 12px;
+    margin-left: 4px;
+    vertical-align: -1px;
+    color: #2563eb;
+    transition: transform .15s ease;
+  }
+
+  /* Last word + arrow, kept on one line so the arrow never wraps alone. */
+  .assistant-insight-tail {
+    white-space: nowrap;
+  }
+
+  .assistant-insight.clickable:hover .assistant-insight-go,
+  .assistant-insight.clickable:focus-visible .assistant-insight-go {
+    transform: translate(2px, -2px);
+  }
+
   .assistant-input-wrapper {
     position: relative;
   }
