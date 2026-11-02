@@ -2856,6 +2856,11 @@
       margin-bottom: 0;
   }
 
+  .recall-assistant .ai-badge {
+      margin-top: 8px;
+  }
+
+
   /* .assistant-response p {
     margin: 8px 0 0;
   } */
