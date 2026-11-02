@@ -395,6 +395,8 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         @Param("userId") Long userId
     );
 
+    // Mastered count uses the same rule as countMasteredByUserIdAndCategory
+    // (dashboard Mastery ring), so the assistant and dashboard agree.
     @Query("""
         SELECT new dev.recallforge.assistant.KnowledgeAreaDto(
             m.category,
@@ -403,8 +405,9 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
             AVG(t.memoryScore),
             SUM(
                 CASE
-                    WHEN t.memoryScore >= 0.7
-                        AND t.nextReviewAt >= :masteryDate
+                    WHEN t.memoryScore >= :memoryScore
+                        AND t.reviewStreak >= :minStreak
+                        AND t.nextReviewAt >= :now
                     THEN 1L
                     ELSE 0L
                 END
@@ -423,6 +426,8 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     List<KnowledgeAreaDto> findKnowledgeAreas(
         @Param("userId") Long userId,
         @Param("category") String category,
-        @Param("masteryDate") LocalDateTime masteryDate
+        @Param("memoryScore") double memoryScore,
+        @Param("minStreak") int minStreak,
+        @Param("now") LocalDateTime now
     );
 }

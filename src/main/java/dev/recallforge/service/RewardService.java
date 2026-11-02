@@ -38,11 +38,11 @@ import dev.recallforge.security.CurrentUserService;
 @Service
 public class RewardService {
 
-    private static final double MASTERY_MEMORY_SCORE = 0.7;
+    public static final double MASTERY_MEMORY_SCORE = 0.7;
 
     // Consecutive good reviews (see RepetitionService's streak) a reviewed
     // topic needs before it counts as mastered.
-    private static final int MASTERY_MIN_STREAK = 3;
+    public static final int MASTERY_MIN_STREAK = 3;
 
     // A "goal day" is hit either by grading enough fresh reviews well, or by
     // getting enough code-challenge attempts fully correct (score == 1 -
