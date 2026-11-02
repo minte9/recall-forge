@@ -2606,7 +2606,7 @@
     flex: 1;
     min-width: 0;
     padding: 11px;
-    padding-right: 58px;
+    padding-right: 84px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
   }
@@ -2629,7 +2629,7 @@
   .assistant-input-row button.assistant-clear {
     position: absolute;
     top: 50%;
-    right: 34px;
+    right: 58px;
     transform: translateY(-50%);
     display: inline-flex;
     width: 16px;
@@ -2655,13 +2655,13 @@
     height: 100%;
   }
 
-  /* "?" inside the assistant input, right-aligned; bubble lists example
+  /* "?" inside the assistant input, left of the AI badge; bubble lists example
      prompts per assistant tool. Same look as .info-tooltip, but with a real
      child element so it can hold a grouped list. */
   .assistant-hints {
     position: absolute;
     top: 50%;
-    right: 10px;
+    right: 34px;
     transform: translateY(-50%);
     display: inline-flex;
     width: 16px;
@@ -2856,8 +2856,17 @@
       margin-bottom: 0;
   }
 
-  .recall-assistant .ai-badge {
-      margin-top: 8px;
+  /* AI badge inside the assistant input, right-most (right of the "?"). */
+  .ai-badge-input {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+  }
+
+  .ai-badge-input svg {
+    width: 20px;
+    height: 20px;
   }
 
 
@@ -3253,6 +3262,11 @@
 
     .layout.mobile-dashboard>.left-panel {
       display: none;
+    }
+
+    /* Match body text and stop iOS from zooming in on focus (<16px). */
+    .assistant-input-row input {
+      font-size: 14px;
     }
 
   }

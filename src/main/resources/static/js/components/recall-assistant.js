@@ -407,14 +407,15 @@ const RecallAssistant = {
               </span>
             </span>
           </span>
+
+          <span class="ai-badge ai-badge-input" tabindex="0" data-tooltip="AI-generated content"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path fill="#facc15" transform="translate(6.75,-0.75)" d="M3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31z"></path>
+            <text x="7" y="14.5" text-anchor="middle" font-size="10" font-weight="700" font-family="Arial, Helvetica, sans-serif" fill="currentColor">AI</text>
+          </svg></span>
         </div>
 
       </div>
 
-      <span class="ai-badge ai-badge-end" tabindex="0" data-tooltip="AI-generated content"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-        <path fill="#facc15" transform="translate(6.75,-0.75)" d="M3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387A1.73 1.73 0 0 0 4.593 5.69l-.387 1.162a.217.217 0 0 1-.412 0L3.407 5.69A1.73 1.73 0 0 0 2.31 4.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387A1.73 1.73 0 0 0 3.407 2.31z"></path>
-        <text x="7" y="14.5" text-anchor="middle" font-size="10" font-weight="700" font-family="Arial, Helvetica, sans-serif" fill="currentColor">AI</text>
-      </svg></span>
 
       <div ref="bottom"></div>
 
