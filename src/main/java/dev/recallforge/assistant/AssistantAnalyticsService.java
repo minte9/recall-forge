@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.recallforge.repository.ReviewRepository;
 import dev.recallforge.repository.TopicRepository;
+import dev.recallforge.service.RewardService;
 
 
 @Service
@@ -140,13 +141,12 @@ public class AssistantAnalyticsService {
                 ? null
                 : category.trim();
 
-        LocalDateTime masteryDate =
-            LocalDateTime.now().plusDays(7);
-
         return topicRepository.findKnowledgeAreas(
             userId,
             categoryFilter,
-            masteryDate
+            RewardService.MASTERY_MEMORY_SCORE,
+            RewardService.MASTERY_MIN_STREAK,
+            LocalDateTime.now()
         );
     }
 }
