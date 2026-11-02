@@ -59,6 +59,15 @@ const RecallAssistant = {
             'What is my average review score this month?', 
             'Am I getting better, or just completing more reviews'
           ]
+        },
+        {
+          title: 'Areas',
+          prompts: [
+            'What subjects do I already know?',
+            'Which are my strongest areas?',
+            'What knowledge areas should I improve?',
+            "What are my weakest Java subcategories?"
+          ]
         }
       ];
     },
@@ -376,7 +385,7 @@ const RecallAssistant = {
           >
             <icon name="question-circle"></icon>
             <span class="assistant-hints-bubble" role="tooltip">
-              <span class="assistant-hints-header">Suggested questions</span>
+              <span class="assistant-hints-header">Suggested Questions</span>
               <span
                 v-for="group in toolHints"
                 :key="group.title"

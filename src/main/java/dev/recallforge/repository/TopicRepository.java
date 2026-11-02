@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import dev.recallforge.assistant.KnowledgeAreaDto;
 import dev.recallforge.domain.MarkdownFile;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.dto.MarkdownSummaryDto;
@@ -392,5 +393,36 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     void deleteByMarkdownFileIdAndUserId(
         @Param("markdownFileId") Long markdownFileId,
         @Param("userId") Long userId
+    );
+
+    @Query("""
+        SELECT new dev.recallforge.assistant.KnowledgeAreaDto(
+            m.category,
+            m.subcategory,
+            COUNT(t.id),
+            AVG(t.memoryScore),
+            SUM(
+                CASE
+                    WHEN t.memoryScore >= 0.7
+                        AND t.nextReviewAt >= :masteryDate
+                    THEN 1L
+                    ELSE 0L
+                END
+            )
+        )
+        FROM Topic t
+        JOIN t.markdownFile m
+        WHERE t.user.id = :userId
+        AND (
+            :category IS NULL
+            OR LOWER(m.category) = LOWER(:category)
+        )
+        GROUP BY m.category, m.subcategory
+        ORDER BY AVG(t.memoryScore) ASC
+    """)
+    List<KnowledgeAreaDto> findKnowledgeAreas(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("masteryDate") LocalDateTime masteryDate
     );
 }

@@ -99,4 +99,41 @@ public class AssistantTools {
             category
         );
     }
+
+    @Tool(description = """
+        Retrieve the authenticated user's existing knowledge
+        areas, grouped by category and subcategory.
+
+        Returns topic counts, average memory scores,
+        and mastered topic counts.
+
+        Use this tool when the user asks:
+        - What subjects or knowledge areas they already have
+        - Which categories or subcategories are strongest
+        - Which knowledge areas are weakest
+        - How many topics they have in a category
+        - What areas they should improve based on recall strength
+
+        An empty category means all categories.
+
+        This tool only analyzes existing knowledge.
+        It does not identify missing curriculum topics.
+    """)
+    public List<KnowledgeAreaDto> getKnowledgeAreas(
+            @ToolParam(description = """
+                Knowledge category, such as Java or Spring Boot.
+                Use an empty string for all categories.
+                """)
+            String category,
+
+            ToolContext context) {
+
+        Long userId =
+            (Long) context.getContext().get("userId");
+
+        return analytics.getKnowledgeAreas(
+            userId,
+            category
+        );
+    }
 }

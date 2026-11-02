@@ -91,6 +91,18 @@ public class AssistantService {
                 - Explain score changes in percentage points.
                 - Do not confuse increased review volume with improved performance.
                 - If the current month has very few reviews, mention that the trend is preliminary.
+
+                When analyzing knowledge areas:
+                - Use getKnowledgeAreas to retrieve actual topic statistics.
+                - Distinguish memory scores from review scores.
+                - A high memory score indicates stronger estimated recall.
+                - Mastered topics meet RecallForge's mastery criteria.
+                - Identify strong and weak areas using the returned data.
+                - Do not claim the user lacks knowledge of topics that
+                are simply absent from RecallForge.
+                - Do not invent categories, subcategories, or topic counts.
+                - Explain that knowledge statistics reflect the user's
+                recorded RecallForge topics, not their entire expertise.
                 """)
             .system(s -> s.param("category", scope))
             .user(question)

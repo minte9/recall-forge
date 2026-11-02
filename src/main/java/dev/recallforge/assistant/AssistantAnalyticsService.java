@@ -1,5 +1,6 @@
 package dev.recallforge.assistant;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -8,14 +9,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.recallforge.repository.ReviewRepository;
+import dev.recallforge.repository.TopicRepository;
+
 
 @Service
 public class AssistantAnalyticsService {
 
     private final ReviewRepository reviewRepository;
+    private final TopicRepository topicRepository;
 
-    public AssistantAnalyticsService(ReviewRepository reviewRepository) {
+
+    public AssistantAnalyticsService(
+            ReviewRepository reviewRepository,
+            TopicRepository topicRepository) {
+
         this.reviewRepository = reviewRepository;
+        this.topicRepository = topicRepository;
     }
 
     @Transactional(readOnly = true)
@@ -118,6 +127,26 @@ public class AssistantAnalyticsService {
             stats.getReviewCount(),
             stats.getAverageScore(),
             stats.getHighScoreRate()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<KnowledgeAreaDto> getKnowledgeAreas(
+            Long userId,
+            String category) {
+
+        String categoryFilter =
+            category == null || category.isBlank()
+                ? null
+                : category.trim();
+
+        LocalDateTime masteryDate =
+            LocalDateTime.now().plusDays(7);
+
+        return topicRepository.findKnowledgeAreas(
+            userId,
+            categoryFilter,
+            masteryDate
         );
     }
 }
