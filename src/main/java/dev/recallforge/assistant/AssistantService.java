@@ -28,6 +28,7 @@ public class AssistantService {
     private final QuestionGenerationRepository questionGenerationRepository;
     private final AppReviewLimitProperties reviewLimitProperties;
 
+    @SuppressWarnings("null")
     public AssistantService(
             ChatModel chatModel,
             AssistantTools tools,
@@ -42,6 +43,7 @@ public class AssistantService {
         this.reviewLimitProperties = reviewLimitProperties;
     }
 
+    @SuppressWarnings("null")
     public String ask(String question, String category) {
 
         // The panel is admin-only in the UI; enforce it here too so the
@@ -72,6 +74,23 @@ public class AssistantService {
                 Never invent statistics or review results.
 
                 Selected category: {category}
+
+                When analyzing recall progress:
+                - Use getProgressStatistics for historical performance.
+                - Compare average scores and review counts separately.
+                - A higher review count does not necessarily mean better recall.
+                - Explain whether average scores increased or decreased.
+                - Treat incomplete calendar months cautiously.
+                - If either month has no reviews, do not claim improvement.
+                - Do not invent statistics or trends.
+                - Distinguish review performance from long-term retention.
+
+                When comparing monthly progress:
+                - Always mention the actual month names.
+                - Use "so far in [month]" for the current month.
+                - Explain score changes in percentage points.
+                - Do not confuse increased review volume with improved performance.
+                - If the current month has very few reviews, mention that the trend is preliminary.
                 """)
             .system(s -> s.param("category", scope))
             .user(question)

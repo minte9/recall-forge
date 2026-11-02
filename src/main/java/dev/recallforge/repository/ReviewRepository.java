@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import dev.recallforge.assistant.MistakeDto;
 import dev.recallforge.assistant.ReviewHistoryDto;
+import dev.recallforge.assistant.ReviewStatsProjection;
 import dev.recallforge.domain.RetryType;
 import dev.recallforge.domain.Review;
 
@@ -329,5 +330,33 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         @Param("userId") Long userId,
         @Param("category") String category,
         Pageable pageable
+    );
+
+    @Query("""
+        SELECT
+            COUNT(r.id) AS reviewCount,
+            AVG(r.score) AS averageScore,
+            AVG(
+                CASE
+                    WHEN r.score >= 0.7 THEN 1.0
+                    ELSE 0.0
+                END
+            ) AS highScoreRate
+        FROM Review r
+        JOIN r.topic t
+        JOIN t.markdownFile m
+        WHERE r.user.id = :userId
+        AND r.reviewedAt >= :startDate
+        AND r.reviewedAt < :endDate
+        AND (
+            :category IS NULL
+            OR LOWER(m.category) = LOWER(:category)
+        )
+        """)
+    ReviewStatsProjection getReviewStatistics(
+        @Param("userId") Long userId,
+        @Param("category") String category,
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate
     );
 }

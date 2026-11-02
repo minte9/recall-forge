@@ -43,12 +43,21 @@ const RecallAssistant = {
           ]
         },
         {
-          title: 'Review history',
+          title: 'History',
           prompts: [
             'Show my last 5 reviews.',
             'What did I review today?',
             'Show my last 10 reviews with feedback.',
             'How did I score on my recent reviews?'
+          ]
+        },
+        {
+          title: 'Progress',
+          prompts: [
+            'Am I improving compared with last month?', 
+            'How is my progress?', 
+            'What is my average review score this month?', 
+            'Am I getting better, or just completing more reviews'
           ]
         }
       ];

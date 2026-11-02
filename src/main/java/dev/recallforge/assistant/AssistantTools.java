@@ -20,7 +20,7 @@ public class AssistantTools {
         Retrieve recent mistakes and low-scoring answers
         for a knowledge category. Use when the user asks
         about mistakes, weaknesses, or recurring errors.
-        """)
+    """)
     public Object getMistakes(
             @ToolParam(description = "Knowledge category, e.g. Java")
             String category,
@@ -43,7 +43,7 @@ public class AssistantTools {
         reviews across all categories.
 
         The maximum number of returned reviews is 10.
-        """)
+    """)
     public List<ReviewHistoryDto> getReviewHistory(
             @ToolParam(description = """
                 Knowledge category such as Java or Spring Boot.
@@ -66,6 +66,37 @@ public class AssistantTools {
             userId,
             category,
             limit == null ? 5 : limit
+        );
+    }
+
+    @Tool(description = """
+        Retrieve the authenticated user's recall progress
+        statistics for the current and previous calendar month.
+
+        Returns review counts, average scores, high-score
+        rates, and changes between the two periods.
+
+        Use this tool when the user asks about progress,
+        improvement, performance trends, or whether
+        they are getting better at a knowledge category.
+
+        An empty category means all categories.
+    """)
+    public ProgressStatisticsDto getProgressStatistics(
+            @ToolParam(description = """
+                Knowledge category, such as Java or Spring Boot.
+                Use an empty string for all categories.
+                """)
+            String category,
+
+            ToolContext context) {
+
+        Long userId =
+            (Long) context.getContext().get("userId");
+
+        return analytics.getProgressStatistics(
+            userId,
+            category
         );
     }
 }
