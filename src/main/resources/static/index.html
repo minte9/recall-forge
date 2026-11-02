@@ -834,16 +834,7 @@
               @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
-            </template>
-
-            <!-- AI Recall Assistant -->
-            <recall-assistant
-              v-if="currentUser?.role == 'ADMIN'"
-              ref="assistant"
-              :category="currentCategory"
-              @open-topic="openAssistantInsightTopic"
-            ></recall-assistant>
-            
+            </template>            
           </div>
         </div>
 

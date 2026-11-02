@@ -297,7 +297,7 @@ const RecallAssistant = {
     <div class="recall-assistant">
 
       <div class="assistant-title" title="AI Assistant">
-        <h3>✨ Insights</h3>
+        <h3>Insights</h3> <!-- ✨ -->
       </div>
 
       <div
