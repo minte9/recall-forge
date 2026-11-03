@@ -284,6 +284,22 @@ const Api = {
     return response.json();
   },
 
+  async reorderMarkdownFiles(category, subcategory, markdownFileIds) {
+    const response = await fetch("/api/markdown/order", {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ category, subcategory, markdownFileIds })
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Could not save the new file order.");
+    }
+  },
+
   async deleteMarkdown(markdownFileId) {
     const response = await fetch("/api/markdown/" + encodeURIComponent(markdownFileId), {
       method: "DELETE",

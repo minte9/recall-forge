@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -925,6 +926,37 @@ public class MarkdownFileService {
 
         topicRepository.deleteByMarkdownFileIdAndUserId(markdownFileId, userId);
         markdownFileRepository.delete(markdownFile);
+    }
+
+    /**
+     * Rewrites the display order of the current user's files in one
+     * category/subcategory to match {@code markdownFileIds} (1..n). The ids
+     * must be exactly that subcategory's files - no missing, extra, foreign
+     * or duplicate ids - so a stale or tampered list can't leave the order
+     * half-applied or touch files outside the subcategory.
+     */
+    @Transactional
+    public void reorderFiles(String category, String subcategory, List<Long> markdownFileIds) {
+        Long userId = currentUserService.currentUserId();
+
+        Map<Long, MarkdownFile> filesById = markdownFileRepository
+                .findByUserIdAndCategoryAndSubcategory(userId, category, subcategory)
+                .stream()
+                .collect(Collectors.toMap(MarkdownFile::getId, file -> file));
+
+        if (markdownFileIds == null
+                || markdownFileIds.size() != filesById.size()
+                || new HashSet<>(markdownFileIds).size() != markdownFileIds.size()
+                || !filesById.keySet().containsAll(markdownFileIds)) {
+            throw new IllegalArgumentException(
+                    "File list doesn't match this subcategory. Reload the page and try again.");
+        }
+
+        for (int i = 0; i < markdownFileIds.size(); i++) {
+            filesById.get(markdownFileIds.get(i)).updateDisplayOrder(i + 1);
+        }
+
+        markdownFileRepository.saveAll(filesById.values());
     }
 
     private Integer nextDisplayOrder(Long userId, String category, String subcategory) {

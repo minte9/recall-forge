@@ -1624,6 +1624,30 @@
     border-bottom: 1px solid #cccccc;
   }
 
+  /* Drag-to-reorder grip (desktop only, see armFileDrag in app.js) -
+     hidden until the row is hovered so the list stays uncluttered. */
+  .drag-handle {
+    cursor: grab;
+    color: #94a3b8;
+    font-size: 14px;
+    letter-spacing: -3px;
+    padding: 4px 6px 4px 2px;
+    user-select: none;
+    visibility: hidden;
+  }
+
+  .markdown-row:hover .drag-handle {
+    visibility: visible;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+
+  .markdown-row.dragging {
+    opacity: 0.4;
+  }
+
   .group-left {
     display: flex;
     align-items: center;
