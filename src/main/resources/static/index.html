@@ -332,7 +332,7 @@
 
             <starter-pack-list v-for="row in starterPackRows" :key="row[0]" :categories="row"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              :mastery="starterPackMastery" :due="starterPackDue" :profile-categories="activeProfileCategories"
               @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 
@@ -830,7 +830,7 @@
 
             <starter-pack-list v-for="row in starterPackRows" :key="row[0]" :categories="row"
               :category-options="categoryOptions" :unlock-status="starterPackUnlockStatus"
-              :mastery="starterPackMastery" :profile-categories="activeProfileCategories"
+              :mastery="starterPackMastery" :due="starterPackDue" :profile-categories="activeProfileCategories"
               @import="importStarterPack" @open="openImportedCategory">
             </starter-pack-list>
 

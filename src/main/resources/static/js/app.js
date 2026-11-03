@@ -2475,10 +2475,18 @@ const starterPackCategoryMixin = {
   props: {
     categoryOptions: { type: Array, default: () => [] },
     unlockStatus: { type: Object, default: () => ({}) },
-    mastery: { type: Object, default: () => ({}) }
+    mastery: { type: Object, default: () => ({}) },
+    due: { type: Object, default: () => ({}) }
   },
   emits: ["import", "open"],
   methods: {
+    percent(category) {
+      return this.mastery[category] || 0;
+    },
+    // Capped so independently rounded reviewed + due never overflow the track.
+    duePercent(category) {
+      return Math.min(this.due[category] || 0, 100 - this.percent(category));
+    },
     isImported(category) {
       return this.categoryOptions.some(o => o.category === category);
     },
@@ -2535,8 +2543,16 @@ app.component("starter-pack-list", {
       <button v-for="category in visibleCategories" :key="category" class="starter-pack-btn"
         :class="dueColorClass(category)"
         :disabled="isLocked(category)" :title="tooltip(category)" @click="onClick(category)">
-        {{ category }}
-        <span v-if="mastery[category] > 0" class="starter-pack-mastery-badge">{{ mastery[category] || 0 }}%</span>
+        <span class="starter-pack-head">
+          <span class="starter-pack-name">{{ category }}</span>
+          <span class="starter-pack-percent">{{ percent(category) }}%</span>
+        </span>
+        <span class="starter-pack-track">
+          <span class="starter-pack-bar" :style="{ width: percent(category) + '%' }"></span>
+          <span v-if="duePercent(category) > 0" class="starter-pack-bar-due"
+            :style="{ width: duePercent(category) + '%' }"
+            :title="duePercent(category) + '% due'"></span>
+        </span>
       </button>
     </div>
   `
@@ -2546,44 +2562,24 @@ app.component("starter-pack-list", {
 //   :profile-categories="activeProfileCategories" :category-options="categoryOptions"
 //   :unlock-status="starterPackUnlockStatus" :mastery="starterPackMastery"
 //   :due="starterPackDue" @import="importStarterPack" @open="openImportedCategory">
-// One bar per profile category that is a starter pack, in the same order as
-// the Starter Pack button rows (STARTER_PACK_ROWS): reviewed % in green,
-// followed by due % (reviewed before, due again) in yellow.
+// Same tiles as the All Categories view (<starter-pack-list> per
+// STARTER_PACK_ROWS row), filtered to the profile's categories; empty rows
+// render nothing.
 app.component("job-profile-progress", {
   mixins: [starterPackCategoryMixin],
   props: {
-    profileCategories: { type: Array, required: true },
-    due: { type: Object, default: () => ({}) }
+    profileCategories: { type: Array, required: true }
   },
-  computed: {
-    visibleCategories() {
-      return STARTER_PACK_ROWS.flat().filter(c => this.profileCategories.includes(c));
-    }
-  },
-  methods: {
-    percent(category) {
-      return this.mastery[category] || 0;
-    },
-    // Capped so independently rounded reviewed + due never overflow the track.
-    duePercent(category) {
-      return Math.min(this.due[category] || 0, 100 - this.percent(category));
-    }
+  data() {
+    return { rows: STARTER_PACK_ROWS };
   },
   template: `
-    <div v-if="visibleCategories.length > 0" class="job-profile-progress">
-      <button v-for="category in visibleCategories" :key="category" class="job-profile-row"
-        :disabled="isLocked(category)" :title="tooltip(category)" @click="onClick(category)">
-        <span class="job-profile-stack">
-          <span class="job-profile-label" :class="dueColorClass(category)">{{ category }}</span>
-          <span class="job-profile-track">
-            <span class="job-profile-bar" :style="{ width: percent(category) + '%' }"></span>
-            <span v-if="duePercent(category) > 0" class="job-profile-bar-due"
-              :style="{ width: duePercent(category) + '%' }"
-              :title="duePercent(category) + '% due'"></span>
-          </span>
-        </span>
-        <span class="job-profile-percent">{{ percent(category) }}%</span>
-      </button>
+    <div class="job-profile-progress">
+      <starter-pack-list v-for="row in rows" :key="row[0]" :categories="row"
+        :profile-categories="profileCategories" :category-options="categoryOptions"
+        :unlock-status="unlockStatus" :mastery="mastery" :due="due"
+        @import="$emit('import', $event)" @open="$emit('open', $event)">
+      </starter-pack-list>
     </div>
   `
 });
