@@ -240,4 +240,45 @@ class MarkdownControllerTest {
             .hasStatus(400)
             .bodyText().contains("looks like your whole Obsidian vault");
     }
+
+    @Test
+    void reorderMarkdownFiles_delegatesToServiceAndReturnsNoContent() {
+        mockMvcTester.put().uri("/api/markdown/order")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                { "category": "Java", "subcategory": "Core", "markdownFileIds": [3, 1, 2] }
+                """)
+            .assertThat()
+            .hasStatus(204);
+
+        verify(markdownFileService).reorderFiles("Java", "Core", List.of(3L, 1L, 2L));
+    }
+
+    @Test
+    void reorderMarkdownFiles_mismatchedIds_returnsBadRequest() {
+        org.mockito.Mockito.doThrow(new IllegalArgumentException("File list doesn't match this subcategory."))
+            .when(markdownFileService).reorderFiles(any(), any(), any());
+
+        mockMvcTester.put().uri("/api/markdown/order")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                { "category": "Java", "subcategory": "Core", "markdownFileIds": [99] }
+                """)
+            .assertThat()
+            .hasStatus(400)
+            .bodyText().contains("doesn't match");
+    }
+
+    @Test
+    void reorderMarkdownFiles_emptyIdList_returnsBadRequestWithoutCallingService() {
+        mockMvcTester.put().uri("/api/markdown/order")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                { "category": "Java", "subcategory": "Core", "markdownFileIds": [] }
+                """)
+            .assertThat()
+            .hasStatus(400);
+
+        verify(markdownFileService, never()).reorderFiles(any(), any(), any());
+    }
 }

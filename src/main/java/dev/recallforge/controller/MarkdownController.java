@@ -19,6 +19,7 @@ import dev.recallforge.dto.MarkdownCreateRequest;
 import dev.recallforge.dto.MarkdownOptimizeRequest;
 import dev.recallforge.dto.MarkdownOptimizeResponse;
 import dev.recallforge.dto.MarkdownOriginalUpdateRequest;
+import dev.recallforge.dto.MarkdownReorderRequest;
 import dev.recallforge.dto.MarkdownReviewCountResponse;
 import dev.recallforge.dto.MarkdownUpdateRequest;
 import dev.recallforge.dto.MarkdownUploadResponse;
@@ -62,6 +63,12 @@ public class MarkdownController {
     @GetMapping("/{id}")
     public MarkdownUploadResponse getMarkdown(@PathVariable Long id) {
         return markdownFileService.getById(id);
+    }
+
+    @PutMapping("/order")
+    public ResponseEntity<Void> reorderMarkdownFiles(@Valid @RequestBody MarkdownReorderRequest request) {
+        markdownFileService.reorderFiles(request.category(), request.subcategory(), request.markdownFileIds());
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")

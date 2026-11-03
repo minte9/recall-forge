@@ -1849,4 +1849,74 @@ class MarkdownFileServiceTest {
         assertThat(response.imported()).hasSize(1);
         verify(subcategoryOrderRepository, org.mockito.Mockito.never()).save(any());
     }
+
+    private static MarkdownFile fileWithId(long id, String title, int displayOrder) {
+        MarkdownFile file = new MarkdownFile(
+            title + ".md", "content", "hash" + id, "Programming", "Java", "Core", title, new UserAccount()
+        );
+        ReflectionTestUtils.setField(file, "id", id);
+        file.updateDisplayOrder(displayOrder);
+        return file;
+    }
+
+    @Test
+    void reorderFiles_validIds_assignsDisplayOrderInGivenOrder() {
+        setUp();
+        MarkdownFile a = fileWithId(10L, "A", 1);
+        MarkdownFile b = fileWithId(11L, "B", 2);
+        MarkdownFile c = fileWithId(12L, "C", 3);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByUserIdAndCategoryAndSubcategory(1L, "Java", "Core"))
+            .thenReturn(List.of(a, b, c));
+
+        markdownFileService.reorderFiles("Java", "Core", List.of(12L, 10L, 11L));
+
+        assertThat(c.getDisplayOrder()).isEqualTo(1);
+        assertThat(a.getDisplayOrder()).isEqualTo(2);
+        assertThat(b.getDisplayOrder()).isEqualTo(3);
+        verify(markdownFileRepository).saveAll(any());
+    }
+
+    @Test
+    void reorderFiles_idOutsideSubcategoryOrUser_throwsAndChangesNothing() {
+        setUp();
+        MarkdownFile a = fileWithId(10L, "A", 1);
+        MarkdownFile b = fileWithId(11L, "B", 2);
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByUserIdAndCategoryAndSubcategory(1L, "Java", "Core"))
+            .thenReturn(List.of(a, b));
+
+        assertThatThrownBy(() -> markdownFileService.reorderFiles("Java", "Core", List.of(11L, 99L)))
+            .isInstanceOf(IllegalArgumentException.class);
+
+        assertThat(a.getDisplayOrder()).isEqualTo(1);
+        assertThat(b.getDisplayOrder()).isEqualTo(2);
+        verify(markdownFileRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void reorderFiles_missingId_throws() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByUserIdAndCategoryAndSubcategory(1L, "Java", "Core"))
+            .thenReturn(List.of(fileWithId(10L, "A", 1), fileWithId(11L, "B", 2)));
+
+        assertThatThrownBy(() -> markdownFileService.reorderFiles("Java", "Core", List.of(11L)))
+            .isInstanceOf(IllegalArgumentException.class);
+        verify(markdownFileRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void reorderFiles_duplicateId_throws() {
+        setUp();
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(markdownFileRepository.findByUserIdAndCategoryAndSubcategory(1L, "Java", "Core"))
+            .thenReturn(List.of(fileWithId(10L, "A", 1), fileWithId(11L, "B", 2)));
+
+        assertThatThrownBy(() -> markdownFileService.reorderFiles("Java", "Core", List.of(10L, 10L)))
+            .isInstanceOf(IllegalArgumentException.class);
+        verify(markdownFileRepository, never()).saveAll(any());
+    }
 }

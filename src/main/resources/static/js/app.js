@@ -40,6 +40,14 @@ const app = createApp({
       result: null,
       dashboard: null,
       markdownSummaries: [],
+      // Desktop drag-to-reorder of files within a subcategory (see
+      // onFileDragStart). dragArmedFileId is set while the mouse is down on
+      // a row's grip handle, so only the handle can start a drag and a
+      // normal row click still opens/starts the file.
+      dragArmedFileId: null,
+      dragFileId: null,
+      dragSubcategory: null,
+      dragSnapshot: null,
       leftExpanded: false,
       leftPanelWidth: null,
       answerSubmitted: false,
@@ -1981,6 +1989,106 @@ When you click <strong>Start Review</strong>, this panel will be updated.
     // Total code-challenge XP across a subcategory group's files.
     groupXp(group) {
       return group.files.reduce((sum, file) => sum + (file.codeChallengeXp || 0), 0);
+    },
+
+    // --- File drag-to-reorder (desktop only) ---
+    // Rows move live in markdownSummaries while dragging (the list renders
+    // from it), and the subcategory's final order is saved once on dragend.
+    // A cancelled drag (dropped outside the list / Esc) or a failed save
+    // restores the snapshot taken at dragstart.
+
+    armFileDrag(file) {
+      if (this.isDesktop) {
+        this.dragArmedFileId = file.markdownFileId;
+      }
+    },
+
+    disarmFileDrag() {
+      if (this.dragFileId === null) {
+        this.dragArmedFileId = null;
+      }
+    },
+
+    onFileDragStart(event, file) {
+      if (this.dragArmedFileId !== file.markdownFileId) {
+        event.preventDefault();
+        return;
+      }
+
+      this.dragFileId = file.markdownFileId;
+      this.dragSubcategory = file.subcategory;
+      this.dragSnapshot = this.markdownSummaries.slice();
+
+      event.dataTransfer.effectAllowed = "move";
+      // Firefox won't start a drag without some data set.
+      event.dataTransfer.setData("text/plain", String(file.markdownFileId));
+    },
+
+    onFileDragOver(event, file) {
+      if (this.dragFileId === null || file.subcategory !== this.dragSubcategory) {
+        return;
+      }
+
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+
+      if (file.markdownFileId === this.dragFileId) {
+        return;
+      }
+
+      const rect = event.currentTarget.getBoundingClientRect();
+      const after = event.clientY > rect.top + rect.height / 2;
+      this.moveDraggedFile(file.markdownFileId, after);
+    },
+
+    moveDraggedFile(targetFileId, after) {
+      const list = this.markdownSummaries;
+      const dragged = list.find(f => f.markdownFileId === this.dragFileId);
+      const rest = list.filter(f => f !== dragged);
+      const targetIndex = rest.findIndex(f => f.markdownFileId === targetFileId);
+
+      rest.splice(targetIndex + (after ? 1 : 0), 0, dragged);
+
+      if (rest.some((f, i) => f !== list[i])) {
+        this.markdownSummaries = rest;
+      }
+    },
+
+    async onFileDragEnd(event) {
+      const subcategory = this.dragSubcategory;
+      const snapshot = this.dragSnapshot;
+
+      this.dragArmedFileId = null;
+      this.dragFileId = null;
+      this.dragSubcategory = null;
+      this.dragSnapshot = null;
+
+      if (!snapshot) {
+        return;
+      }
+
+      if (event.dataTransfer.dropEffect === "none") {
+        this.markdownSummaries = snapshot;
+        return;
+      }
+
+      const idsIn = list => list
+        .filter(f => f.category === this.selectedEnvironment && f.subcategory === subcategory)
+        .map(f => f.markdownFileId);
+
+      const newIds = idsIn(this.markdownSummaries);
+      const oldIds = idsIn(snapshot);
+
+      if (newIds.every((id, i) => id === oldIds[i])) {
+        return;
+      }
+
+      try {
+        await Api.reorderMarkdownFiles(this.selectedEnvironment, subcategory, newIds);
+      } catch (err) {
+        this.markdownSummaries = snapshot;
+        this.error = err.message || "Could not save the new file order.";
+      }
     },
 
     categoryDueColor(category) {

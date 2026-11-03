@@ -384,6 +384,12 @@
             </summary>
 
             <div v-for="file in group.files" :key="file.markdownFileId" class="markdown-row clickable"
+              :class="{ dragging: dragFileId === file.markdownFileId }"
+              :draggable="dragArmedFileId === file.markdownFileId"
+              @dragstart="onFileDragStart($event, file)"
+              @dragover="onFileDragOver($event, file)"
+              @drop.prevent
+              @dragend="onFileDragEnd($event)"
               @click="file.dueCount > 0 ? previewMarkdownFile(file.markdownFileId) : startReviewForFile(file.markdownFileId)">
 
               <div class="row-left">
@@ -422,6 +428,9 @@
                 <span class="due-badge" v-if="file.dueCount>0">
                   {{ file.dueCount }}
                 </span>
+
+                <span v-if="isDesktop && group.files.length > 1" class="drag-handle" title="Drag to reorder"
+                  @mousedown="armFileDrag(file)" @mouseup="disarmFileDrag()" @click.stop>⋮⋮</span>
               </div>
 
             </div>
