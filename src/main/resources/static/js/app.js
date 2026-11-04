@@ -16,7 +16,8 @@ const STARTER_PACK_ROWS = [
   ["SQL", "PostgreSQL"],
   ["Python", "FastAPI"],
   ["Git", "Docker"],
-  ["Embeddings"]
+  ["Embeddings"],
+  ["Algorithms"],
 ];
 
 const app = createApp({

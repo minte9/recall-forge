@@ -158,16 +158,16 @@ class StarterPackServiceTest {
         assertThat(starterPackService.isPublicCategory(1L, "postgresql")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "https")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "mcp")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "algorithms")).isTrue();
     }
 
     @Test
-    void isPublicCategory_templateUserMicroservicesMySqlVueJsAlgorithms_returnsFalse() {
+    void isPublicCategory_templateUserMicroservicesMySqlVueJs_returnsFalse() {
         setUp();
 
         assertThat(starterPackService.isPublicCategory(1L, "microservices")).isFalse();
         assertThat(starterPackService.isPublicCategory(1L, "mysql")).isFalse();
         assertThat(starterPackService.isPublicCategory(1L, "vue.js")).isFalse();
-        assertThat(starterPackService.isPublicCategory(1L, "algorithms")).isFalse();
     }
 
     @Test
@@ -244,7 +244,8 @@ class StarterPackServiceTest {
                 "Java", "Python", "Git", "SQL", "Javascript",
                 "Spring", "Docker", "TypeScript", "Angular",
                 "Security", "PostgreSQL", "REST", "GraphQL", "MCP", "HTTPS",
-                "Embeddings", "FastAPI"
+                "Embeddings", "FastAPI",
+                "Algorithms"
             )
             .containsEntry("Java", 73);
     }
@@ -260,7 +261,8 @@ class StarterPackServiceTest {
                 "Java", "Python", "Git", "SQL", "Javascript",
                 "Spring", "Docker", "TypeScript", "Angular",
                 "Security", "PostgreSQL", "REST", "GraphQL", "MCP", "HTTPS",
-                "Embeddings", "FastAPI"
+                "Embeddings", "FastAPI",
+                "Algorithms"
             )
             .containsEntry("Java", 15);
     }

@@ -46,7 +46,8 @@ public class StarterPackService {
                 "Javascript", List.of("TypeScript", "Angular"),
                 "Security", List.of("HTTPS"),
                 "REST", List.of("GraphQL", "MCP"),
-                "Embeddings", List.of()
+                "Embeddings", List.of(),
+                "Algorithms", List.of()
             );
     
     @SuppressWarnings("null")
