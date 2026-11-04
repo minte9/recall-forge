@@ -1566,7 +1566,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 36px 8px 36px;
+    /* right padding = .group-arrow width + .group-right gap, so the row
+       content lines up with the "N files" label in the header */
+    padding: 8px 26px 8px 36px;
     border-top: 0;
   }
 
@@ -1631,7 +1633,7 @@
     color: #94a3b8;
     font-size: 14px;
     letter-spacing: -3px;
-    padding: 4px 6px 4px 2px;
+    padding: 4px 2px 4px 0;
     user-select: none;
     visibility: hidden;
   }
@@ -1695,6 +1697,11 @@
     padding-bottom: 12px;
   }
 
+  .group-right .group-arrow {
+    width: 20px;
+    text-align: center;
+  }
+
   .clickable {
     cursor: pointer;
   }
@@ -1736,7 +1743,7 @@
   .row-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
   }
 
   .due-badge {

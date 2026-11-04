@@ -425,12 +425,12 @@
               </div>
 
               <div class="row-right">
+                <span v-if="isDesktop && group.files.length > 1" class="drag-handle" title="Drag to reorder"
+                  @mousedown="armFileDrag(file)" @mouseup="disarmFileDrag()" @click.stop>⋮⋮</span>
+
                 <span class="due-badge" v-if="file.dueCount>0">
                   {{ file.dueCount }}
                 </span>
-
-                <span v-if="isDesktop && group.files.length > 1" class="drag-handle" title="Drag to reorder"
-                  @mousedown="armFileDrag(file)" @mouseup="disarmFileDrag()" @click.stop>⋮⋮</span>
               </div>
 
             </div>
