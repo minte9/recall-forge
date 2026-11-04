@@ -863,7 +863,7 @@
           </a>
 
           <div v-if="reviewQuestionLoading" class="markdown-loading">
-            Loading...
+            {{ reviewQuestionSeconds ? "Loading... " + reviewQuestionSeconds + "s" : "Loading..." }}
           </div>
 
           <template v-else>

@@ -62,6 +62,8 @@ const app = createApp({
       mobilePageTitle: "Dashboard",
       markdownLoading: false,
       reviewQuestionLoading: false,
+      reviewQuestionSeconds: 0,
+      reviewQuestionIntervalId: null,
       markdownEditing: false,
       optimizingMarkdown: false,
       optimizingSeconds: 0,
@@ -1075,6 +1077,19 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       );
     },
 
+    startReviewQuestionTimer() {
+      this.stopReviewQuestionTimer();
+      this.reviewQuestionSeconds = 0;
+      this.reviewQuestionIntervalId = setInterval(() => {
+        this.reviewQuestionSeconds++;
+      }, 1000);
+    },
+
+    stopReviewQuestionTimer() {
+      clearInterval(this.reviewQuestionIntervalId);
+      this.reviewQuestionIntervalId = null;
+    },
+
     async loadReviewQuestion(fetchQuestion, allowBroaderFallback) {
       // If a file's content is already showing (e.g. previewed before
       // clicking Start Review), don't flash a loading state — or, on
@@ -1092,6 +1107,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       this.loading = true;
       this.reviewQuestionLoading = true;
+      this.startReviewQuestionTimer();
       if (!markdownAlreadyShown || subcategoryDone || fileDone) {
         this.markdownLoading = true;
       }
@@ -1187,6 +1203,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.loading = false;
         this.markdownLoading = false;
         this.reviewQuestionLoading = false;
+        this.stopReviewQuestionTimer();
       }
     },
 
@@ -1663,6 +1680,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.retryMenuOpen = false;
       this.loading = true;
       this.reviewQuestionLoading = true;
+      this.startReviewQuestionTimer();
       this.codeChallengeLoading = true;
       this.error = null;
       this.success = null;
@@ -1679,6 +1697,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       } finally {
         this.loading = false;
         this.reviewQuestionLoading = false;
+        this.stopReviewQuestionTimer();
         this.codeChallengeLoading = false;
       }
     },
