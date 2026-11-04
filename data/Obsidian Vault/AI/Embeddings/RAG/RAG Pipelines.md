@@ -42,7 +42,7 @@ List<Document> chunks = splitter.apply(
 
 The splitter uses token-based limits, not Markdown heading boundaries. Small documents may produce only one chunk.
 
-### 2. Embedding and Indexing Documents
+## 2. Embedding and Indexing Documents
 
 After chunking, each chunk is converted into a numerical vector using an embedding model. These vectors represent the semantic meaning of the text, allowing similar concepts to be found even when different words are used.
 

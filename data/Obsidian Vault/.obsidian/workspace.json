@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "AI/Embeddings/Embeddings/Cosine Similarity.md",
+                "file": "CS/Algorithms/Fundamentals/Algorithm Design.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Cosine Similarity"
+              "title": "Algorithm Design"
             }
           }
         ]
@@ -196,10 +196,12 @@
       "bases:Create new base": false
     }
   },
-  "active": "493fa442051c9418",
+  "active": "d62c2f0effa552d0",
   "lastOpenFiles": [
-    "AI/Embeddings/Embeddings/Embedings Fundamentals.md",
+    "AI/Embeddings/RAG/RAG Pipelines.md",
+    "AI/Embeddings/Embeddings/Vector Databases.md",
     "AI/Embeddings/Embeddings/Cosine Similarity.md",
+    "AI/Embeddings/Embeddings/Embedings Fundamentals.md",
     "CS/_images/Pasted image 20261103163801.png",
     "CS/Algorithms/Fundamentals/Algorithm Design.md",
     "CS/_images/Pasted image 20261103190626.png",
@@ -218,13 +220,11 @@
     "DB/Database/Fundamentals/Database Concepts.md",
     "CS/Algorithms/Fundamentals",
     "DB/Database/Fundamentals",
-    "AI/Embeddings/RAG/RAG Pipelines.md",
     "CS/Algorithms",
     "CS",
     "DB/Database",
     "DB",
     "AI/_images/Pasted image 20261031103705.png",
-    "AI/Embeddings/Embeddings/Vector Databases.md",
     "AI/Embeddings/Embeddings/Vector Search.md",
     "AI/Embeddings/RAG/Fundamentals.md",
     "AI/Embeddings/RAG",
