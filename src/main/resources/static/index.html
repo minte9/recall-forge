@@ -852,8 +852,8 @@
       </section>
 
       <div v-if="!leftExpanded" class="panel-resizer" role="separator" aria-orientation="vertical"
-        aria-label="Resize panels" title="Drag to resize, double-click to reset"
-        @mousedown="startPanelResize" @dblclick="resetPanelWidth"></div>
+        aria-label="Resize panels" title="Drag to resize, double-click to expand or reset"
+        @mousedown="startPanelResize" @dblclick="togglePanelWidth"></div>
 
       <section v-if="!leftExpanded" class="panel app-panel">
 

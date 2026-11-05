@@ -488,8 +488,16 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       const rect = layoutEl.getBoundingClientRect();
       const minPx = 240;
       const gutterPx = 12;
+      const dragThresholdPx = 3;
+      const startX = event.clientX;
+      let dragging = false;
 
       const onMove = (moveEvent) => {
+        // Ignore small movements so a slightly shaky double-click doesn't
+        // count as a resize (togglePanelWidth relies on the width staying null).
+        if (!dragging && Math.abs(moveEvent.clientX - startX) < dragThresholdPx) return;
+        dragging = true;
+
         const maxX = rect.width - gutterPx - minPx;
         const x = Math.min(Math.max(moveEvent.clientX - rect.left, minPx), maxX);
         this.leftPanelWidth = (x / rect.width) * 100;
@@ -506,8 +514,10 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       document.addEventListener("mouseup", onUp);
     },
 
-    resetPanelWidth() {
-      this.leftPanelWidth = null;
+    // Double-click on the gutter: expand the left panel from the default
+    // split, otherwise reset to the default split.
+    togglePanelWidth() {
+      this.leftPanelWidth = this.leftPanelWidth === null ? 70 : null;
     },
 
     formatScore(score) {
