@@ -278,6 +278,7 @@
     align-items: center;
     gap: 10px;
     margin-top: 5px;
+    scroll-margin-top: 8px;
 }
 
 .ai-badge {
@@ -2808,6 +2809,11 @@
 
     .review-question:hover {
       color: inherit;
+    }
+
+    /* Clears the sticky 52px .mobile-topbar when scrolled to on KB open. */
+    .markdown-file-actions {
+      scroll-margin-top: 60px;
     }
 
     .mobile-topbar {

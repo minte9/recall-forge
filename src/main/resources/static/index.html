@@ -479,7 +479,7 @@
           </div>
 
           <div v-if="!markdownLoading && !markdownEditing && currentMarkdownFileId"
-            class="markdown-file-actions">
+            ref="markdownFileActions" class="markdown-file-actions">
             <button v-if="!activeTopic && !isDesktop" class="start-review-file-button"
               @click="startReviewForFile(currentMarkdownFileId)" :disabled="loading || (aiEnabled && dailyLimitReached)"
               :title="aiEnabled && dailyLimitReached ? 'Daily review limit reached' : null">

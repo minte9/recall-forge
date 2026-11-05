@@ -765,15 +765,16 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         return;
       }
 
-      const scrollY = window.scrollY;
-
       this.markdownEditing = false;
       this.viewingCodeChallenges = false;
       this.editingOriginalMarkdown = false;
       this.viewingOriginal = true;
+      this.leftPanelWidth = Math.max(this.leftPanelWidth ?? 0, 70);
 
+      // After the wider panel has reflowed, bring the action bar (KB button)
+      // to the top so the section below it fills the view.
       this.$nextTick(() => {
-        window.scrollTo(0, scrollY);
+        this.$refs.markdownFileActions?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     },
 
@@ -782,6 +783,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
 
       this.viewingOriginal = false;
       this.editingOriginalMarkdown = false;
+      this.leftPanelWidth = null;
 
       this.$nextTick(() => {
         window.scrollTo(0, scrollY);
