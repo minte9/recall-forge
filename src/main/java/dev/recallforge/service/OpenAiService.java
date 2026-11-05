@@ -40,7 +40,7 @@ public class OpenAiService {
 
     // Rewriting a whole file's worth of topics needs far more headroom than
     // the short question/grading calls above.
-    private static final int OPTIMIZE_MAX_TOKENS = 2500;
+    private static final int OPTIMIZE_MAX_TOKENS = 5000;
     private static final int MAX_OPTIMIZE_INPUT_CHARS = 12000;
 
     public OpenAiService(RestClient openAiRestClient, @Value("${openai.model}") String model) {
