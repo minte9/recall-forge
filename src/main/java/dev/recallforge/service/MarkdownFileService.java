@@ -50,9 +50,11 @@ import jakarta.transaction.Transactional;
  * {@link StarterPackService}), parses their topics via
  * {@link MarkdownTopicImporter}, and persists them as {@link MarkdownFile}
  * and {@link Topic} records scoped to {@link CurrentUserService#currentUser()}.
- * Files are matched against existing records by content hash or by
- * environment/category/subcategory/title metadata so re-imports update the
- * existing file and its topics instead of creating duplicates.
+ * Files are matched against existing records by their exact
+ * environment/category/subcategory/title path so re-imports update the
+ * existing file and its topics instead of creating duplicates. Topic titles
+ * are never used to match files: generic ones like "1. Overview" recur
+ * across unrelated files.
  *
  * {@link #optimize} is a separate, non-persisting entry point
  * that returns AI-rewritten markdown text for preview before the caller
@@ -979,23 +981,13 @@ public class MarkdownFileService {
         MarkdownTopicImporter.ParsedTopic firstTopic,
         Long userId
     ) {
-        Optional<MarkdownFile> byMetadata =
-                markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
-                        firstTopic.environment(),
-                        firstTopic.category(),
-                        firstTopic.subcategory(),
-                        firstTopic.fileTitle(),
-                        userId
-                );
-
-        if (byMetadata.isPresent()) {
-            return byMetadata;
-        }
-
-        Optional<Topic> byTopicTitle =
-                topicRepository.findByTitleAndUserId(firstTopic.title(), userId);
-
-        return byTopicTitle.map(Topic::getMarkdownFile);
+        return markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                firstTopic.environment(),
+                firstTopic.category(),
+                firstTopic.subcategory(),
+                firstTopic.fileTitle(),
+                userId
+        );
     }
 
     // Checked before anything is saved. The projected total assumes this

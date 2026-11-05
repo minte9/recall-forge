@@ -210,7 +210,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "Programming", "Java", "Core", "Java Basics", 1L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("Java Basics", 1L)).thenReturn(Optional.empty());
         when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "Java", "Core"))
             .thenReturn(Optional.empty());
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -257,7 +256,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "Programming", "Java", "Core", "Java Basics", 1L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("Java Basics", 1L)).thenReturn(Optional.empty());
         when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "Java", "Core"))
             .thenReturn(Optional.of(4));
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -321,7 +319,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "Programming", "Java", "Core", "Java Basics", 1L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("Java Basics", 1L)).thenReturn(Optional.empty());
         when(topicRepository.countAllByUser(1L)).thenReturn(2000L);
 
         assertThatThrownBy(() -> markdownFileService.upload(file))
@@ -401,8 +398,58 @@ class MarkdownFileServiceTest {
         assertThat(existingMarkdownFile.getContent()).isEqualTo(newContent);
         assertThat(existingMarkdownFile.getContentHash()).isEqualTo(sha256(newContent));
         verify(markdownFileRepository).save(existingMarkdownFile);
-        verify(topicRepository, org.mockito.Mockito.never())
-            .findByTitleAndUserId(any(), any());
+    }
+
+    // Regression: a generic first-topic title ("1. Overview") shared with an
+    // unrelated file used to match that file, relabel it with the new path,
+    // and drop the uploaded content while still reporting success.
+    @Test
+    void upload_newPathWithFirstTopicTitleUsedByAnotherFile_createsNewFileAndLeavesOtherUntouched() throws Exception {
+        setUp();
+        String content = "# CS / Algorithms / Data Structures / Arrays and Lists\n\n## 1. Overview\nArrays.";
+        MockMultipartFile file = new MockMultipartFile(
+            "file", "Arrays and Lists.md", "text/markdown", content.getBytes(StandardCharsets.UTF_8)
+        );
+        MarkdownTopicImporter.ParsedTopic parsedTopic = new MarkdownTopicImporter.ParsedTopic(
+            "CS", "Algorithms", "Data Structures", "Arrays and Lists", "1. Overview", "Arrays."
+        );
+        UserAccount user = new UserAccount();
+        MarkdownFile unrelatedFile = new MarkdownFile(
+            "Vector Databases.md", "Optimized vectors.", "vectorhash",
+            "AI", "Embeddings", "Embeddings", "Vector Databases", user
+        );
+        unrelatedFile.markOptimized("Original vectors.");
+
+        when(currentUserService.currentUserId()).thenReturn(1L);
+        when(currentUserService.currentUser()).thenReturn(user);
+        when(markdownTopicImporter.parseMarkdown(content)).thenReturn(List.of(parsedTopic));
+        when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
+                "CS", "Algorithms", "Data Structures", "Arrays and Lists", 1L))
+            .thenReturn(Optional.empty());
+        when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(
+                1L, "Algorithms", "Data Structures"))
+            .thenReturn(Optional.empty());
+        when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("1. Overview"), eq(1L)))
+            .thenReturn(Optional.empty());
+
+        markdownFileService.upload(file);
+
+        ArgumentCaptor<MarkdownFile> markdownFileCaptor = ArgumentCaptor.forClass(MarkdownFile.class);
+        verify(markdownFileRepository).save(markdownFileCaptor.capture());
+        MarkdownFile savedMarkdownFile = markdownFileCaptor.getValue();
+        assertThat(savedMarkdownFile).isNotSameAs(unrelatedFile);
+        assertThat(savedMarkdownFile.getFilename()).isEqualTo("Arrays and Lists.md");
+        assertThat(savedMarkdownFile.getContent()).isEqualTo(content);
+        assertThat(savedMarkdownFile.getCategory()).isEqualTo("Algorithms");
+        assertThat(savedMarkdownFile.getSubcategory()).isEqualTo("Data Structures");
+
+        ArgumentCaptor<Topic> topicCaptor = ArgumentCaptor.forClass(Topic.class);
+        verify(topicRepository).save(topicCaptor.capture());
+        assertThat(topicCaptor.getValue().getMarkdownFile()).isSameAs(savedMarkdownFile);
+
+        assertThat(unrelatedFile.getCategory()).isEqualTo("Embeddings");
+        assertThat(unrelatedFile.getSubcategory()).isEqualTo("Embeddings");
     }
 
     @Test
@@ -896,7 +943,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "Programming", "Java", "Core", "Java Basics", 2L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("Java Basics", 2L)).thenReturn(Optional.empty());
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Java Basics"), eq(2L)))
             .thenReturn(Optional.empty());
@@ -928,7 +974,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "JVM", "Java", "Streams", "Stream Basics", 2L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("Stream Basics", 2L)).thenReturn(Optional.empty());
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(topicRepository.findByMarkdownFileAndTitleAndUserId(any(), eq("Stream Basics"), eq(2L)))
             .thenReturn(Optional.empty());
@@ -1377,7 +1422,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "Java", "OOP", "Uncategorized", "Notes", 1L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("Topic", 1L)).thenReturn(Optional.empty());
         when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "OOP", "Uncategorized"))
             .thenReturn(Optional.empty());
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -1493,7 +1537,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "Java", "OOP", "Uncategorized", "Notes", 1L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("Topic", 1L)).thenReturn(Optional.empty());
         when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "OOP", "Uncategorized"))
             .thenReturn(Optional.empty());
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -1529,7 +1572,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "Java", "OOP", "Uncategorized", "Notes", 1L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("Topic", 1L)).thenReturn(Optional.empty());
         when(topicRepository.countAllByUser(1L)).thenReturn(2000L);
 
         MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
@@ -1566,7 +1608,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "Java", "OOP", "Composition", "Notes", 1L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("Composition", 1L)).thenReturn(Optional.empty());
         when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "OOP", "Composition"))
             .thenReturn(Optional.empty());
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -1616,7 +1657,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "AI", "Machine Learning", "Supervised Learning", "Knn Classifier", 1L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("KNN", 1L)).thenReturn(Optional.empty());
         when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(
                 1L, "Machine Learning", "Supervised Learning"))
             .thenReturn(Optional.empty());
@@ -1666,7 +1706,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "AI", "Machine Learning", "Supervised Learning", "Knn Classifier", 1L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("KNN", 1L)).thenReturn(Optional.empty());
         when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(
                 1L, "Machine Learning", "Supervised Learning"))
             .thenReturn(Optional.empty());
@@ -1730,7 +1769,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "Explicit", "Header", "Line", "Title", 1L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("Topic", 1L)).thenReturn(Optional.empty());
         when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(1L, "Header", "Line"))
             .thenReturn(Optional.empty());
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -1787,7 +1825,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 eq("API"), eq("GraphQL"), any(), any(), eq(1L)))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId(any(), eq(1L))).thenReturn(Optional.empty());
         when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(eq(1L), eq("GraphQL"), any()))
             .thenReturn(Optional.empty());
         when(markdownFileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -1833,7 +1870,6 @@ class MarkdownFileServiceTest {
         when(markdownFileRepository.findByEnvironmentAndCategoryAndSubcategoryAndTopicGroupAndUserId(
                 "API", "GraphQL", "Query Arguments", "Args", 1L))
             .thenReturn(Optional.empty());
-        when(topicRepository.findByTitleAndUserId("Args", 1L)).thenReturn(Optional.empty());
         when(markdownFileRepository.findMaxDisplayOrderByUserIdAndCategoryAndSubcategory(
                 1L, "GraphQL", "Query Arguments"))
             .thenReturn(Optional.empty());
