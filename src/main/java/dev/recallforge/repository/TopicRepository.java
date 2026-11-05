@@ -18,8 +18,6 @@ import dev.recallforge.dto.MarkdownSummaryDto;
 
 public interface TopicRepository extends JpaRepository<Topic, Long> {
 
-    Optional<Topic> findByTitleAndUserId(String title, Long userId);
-
     Optional<Topic> findByTitleAndMarkdownFileIsNotNullAndUserId(
         String title,
         Long userId
