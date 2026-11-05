@@ -610,6 +610,10 @@
     background: #f7f7f7;
   }
 
+  .original-markdown .original-scroll-top {
+    margin: 16px auto 0;
+  }
+
   /* Extra breathing room after each challenge block, scoped to the Code
      Challenges list only - the regular file-content view keeps its normal
      spacing. */

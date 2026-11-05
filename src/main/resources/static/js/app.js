@@ -774,8 +774,12 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       // After the wider panel has reflowed, bring the action bar (KB button)
       // to the top so the section below it fills the view.
       this.$nextTick(() => {
-        this.$refs.markdownFileActions?.scrollIntoView({ behavior: "smooth", block: "start" });
+        this.scrollToFileActions();
       });
+    },
+
+    scrollToFileActions() {
+      this.$refs.markdownFileActions?.scrollIntoView({ behavior: "smooth", block: "start" });
     },
 
     hideOriginal() {

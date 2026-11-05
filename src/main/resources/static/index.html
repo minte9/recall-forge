@@ -545,6 +545,11 @@
               <div v-html="renderMarkdown(currentMarkdownOriginalContent || '', { openCode: true })"
                 @click="onOriginalMarkdownClick">
               </div>
+
+              <button class="file-nav-button original-scroll-top" @click="scrollToFileActions()"
+                title="Back to top of Original" aria-label="Back to top of Original">
+                <icon name="arrow-up"></icon>
+              </button>
             </div>
           </div>
 
