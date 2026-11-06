@@ -155,10 +155,17 @@ class StarterPackServiceTest {
     void isPublicCategory_templateUserFullCatalogAdditionsCaseInsensitive_returnsTrue() {
         setUp();
 
-        assertThat(starterPackService.isPublicCategory(1L, "postgresql")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "https")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "mcp")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "algorithms")).isTrue();
+    }
+
+    @Test
+    void isPublicCategory_templateUserSqlPostgreSql_returnsFalse() {
+        setUp();
+
+        assertThat(starterPackService.isPublicCategory(1L, "sql")).isFalse();
+        assertThat(starterPackService.isPublicCategory(1L, "postgresql")).isFalse();
     }
 
     @Test
@@ -216,7 +223,7 @@ class StarterPackServiceTest {
         assertThat(starterPackService.getUnlockStatus())
             .containsOnlyKeys(
                 "Spring", "Docker", "TypeScript", "Angular",
-                "PostgreSQL", "GraphQL", "MCP", "HTTPS", "FastAPI"
+                "GraphQL", "MCP", "HTTPS", "FastAPI"
             );
     }
 
@@ -241,9 +248,9 @@ class StarterPackServiceTest {
 
         assertThat(starterPackService.getReviewedPercentages())
             .containsOnlyKeys(
-                "Java", "Python", "Git", "SQL", "Javascript",
+                "Java", "Python", "Git", "Javascript",
                 "Spring", "Docker", "TypeScript", "Angular",
-                "Security", "PostgreSQL", "REST", "GraphQL", "MCP", "HTTPS",
+                "Security", "REST", "GraphQL", "MCP", "HTTPS",
                 "Embeddings", "FastAPI",
                 "Algorithms"
             )
@@ -258,9 +265,9 @@ class StarterPackServiceTest {
 
         assertThat(starterPackService.getDuePercentages())
             .containsOnlyKeys(
-                "Java", "Python", "Git", "SQL", "Javascript",
+                "Java", "Python", "Git", "Javascript",
                 "Spring", "Docker", "TypeScript", "Angular",
-                "Security", "PostgreSQL", "REST", "GraphQL", "MCP", "HTTPS",
+                "Security", "REST", "GraphQL", "MCP", "HTTPS",
                 "Embeddings", "FastAPI",
                 "Algorithms"
             )
