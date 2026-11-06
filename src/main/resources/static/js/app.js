@@ -13,6 +13,7 @@ const STARTER_PACK_ROWS = [
   ["Java", "Spring"],
   ["REST", "GraphQL", "MCP"],
   ["Javascript", "TypeScript", "Angular"],
+  ["Security", "HTTPS", "OAuth2"],
   ["Python", "FastAPI"],
   ["Git", "Docker"],
   ["Embeddings"],
