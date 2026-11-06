@@ -30,7 +30,7 @@ public class StarterPackService {
     private static final Long TEMPLATE_USER_ID = 1L;
 
     // Hardcoded for now - mirrors the Starter Pack panel's button rows
-    // (static/index.html): a level 1 category (Java, Python, Git, SQL,
+    // (static/index.html): a level 1 category (Java, Python, Git,
     // Javascript, Embeddings, ...) is always importable; every category
     // listed under it here unlocks together, flatly, once level 1's reviewed percent crosses
     // UNLOCK_REVIEWED_THRESHOLD_PERCENT - there's no further chaining between
@@ -42,7 +42,6 @@ public class StarterPackService {
                 "Java", List.of("Spring"),
                 "Python", List.of("FastAPI"),
                 "Git", List.of("Docker"),
-                "SQL", List.of("PostgreSQL"),
                 "Javascript", List.of("TypeScript", "Angular"),
                 "Security", List.of("HTTPS"),
                 "REST", List.of("GraphQL", "MCP"),
