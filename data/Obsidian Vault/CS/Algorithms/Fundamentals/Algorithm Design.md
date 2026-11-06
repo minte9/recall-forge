@@ -1,4 +1,4 @@
-e## 1. What Is Algorithm Design?
+## 1. What Is Algorithm Design?
 
 Algorithm design is the process of choosing a strategy for solving a computational problem efficiently and correctly. Rather than immediately writing code, we first examine the problem's constraints, available data, and desired result.
 

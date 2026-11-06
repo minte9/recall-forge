@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "CS/Algorithms/Fundamentals/Algorithm Design.md",
+                "file": "CS/Algorithms/Data Structures/Arrays and Lists.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Algorithm Design"
+              "title": "Arrays and Lists"
             }
           }
         ]
@@ -198,12 +198,14 @@
   },
   "active": "d62c2f0effa552d0",
   "lastOpenFiles": [
+    "CS/Algorithms/Fundamentals/Algorithm Design.md",
+    "CS/Algorithms/Data Structures/Arrays and Lists.md",
+    "CS/Algorithms/Data Structures",
     "AI/Embeddings/RAG/RAG Pipelines.md",
     "AI/Embeddings/Embeddings/Vector Databases.md",
     "AI/Embeddings/Embeddings/Cosine Similarity.md",
     "AI/Embeddings/Embeddings/Embedings Fundamentals.md",
     "CS/_images/Pasted image 20261103163801.png",
-    "CS/Algorithms/Fundamentals/Algorithm Design.md",
     "CS/_images/Pasted image 20261103190626.png",
     "CS/Algorithms/Fundamentals/Recursion.md",
     "CS/_images/Pasted image 20261103165340.png",
@@ -229,7 +231,6 @@
     "AI/Embeddings/RAG/Fundamentals.md",
     "AI/Embeddings/RAG",
     "AI/Embeddings/Vectors/Untitled",
-    "AI/Embeddings/Vectors",
     "AI/Machine Learning/Supervised Learning/Linear Regression.md",
     "AI/Machine Learning/Algorithms/Algorithms.md",
     "AI/Machine Learning/Supervised Learning/Knn Classifier.md",
