@@ -1,42 +1,51 @@
-// Colors code blocks in the original file view only. Set to false for plain
-// code blocks there. The main markdown view stays plain either way, since
-// colored code could distract while answering a question.
+// Colors code blocks in the main and original file views (see the highlight
+// option on render). Set to false for plain code blocks in both.
 const CODE_HIGHLIGHT_ENABLED = true;
 
 const Markdown = {
   // v-html's expression runs on every Vue re-render (e.g. each keystroke in
-  // the answer box), so keep the last original-view result rather than
+  // the answer box), so keep each file view's last result rather than
   // re-highlighting unchanged content.
-  originalCache: { md: null, html: "" },
+  fileViewCache: {
+    main: { md: null, html: "" },
+    original: { md: null, html: "" }
+  },
 
   // openCode: true renders code blocks as a plain, always-visible card with
   // no toggle at all (the original file view - meant for reference/detail,
   // not recall) instead of the usual collapsed "show code" <details> (the
   // main markdown view and code challenges, where hiding code supports the
   // review/practice purpose).
-  render(md, { openCode = false } = {}) {
-    if (openCode && this.originalCache.md === md) {
-      return this.originalCache.html;
+  // highlight: true colors code blocks. Only the file views pass it, which
+  // also keeps per-message callers like the Recall Assistant out of the cache.
+  render(md, { openCode = false, highlight = false } = {}) {
+    const cacheKey = openCode ? "original" : "main";
+    if (highlight && this.fileViewCache[cacheKey].md === md) {
+      return this.fileViewCache[cacheKey].html;
     }
 
     let html = marked.parse(md || "");
 
     html = html.replace(
       /<pre><code(.*?)>([\s\S]*?)<\/code><\/pre>/g,
-      openCode
-        ? (match, attributes, code) =>
+      (match, attributes, code) => {
+        const body = highlight ? this.highlightCode(attributes, code) : code;
+
+        return openCode
+          ?
 `
 <div class="code-block">
-<pre><code>${this.highlightCode(attributes, code)}</code></pre>
+<pre><code>${body}</code></pre>
 </div>
 `
-        :
+          :
 `
 <details class="code-block">
 <summary>show code</summary>
-<pre><code>$2</code></pre>
+<pre><code>${body}</code></pre>
 </details>
-`
+`;
+      }
     );
 
     // Stored content can come from an uploaded file or a starter-pack copy of
@@ -44,8 +53,8 @@ const Markdown = {
     // markdown source carries before it's injected into the DOM via v-html.
     html = DOMPurify.sanitize(html);
 
-    if (openCode) {
-      this.originalCache = { md, html };
+    if (highlight) {
+      this.fileViewCache[cacheKey] = { md, html };
     }
     return html;
   },
