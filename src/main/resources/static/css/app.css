@@ -653,12 +653,11 @@
 
   /* Score label shown next to the days-ago text in .challenge-reviewed. */
   .challenge-score {
-    margin-right: 10px;
     font-weight: 300;
     color: #374151;
   }
 
-  /* Retry button shown next to each challenge's score/days-ago line, so a
+  /* Retry button shown under each challenge's score/days-ago line, so a
      past challenge can be retried without leaving the list. */
   .challenge-retry-btn {
     padding: 6px 12px;
@@ -666,11 +665,11 @@
     font-weight: 600;
     border: 1px solid var(--orange-dark);
     border-radius: 5px;
-    background: white;
-    color: var(--orange-dark);
+    background: var(--orange-dark);
+    color: white;
     cursor: pointer;
-    float: left;
-    margin-bottom: 5px;
+    display: block;
+    margin: 6px 0 5px auto;
   }
 
   .challenge-retry-btn:hover {
@@ -680,8 +679,8 @@
 
   .challenge-retry-btn:disabled,
   .challenge-retry-btn:disabled:hover {
-    background: white;
-    color: var(--orange-dark);
+    background: var(--orange-dark);
+    color: white;
     opacity: .5;
     cursor: not-allowed;
   }
