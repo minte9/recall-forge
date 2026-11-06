@@ -476,7 +476,7 @@
             </div>
           </div>
 
-          <div v-else ref="markdownView" class="markdown" v-html="renderMarkdown(markdown)"
+          <div v-else ref="markdownView" class="markdown" v-html="renderMarkdown(markdown, { highlight: true })"
             @click="onMarkdownClick">
           </div>
 
@@ -542,7 +542,7 @@
 
             <div v-else class="markdown original-markdown">
               <h2>Original (reference version)</h2>
-              <div v-html="renderMarkdown(currentMarkdownOriginalContent || '', { openCode: true })"
+              <div v-html="renderMarkdown(currentMarkdownOriginalContent || '', { openCode: true, highlight: true })"
                 @click="onOriginalMarkdownClick">
               </div>
 
