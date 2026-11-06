@@ -78,5 +78,38 @@ const Markdown = {
     const decoder = document.createElement("textarea");
     decoder.innerHTML = code;
     return hljs.highlight(decoder.value, { language, ignoreIllegals: true }).value;
+  },
+
+  // The most common language tag on the markdown's code fences, or null if
+  // it has none highlight.js knows. Code challenge answers are raw text with
+  // no tag of their own, so they borrow the language of their file.
+  mainLanguage(md) {
+    if (!CODE_HIGHLIGHT_ENABLED || typeof hljs === "undefined") {
+      return null;
+    }
+
+    const counts = {};
+    for (const [, tag] of (md || "").matchAll(/^```([\w+#-]+)/gm)) {
+      const language = tag.toLowerCase();
+      if (language !== "txt" && hljs.getLanguage(language)) {
+        counts[language] = (counts[language] || 0) + 1;
+      }
+    }
+
+    const languages = Object.keys(counts);
+    if (languages.length === 0) {
+      return null;
+    }
+    return languages.reduce((best, language) => counts[language] > counts[best] ? language : best);
+  },
+
+  // Sanitized HTML for raw code, or null when there's no language to color it
+  // with - callers then show the text as they would without highlighting.
+  highlightText(text, language) {
+    if (!language || !(text || "").trim()) {
+      return null;
+    }
+
+    return DOMPurify.sanitize(hljs.highlight(text, { language, ignoreIllegals: true }).value);
   }
 };
