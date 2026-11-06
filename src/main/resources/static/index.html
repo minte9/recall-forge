@@ -564,7 +564,8 @@
                 <div class="challenge-item">
                   <details class="code-block" open>
                     <summary>{{ c.question }}</summary>
-                    <pre v-if="(c.userAnswer || '').trim()"><code>{{ c.userAnswer }}</code></pre>
+                    <pre v-if="c.answerHtml"><code v-html="c.answerHtml"></code></pre>
+                    <pre v-else-if="(c.userAnswer || '').trim()"><code>{{ c.userAnswer }}</code></pre>
                     <p v-else><em>No answer submitted.</em></p>
                   </details>
 

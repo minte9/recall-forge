@@ -419,6 +419,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       };
 
       let prevTopicId = null;
+      const language = Markdown.mainLanguage(this.markdown);
 
       return this.currentMarkdownCodeChallenges
         .slice()
@@ -434,6 +435,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           return {
             ...c,
             showTopicHeader,
+            answerHtml: Markdown.highlightText(c.userAnswer, language),
             // topicHeading: (c.topicTitle || "").replace(/^\s*\d+\.\s*/, "")
             topicHeading: (c.topicTitle || "")
           };
