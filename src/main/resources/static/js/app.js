@@ -2390,6 +2390,7 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.success = null;
       this.result = null;
       this.viewingCodeChallenges = false;
+      this.leftPanelWidth = null;
       this.mobileView = "review";
 
       this.$nextTick(() => window.scrollTo(0, 0));
