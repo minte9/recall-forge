@@ -771,10 +771,15 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.viewingCodeChallenges = false;
       this.editingOriginalMarkdown = false;
       this.viewingOriginal = true;
+      this.expandMarkdownSection();
+    },
+
+    // Opening a KB / CC section: widen the left panel and, once it has
+    // reflowed, bring the action bar to the top so the section below it
+    // fills the view.
+    expandMarkdownSection() {
       this.leftPanelWidth = Math.max(this.leftPanelWidth ?? 0, 70);
 
-      // After the wider panel has reflowed, bring the action bar (KB button)
-      // to the top so the section below it fills the view.
       this.$nextTick(() => {
         this.scrollToFileActions();
       });
@@ -2400,10 +2405,18 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.viewingCodeChallenges = true;
       this.viewingOriginal = false;
       this.editingOriginalMarkdown = false;
+      this.expandMarkdownSection();
     },
 
     hideCodeChallenges() {
+      const scrollY = window.scrollY;
+
       this.viewingCodeChallenges = false;
+      this.leftPanelWidth = null;
+
+      this.$nextTick(() => {
+        window.scrollTo(0, scrollY);
+      });
     },
 
     // CC button / menu - same section-under-the-markdown toggle as KB.
