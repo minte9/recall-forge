@@ -134,13 +134,12 @@ class StarterPackServiceTest {
     }
 
     @Test
-    void isPublicCategory_templateUserKotlinOracleNodeOAuth2_returnsFalse() {
+    void isPublicCategory_templateUserKotlinOracleNode_returnsFalse() {
         setUp();
 
         assertThat(starterPackService.isPublicCategory(1L, "kotlin")).isFalse();
         assertThat(starterPackService.isPublicCategory(1L, "oracle")).isFalse();
         assertThat(starterPackService.isPublicCategory(1L, "node")).isFalse();
-        assertThat(starterPackService.isPublicCategory(1L, "oauth2")).isFalse();
     }
 
     @Test
@@ -156,6 +155,7 @@ class StarterPackServiceTest {
         setUp();
 
         assertThat(starterPackService.isPublicCategory(1L, "https")).isTrue();
+        assertThat(starterPackService.isPublicCategory(1L, "oauth2")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "mcp")).isTrue();
         assertThat(starterPackService.isPublicCategory(1L, "algorithms")).isTrue();
     }
@@ -223,20 +223,21 @@ class StarterPackServiceTest {
         assertThat(starterPackService.getUnlockStatus())
             .containsOnlyKeys(
                 "Spring", "Docker", "TypeScript", "Angular",
-                "GraphQL", "MCP", "HTTPS", "FastAPI"
+                "GraphQL", "MCP", "HTTPS", "OAuth2", "FastAPI"
             );
     }
 
     @Test
     void getUnlockStatus_allDependentsOfALevelOneCategoryUnlockTogetherOnItsReviewedPercentAlone() {
         setUp();
-        // Security reviewed, HTTPS never touched (0% reviewed) - it still
-        // unlocks, since it gates directly on Security alone.
+        // Security reviewed, HTTPS and OAuth2 never touched (0% reviewed) - they
+        // still unlock, since they gate directly on Security alone.
         when(rewardService.getCurrentUserReward(anyString())).thenReturn(rewardWithReviewed("x", 0));
         when(rewardService.getCurrentUserReward("Security")).thenReturn(rewardWithReviewed("Security", 30));
 
         assertThat(starterPackService.getUnlockStatus())
             .containsEntry("HTTPS", true)
+            .containsEntry("OAuth2", true)
             .containsEntry("Spring", false);
     }
 
@@ -250,7 +251,7 @@ class StarterPackServiceTest {
             .containsOnlyKeys(
                 "Java", "Python", "Git", "Javascript",
                 "Spring", "Docker", "TypeScript", "Angular",
-                "Security", "REST", "GraphQL", "MCP", "HTTPS",
+                "Security", "REST", "GraphQL", "MCP", "HTTPS", "OAuth2",
                 "Embeddings", "FastAPI",
                 "Algorithms"
             )
@@ -267,7 +268,7 @@ class StarterPackServiceTest {
             .containsOnlyKeys(
                 "Java", "Python", "Git", "Javascript",
                 "Spring", "Docker", "TypeScript", "Angular",
-                "Security", "REST", "GraphQL", "MCP", "HTTPS",
+                "Security", "REST", "GraphQL", "MCP", "HTTPS", "OAuth2",
                 "Embeddings", "FastAPI",
                 "Algorithms"
             )

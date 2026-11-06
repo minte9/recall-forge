@@ -43,7 +43,7 @@ public class StarterPackService {
                 "Python", List.of("FastAPI"),
                 "Git", List.of("Docker"),
                 "Javascript", List.of("TypeScript", "Angular"),
-                "Security", List.of("HTTPS"),
+                "Security", List.of("HTTPS", "OAuth2"),
                 "REST", List.of("GraphQL", "MCP"),
                 "Embeddings", List.of(),
                 "Algorithms", List.of()

@@ -274,6 +274,12 @@
                 </div>
 
                 <div class="starter-pack-row">
+                    <span class="starter-pack-chip">Security</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">HTTPS</span>
+                    <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">OAuth2</span>
+                </div>
+
+                <div class="starter-pack-row">
                     <span class="starter-pack-chip">Python</span>
                     <span class="starter-pack-chip starter-pack-chip--locked" title="Unlocks as you build mastery">FastAPI</span>
                 </div>
@@ -594,7 +600,8 @@
     })();
 
     // Job profiles demo: switches the bars below the selector. Hardcoded copy
-    // of the enabled job profiles (database/recallforge_job_profiles_migration.sql),
+    // of the enabled job profiles (database/recallforge_job_profiles_migration.sql
+    // and recallforge_job_profiles_security.sql),
     // keeping only starter-pack categories in STARTER_PACK_ROWS order (app.js),
     // like the app's <job-profile-progress>. Refresh by hand when profiles change:
     //   SELECT jp.name, co.category FROM job_profiles jp
@@ -610,7 +617,8 @@
 
         var profiles = {
             'Java Backend Engineer':
-                ['Java', 'Spring', 'REST', 'GraphQL', 'Git', 'Docker'],
+                ['Java', 'Spring', 'REST', 'GraphQL', 'Security', 'HTTPS', 'OAuth2',
+                 'Git', 'Docker'],
             'Java Full-Stack Developer':
                 ['Java', 'Spring', 'REST', 'Javascript', 'TypeScript', 'Angular'],
             'AI Integration Engineer':
@@ -622,6 +630,7 @@
         var reviewed = {
             Java: 98, Spring: 40, REST: 45, GraphQL: 22, MCP: 36,
             Javascript: 70, TypeScript: 31, Angular: 0,
+            Security: 35, HTTPS: 20, OAuth2: 8,
             Python: 62, Embeddings: 18, Algorithms: 25,
             Git: 12, Docker: 0
         };
