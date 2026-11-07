@@ -4,35 +4,24 @@
     "type": "split",
     "children": [
       {
-        "id": "9c36562ae1a56231",
+        "id": "9181753a56477d70",
         "type": "tabs",
         "children": [
           {
-            "id": "0c8723c482d52a55",
+            "id": "73b2ce12ee84d597",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "_images/welcome.png"
+                "file": "DB/Databases/Fundamentals/Transactions and ACID.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "welcome"
-            }
-          },
-          {
-            "id": "a13297ce04f1ab5a",
-            "type": "leaf",
-            "state": {
-              "type": "image",
-              "state": {
-                "file": "_images/mcp_services.png"
-              },
-              "icon": "lucide-image",
-              "title": "mcp_services"
+              "icon": "lucide-file",
+              "title": "Transactions and ACID"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -207,8 +196,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "493fa442051c9418",
+  "active": "73b2ce12ee84d597",
   "lastOpenFiles": [
+    "_images/mcp_services.png",
     "_images/components_architecture.png",
     "_images/product_card_search.png",
     "_images/product_card_browser.png",
@@ -223,7 +213,6 @@
     "JS/Angular/Basics/Components.md",
     "JS/Angular/Basics/Development Setup.md",
     "JS/Angular/Basics/Overview.md",
-    "_images/products_components.png",
     "_images",
     "DB/Databases/Fundamentals/DBMS Architecture.md",
     "DB/Databases/Fundamentals/Relational Model.md",

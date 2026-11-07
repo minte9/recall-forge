@@ -125,6 +125,8 @@ INSERT INTO accounts (owner, balance)
 VALUES
     ('Alice', 500.00),
     ('Bob', 200.00);
+    
+SELECT * FROM accounts;
 ```
 
 Initial state:
@@ -137,7 +139,7 @@ Initial state:
 
 ### Step 2 — Execute a successful transaction
 
-```
+```postgresql
 BEGIN;
 
 UPDATE accounts
@@ -163,7 +165,7 @@ Both operations were committed together.
 
 ### Step 3 — Test rollback
 
-```
+```postgresql
 BEGIN;
 
 UPDATE accounts
@@ -185,7 +187,7 @@ Key point: Changes made inside a transaction are visible to that transaction bef
 
 ### Step 4 — Test a constraint violation
 
-```
+```postgresql
 BEGIN;
 
 UPDATE accounts
@@ -195,14 +197,14 @@ WHERE owner = 'Alice';
 
 PostgreSQL returns an error similar to:
 
-```
+```sql
 ERROR: new row for relation "accounts"
 violates check constraint "accounts_balance_check"
 ```
 
 The transaction is now in an aborted state.
 
-```
+```postgresql
 ROLLBACK;
 ```
 
@@ -216,13 +218,13 @@ SQLite supports ACID transactions but has a different concurrency architecture f
 
 From a terminal:
 
-```
+```sh
 sqlite3 banking.db
 ```
 
 Create the table:
 
-```
+```sqlite
 CREATE TABLE accounts (
     id INTEGER PRIMARY KEY,
     owner TEXT NOT NULL,
@@ -239,7 +241,7 @@ SQLite's `NUMERIC` affinity is not equivalent to PostgreSQL's exact fixed-precis
 
 ### Step 2 — Execute a transaction
 
-```
+```sqlite
 BEGIN TRANSACTION;
 
 UPDATE accounts
@@ -255,7 +257,7 @@ COMMIT;
 
 ### Step 3 — Test rollback
 
-```
+```sqlite
 BEGIN TRANSACTION;
 
 UPDATE accounts
@@ -279,7 +281,7 @@ SQLite provides three transaction-start modes:
 
 Example:
 
-```
+```sqlite
 BEGIN IMMEDIATE;
 
 UPDATE accounts
@@ -303,7 +305,7 @@ By default, many database clients operate in autocommit mode.
 
 For example:
 
-```
+```sql
 UPDATE accounts
 SET balance = balance - 100
 WHERE id = 1;
@@ -317,7 +319,7 @@ This creates a risk for operations that must succeed together.
 
 ### Explicit transaction
 
-```
+```sql
 BEGIN;
 
 UPDATE accounts
@@ -337,7 +339,7 @@ Both updates belong to the same transaction.
 
 In a Spring Boot application, transaction boundaries are often defined at the service layer.
 
-```
+```java
 @Service
 public class TransferService {
 
@@ -392,11 +394,8 @@ public class TransferService {
 Here, Spring manages the transaction:
 
 1. Start a transaction when entering the proxied `transfer()` method.
-    
 2. Execute the database operations.
-    
 3. Commit if the method completes successfully.
-    
 4. Roll back by default if an unchecked exception occurs.
     
 
@@ -404,7 +403,7 @@ This example illustrates transaction boundaries, not a complete concurrency-safe
 
 Also remember that Spring's default rollback behavior does not automatically include checked exceptions. You can configure that explicitly:
 
-```
+```java
 @Transactional(rollbackFor = Exception.class)
 ```
 
@@ -414,7 +413,7 @@ Sometimes you want to undo only part of a transaction.
 
 SQL provides savepoints for this.
 
-```
+```postgresql
 BEGIN;
 
 UPDATE accounts
@@ -467,7 +466,7 @@ PostgreSQL is generally better suited for backend services with many concurrent 
 
 ### Mistake 1 — Forgetting the transaction
 
-```
+```sql
 UPDATE accounts SET balance = balance - 100
 WHERE id = 1;
 
@@ -479,7 +478,7 @@ If these run as separate autocommitted statements, the first change may persist 
 
 ### Mistake 2 — Keeping transactions open too long
 
-```
+```sql
 BEGIN;
 
 UPDATE orders
@@ -505,11 +504,8 @@ For example, two transactions can read the same initial value and make conflicti
 The correct solution may require:
 
 - Row-level locks
-    
 - Optimistic locking
-    
 - Conditional updates
-    
 - A stronger isolation level
     
 
@@ -521,7 +517,7 @@ A database rollback cannot automatically undo an email already sent, an HTTP req
 
 Distributed workflows may require patterns such as the transactional outbox, idempotency, or sagas.
 
-## 11. Summary
+## 9. Summary
 
 |Concept|Key idea|
 |---|---|
