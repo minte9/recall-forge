@@ -81,6 +81,7 @@ class MarkdownControllerTest {
         when(markdownFileService.uploadVault(any(), any())).thenReturn(
             new MarkdownVaultUploadResponse(
                 List.of(new MarkdownUploadResponse(1L, "Composition.md", "## Composition\ncontent", null, false, false)),
+                List.of("diagram.png"),
                 List.of(new MarkdownVaultUploadResponse.VaultFileError(
                     "MyVault/Java/OOP/Inheritance.md", "File is too large. Maximum size is 200 KB."))
             )
@@ -99,6 +100,7 @@ class MarkdownControllerTest {
                   "imported": [
                     { "markdownFileId": 1, "filename": "Composition.md", "content": "## Composition\\ncontent" }
                   ],
+                  "importedImages": ["diagram.png"],
                   "errors": [
                     { "path": "MyVault/Java/OOP/Inheritance.md", "message": "File is too large. Maximum size is 200 KB." }
                   ]

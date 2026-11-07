@@ -5,6 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.markdown")
 public record AppMarkdownLimitProperties(
     int maxTopicsPerUser,
-    int dailyOptimizeLimit
+    int dailyOptimizeLimit,
+    int maxImagesPerUser,
+    int maxImageStorageMbPerUser
 ) {
 }

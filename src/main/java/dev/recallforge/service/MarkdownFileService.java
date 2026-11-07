@@ -75,6 +75,7 @@ public class MarkdownFileService {
     private final AppMarkdownLimitProperties markdownLimitProperties;
     private final QuestionGenerationRepository questionGenerationRepository;
     private final AppReviewLimitProperties reviewLimitProperties;
+    private final ImageService imageService;
 
     private static final long MAX_FILE_SIZE = 200 * 1024;  // 200 KB
     private static final int MAX_CONTENT_LENGTH = 200_000;
@@ -104,7 +105,8 @@ public class MarkdownFileService {
             SubcategoryOrderRepository subcategoryOrderRepository,
             AppMarkdownLimitProperties markdownLimitProperties,
             QuestionGenerationRepository questionGenerationRepository,
-            AppReviewLimitProperties reviewLimitProperties
+            AppReviewLimitProperties reviewLimitProperties,
+            ImageService imageService
     ) {
         this.markdownFileRepository = markdownFileRepository;
         this.topicRepository = topicRepository;
@@ -117,6 +119,7 @@ public class MarkdownFileService {
         this.markdownLimitProperties = markdownLimitProperties;
         this.questionGenerationRepository = questionGenerationRepository;
         this.reviewLimitProperties = reviewLimitProperties;
+        this.imageService = imageService;
     }
 
     @Transactional
@@ -150,13 +153,17 @@ public class MarkdownFileService {
      * exactly like a normal upload - an explicit in-file header always
      * wins. Otherwise a header is synthesized from the file's folder path
      * (see {@link #synthesizeHeaderFromPath}) before it's handed to the
-     * same {@link #importMarkdown} used by single-file uploads. Non-{@code
-     * .md} files (images, {@code .obsidian/} config, etc.) are silently
-     * skipped rather than treated as errors.
+     * same {@link #importMarkdown} used by single-file uploads.
      *
-     * One bad markdown file (too large, no topics, too many topics) is
-     * recorded in the response's {@code errors} list and skipped rather
-     * than aborting the rest of the vault.
+     * {@code .png}/{@code .jpg}/{@code .jpeg} files are handed to {@link
+     * ImageService} (validated, re-encoded, stored per user by filename) so
+     * markdown {@code ![[name.png]]} embeds can resolve to them - a folder
+     * of only images (e.g. the vault's {@code _images}) is a valid upload.
+     * Any other file ({@code .obsidian/} config, etc.) is silently skipped.
+     *
+     * One bad file (too large, no topics, too many topics, invalid image,
+     * image quota reached) is recorded in the response's {@code errors}
+     * list and skipped rather than aborting the rest of the vault.
      *
      * The whole request is rejected upfront, before any file is processed,
      * if the picked folder looks like the whole vault rather than a single
@@ -187,6 +194,7 @@ public class MarkdownFileService {
         }
 
         List<MarkdownUploadResponse> imported = new ArrayList<>();
+        List<String> importedImages = new ArrayList<>();
         List<MarkdownVaultUploadResponse.VaultFileError> errors = new ArrayList<>();
 
         // Category -> (subcategory -> displayOrder), lazily loaded per
@@ -207,6 +215,13 @@ public class MarkdownFileService {
                 }
 
                 String rawFilename = file.getOriginalFilename();
+
+                if (ImageService.isImageFilename(rawFilename)) {
+                    String imageFilename = basename(rawFilename);
+                    imageService.store(imageFilename, file.getBytes());
+                    importedImages.add(imageFilename);
+                    continue;
+                }
 
                 if (rawFilename == null || !rawFilename.toLowerCase().endsWith(".md")) {
                     continue;
@@ -251,7 +266,7 @@ public class MarkdownFileService {
             }
         }
 
-        return new MarkdownVaultUploadResponse(imported, errors);
+        return new MarkdownVaultUploadResponse(imported, importedImages, errors);
     }
 
     /**

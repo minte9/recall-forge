@@ -1543,22 +1543,24 @@ When you click <strong>Start Review</strong>, this panel will be updated.
       this.$refs.vaultFolderInput.click();
     },
 
-    // Admin-only. event.target.files is every file under the selected
-    // folder (webkitdirectory) - each File carries a webkitRelativePath
-    // the backend uses to derive Environment/Category/Subcategory/
-    // FileTitle for files that don't already have their own header line.
-    // Non-markdown files (images, .obsidian/ config, etc.) are filtered
-    // out here rather than sent and skipped server-side.
+    // event.target.files is every file under the selected folder
+    // (webkitdirectory) - each File carries a webkitRelativePath the
+    // backend uses to derive Environment/Category/Subcategory/FileTitle
+    // for files that don't already have their own header line. Images
+    // (.png/.jpg/.jpeg) are sent too, so ![[name.png]] embeds resolve -
+    // picking just the vault's _images folder is a valid upload. Anything
+    // else (.obsidian/ config, etc.) is filtered out here rather than sent
+    // and skipped server-side.
     async uploadVaultFiles(event) {
       // The File API has no filesystem creation time - lastModified is the
       // closest available proxy, and the folder picker otherwise returns
       // entries alphabetically rather than in any meaningful order.
       const files = Array.from(event.target.files || [])
-        .filter(file => /\.md$/i.test(file.name))
+        .filter(file => /\.(md|png|jpe?g)$/i.test(file.name))
         .sort((a, b) => a.lastModified - b.lastModified);
 
       if (files.length === 0) {
-        this.error = "No .md files found in the selected folder.";
+        this.error = "No .md or image files found in the selected folder.";
         event.target.value = "";
         return;
       }
@@ -1574,8 +1576,16 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         const response = await Api.uploadVault(files, paths);
 
         this.showMarkdownSummaries();
-        this.success = `Imported ${response.imported.length} of ${files.length} file` +
-          (files.length === 1 ? "" : "s") + " from the vault.";
+        const markdownCount = files.filter(file => /\.md$/i.test(file.name)).length;
+        const imageCount = files.length - markdownCount;
+        const parts = [];
+        if (markdownCount > 0) {
+          parts.push(`${response.imported.length} of ${markdownCount} file` + (markdownCount === 1 ? "" : "s"));
+        }
+        if (imageCount > 0) {
+          parts.push(`${response.importedImages.length} of ${imageCount} image` + (imageCount === 1 ? "" : "s"));
+        }
+        this.success = `Imported ${parts.join(" and ")} from the vault.`;
 
         if (response.errors.length > 0) {
           this.error = response.errors.map(e => `${e.path}: ${e.message}`).join("\n");

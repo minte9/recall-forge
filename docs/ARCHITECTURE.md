@@ -63,6 +63,12 @@ on it for scoping data to the current user.
   (upload/update/delete, dedup by content hash, re-sync topics on re-import)
   + `MarkdownTopicImporter` (stateless `##`/`###` heading parser) →
   `domain/MarkdownFile`, `domain/Topic`.
+- **Vault images** — vault upload routes `.png`/`.jpg` files to
+  `ImageService` (byte-signature check, size/pixel limits, re-encode,
+  per-user quota) → `domain/ImageAsset` (bytea, unique per user+filename).
+  `ImageController` serves `GET /api/images/{filename}` (own image, else the
+  template user's for starter-pack copies). Markdown keeps Obsidian's
+  `![[name.png]]`; `static/js/markdown.js` resolves it at render time.
 - **Review lifecycle** — `ReviewController` → `ReviewService` (start review,
   get question via `OpenAiService`, submit answer, grade via `OpenAiService`,
   update memory score) → `RepetitionService` (spaced-repetition scoring/

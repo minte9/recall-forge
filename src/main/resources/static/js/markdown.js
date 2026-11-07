@@ -2,6 +2,47 @@
 // option on render). Set to false for plain code blocks in both.
 const CODE_HIGHLIGHT_ENABLED = true;
 
+// Obsidian image embeds - ![[name.png]] or ![[name.png|300]] (display
+// width). Stored markdown keeps this syntax as-is; it's resolved here, at
+// render time, to the image uploaded with the vault (ImageController), so
+// files imported before their images were uploaded need no re-import.
+// A marked inline extension rather than a regex over the source, so embeds
+// inside code spans/blocks are left as literal text.
+const OBSIDIAN_IMAGE_EMBED = /^!\[\[([^\]|\n]+\.(?:png|jpe?g))(?:\|(\d{1,4})(?:x\d{1,4})?)?\]\]/i;
+
+marked.use({
+  extensions: [{
+    name: "obsidianImageEmbed",
+    level: "inline",
+    start(src) {
+      const index = src.indexOf("![[");
+      return index >= 0 ? index : undefined;
+    },
+    tokenizer(src) {
+      const match = OBSIDIAN_IMAGE_EMBED.exec(src);
+      if (!match) {
+        return undefined;
+      }
+      return {
+        type: "obsidianImageEmbed",
+        raw: match[0],
+        filename: match[1].trim(),
+        width: match[2] || null
+      };
+    },
+    renderer(token) {
+      const src = "/api/images/" + encodeURIComponent(token.filename);
+      const alt = token.filename
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      const width = token.width ? ` width="${token.width}"` : "";
+      return `<img src="${src}" alt="${alt}"${width} loading="lazy">`;
+    }
+  }]
+});
+
 const Markdown = {
   // v-html's expression runs on every Vue re-render (e.g. each keystroke in
   // the answer box), so keep each file view's last result rather than
