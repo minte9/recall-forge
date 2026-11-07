@@ -4,24 +4,35 @@
     "type": "split",
     "children": [
       {
-        "id": "b88596eddc5ea5d8",
+        "id": "9c36562ae1a56231",
         "type": "tabs",
         "children": [
           {
-            "id": "d62c2f0effa552d0",
+            "id": "0c8723c482d52a55",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "CS/Algorithms/Data Structures/Arrays and Lists.md",
-                "mode": "source",
-                "source": false
+                "file": "_images/welcome.png"
               },
-              "icon": "lucide-file",
-              "title": "Arrays and Lists"
+              "icon": "lucide-image",
+              "title": "welcome"
+            }
+          },
+          {
+            "id": "a13297ce04f1ab5a",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "_images/mcp_services.png"
+              },
+              "icon": "lucide-image",
+              "title": "mcp_services"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -196,54 +207,54 @@
       "bases:Create new base": false
     }
   },
-  "active": "d62c2f0effa552d0",
+  "active": "493fa442051c9418",
   "lastOpenFiles": [
-    "CS/Algorithms/Fundamentals/Algorithm Design.md",
+    "_images/components_architecture.png",
+    "_images/product_card_search.png",
+    "_images/product_card_browser.png",
+    "_images/product_card.png",
+    "_images/welcome.png",
+    "_images/knn image 1.png",
+    "_images/Pasted image 20261030150550.png",
+    "_images/Pasted image 20261030105455.png",
+    "_images/Pasted image 20261103132828.png",
+    "DB/Databases/Fundamentals/Transactions and ACID.md",
+    "_images/Pasted image 20261106161956.png",
+    "JS/Angular/Basics/Components.md",
+    "JS/Angular/Basics/Development Setup.md",
+    "JS/Angular/Basics/Overview.md",
+    "_images/products_components.png",
+    "_images",
+    "DB/Databases/Fundamentals/DBMS Architecture.md",
+    "DB/Databases/Fundamentals/Relational Model.md",
+    "DB/_images",
+    "DB/Databases/Fundamentals/Database Concepts.md",
+    "CS/Algorithms/Data Structures/Stacks and Queues.md",
     "CS/Algorithms/Data Structures/Arrays and Lists.md",
+    "CS/Algorithms/Fundamentals/Algorithm Design.md",
     "CS/Algorithms/Data Structures",
     "AI/Embeddings/RAG/RAG Pipelines.md",
     "AI/Embeddings/Embeddings/Vector Databases.md",
     "AI/Embeddings/Embeddings/Cosine Similarity.md",
     "AI/Embeddings/Embeddings/Embedings Fundamentals.md",
-    "CS/_images/Pasted image 20261103163801.png",
-    "CS/_images/Pasted image 20261103190626.png",
     "CS/Algorithms/Fundamentals/Recursion.md",
-    "CS/_images/Pasted image 20261103165340.png",
     "CS/Algorithms/Fundamentals/Complexity Examples.md",
-    "CS/_images/Pasted image 20261103151912.png",
-    "CS/_images/Pasted image 20261103152049.png",
     "CS/Algorithms/Fundamentals/Complexity Analysis.md",
-    "CS/_images/Pasted image 20261103135934.png",
     "CS/Algorithms/Fundamentals/Introduction.md",
-    "CS/_images/Pasted image 20261103134016.png",
-    "Pasted image 20261103133845.png",
     "CS/_images",
-    "CS/_images/Pasted image 20261103132828.png",
-    "DB/Database/Fundamentals/Database Concepts.md",
     "CS/Algorithms/Fundamentals",
-    "DB/Database/Fundamentals",
+    "DB/Databases/Fundamentals",
     "CS/Algorithms",
     "CS",
-    "DB/Database",
+    "DB/Databases",
     "DB",
-    "AI/_images/Pasted image 20261031103705.png",
     "AI/Embeddings/Embeddings/Vector Search.md",
     "AI/Embeddings/RAG/Fundamentals.md",
-    "AI/Embeddings/RAG",
-    "AI/Embeddings/Vectors/Untitled",
     "AI/Machine Learning/Supervised Learning/Linear Regression.md",
     "AI/Machine Learning/Algorithms/Algorithms.md",
     "AI/Machine Learning/Supervised Learning/Knn Classifier.md",
     "AI/Machine Learning/Machine Learning.md",
     "AI/Machine Learning/Supervised Learning/Supervised Learning.md",
-    "JS/Angular/Routing/Route parameters.md",
-    "JS/Angular/Routing/Routing Basics.md",
-    "JS/Angular/Services/Dependency Injection.md",
-    "JS/Angular/Services/Services.md",
-    "JS/Angular/Comunication/View Queries.md",
-    "JS/Angular/Comunication/Input Output.md",
-    "JS/Angular/Comunication/Component Composition.md",
-    "JS/Angular/Basics/Templates.md",
     "API/Fundamentals.canvas",
     "API/API.canvas",
     "API/Query Arguments.canvas",
