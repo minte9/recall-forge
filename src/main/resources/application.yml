@@ -43,6 +43,14 @@ spring:
     username: recallforge
     password: recallforge
 
+  servlet:
+    multipart:
+      # ImageService enforces 2 MB per image (and MarkdownFileService 200 KB
+      # per .md) as per-file errors; this outer cap is looser so one
+      # oversized image doesn't fail the whole vault request.
+      max-file-size: 10MB
+      max-request-size: 60MB
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -109,6 +117,9 @@ app:
     # Optimize is the most expensive AI call (whole file in, whole rewrite
     # out). Also counts toward daily-user-question-limit above.
     daily-optimize-limit: ${APP_DAILY_OPTIMIZE_LIMIT:10}
+    # Images uploaded with a vault (![[name.png]] embeds), stored in the DB.
+    max-images-per-user: ${APP_MAX_IMAGES_PER_USER:500}
+    max-image-storage-mb-per-user: ${APP_MAX_IMAGE_STORAGE_MB_PER_USER:20}
   goal-days:
     reviews: ${APP_GOAL_DAYS_REVIEWS:10}
     code-challenges: ${APP_GOAL_DAYS_CHALLENGES:3}

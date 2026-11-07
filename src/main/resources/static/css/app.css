@@ -573,6 +573,14 @@
     margin: 3px 0;
   }
 
+  /* Obsidian ![[image]] embeds - a width from ![[x.png|600]] still shrinks to fit. */
+  .markdown img {
+    display: block;
+    margin: 16px 0;
+    max-width: 100%;
+    height: auto;
+  }
+
   .markdown pre {
     margin: 0;
     padding: 12px;

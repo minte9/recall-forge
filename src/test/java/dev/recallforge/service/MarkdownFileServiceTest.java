@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -86,13 +87,16 @@ class MarkdownFileServiceTest {
     @Mock
     private AppReviewLimitProperties reviewLimitProperties;
 
+    @Mock
+    private ImageService imageService;
+
     private MarkdownFileService markdownFileService;
 
     private void setUp() {
         markdownFileService = new MarkdownFileService(
             markdownFileRepository, topicRepository, reviewRepository, markdownTopicImporter,
             currentUserService, openAiService, allowedEnvironmentRepository, subcategoryOrderRepository,
-            markdownLimitProperties, questionGenerationRepository, reviewLimitProperties
+            markdownLimitProperties, questionGenerationRepository, reviewLimitProperties, imageService
         );
 
         lenient().when(markdownLimitProperties.maxTopicsPerUser()).thenReturn(2000);
@@ -1497,19 +1501,60 @@ class MarkdownFileServiceTest {
     }
 
     @Test
-    void uploadVault_nonMdFile_skippedSilentlyWithoutError() throws Exception {
+    void uploadVault_nonMdNonImageFile_skippedSilentlyWithoutError() throws Exception {
         setUp();
 
-        MultipartFile image = new MockMultipartFile(
-            "files", "diagram.png", "image/png", new byte[]{1, 2, 3}
+        MultipartFile config = new MockMultipartFile(
+            "files", "app.json", "application/json", new byte[]{1, 2, 3}
         );
 
         MarkdownVaultUploadResponse response =
-            markdownFileService.uploadVault(List.of(image), List.of("Vault/Java/diagram.png"));
+            markdownFileService.uploadVault(List.of(config), List.of("Vault/Java/.obsidian/app.json"));
 
         assertThat(response.imported()).isEmpty();
+        assertThat(response.importedImages()).isEmpty();
         assertThat(response.errors()).isEmpty();
         verify(markdownTopicImporter, never()).parseMarkdown(any());
+        verify(imageService, never()).store(any(), any());
+    }
+
+    @Test
+    void uploadVault_imageOnlyFolder_storesEachImageByBasename() throws Exception {
+        setUp();
+        byte[] pngBytes = {1, 2, 3};
+        byte[] jpgBytes = {4, 5, 6};
+        MultipartFile png = new MockMultipartFile("files", "Pasted image 1.png", "image/png", pngBytes);
+        MultipartFile jpg = new MockMultipartFile("files", "_images/photo.JPG", "image/jpeg", jpgBytes);
+
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(png, jpg), List.of("_images/Pasted image 1.png", "_images/photo.JPG"));
+
+        assertThat(response.importedImages()).containsExactly("Pasted image 1.png", "photo.JPG");
+        assertThat(response.imported()).isEmpty();
+        assertThat(response.errors()).isEmpty();
+        verify(imageService).store("Pasted image 1.png", pngBytes);
+        verify(imageService).store("photo.JPG", jpgBytes);
+        verify(markdownTopicImporter, never()).parseMarkdown(any());
+    }
+
+    @Test
+    void uploadVault_rejectedImage_recordedAsErrorAndOtherImagesStillStored() throws Exception {
+        setUp();
+        byte[] badBytes = {1};
+        byte[] goodBytes = {2};
+        MultipartFile bad = new MockMultipartFile("files", "evil.png", "image/png", badBytes);
+        MultipartFile good = new MockMultipartFile("files", "good.png", "image/png", goodBytes);
+        doThrow(new IllegalArgumentException("File is not a valid PNG or JPEG image."))
+            .when(imageService).store("evil.png", badBytes);
+
+        MarkdownVaultUploadResponse response = markdownFileService.uploadVault(
+            List.of(bad, good), List.of("_images/evil.png", "_images/good.png"));
+
+        assertThat(response.importedImages()).containsExactly("good.png");
+        assertThat(response.errors()).extracting(MarkdownVaultUploadResponse.VaultFileError::path)
+            .containsExactly("_images/evil.png");
+        assertThat(response.errors().get(0).message()).isEqualTo("File is not a valid PNG or JPEG image.");
+        verify(imageService).store("good.png", goodBytes);
     }
 
     @Test
