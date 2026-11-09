@@ -189,6 +189,7 @@ const CATEGORY_ICONS = {
   Git: "git",
   Docker: "docker",
   SQL: "database-fill",
+  Databases: "database-fill",
   PostgreSQL: "postgresql",
   Oracle: "oracle",
   MySQL: "mysql",

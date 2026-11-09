@@ -253,7 +253,7 @@ class StarterPackServiceTest {
                 "Spring", "Docker", "TypeScript", "Angular",
                 "Security", "REST", "GraphQL", "MCP", "HTTPS", "OAuth2",
                 "Embeddings", "FastAPI",
-                "Algorithms"
+                "Algorithms", "Databases"
             )
             .containsEntry("Java", 73);
     }
@@ -270,7 +270,7 @@ class StarterPackServiceTest {
                 "Spring", "Docker", "TypeScript", "Angular",
                 "Security", "REST", "GraphQL", "MCP", "HTTPS", "OAuth2",
                 "Embeddings", "FastAPI",
-                "Algorithms"
+                "Algorithms", "Databases"
             )
             .containsEntry("Java", 15);
     }

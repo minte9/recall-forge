@@ -12,6 +12,7 @@ const MAX_ANSWER_LENGTH = 2000;
 const STARTER_PACK_ROWS = [
   ["Java", "Spring"],
   ["REST", "GraphQL", "MCP"],
+  ["Databases"],
   ["Javascript", "TypeScript", "Angular"],
   ["Security", "HTTPS", "OAuth2"],
   ["Python", "FastAPI"],
