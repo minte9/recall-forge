@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "61a635d0cb5cbb02",
+        "id": "d201004c483c7cbe",
         "type": "tabs",
         "children": [
           {
-            "id": "c4147b6766c73527",
+            "id": "6870662693d5fbd0",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "DB/Databases/SQL/Filtering and Operators.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Filtering and Operators"
+              "title": "New tab"
             }
           }
         ]
@@ -83,7 +79,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 270.5
+    "width": 307.5
   },
   "right": {
     "id": "03bb5cf4e0812267",
@@ -196,25 +192,29 @@
       "bases:Create new base": false
     }
   },
-  "active": "c4147b6766c73527",
+  "active": "493fa442051c9418",
   "lastOpenFiles": [
-    "DB/Databases/SQL/SQL Fundamentals.md",
+    "CS/Algorithms/Searching Algorithms/Binary Search.md",
+    "_images/02/Pasted image 20261110150242.png",
+    "CS/Algorithms/Searching Algorithms/Linear Search.md",
+    "CS/Algorithms/Data Structures/Binary Search Tree.md",
+    "CS/Algorithms/Data Structures/Graphs.md",
+    "CS/Algorithms/Searching Algorithms",
+    "_images/02/Pasted image 20261110095735.png",
+    "_images/02/Pasted image 20261110120555.png",
+    "_images/02/Pasted image 20261110120512.png",
+    "_images/02/Pasted image 20261110102225.png",
+    "_images/02/Pasted image 20261110101357.png",
+    "_images/02/Pasted image 20261110100424.png",
+    "_images/02/Pasted image 20261110100033.png",
+    "_images/02/Pasted image 20261110095941.png",
+    "_images/02/Pasted image 20261110095853.png",
     "DB/Databases/SQL/Filtering and Operators.md",
-    "Pasted image 20261109191403.png",
+    "DB/Databases/SQL/SQL Fundamentals.md",
     "DB/Databases/Fundamentals/Normalization and Denormalization.md",
     "DB/Databases/SQL",
-    "_images/02/Pasted image 20261109125929.png",
-    "_images/02/Pasted image 20261109163217.png",
     "CS/Machine Learning/Supervised Learning/Linear Regression.md",
     "CS/Machine Learning/Supervised Learning/Knn Classifier.md",
-    "_images/02/Pasted image 20261108173206.png",
-    "CS/Algorithms/Data Structures/Binary Search Tree.md",
-    "_images/02/Pasted image 20261108184655.png",
-    "_images/02/Pasted image 20261108182522.png",
-    "_images/02/Pasted image 20261108182136.png",
-    "_images/02/Pasted image 20261108180820.png",
-    "_images/02/Pasted image 20261108173324.png",
-    "_images/02/Pasted image 20261108173240.png",
     "CS/Algorithms/Data Structures/Hash Tables and Sets.md",
     "_images/02",
     "_images/01",
@@ -236,14 +236,9 @@
     "AI/Embeddings/Embeddings/Vector Databases.md",
     "AI/Embeddings/Embeddings/Cosine Similarity.md",
     "AI/Embeddings/Embeddings/Embedings Fundamentals.md",
-    "CS/Algorithms/Fundamentals/Recursion.md",
-    "CS/Algorithms/Fundamentals/Complexity Examples.md",
-    "CS/Algorithms/Fundamentals/Complexity Analysis.md",
-    "CS/Algorithms/Fundamentals/Introduction.md",
     "CS/_images",
     "CS/Algorithms/Fundamentals",
     "DB/Databases/Fundamentals",
-    "CS/Algorithms",
     "API/Fundamentals.canvas",
     "API/API.canvas",
     "API/Query Arguments.canvas",
