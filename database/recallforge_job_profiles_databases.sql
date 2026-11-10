@@ -2,14 +2,18 @@
 -- PostgreSQL 16
 -- Safe to re-run. Back up production before applying.
 -- Maps by stable (environment, category), not numeric IDs.
--- Requires the DB/Databases row in category_order (created when the
--- template user, id 1, imports the Databases markdown).
+-- Creates the DB/Databases category_order row itself: the markdown import
+-- only creates subcategory_order rows, never category_order rows.
 --
 -- Run:
 --   docker compose exec -T postgres psql -U recallforge -d recallforge \
 --     -v ON_ERROR_STOP=1 < database/recallforge_job_profiles_databases.sql
 
 BEGIN;
+
+INSERT INTO category_order (environment, category, display_order)
+VALUES ('DB', 'Databases', 1)
+ON CONFLICT (environment, category) DO NOTHING;
 
 WITH desired(profile_name, environment, category) AS (
     VALUES

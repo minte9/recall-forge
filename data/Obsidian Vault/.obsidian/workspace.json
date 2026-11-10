@@ -11,10 +11,14 @@
             "id": "6870662693d5fbd0",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "CS/Algorithms/Searching Algorithms/Binary Search.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Binary Search"
             }
           }
         ]
@@ -192,10 +196,10 @@
       "bases:Create new base": false
     }
   },
-  "active": "493fa442051c9418",
+  "active": "6870662693d5fbd0",
   "lastOpenFiles": [
-    "CS/Algorithms/Searching Algorithms/Binary Search.md",
     "_images/02/Pasted image 20261110150242.png",
+    "CS/Algorithms/Searching Algorithms/Binary Search.md",
     "CS/Algorithms/Searching Algorithms/Linear Search.md",
     "CS/Algorithms/Data Structures/Binary Search Tree.md",
     "CS/Algorithms/Data Structures/Graphs.md",
