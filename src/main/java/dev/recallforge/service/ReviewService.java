@@ -33,7 +33,7 @@ import dev.recallforge.security.CurrentUserService;
 /**
  * Orchestrates the review lifecycle for the current user: picks the next
  * due topic (via {@link TopicService}), gets a question from
- * {@link OpenAiService}, grades the submitted answer, updates the topic's
+ * {@link AiService}, grades the submitted answer, updates the topic's
  * memory score and next-review date via {@link RepetitionService}, awards
  * XP via {@link RewardService}, and enforces the daily review/question
  * limits from {@link AppReviewLimitProperties}. {@code evaluateAnswer} and
@@ -47,7 +47,7 @@ public class ReviewService {
     private final TopicService topicService;
     private final ReviewRepository reviewRepository;
     private final QuestionGenerationRepository questionGenerationRepository;
-    private final OpenAiService openAiService;
+    private final AiService aiService;
     private final RepetitionService repetitionService;
     private final RewardService rewardService;
     private final CurrentUserService currentUserService;
@@ -57,14 +57,14 @@ public class ReviewService {
     public ReviewService(
             TopicService topicService, ReviewRepository reviewRepository,
             QuestionGenerationRepository questionGenerationRepository,
-            OpenAiService openAiService, RepetitionService repetitionService,
+            AiService aiService, RepetitionService repetitionService,
             RewardService rewardService, CurrentUserService currentUserService,
             AppReviewLimitProperties reviewLimitProperties, AppAiProperties aiProperties) {
 
         this.topicService = topicService;
         this.reviewRepository = reviewRepository;
         this.questionGenerationRepository = questionGenerationRepository;
-        this.openAiService = openAiService;
+        this.aiService = aiService;
         this.repetitionService = repetitionService;
         this.rewardService = rewardService;
         this.currentUserService = currentUserService;
@@ -111,7 +111,7 @@ public class ReviewService {
                 && topic.getNextReviewAt().isAfter(LocalDateTime.now());
         boolean forcePractice = alreadyReviewedToday || notDue;
 
-        String question = openAiService.generateQuestion(
+        String question = aiService.generateQuestion(
                 topic.getTitle(), topic.getContent(), topic.getMemoryScore(), recentReviews);
 
         questionGenerationRepository.save(new QuestionGeneration(userId, topic.getCategory()));
@@ -172,7 +172,7 @@ public class ReviewService {
                 .distinct()
                 .toList();
 
-        String question = openAiService.generateCodeChallenge(
+        String question = aiService.generateCodeChallenge(
                 topic.getCategory(), topic.getTitle(), topic.getContent(), topic.getMemoryScore(),
                 recentChallenges);
 
@@ -278,7 +278,7 @@ public class ReviewService {
         Topic topic = topicService.getTopic(topicId, userId);
 
         if (codeChallenge) {
-            return openAiService.evaluateCodeChallenge(
+            return aiService.evaluateCodeChallenge(
                     topic.getCategory(),
                     topic.getTitle(),
                     topic.getContent(),
@@ -286,7 +286,7 @@ public class ReviewService {
                     userAnswer);
         }
 
-        return openAiService.evaluateAnswer(
+        return aiService.evaluateAnswer(
                 topic.getTitle(),
                 topic.getContent(),
                 question,

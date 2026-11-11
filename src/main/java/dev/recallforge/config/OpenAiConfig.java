@@ -17,7 +17,8 @@ public class OpenAiConfig {
     static final Duration READ_TIMEOUT = Duration.ofSeconds(120);
 
     @Bean
-    RestClient openAiRestClient(@Value("${openai.api-key}") String apiKey) {
+    RestClient openAiRestClient(
+            @Value("${openai.api-key}") String apiKey) {
 
         return RestClient.builder()
             .baseUrl("https://api.openai.com/v1")

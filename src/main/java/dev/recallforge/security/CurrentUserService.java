@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.recallforge.domain.AiModel;
 import dev.recallforge.domain.Topic;
 import dev.recallforge.domain.UserAccount;
 import dev.recallforge.exception.TemplateUserOperationException;
@@ -142,5 +143,14 @@ public class CurrentUserService {
         List<Topic> topics = topicRepository.findTopicsByMarkdownFileId(markdownFileId, userId);
         topics.forEach(Topic::resetProgress);
         topicRepository.saveAll(topics);
+    }
+
+    @Transactional 
+    public void setAiModel(AiModel aiModel) {
+        UserAccount user = currentUser();
+
+        user.setAiModel(aiModel);
+
+        userAccountRepository.save(user);
     }
 }

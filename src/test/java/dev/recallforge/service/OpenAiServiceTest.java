@@ -1,13 +1,12 @@
 package dev.recallforge.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,58 +14,35 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestClient;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
+import dev.recallforge.dto.AiResponse;
 
 /**
- * Does not exercise the real OpenAI network call: RestClient is mocked.
+ * Does not exercise any real AI provider: AiModelRouter is mocked.
  * Covers only prompt trimming and score security limits, as requested.
  */
 @ExtendWith(MockitoExtension.class)
 class OpenAiServiceTest {
 
-    private static final JsonMapper JSON = JsonMapper.builder().build();
-
     @Mock
-    private RestClient restClient;
+    private AiModelRouter aiModelRouter;
 
-    @Mock
-    private RestClient.RequestBodyUriSpec requestBodyUriSpec;
-
-    @Mock
-    private RestClient.ResponseSpec responseSpec;
-
-    private OpenAiService openAiService;
+    private AiService openAiService;
 
     @BeforeEach
     void setUp() {
-        openAiService = new OpenAiService(restClient, "gpt-test");
+        openAiService = new AiService(aiModelRouter);
     }
 
     private void mockAiReply(String replyContent) {
-        when(restClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.body(any(Object.class))).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
-
-        String responseJson = """
-                {"choices":[{"message":{"content":%s}}]}
-                """.formatted(JSON.writeValueAsString(replyContent));
-
-        when(responseSpec.body(JsonNode.class)).thenReturn(JSON.readTree(responseJson));
+        when(aiModelRouter.ask(anyString(), anyInt()))
+            .thenReturn(new AiResponse(replyContent, 0, 0, 0));
     }
 
-    @SuppressWarnings("unchecked")
     private String capturePromptSentToAi() {
-        ArgumentCaptor<Object> bodyCaptor = ArgumentCaptor.forClass(Object.class);
-        verify(requestBodyUriSpec).body(bodyCaptor.capture());
-
-        Map<String, Object> requestBody = (Map<String, Object>) bodyCaptor.getValue();
-        Object[] messages = (Object[]) requestBody.get("messages");
-        Map<String, Object> message = (Map<String, Object>) messages[0];
-        return (String) message.get("content");
+        ArgumentCaptor<String> promptCaptor = ArgumentCaptor.forClass(String.class);
+        verify(aiModelRouter).ask(promptCaptor.capture(), anyInt());
+        return promptCaptor.getValue();
     }
 
     // --- trimTopicContent, exercised through generateQuestion ---

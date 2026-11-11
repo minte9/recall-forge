@@ -38,6 +38,10 @@ public class UserAccount {
     @Column(name = "active_job_profile_id")
     private Long activeJobProfileId;
 
+    @Enumerated (EnumType.STRING)
+    @Column(name = "ai_model", nullable = false)
+    private AiModel aiModel = AiModel.OPENAI;
+
     private String email;
     private String displayName;
     private String avatarUrl;

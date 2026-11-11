@@ -2008,6 +2008,22 @@ When you click <strong>Start Review</strong>, this panel will be updated.
         this.showMarkdownSummaries();
       }
     },
+    
+    async saveAiModel() {
+      const response = await fetch('/api/me/ai-model', {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              aiModel: this.currentUser.aiModel
+          })
+      });
+
+      if (!response.ok) {
+          throw new Error('Failed to update AI model');
+      }
+    },
 
     closeLeftPanel() {
       this.error = null;

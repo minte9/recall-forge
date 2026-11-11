@@ -1,18 +1,23 @@
 package dev.recallforge.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import dev.recallforge.config.AppAiProperties;
 import dev.recallforge.config.AppMarkdownLimitProperties;
 import dev.recallforge.config.AppReviewLimitProperties;
 import dev.recallforge.domain.UserAccount;
+import dev.recallforge.dto.AiModelResponse;
 import dev.recallforge.dto.CurrentUserResponse;
+import dev.recallforge.dto.UpdateAiModelRequest;
 import dev.recallforge.security.CurrentUserService;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.DeleteMapping;
-
-import org.springframework.http.ResponseEntity;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
@@ -52,7 +57,8 @@ public class CurrentUserController {
             reviewLimitProperties.dailyUserQuestionLimit(),
             markdownLimitProperties.dailyOptimizeLimit(),
             markdownLimitProperties.maxTopicsPerUser(),
-            aiProperties.enabled()
+            aiProperties.enabled(),
+            user.getAiModel()
         );
     }
 
@@ -66,5 +72,15 @@ public class CurrentUserController {
     public ResponseEntity<Void> resetReviewsData() {
         currentUserService.resetCurrentUserReviews();
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping ("/me/ai-model")
+    @Transactional 
+    public AiModelResponse updateAiModel(
+            @Valid @RequestBody UpdateAiModelRequest request) {
+        
+        currentUserService.requireAdmin();
+        currentUserService.setAiModel(request.aiModel());
+        return new AiModelResponse(request.aiModel());
     }
 }

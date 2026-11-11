@@ -70,7 +70,7 @@ class MarkdownFileServiceTest {
     private CurrentUserService currentUserService;
 
     @Mock
-    private OpenAiService openAiService;
+    private AiService openAiService;
 
     @Mock
     private AllowedEnvironmentRepository allowedEnvironmentRepository;
