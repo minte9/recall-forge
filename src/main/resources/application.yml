@@ -97,8 +97,8 @@ openai:
 
 gemini:
   api-key: ${GEMINI_API_KEY}
-  model: gemini-2.5-flash-lite
-  #model: gemini-2.5-flash
+  model: gemini-3.5-flash-lite
+  #model: gemini-3.5-flash
 
 logging:
   level:

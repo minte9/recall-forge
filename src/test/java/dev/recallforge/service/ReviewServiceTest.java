@@ -54,7 +54,7 @@ class ReviewServiceTest {
     private QuestionGenerationRepository questionGenerationRepository;
 
     @Mock
-    private OpenAiService openAiService;
+    private AiService openAiService;
 
     @Mock
     private RepetitionService repetitionService;

@@ -69,7 +69,7 @@ public class MarkdownFileService {
     private final ReviewRepository reviewRepository;
     private final MarkdownTopicImporter markdownTopicImporter;
     private final CurrentUserService currentUserService;
-    private final OpenAiService openAiService;
+    private final AiService openAiService;
     private final AllowedEnvironmentRepository allowedEnvironmentRepository;
     private final SubcategoryOrderRepository subcategoryOrderRepository;
     private final AppMarkdownLimitProperties markdownLimitProperties;
@@ -100,7 +100,7 @@ public class MarkdownFileService {
             ReviewRepository reviewRepository,
             MarkdownTopicImporter markdownTopicImporter,
             CurrentUserService currentUserService,
-            OpenAiService openAiService,
+            AiService openAiService,
             AllowedEnvironmentRepository allowedEnvironmentRepository,
             SubcategoryOrderRepository subcategoryOrderRepository,
             AppMarkdownLimitProperties markdownLimitProperties,

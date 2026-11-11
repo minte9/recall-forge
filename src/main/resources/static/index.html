@@ -756,6 +756,20 @@
               </strong>
             </div>
 
+            <div class="account-row" v-if="currentUser?.role == 'ADMIN'" >
+                <span>Preferred AI Model (OpenAI, Google)</span>
+
+                <select v-model="currentUser.aiModel"
+                        @change="saveAiModel">
+                    <option value="OPENAI">
+                        GPT-6 Luna
+                    </option>
+                    <option value="GEMINI">
+                        Gemini 3.5 Flash
+                    </option>
+                </select>
+            </div>
+
           </div>
 
           <div v-if="leftPanel === 'account' && currentUser" class="account-panel">

@@ -1,15 +1,9 @@
 package dev.recallforge.service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.client.RestClient;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.JsonNode;
 
 import dev.recallforge.dto.AiResponse;
 
@@ -28,12 +22,9 @@ import dev.recallforge.dto.AiResponse;
  * {@code RestClient} bean configured in {@code config/OpenAiConfig}.
  */
 @Service
-public class OpenAiService {
+public class AiService {
 
-    private final RestClient openAiRestClient;
-    private final String model;
-
-    private static final Logger log = LoggerFactory.getLogger(OpenAiService.class);
+    private final AiModelRouter aiModelRouter;
 
     // Below this, the user is still shaky on the topic and gets recall-level questions.
     private static final double PROFICIENCY_THRESHOLD = 0.7;
@@ -43,9 +34,8 @@ public class OpenAiService {
     private static final int OPTIMIZE_MAX_TOKENS = 5000;
     private static final int MAX_OPTIMIZE_INPUT_CHARS = 12000;
 
-    public OpenAiService(RestClient openAiRestClient, @Value("${openai.model}") String model) {
-        this.openAiRestClient = openAiRestClient;
-        this.model = model;
+    public AiService(AiModelRouter aiModelRouter) {
+        this.aiModelRouter = aiModelRouter;
     }
 
     public String generateQuestion(
@@ -96,7 +86,7 @@ public class OpenAiService {
                 proficiencyGuidance(memoryScore),
                 recentReviewsSection(recentReviews));
 
-        AiResponse response = ask(prompt, 40);  // question generation
+        AiResponse response = aiModelRouter.ask(prompt, 40);  // question generation
         return response.content();
     }
 
@@ -147,7 +137,7 @@ public class OpenAiService {
                 recentChallengesSection(recentChallenges),
                 category);
 
-        AiResponse response = ask(prompt, 100);  // code challenge generation
+        AiResponse response = aiModelRouter.ask(prompt, 100);  // code challenge generation
         return response.content();
     }
 
@@ -238,7 +228,7 @@ public class OpenAiService {
         """;
         prompt = prompt.formatted(topicTitle, topicContent, question, trimUserAnswer(userAnswer));
 
-        AiResponse response = ask(prompt, 120);  // answer evaluation
+        AiResponse response = aiModelRouter.ask(prompt, 120);  // answer evaluation
         return parseEvaluation(response.content(), response.totalTokens());
     }
 
@@ -295,7 +285,7 @@ public class OpenAiService {
                 trimUserAnswer(userAnswer),
                 category);
 
-        AiResponse response = ask(prompt, 90);  // code challenge evaluation
+        AiResponse response = aiModelRouter.ask(prompt, 90);  // code challenge evaluation
         return parseEvaluation(response.content(), response.totalTokens());
     }
 
@@ -340,7 +330,7 @@ public class OpenAiService {
         """;
         prompt = prompt.formatted(topicsBlock.toString().trim());
 
-        AiResponse response = ask(prompt, OPTIMIZE_MAX_TOKENS);
+        AiResponse response = aiModelRouter.ask(prompt, OPTIMIZE_MAX_TOKENS);
         return response.content();
     }
 
@@ -409,144 +399,87 @@ public class OpenAiService {
         """;
         prompt = prompt.formatted(environmentsBlock, trimText(rawContent, MAX_OPTIMIZE_INPUT_CHARS));
 
-        AiResponse response = ask(prompt, OPTIMIZE_MAX_TOKENS);
+        AiResponse response = aiModelRouter.ask(prompt, OPTIMIZE_MAX_TOKENS);
         return response.content();
     }
 
-    /*private AiResponse ask(String prompt, int maxTokens) {
-        Map<String, Object> requestBody = Map.of(
-            "model", model,
-            "messages", new Object[]{
-                Map.of(
-                    "role", "user", "content", prompt
-                )
-            },
-            "temperature", 0.3,
-            "max_tokens", maxTokens  // 100 tokens ≈ 75 words / gpt-4o-mini ~ 66k = $0.01
-        );
+    // private AiResponse ask(String prompt, int maxTokens) {
 
-        JsonNode response = openAiRestClient
-                .post()
-                .uri("/chat/completions")
-                .body(requestBody)
-                .retrieve()
-                .body(JsonNode.class);
+    //     Map<String, Object> requestBody = Map.of(
+    //         "model", model,
+    //         "messages", new Object[]{
+    //             Map.of(
+    //                 "role", "user",
+    //                 "content", prompt
+    //             )
+    //         },
+    //         "reasoning_effort", "none",
+    //         "max_completion_tokens", maxTokens
+    //     );
 
-        if (response == null) {
-            throw new IllegalStateException("OpenAI returned an empty response.");
-        }
+    //     long start = System.nanoTime();
 
-        JsonNode contentNode = response
-                .path("choices")
-                .path(0)
-                .path("message")
-                .path("content");
+    //     JsonNode response = openAiRestClient
+    //             .post()
+    //             .uri("/chat/completions")
+    //             .body(requestBody)
+    //             .retrieve()
+    //             .body(JsonNode.class);
 
-        if (contentNode.isMissingNode()) {
-            throw new IllegalStateException("Could not read OpenAI response: " + response);
-        }
+    //     if (response == null) {
+    //         throw new IllegalStateException(
+    //             "OpenAI returned an empty response."
+    //         );
+    //     }
 
-        JsonNode usage = response.path("usage");
-        int promptTokens = usage.path("prompt_tokens").asInt();
-        int completionTokens = usage.path("completion_tokens").asInt();
-        int totalTokens = usage.path("total_tokens").asInt();
+    //     JsonNode choice = response
+    //             .path("choices")
+    //             .path(0);
 
-        String content = contentNode.asString().trim();
-        
-        log.info(
-            "OpenAI tokens: prompt={}, completion={}, total={}",  // docker compose logs -f app | grep "OpenAI tokens"
-            promptTokens,
-            completionTokens,
-            totalTokens
-        ); 
-        
-        //log.debug("OpenAI prompt: {}", prompt);  // docker compose logs -f app | grep -A 40 "OpenAI prompt"
+    //     JsonNode contentNode = choice
+    //             .path("message")
+    //             .path("content");
 
-        return new AiResponse(
-            content,
-            promptTokens,
-            completionTokens,
-            totalTokens
-        );
-    }*/
+    //     String content = contentNode.asString().trim();
 
-    private AiResponse ask(String prompt, int maxTokens) {
+    //     if (content.isEmpty()) {
+    //         throw new IllegalStateException(
+    //             "OpenAI returned no text. Finish reason: "
+    //             + choice.path("finish_reason").asString()
+    //             + ", response: " + response
+    //         );
+    //     }
 
-        Map<String, Object> requestBody = Map.of(
-            "model", model,
-            "messages", new Object[]{
-                Map.of(
-                    "role", "user",
-                    "content", prompt
-                )
-            },
-            "reasoning_effort", "none",
-            "max_completion_tokens", maxTokens
-        );
+    //     JsonNode usage = response.path("usage");
 
-        long start = System.nanoTime();
+    //     int promptTokens = usage.path("prompt_tokens").asInt();
+    //     int completionTokens = usage.path("completion_tokens").asInt();
+    //     int totalTokens = usage.path("total_tokens").asInt();
+    //     int reasoningTokens = usage
+    //         .path("completion_tokens_details")
+    //         .path("reasoning_tokens")
+    //         .asInt(0);
+    //     long latencyMs = (System.nanoTime() - start) / 1_000_000;
 
-        JsonNode response = openAiRestClient
-                .post()
-                .uri("/chat/completions")
-                .body(requestBody)
-                .retrieve()
-                .body(JsonNode.class);
+    //     log.info(
+    //         "OpenAI tokens: model={}, latency={}ms, prompt={}, completion={}, reasoning={}, total={}",
+    //         model,
+    //         latencyMs,
+    //         promptTokens,
+    //         completionTokens,
+    //         reasoningTokens,
+    //         totalTokens
+    //     );
 
-        if (response == null) {
-            throw new IllegalStateException(
-                "OpenAI returned an empty response."
-            );
-        }
+    //     //log.debug("OpenAI prompt: {}", prompt);  // docker compose logs -f app | grep "OpenAI tokens"
 
-        JsonNode choice = response
-                .path("choices")
-                .path(0);
-
-        JsonNode contentNode = choice
-                .path("message")
-                .path("content");
-
-        String content = contentNode.asString().trim();
-
-        if (content.isEmpty()) {
-            throw new IllegalStateException(
-                "OpenAI returned no text. Finish reason: "
-                + choice.path("finish_reason").asString()
-                + ", response: " + response
-            );
-        }
-
-        JsonNode usage = response.path("usage");
-
-        int promptTokens = usage.path("prompt_tokens").asInt();
-        int completionTokens = usage.path("completion_tokens").asInt();
-        int totalTokens = usage.path("total_tokens").asInt();
-        int reasoningTokens = usage
-            .path("completion_tokens_details")
-            .path("reasoning_tokens")
-            .asInt(0);
-        long latencyMs = (System.nanoTime() - start) / 1_000_000;
-
-        log.info(
-            "OpenAI tokens: model={}, latency={}ms, prompt={}, completion={}, reasoning={}, total={}",
-            model,
-            latencyMs,
-            promptTokens,
-            completionTokens,
-            reasoningTokens,
-            totalTokens
-        );
-
-        //log.debug("OpenAI prompt: {}", prompt);  // docker compose logs -f app | grep "OpenAI tokens"
-
-        return new AiResponse(
-            content,
-            promptTokens,
-            completionTokens,
-            totalTokens
-        );
-    }
+    //     return new AiResponse(
+    //         content,
+    //         promptTokens,
+    //         completionTokens,
+    //         totalTokens
+    //     );
+    // }
 
     private EvaluationResult parseEvaluation(String text, int totalTokens) {
         double score = 0.5;

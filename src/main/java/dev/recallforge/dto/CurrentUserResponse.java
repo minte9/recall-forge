@@ -1,5 +1,7 @@
 package dev.recallforge.dto;
 
+import dev.recallforge.domain.AiModel;
+
 public record CurrentUserResponse(
     Long id,
     String email,
@@ -14,5 +16,6 @@ public record CurrentUserResponse(
     int dailyUserQuestionLimit,
     int dailyOptimizeLimit,
     int maxTopicsPerUser,
-    boolean aiEnabled
+    boolean aiEnabled,
+    AiModel aiModel
 ) {}
