@@ -1649,12 +1649,6 @@ When you click <strong>Start Review</strong>, this panel will be updated.
           await this.loadMarkdownCodeChallenges();
         }
 
-        // Retries and code challenges don't move memoryScore, so mastery
-        // can only change on a real graded answer.
-        if (!this.isRetry) {
-          await this.loadStarterPackStatus();
-        }
-
         // Unlocks the "?" prompts and, unless a retry, picks the next
         // weakest topic (absent for non-admins).
         await this.$refs.assistant?.onReviewSubmitted(this.isRetry);
