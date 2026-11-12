@@ -2,6 +2,14 @@
 // option on render). Set to false for plain code blocks in both.
 const CODE_HIGHLIGHT_ENABLED = true;
 
+// Code challenge answers in a file with no code fence tags get their
+// language guessed from these (highlightText). A short list keeps the guess
+// reliable - auto-detecting across every language misreads short snippets.
+// sql/bash are left out: plain-English answers score as SQL. Guesses scoring
+// below the minimum relevance (prose scores 0-1, real code 2+) stay uncolored.
+const AUTO_DETECT_LANGUAGES = ["java", "python", "javascript", "typescript", "php"];
+const AUTO_DETECT_MIN_RELEVANCE = 2;
+
 // Obsidian image embeds - ![[name.png]] or ![[name.png|300]] (display
 // width). Stored markdown keeps this syntax as-is; it's resolved here, at
 // render time, to the image uploaded with the vault (ImageController), so
@@ -129,10 +137,15 @@ const Markdown = {
       return null;
     }
 
+    // Plain-text fences (text, txt, plaintext - all one highlight.js
+    // language) are diagrams/output, not code, so they don't get a vote -
+    // otherwise two ```text diagrams outvote one ```java block.
+    const plaintext = hljs.getLanguage("plaintext");
     const counts = {};
     for (const [, tag] of (md || "").matchAll(/^```([\w+#-]+)/gm)) {
       const language = tag.toLowerCase();
-      if (language !== "txt" && hljs.getLanguage(language)) {
+      const definition = hljs.getLanguage(language);
+      if (definition && definition !== plaintext) {
         counts[language] = (counts[language] || 0) + 1;
       }
     }
@@ -146,11 +159,23 @@ const Markdown = {
 
   // Sanitized HTML for raw code, or null when there's no language to color it
   // with - callers then show the text as they would without highlighting.
+  // Without a language (the file has no code fence tags), the language is
+  // guessed from the text itself among AUTO_DETECT_LANGUAGES; a weak guess
+  // (prose, a one-liner) is treated as no language.
   highlightText(text, language) {
-    if (!language || !(text || "").trim()) {
+    if (!CODE_HIGHLIGHT_ENABLED || typeof hljs === "undefined" || !(text || "").trim()) {
       return null;
     }
 
-    return DOMPurify.sanitize(hljs.highlight(text, { language, ignoreIllegals: true }).value);
+    if (language) {
+      return DOMPurify.sanitize(hljs.highlight(text, { language, ignoreIllegals: true }).value);
+    }
+
+    const candidates = AUTO_DETECT_LANGUAGES.filter(l => hljs.getLanguage(l));
+    const result = hljs.highlightAuto(text, candidates);
+    if (!result.language || result.relevance < AUTO_DETECT_MIN_RELEVANCE) {
+      return null;
+    }
+    return DOMPurify.sanitize(result.value);
   }
 };
