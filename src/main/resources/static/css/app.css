@@ -2384,7 +2384,7 @@
   .starter-pack-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 6px;
     margin-top: 16px;
   }
 
@@ -2395,7 +2395,7 @@
     display: inline-flex;
     flex-direction: column;
     align-items: stretch;
-    min-width: 120px;
+    /* min-width: 120px; */
     padding: 0;
     overflow: hidden;
 
@@ -2445,6 +2445,7 @@
     color: #64748b;
     font-size: 11px;
     font-weight: 600;
+    display: none;
   }
 
   .starter-pack-btn:hover {
