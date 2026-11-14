@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class AdminService {
 
-    private static final int VISIT_STATS_DAYS = 30;
+    private static final int VISIT_STATS_DAYS = 7;
     
     private final UserAccountRepository userAccountRepository;
     private final PageVisitRepository pageVisitRepository;
