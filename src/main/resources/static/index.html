@@ -1203,21 +1203,20 @@
                     <line x1="3" y1="11" x2="21" y2="11" />
                   </svg>
                 </div>
-                <strong>{{ dashboard.totalTopics }}</strong>
-                <span>Total</span>
+                <strong>{{ dashboard.thisWeekReviewLimit }}</strong>
+                <span>Week</span>
               </div>
 
-              <div class="review-stat stat-green total-stat clickable info-tooltip" tabindex="0" @click="toggleMasteredPanel()"
-                data-tooltip="Topics with a memory score of at least 0.7 that aren't currently due for review.">
-                <div class="stat-icon green">
+              <div class="review-stat stat-orange-dark total-stat clickable" tabindex="0" @click="toggleMasteredPanel()">
+                <div class="stat-icon orange-dark">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 3 3 8l9 5 9-5-9-5z" />
                     <path d="M3 12l9 5 9-5" />
                     <path d="M3 16l9 5 9-5" />
                   </svg>
                 </div>
-                <strong>{{ dashboard.reward.reviewedTopics }}</strong>
-                <span>Reviewed</span>
+                <strong>{{ dashboard.totalTopics }}</strong>
+                <span>Total</span>
               </div>
             </div>
           </div>

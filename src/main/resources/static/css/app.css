@@ -1419,6 +1419,10 @@
     color: #22c55e;
   }
 
+  .orange-dark {
+    color: var(--orange-dark);
+  }
+
   .review-stat strong {
     display: block;
     margin-top: 4px;
