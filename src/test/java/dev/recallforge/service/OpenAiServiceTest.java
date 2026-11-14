@@ -83,6 +83,10 @@ class OpenAiServiceTest {
 
     // --- proficiency guidance derived from memoryScore ---
 
+    // More than THIN_CONTENT_PROSE_CHARS of prose, so MEDIUM is allowed.
+    private static final String RICH_CONTENT =
+        "Explanation sentence about the concept and why it matters. ".repeat(5);
+
     @Test
     void generateQuestion_memoryScoreBelowThreshold_labelsProficiencyEasy() {
         mockAiReply("Some question?");
@@ -97,7 +101,7 @@ class OpenAiServiceTest {
     void generateQuestion_memoryScoreAtThreshold_labelsProficiencyMedium() {
         mockAiReply("Some question?");
 
-        openAiService.generateQuestion("Title", "Content", 0.7, List.of());
+        openAiService.generateQuestion("Title", RICH_CONTENT, 0.7, List.of());
 
         String prompt = capturePromptSentToAi();
         assertThat(prompt).contains("User's proficiency on this topic: MEDIUM");
@@ -107,10 +111,42 @@ class OpenAiServiceTest {
     void generateQuestion_memoryScoreAboveThreshold_labelsProficiencyMedium() {
         mockAiReply("Some question?");
 
-        openAiService.generateQuestion("Title", "Content", 0.95, List.of());
+        openAiService.generateQuestion("Title", RICH_CONTENT, 0.95, List.of());
 
         String prompt = capturePromptSentToAi();
         assertThat(prompt).contains("User's proficiency on this topic: MEDIUM");
+    }
+
+    @Test
+    void generateQuestion_mediumGuidance_staysWithinStatedContent() {
+        mockAiReply("Some question?");
+
+        openAiService.generateQuestion("Title", RICH_CONTENT, 0.95, List.of());
+
+        String prompt = capturePromptSentToAi();
+        assertThat(prompt).contains("both explicitly stated above");
+        assertThat(prompt).contains("Never go beyond what the content states.");
+    }
+
+    @Test
+    void generateQuestion_thinContentWithHighScore_labelsProficiencyEasy() {
+        mockAiReply("Some question?");
+
+        openAiService.generateQuestion("Title", "Short note.", 0.95, List.of());
+
+        String prompt = capturePromptSentToAi();
+        assertThat(prompt).contains("User's proficiency on this topic: EASY");
+    }
+
+    @Test
+    void generateQuestion_proseInsideCodeFences_doesNotCountTowardThreshold() {
+        mockAiReply("Some question?");
+        String codeHeavy = "Short intro.\n```java\n// " + "x".repeat(500) + "\n```\n";
+
+        openAiService.generateQuestion("Title", codeHeavy, 0.95, List.of());
+
+        String prompt = capturePromptSentToAi();
+        assertThat(prompt).contains("User's proficiency on this topic: EASY");
     }
 
     // --- recent review history included in prompt ---

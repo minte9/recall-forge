@@ -29,6 +29,16 @@ public class AiService {
     // Below this, the user is still shaky on the topic and gets recall-level questions.
     private static final double PROFICIENCY_THRESHOLD = 0.7;
 
+    // Topics with less explanatory prose than this (outside code fences)
+    // don't state enough ideas to connect, so review questions stay EASY
+    // regardless of memory score - otherwise the model invents beyond the file.
+    private static final int THIN_CONTENT_PROSE_CHARS = 200;
+
+    private static final String EASY_GUIDANCE =
+        "EASY - the user is still building basic understanding of this topic. "
+            + "Ask a foundational, recall-oriented question about a single concept "
+            + "explicitly stated above.";
+
     // Rewriting a whole file's worth of topics needs far more headroom than
     // the short question/grading calls above.
     private static final int OPTIMIZE_MAX_TOKENS = 5000;
@@ -83,7 +93,7 @@ public class AiService {
         prompt = prompt.formatted(
                 topicTitle,
                 trimTopicContent(topicContent),
-                proficiencyGuidance(memoryScore),
+                questionProficiencyGuidance(memoryScore, topicContent),
                 recentReviewsSection(recentReviews));
 
         AiResponse response = aiModelRouter.ask(prompt, 40);  // question generation
@@ -157,11 +167,35 @@ public class AiService {
         return section.toString();
     }
 
+    /**
+     * Review-question variant of {@link #proficiencyGuidance}: MEDIUM is
+     * kept inside the topic content, and thin topics always get EASY.
+     */
+    private String questionProficiencyGuidance(double memoryScore, String topicContent) {
+        if (memoryScore < PROFICIENCY_THRESHOLD
+                || proseLength(topicContent) < THIN_CONTENT_PROSE_CHARS) {
+            return EASY_GUIDANCE;
+        }
+
+        return "MEDIUM - the user already has a solid grasp of this topic. "
+            + "Ask a question that connects or compares two ideas that are both "
+            + "explicitly stated above, or asks what happens in a situation the "
+            + "content directly describes - not just recalling a definition. "
+            + "Never go beyond what the content states.";
+    }
+
+    /** Length of the content's text outside ``` code fences, trimmed. */
+    private int proseLength(String content) {
+        if (content == null) {
+            return 0;
+        }
+        String prose = content.replaceAll("(?s)```.*?(```|$)", "");
+        return prose.replaceAll("\\s+", " ").trim().length();
+    }
+
     private String proficiencyGuidance(double memoryScore) {
         if (memoryScore < PROFICIENCY_THRESHOLD) {
-            return "EASY - the user is still building basic understanding of this topic. "
-                + "Ask a foundational, recall-oriented question about a single concept "
-                + "explicitly stated above.";
+            return EASY_GUIDANCE;
         }
 
         return "MEDIUM - the user already has a solid grasp of this topic. "
